@@ -4,17 +4,24 @@ import { useAuthStore } from "@/store";
 // ─── Base Axios Instance ──────────────────────────────────────
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8443/fineract-provider/api/v1",
+    auth: {
+        username: "mifos",
+        password: "password",
+    },
+    headers: {
+        "Fineract-Platform-TenantId": "default",
+        "Content-Type": "application/json",
+    },
     timeout: 30_000,
-    headers: { "Content-Type": "application/json" },
 });
 
 // ─── Request Interceptor ──────────────────────────────────────
 client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        // Attach auth token from Zustand store
-        const token = useAuthStore.getState().token;
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Attach Basic Auth credentials from Zustand store
+        const basicAuth = useAuthStore.getState().basicAuth;
+        if (basicAuth) {
+            config.headers.Authorization = `Basic ${basicAuth}`;
         }
         // Fineract requires this header for tenant identification
         config.headers["Fineract-Platform-TenantId"] = "default";

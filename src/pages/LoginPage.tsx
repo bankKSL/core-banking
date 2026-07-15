@@ -12,8 +12,8 @@ const LoginPage: FC = () => {
     const { login, isLoggingIn, loginError, clearLoginError, isAuthenticated } = useAuthStore();
     const { theme, toggleTheme } = useUIStore();
 
-    const [email, setEmail] = useState("admin@corebank.com");
-    const [password, setPassword] = useState("admin123");
+    const [email, setEmail] = useState("mifos");
+    const [password, setPassword] = useState("password");
     const [showPassword, setShowPassword] = useState(false);
     const passwordInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,7 +90,7 @@ const LoginPage: FC = () => {
                             </Label>
                             <Input
                                 id="email"
-                                type="email"
+
                                 placeholder="you@corebank.com"
                                 value={email}
                                 onChange={(e) => handleInputChange(setEmail, e.target.value)}

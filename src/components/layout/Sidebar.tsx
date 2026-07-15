@@ -56,13 +56,13 @@ const sections: NavSectionConfig[] = [
     {
         id: "dashboard",
         title: "Dashboard",
-        defaultOpen: false,
+        defaultOpen: true,
         items: [{ label: "Dashboard", path: "/", icon: LayoutDashboard }],
     },
     {
         id: "lending",
         title: "Lending",
-        defaultOpen: false,
+        defaultOpen: true,
         items: [
             { label: "Loan Applications", path: "/lending/applications", icon: Banknote },
             { label: "Loan Products", path: "/lending/products", icon: Briefcase },
@@ -73,7 +73,7 @@ const sections: NavSectionConfig[] = [
     {
         id: "deposits",
         title: "Deposits",
-        defaultOpen: false,
+        defaultOpen: true,
         items: [
             { label: "Deposit Accounts", path: "/deposits/accounts", icon: PiggyBank },
             { label: "Transactions", path: "/deposits/transactions", icon: Receipt },
@@ -84,19 +84,19 @@ const sections: NavSectionConfig[] = [
     {
         id: "treasury",
         title: "Treasury",
-        defaultOpen: false,
+        defaultOpen: true,
         items: [{ label: "Exchange Rates", path: "/exchange-rates", icon: Globe }],
     },
     {
         id: "crm",
         title: "CRM",
-        defaultOpen: false,
+        defaultOpen: true,
         items: [{ label: "Customers", path: "/customers", icon: Users }],
     },
     {
         id: "organization",
         title: "Organization",
-        defaultOpen: false,
+        defaultOpen: true,
         items: [
             { label: "Organization", path: "/organization", icon: Building2 },
             { label: "Offices", path: "/organization/offices", icon: MapPin },

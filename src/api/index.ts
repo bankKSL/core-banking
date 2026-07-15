@@ -165,8 +165,7 @@ export const customerApi = {
 };
 
 // ─── Health Check ─────────────────────────────────────────────
-const FINERACT_ROOT = "https://localhost:8443/fineract-provider";
 export const healthApi = {
     check: (): Promise<{ status: string }> =>
-        api.get("/actuator/health", { baseURL: FINERACT_ROOT }).then((r) => r.data),
+        api.get("", { baseURL: "/fineract-provider/actuator/health" }).then((r) => r.data),
 };
