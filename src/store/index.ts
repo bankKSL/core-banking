@@ -8,6 +8,7 @@ export interface AuthUser {
 interface AuthState {
     isAuthenticated: boolean;
     user: AuthUser | null;
+    token: string | null;
     loginError: string | null;
     isLoggingIn: boolean;
     resetPasswordSent: boolean;
@@ -23,6 +24,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     user: null,
+    token: null,
     loginError: null,
     isLoggingIn: false,
     resetPasswordSent: false,
@@ -38,6 +40,7 @@ export const useAuthStore = create<AuthState>((set) => ({
                 isAuthenticated: true,
                 isLoggingIn: false,
                 loginError: null,
+                token: "mock-jwt-token",
                 user: { name: "Admin User", email: "admin@corebank.com", role: "Administrator" },
             });
             return true;
@@ -45,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ isLoggingIn: false, loginError: "Invalid email or password. Please try again." });
         return false;
     },
-    logout: () => set({ isAuthenticated: false, user: null, loginError: null }),
+    logout: () => set({ isAuthenticated: false, user: null, token: null, loginError: null }),
     clearLoginError: () => set({ loginError: null }),
     forgotPassword: async (email) => {
         set({ isSendingReset: true, resetError: null });
