@@ -24,6 +24,20 @@ import ExchangeRatePage from "./pages/ExchangeRatePage";
 import CustomerPage from "./pages/CustomerPage";
 import CreateLoanApplicationPage from "./pages/CreateLoanApplicationPage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
+import OrganizationDashboardPage from "./pages/OrganizationDashboardPage";
+import OfficesPage from "./pages/OfficesPage";
+import StaffPage from "./pages/StaffPage";
+import UsersPage from "./pages/UsersPage";
+import RolesPage from "./pages/RolesPage";
+import PermissionsPage from "./pages/PermissionsPage";
+import CurrenciesPage from "./pages/CurrenciesPage";
+import CodesPage from "./pages/CodesPage";
+import WorkingDaysPage from "./pages/WorkingDaysPage";
+import HolidaysPage from "./pages/HolidaysPage";
+import BusinessDatePage from "./pages/BusinessDatePage";
+import TellersPage from "./pages/TellersPage";
+import CashiersPage from "./pages/CashiersPage";
+import OrganizationAuditLogsPage from "./pages/OrganizationAuditLogsPage";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { useAuthStore } from "./store";
@@ -101,6 +115,21 @@ function App() {
                                     <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                                     {/* CRM */}
                                     <Route path="/customers" element={<CustomerPage />} />
+                                    {/* Organization Management */}
+                                    <Route path="/organization" element={<OrganizationDashboardPage />} />
+                                    <Route path="/organization/offices" element={<OfficesPage />} />
+                                    <Route path="/organization/staff" element={<StaffPage />} />
+                                    <Route path="/organization/users" element={<UsersPage />} />
+                                    <Route path="/organization/roles" element={<RolesPage />} />
+                                    <Route path="/organization/permissions" element={<PermissionsPage />} />
+                                    <Route path="/organization/currencies" element={<CurrenciesPage />} />
+                                    <Route path="/organization/codes" element={<CodesPage />} />
+                                    <Route path="/organization/working-days" element={<WorkingDaysPage />} />
+                                    <Route path="/organization/holidays" element={<HolidaysPage />} />
+                                    <Route path="/organization/business-date" element={<BusinessDatePage />} />
+                                    <Route path="/organization/tellers" element={<TellersPage />} />
+                                    <Route path="/organization/cashiers" element={<CashiersPage />} />
+                                    <Route path="/organization/audit-logs" element={<OrganizationAuditLogsPage />} />
                                 </Routes>
                             </AppLayout>
                         </RequireAuth>
