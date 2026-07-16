@@ -2,7 +2,6 @@ import { type FC, useState, useCallback } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
     LayoutDashboard,
-    Zap,
     Megaphone,
     Tags,
     Package,
@@ -13,8 +12,6 @@ import {
     FileText,
     ShieldCheck,
     Settings,
-    ChevronLeft,
-    ChevronRight,
     ChevronDown,
     Landmark,
     Banknote,
@@ -26,7 +23,16 @@ import {
     PiggyBank,
     Globe,
     Users,
-    Award,
+    Building2,
+    MapPin,
+    UserCheck,
+    Shield,
+    Key,
+    Coins,
+    Hash,
+    Clock,
+    CalendarDays,
+    CalendarX2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -79,23 +85,39 @@ const sections: NavSectionConfig[] = [
         id: "treasury",
         title: "Treasury",
         defaultOpen: true,
-        items: [
-            { label: "Exchange Rates", path: "/exchange-rates", icon: Globe },
-        ],
+        items: [{ label: "Exchange Rates", path: "/exchange-rates", icon: Globe }],
     },
     {
         id: "crm",
         title: "CRM",
         defaultOpen: true,
+        items: [{ label: "Customers", path: "/customers", icon: Users }],
+    },
+    {
+        id: "organization",
+        title: "Organization",
+        defaultOpen: true,
         items: [
-            { label: "Customers", path: "/customers", icon: Users },
-            { label: "Score Grade", path: "/crm/score-grade", icon: Award },
+            { label: "Organization", path: "/organization", icon: Building2 },
+            { label: "Offices", path: "/organization/offices", icon: MapPin },
+            { label: "Staff", path: "/organization/staff", icon: UserCheck },
+            { label: "Users", path: "/organization/users", icon: Users },
+            { label: "Roles", path: "/organization/roles", icon: Shield },
+            { label: "Permissions", path: "/organization/permissions", icon: Key },
+            { label: "Currencies", path: "/organization/currencies", icon: Coins },
+            { label: "Codes", path: "/organization/codes", icon: Hash },
+            { label: "Working Days", path: "/organization/working-days", icon: Clock },
+            { label: "Holidays", path: "/organization/holidays", icon: CalendarDays },
+            { label: "Business Date", path: "/organization/business-date", icon: CalendarX2 },
+            { label: "Tellers", path: "/organization/tellers", icon: Banknote },
+            { label: "Cashiers", path: "/organization/cashiers", icon: Wallet },
+            { label: "Audit Logs", path: "/organization/audit-logs", icon: FileText },
         ],
     },
     {
         id: "formula-engine",
         title: "Formula Engine",
-        defaultOpen: true,
+        defaultOpen: false,
         items: [
             { label: "Campaign", path: "/campaign", icon: Megaphone },
             { label: "Category", path: "/category", icon: Tags },
@@ -250,9 +272,9 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
                 // On desktop, drawer mode should not apply
                 "lg:translate-x-0",
                 // When drawerMode is off on desktop, use width-based
-                !drawerMode && "lg:w-[var(--sidebar-width)]",
+                !drawerMode && "lg:w-(--sidebar-width)",
             )}
-            style={!drawerMode ? { "--sidebar-width": sidebarCollapsed ? "4.5rem" : "17.5rem" } as React.CSSProperties : undefined}
+            style={!drawerMode ? ({ "--sidebar-width": sidebarCollapsed ? "4.5rem" : "17.5rem" } as React.CSSProperties) : undefined}
         >
             {/* Logo area */}
             <div

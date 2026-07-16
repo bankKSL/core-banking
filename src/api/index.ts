@@ -163,3 +163,8 @@ export const customerApi = {
     update: (id: string, payload: Partial<Customer>) => update<Partial<Customer>, Customer>(CUSTOMERS, id, payload),
     delete: (id: string) => remove(CUSTOMERS, id),
 };
+
+// ─── Health Check ─────────────────────────────────────────────
+export const healthApi = {
+    check: (): Promise<{ status: string }> => api.get("", { baseURL: "/fineract-provider/actuator/health" }).then((r) => r.data),
+};

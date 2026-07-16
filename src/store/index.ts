@@ -8,6 +8,8 @@ export interface AuthUser {
 interface AuthState {
     isAuthenticated: boolean;
     user: AuthUser | null;
+    /** Base64-encoded "username:password" for Basic Auth */
+    basicAuth: string | null;
     loginError: string | null;
     isLoggingIn: boolean;
     resetPasswordSent: boolean;
@@ -23,29 +25,38 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     user: null,
+    basicAuth: null,
     loginError: null,
     isLoggingIn: false,
     resetPasswordSent: false,
     isSendingReset: false,
     resetError: null,
-    login: async (email, password) => {
+    login: async (username, password) => {
         set({ isLoggingIn: true, loginError: null });
-        // Simulate network delay
-        await new Promise((r) => setTimeout(r, 800));
-        // Mock credentials — in production this is your real auth endpoint
-        if (email === "admin@corebank.com" && password === "admin123") {
+        try {
+            const basic = btoa(`${username}:${password}`);
+            // Verify credentials against Fineract via existing axios client
+            const { default: api } = await import("@/api/client");
+            await api.get("/offices?limit=1", {
+                headers: {
+                    Authorization: `Basic ${basic}`,
+                    "Fineract-Platform-TenantId": "default",
+                },
+            });
             set({
                 isAuthenticated: true,
                 isLoggingIn: false,
                 loginError: null,
-                user: { name: "Admin User", email: "admin@corebank.com", role: "Administrator" },
+                basicAuth: basic,
+                user: { name: username, email: username, role: "User" },
             });
             return true;
+        } catch {
+            set({ isLoggingIn: false, loginError: "Invalid credentials. Please try again." });
+            return false;
         }
-        set({ isLoggingIn: false, loginError: "Invalid email or password. Please try again." });
-        return false;
     },
-    logout: () => set({ isAuthenticated: false, user: null, loginError: null }),
+    logout: () => set({ isAuthenticated: false, user: null, basicAuth: null, loginError: null }),
     clearLoginError: () => set({ loginError: null }),
     forgotPassword: async (email) => {
         set({ isSendingReset: true, resetError: null });

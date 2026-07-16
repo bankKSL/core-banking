@@ -516,3 +516,33 @@ export interface ExchangeRate {
   isActive: boolean;
 }
 
+// ─── Organization: Office ─────────────────────────────────────
+export interface Office {
+  id: number;
+  name: string;
+  nameDecorated: string;
+  externalId: string;
+  openingDate: string;       // ISO date
+  hierarchy: string;          // e.g. ".1.2."
+  parentId: number | null;
+  parentName: string | null;
+}
+
+export interface OfficeCreateRequest {
+  name: string;
+  parentId?: number;
+  openingDate: string;
+  externalId?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+
+export interface OfficeUpdateRequest {
+  name?: string;
+  parentId?: number;
+  openingDate?: string;
+  externalId?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+

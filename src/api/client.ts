@@ -1,18 +1,30 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { useAuthStore } from "@/store";
 
 // ─── Base Axios Instance ──────────────────────────────────────
 const client = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/v1",
+    baseURL: import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8443/fineract-provider/api/v1",
+    auth: {
+        username: "mifos",
+        password: "password",
+    },
+    headers: {
+        "Fineract-Platform-TenantId": "default",
+        "Content-Type": "application/json",
+    },
     timeout: 30_000,
-    headers: { "Content-Type": "application/json" },
 });
 
 // ─── Request Interceptor ──────────────────────────────────────
 client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        // Attach auth token from Zustand store when we have one
-        // Example: const token = useAuthStore.getState().token;
-        // if (token) config.headers.Authorization = `Bearer ${token}`;
+        // Attach Basic Auth credentials from Zustand store
+        const basicAuth = useAuthStore.getState().basicAuth;
+        if (basicAuth) {
+            config.headers.Authorization = `Basic ${basicAuth}`;
+        }
+        // Fineract requires this header for tenant identification
+        config.headers["Fineract-Platform-TenantId"] = "default";
         return config;
     },
     (error: AxiosError) => Promise.reject(error),
@@ -22,9 +34,9 @@ client.interceptors.request.use(
 client.interceptors.response.use(
     (res) => res,
     (error: AxiosError<{ message?: string }>) => {
-        // Global error handling (401 → force logout, 500 → toast, etc.)
+        // 401 → force logout
         if (error.response?.status === 401) {
-            // Example: useAuthStore.getState().logout();
+            useAuthStore.getState().logout();
         }
         return Promise.reject(error);
     },
