@@ -26,6 +26,7 @@ import {
     PiggyBank,
     Globe,
     Users,
+    Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -88,6 +89,7 @@ const sections: NavSectionConfig[] = [
         defaultOpen: true,
         items: [
             { label: "Customers", path: "/customers", icon: Users },
+            { label: "Score Grade", path: "/crm/score-grade", icon: Award },
         ],
     },
     {

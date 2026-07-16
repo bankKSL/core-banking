@@ -22,6 +22,7 @@ import WithdrawalsPage from "./pages/WithdrawalsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import CustomerPage from "./pages/CustomerPage";
+import ScoreGradePage from "./pages/ScoreGradePage";
 import CreateLoanApplicationPage from "./pages/CreateLoanApplicationPage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
 import LoginPage from "./pages/LoginPage";
@@ -101,6 +102,7 @@ function App() {
                                     <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                                     {/* CRM */}
                                     <Route path="/customers" element={<CustomerPage />} />
+                                    <Route path="/crm/score-grade" element={<ScoreGradePage />} />
                                 </Routes>
                             </AppLayout>
                         </RequireAuth>
