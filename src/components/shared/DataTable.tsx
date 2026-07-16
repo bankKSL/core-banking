@@ -31,6 +31,20 @@ interface DataTableProps<T> {
     idAccessor?: (row: T) => string;
     rowClassName?: (row: T) => string;
     skeletonRowCount?: number;
+    /**
+     * When true (default), the table is constrained to its container width
+     * and a horizontal scrollbar appears INSIDE the table card whenever the
+     * content is wider than the viewport. When false, the table is allowed
+     * to grow beyond its container (legacy behavior).
+     */
+    responsive?: boolean;
+    /**
+     * Minimum width of the table in pixels. When the screen is narrower than
+     * this value, the table will scroll horizontally instead of squashing
+     * columns.
+     * @default 640
+     */
+    minWidth?: number;
 }
 
 type SortDirection = "asc" | "desc" | null;
@@ -47,6 +61,8 @@ function DataTable<T>({
     idAccessor = (row: any) => row.id,
     rowClassName,
     skeletonRowCount = 5,
+    responsive = true,
+    minWidth = 640,
 }: DataTableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<SortDirection>(null);
@@ -128,8 +144,16 @@ function DataTable<T>({
     // Loading skeleton
     if (loading) {
         return (
-            <div className="w-full overflow-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                <Table>
+            <div
+                className={cn(
+                    "rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+                    responsive ? "block w-full max-w-full overflow-x-auto" : "w-full overflow-auto",
+                )}
+            >
+                <Table
+                    className={cn(responsive && "w-full")}
+                    style={responsive ? { minWidth: `${minWidth}px` } : undefined}
+                >
                     <TableHeader>
                         <TableRow>
                             {selectable && (
@@ -168,7 +192,7 @@ function DataTable<T>({
     // Empty state
     if (data.length === 0) {
         return (
-            <div className="w-full overflow-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <div className="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
                 <div className="flex flex-col items-center justify-center py-16 px-4">
                     {emptyState?.icon ?? <Inbox className="h-12 w-12 text-gray-300 dark:text-gray-600" />}
                     <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">{emptyState?.title ?? "No data found"}</h3>
@@ -179,8 +203,16 @@ function DataTable<T>({
     }
 
     return (
-        <div className="w-full overflow-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-            <Table>
+        <div
+            className={cn(
+                "rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+                responsive ? "block w-full max-w-full overflow-x-auto" : "w-full overflow-auto",
+            )}
+        >
+            <Table
+                className={cn(responsive && "w-full")}
+                style={responsive ? { minWidth: `${minWidth}px` } : undefined}
+            >
                 <TableHeader>
                     <TableRow>
                         {selectable && (

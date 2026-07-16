@@ -74,7 +74,7 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
                 {/* Main content area */}
                 <main
                     className={cn(
-                        "flex min-h-screen flex-col transition-all duration-300 ease-in-out",
+                        "flex min-h-screen min-w-0 flex-col transition-all duration-300 ease-in-out",
                         sidebarCollapsed ? "ml-18" : "ml-70",
                         "w-full",
                     )}
@@ -82,7 +82,7 @@ const AppLayout: FC<AppLayoutProps> = ({ children }) => {
                     <TopNav />
 
                     {/* Page content */}
-                    <div className="flex-1 p-6">{children}</div>
+                    <div className="min-w-0 flex-1 p-6">{children}</div>
                 </main>
             </div>
         </TooltipProvider>

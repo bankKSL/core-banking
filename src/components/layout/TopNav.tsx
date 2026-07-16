@@ -90,7 +90,7 @@ const TopNav: FC = () => {
     }, []);
 
     return (
-        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <header className="sticky top-0 z-30 min-w-0 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
             {/* Top bar */}
             <div className="flex justify-between items-center h-16 gap-4 px-6">
                 {/* Left: hamburger */}
