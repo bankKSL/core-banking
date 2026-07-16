@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store";
 
 // ─── Base Axios Instance ──────────────────────────────────────
 const client = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8443/fineract-provider/api/v1",
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     auth: {
         username: "mifos",
         password: "password",

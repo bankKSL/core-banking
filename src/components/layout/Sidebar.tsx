@@ -272,7 +272,7 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
                         </div>
 
                         <div className="flex flex-col">
-                            <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">Core Banking</span>
+                            <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">Insee Hub</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">Dashboard</span>
                         </div>
                     </div>
