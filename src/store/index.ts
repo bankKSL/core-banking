@@ -35,14 +35,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ isLoggingIn: true, loginError: null });
         try {
             const basic = btoa(`${username}:${password}`);
-            // Verify credentials against Fineract via existing axios client
-            const { default: api } = await import("@/api/client");
-            await api.get("/offices?limit=1", {
-                headers: {
-                    Authorization: `Basic ${basic}`,
-                    "Fineract-Platform-TenantId": "default",
-                },
-            });
             set({
                 isAuthenticated: true,
                 isLoggingIn: false,
@@ -71,7 +63,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
     clearResetState: () => set({ resetPasswordSent: false, resetError: null }),
 }));
-
 
 import { create } from "zustand";
 import type {
@@ -353,18 +344,13 @@ export const useLendingStore = create<LendingState>((set) => ({
     setSelectedApplication: (app) => set({ selectedApplication: app }),
     updateApplicationStatus: (id, status) =>
         set((state) => ({
-            applications: state.applications.map((a) =>
-                a.id === id ? { ...a, status, updatedAt: new Date().toISOString() } : a
-            ),
+            applications: state.applications.map((a) => (a.id === id ? { ...a, status, updatedAt: new Date().toISOString() } : a)),
         })),
     updateApplication: (id, data) =>
         set((state) => ({
-            applications: state.applications.map((a) =>
-                a.id === id ? { ...a, ...data, updatedAt: new Date().toISOString() } : a
-            ),
+            applications: state.applications.map((a) => (a.id === id ? { ...a, ...data, updatedAt: new Date().toISOString() } : a)),
         })),
-    addApplication: (app) =>
-        set((state) => ({ applications: [...state.applications, app] })),
+    addApplication: (app) => set((state) => ({ applications: [...state.applications, app] })),
     setFilteredStatus: (status) => set({ filteredStatus: status }),
     setSearchQuery: (q) => set({ searchQuery: q }),
 }));
@@ -382,20 +368,16 @@ interface LoanProductState {
 export const useLoanProductStore = create<LoanProductState>((set) => ({
     products: [],
     setProducts: (list) => set({ products: list }),
-    addProduct: (product) =>
-        set((state) => ({ products: [...state.products, product] })),
+    addProduct: (product) => set((state) => ({ products: [...state.products, product] })),
     updateProduct: (id, data) =>
         set((state) => ({
             products: state.products.map((p) => (p.id === id ? { ...p, ...data, updatedAt: new Date().toISOString() } : p)),
         })),
     toggleActive: (id) =>
         set((state) => ({
-            products: state.products.map((p) =>
-                p.id === id ? { ...p, isActive: !p.isActive, updatedAt: new Date().toISOString() } : p
-            ),
+            products: state.products.map((p) => (p.id === id ? { ...p, isActive: !p.isActive, updatedAt: new Date().toISOString() } : p)),
         })),
-    removeProduct: (id) =>
-        set((state) => ({ products: state.products.filter((p) => p.id !== id) })),
+    removeProduct: (id) => set((state) => ({ products: state.products.filter((p) => p.id !== id) })),
 }));
 
 // ─── Collateral Store ────────────────────────────────────────
@@ -415,8 +397,7 @@ export const useCollateralStore = create<CollateralState>((set) => ({
         set((state) => ({
             items: state.items.map((c) => (c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c)),
         })),
-    removeItem: (id) =>
-        set((state) => ({ items: state.items.filter((c) => c.id !== id) })),
+    removeItem: (id) => set((state) => ({ items: state.items.filter((c) => c.id !== id) })),
 }));
 
 // ─── Deposit Store ───────────────────────────────────────────
@@ -443,11 +424,10 @@ export const useDepositStore = create<DepositState>((set) => ({
             accounts: state.accounts.map((a) =>
                 a.id === id
                     ? { ...a, balance: newBalance, lastTransactionDate: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    : a
+                    : a,
             ),
         })),
-    addTransaction: (txn) =>
-        set((state) => ({ transactions: [...state.transactions, txn] })),
+    addTransaction: (txn) => set((state) => ({ transactions: [...state.transactions, txn] })),
 }));
 
 // ─── Fixed Deposit Store ─────────────────────────────────────
@@ -470,16 +450,12 @@ export const useFixedDepositStore = create<FixedDepositState>((set) => ({
     addFixedDeposit: (fd) => set((s) => ({ fixedDeposits: [...s.fixedDeposits, fd] })),
     updateFixedDeposit: (id, data) =>
         set((s) => ({
-            fixedDeposits: s.fixedDeposits.map((f) =>
-                f.id === id ? { ...f, ...data, updatedAt: new Date().toISOString() } : f
-            ),
+            fixedDeposits: s.fixedDeposits.map((f) => (f.id === id ? { ...f, ...data, updatedAt: new Date().toISOString() } : f)),
         })),
     addRecurringDeposit: (rd) => set((s) => ({ recurringDeposits: [...s.recurringDeposits, rd] })),
     updateRecurringDeposit: (id, data) =>
         set((s) => ({
-            recurringDeposits: s.recurringDeposits.map((r) =>
-                r.id === id ? { ...r, ...data, updatedAt: new Date().toISOString() } : r
-            ),
+            recurringDeposits: s.recurringDeposits.map((r) => (r.id === id ? { ...r, ...data, updatedAt: new Date().toISOString() } : r)),
         })),
 }));
 
@@ -498,9 +474,7 @@ export const useExchangeRateStore = create<ExchangeRateState>((set) => ({
     addRate: (rate) => set((s) => ({ rates: [...s.rates, rate] })),
     updateRate: (id, data) =>
         set((s) => ({
-            rates: s.rates.map((r) =>
-                r.id === id ? { ...r, ...data, lastUpdated: new Date().toISOString() } : r
-            ),
+            rates: s.rates.map((r) => (r.id === id ? { ...r, ...data, lastUpdated: new Date().toISOString() } : r)),
         })),
     removeRate: (id) => set((s) => ({ rates: s.rates.filter((r) => r.id !== id) })),
 }));
@@ -520,9 +494,7 @@ export const useCustomerStore = create<CustomerState>((set) => ({
     addCustomer: (c) => set((s) => ({ customers: [...s.customers, c] })),
     updateCustomer: (id, data) =>
         set((s) => ({
-            customers: s.customers.map((c) =>
-                c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c
-            ),
+            customers: s.customers.map((c) => (c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c)),
         })),
     removeCustomer: (id) => set((s) => ({ customers: s.customers.filter((c) => c.id !== id) })),
 }));

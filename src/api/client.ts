@@ -4,13 +4,10 @@ import { useAuthStore } from "@/store";
 // ─── Base Axios Instance ──────────────────────────────────────
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
-    auth: {
-        username: "mifos",
-        password: "password",
-    },
     headers: {
         "Fineract-Platform-TenantId": "default",
         "Content-Type": "application/json",
+        Authorization: "Basic bWlmb3M6cGFzc3dvcmQ=",
     },
     timeout: 30_000,
 });

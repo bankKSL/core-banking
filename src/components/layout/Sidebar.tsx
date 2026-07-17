@@ -23,16 +23,8 @@ import {
     PiggyBank,
     Globe,
     Users,
-    Building2,
-    MapPin,
     UserCheck,
     Shield,
-    Key,
-    Coins,
-    Hash,
-    Clock,
-    CalendarDays,
-    CalendarX2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -92,8 +84,9 @@ const sections: NavSectionConfig[] = [
         title: "CRM",
         defaultOpen: true,
         items: [
-            { label: "Customers", path: "/customers", icon: Users },
-            { label: "Score Grade", path: "/score-grade", icon: UserCheck },
+            { label: "Clients", path: "/clients", icon: Users },
+            { label: "Customers", path: "/customers", icon: UserCheck },
+            { label: "Score Grade", path: "/score-grade", icon: Shield },
         ],
     },
     {

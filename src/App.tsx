@@ -22,6 +22,10 @@ import WithdrawalsPage from "./pages/WithdrawalsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import CustomerPage from "./pages/CustomerPage";
+import ClientListPage from "@/features/clients/pages/ClientListPage";
+import CreateClientPage from "@/features/clients/pages/CreateClientPage";
+import ClientDetailPage from "@/features/clients/pages/ClientDetailPage";
+import EditClientPage from "@/features/clients/pages/EditClientPage";
 import ScoreGradePage from "./pages/ScoreGradePage";
 import CreateLoanApplicationPage from "./pages/CreateLoanApplicationPage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
@@ -103,6 +107,11 @@ function App() {
                                     {/* CRM */}
                                     <Route path="/customers" element={<CustomerPage />} />
                                     <Route path="/score-grades" element={<ScoreGradePage />} />
+                                    {/* Clients */}
+                                    <Route path="/clients" element={<ClientListPage />} />
+                                    <Route path="/clients/new" element={<CreateClientPage />} />
+                                    <Route path="/clients/:id" element={<ClientDetailPage />} />
+                                    <Route path="/clients/:id/edit" element={<EditClientPage />} />
                                 </Routes>
                             </AppLayout>
                         </RequireAuth>
