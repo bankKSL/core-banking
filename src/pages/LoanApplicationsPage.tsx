@@ -1,10 +1,6 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus, Search, Filter, Eye, CheckCircle, XCircle,
-  DollarSign, Clock, AlertTriangle, TrendingUp, TrendingDown,
-  Users, FileText, MoreHorizontal, Pencil, Trash2,
-} from "lucide-react";
+import { Plus, Search, Filter, Eye, CheckCircle, XCircle, DollarSign, Clock, TrendingUp, MoreHorizontal } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -13,250 +9,170 @@ import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Pagination } from "@/components/shared/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle } from "lucide-react";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter,
-  DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { loanApplications } from "@/mock/data";
-import type { LoanApplication, LoanStatus } from "@/types";
+  useLoans,
+  useApproveLoan,
+  useDisburseLoan,
+  useRejectLoan,
+  useCloseLoan,
+  LOAN_STATUS_CONFIG,
+} from "@/features/loans";
+import type { Loan } from "@/features/loans";
 
 const PAGE_SIZE = 10;
 
-const PRODUCT_TYPE_LABELS: Record<string, string> = {
-  personal_loan: "Personal Loan",
-  mortgage: "Mortgage",
-  auto_loan: "Auto Loan",
-  business_loan: "Business Loan",
-  education_loan: "Education Loan",
-  home_equity: "Home Equity",
-};
-
 const LoanApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState<LoanApplication[]>(loanApplications);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<LoanStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
-  const [statusDialog, setStatusDialog] = useState<{ app: LoanApplication; newStatus: LoanStatus } | null>(null);
+  const [statusDialog, setStatusDialog] = useState<{ app: Loan; newCommand: string } | null>(null);
 
+  // ─── React Query hooks ─────────────────────────────────────────
+  const { data: loansData, isLoading, isError, error } = useLoans({
+    limit: PAGE_SIZE,
+    offset: (page - 1) * PAGE_SIZE,
+  });
+
+  const approveMutation = useApproveLoan();
+  const disburseMutation = useDisburseLoan();
+  const rejectMutation = useRejectLoan();
+  const closeMutation = useCloseLoan();
+
+  const data = loansData?.pageItems ?? [];
+  const totalFilteredRecords = loansData?.totalFilteredRecords ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalFilteredRecords / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+
+  // ─── Stats ─────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const total = data.length;
-    const pending = data.filter((a) => a.status === "pending" || a.status === "under_review").length;
-    const approved = data.filter((a) => a.status === "approved" || a.status === "disbursed").length;
-    const active = data.filter((a) => a.status === "active").length;
-    const defaulted = data.filter((a) => a.status === "defaulted").length;
-    const totalDisbursed = data
-      .filter((a) => a.status === "active" || a.status === "disbursed" || a.status === "closed")
-      .reduce((sum, a) => sum + a.amount, 0);
-    return { total, pending, approved, active, defaulted, totalDisbursed };
-  }, [data]);
+    const pending = data.filter((l) => l.status?.code === "loanStatusType.submitted.and.pending.approval").length;
+    const approved = data.filter((l) => l.status?.code === "loanStatusType.approved" || l.status?.code === "loanStatusType.active").length;
+    const active = data.filter((l) => l.status?.code === "loanStatusType.active").length;
+    const totalDisbursed = data.reduce((sum, l) => sum + (l.totalRepayment ?? 0), 0);
+    return { total: totalFilteredRecords, pending, approved, active, totalDisbursed };
+  }, [data, totalFilteredRecords]);
 
+  // ─── Filtering ─────────────────────────────────────────────────
   const filtered = useMemo(() => {
     let result = data;
     const q = search.toLowerCase();
-    if (q) {
-      result = result.filter(
-        (a) =>
-          a.customerName.toLowerCase().includes(q) ||
-          a.applicationId.toLowerCase().includes(q) ||
-          a.productName.toLowerCase().includes(q) ||
-          a.assignedTo.toLowerCase().includes(q),
-      );
-    }
-    if (statusFilter !== "all") {
-      result = result.filter((a) => a.status === statusFilter);
-    }
+    if (q) result = result.filter((l) => (l.clientName ?? "").toLowerCase().includes(q) || (l.accountNo ?? "").toLowerCase().includes(q) || l.loanProductName.toLowerCase().includes(q));
+    if (statusFilter !== "all") result = result.filter((l) => l.status?.code === statusFilter);
     return result;
   }, [data, search, statusFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginated = useMemo(() => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE), [filtered, safePage]);
+  const handleStatusChange = (app: Loan, command: string) => setStatusDialog({ app, newCommand: command });
 
-  const handleStatusChange = useCallback((app: LoanApplication, newStatus: LoanStatus) => {
-    setStatusDialog({ app, newStatus });
-  }, []);
-
-  const confirmStatusChange = useCallback(() => {
+  const confirmStatusChange = () => {
     if (!statusDialog) return;
-    const now = new Date().toISOString();
-    setData((prev) =>
-      prev.map((a) => {
-        if (a.id !== statusDialog.app.id) return a;
-        const updates: Partial<LoanApplication> = { status: statusDialog.newStatus, updatedAt: now };
-        if (statusDialog.newStatus === "approved") updates.approvedDate = now;
-        if (statusDialog.newStatus === "disbursed") updates.disbursedDate = now;
-        if (statusDialog.newStatus === "closed") updates.closedDate = now;
-        return { ...a, ...updates };
-      }),
-    );
+    const { app, newCommand } = statusDialog;
+    const loanId = app.id;
+    const basePayload = { locale: "en", dateFormat: "dd MMMM yyyy" };
+    switch (newCommand) {
+      case "approve":
+        approveMutation.mutate({ loanId, payload: { ...basePayload, approvedOnDate: new Date().toISOString().split("T")[0] } });
+        break;
+      case "disburse":
+        disburseMutation.mutate({ loanId, payload: { ...basePayload, actualDisbursementDate: new Date().toISOString().split("T")[0] } });
+        break;
+      case "reject":
+        rejectMutation.mutate({ loanId, payload: { ...basePayload, rejectedOnDate: new Date().toISOString().split("T")[0] } });
+        break;
+      case "close":
+        closeMutation.mutate({ loanId, payload: { ...basePayload, closedOnDate: new Date().toISOString().split("T")[0] } });
+        break;
+    }
     setStatusDialog(null);
-  }, [statusDialog]);
+  };
 
-  const formatCurrency = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+  const formatCurrency = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
-  const columns: ColumnDef<LoanApplication>[] = [
+  const columns: ColumnDef<Loan>[] = [
+    { key: "accountNo", header: "Loan #", cell: (r) => <code className="text-xs font-mono">{r.accountNo ?? `#${r.id}`}</code> },
+    { key: "clientName", header: "Customer", cell: (r) => <span className="font-medium">{r.clientName ?? `Client #${r.clientId}`}</span> },
+    { key: "loanProductName", header: "Product" },
+    { key: "principal", header: "Amount", cell: (r) => <span className="font-mono text-sm font-medium">{formatCurrency(r.principal ?? 0)}</span> },
+    { key: "numberOfRepayments", header: "Tenure", cell: (r) => `${r.numberOfRepayments} × ${r.repaymentEvery} ${r.repaymentFrequencyType?.value?.toLowerCase() ?? "mo"}` },
+    { key: "annualInterestRate", header: "Rate", cell: (r) => `${r.annualInterestRate ?? 0}%` },
+    { key: "status", header: "Status", cell: (r) => { const c = LOAN_STATUS_CONFIG[r.status?.code ?? ""]; return <StatusBadge status={c?.variant ?? "default"} size="sm">{c?.label ?? r.status?.code ?? "Unknown"}</StatusBadge>; } },
+    { key: "loanOfficerName", header: "Officer", cell: (r) => <span className="text-xs">{r.loanOfficerName ?? "—"}</span> },
+    { key: "timeline", header: "Submitted", cell: (r) => <span className="text-xs">{r.timeline?.submittedOnDate ? new Date(r.timeline.submittedOnDate).toLocaleDateString() : "—"}</span> },
     {
-      key: "applicationId", header: "Application ID",
-      cell: (row) => <code className="text-xs font-mono text-gray-700 dark:text-gray-300">{row.applicationId}</code>,
-    },
-    {
-      key: "customerName", header: "Customer",
-      cell: (row) => (
-        <div>
-          <span className="font-medium text-gray-900 dark:text-gray-100">{row.customerName}</span>
-          <p className="text-xs text-gray-500">{row.customerType === "business" ? "Business" : "Individual"}</p>
-        </div>
-      ),
-    },
-    {
-      key: "productType", header: "Product",
-      cell: (row) => <span className="text-sm">{PRODUCT_TYPE_LABELS[row.productType] ?? row.productName}</span>,
-    },
-    {
-      key: "amount", header: "Amount",
-      cell: (row) => <span className="font-mono text-sm font-medium">{formatCurrency(row.amount)}</span>,
-    },
-    { key: "tenure", header: "Tenure", cell: (row) => `${row.tenure} mo` },
-    { key: "interestRate", header: "Rate", cell: (row) => `${row.interestRate}%` },
-    { key: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} size="sm" /> },
-    { key: "assignedTo", header: "Assigned To", cell: (row) => <span className="text-xs">{row.assignedTo}</span> },
-    {
-      key: "appliedDate", header: "Applied",
-      cell: (row) => <span className="text-xs">{new Date(row.appliedDate).toLocaleDateString()}</span>,
-    },
-    {
-      key: "actions", header: "Actions",
-      cell: (row) => (
+      key: "actions", header: "",
+      cell: (r) => (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => navigate(`/lending/applications/${row.id}`)}>
-              <Eye className="mr-2 h-4 w-4" /> View Details
-            </DropdownMenuItem>
-            {(row.status === "pending" || row.status === "draft") && (
-              <DropdownMenuItem onClick={() => handleStatusChange(row, "under_review")}>
-                <FileText className="mr-2 h-4 w-4" /> Send to Review
-              </DropdownMenuItem>
-            )}
-            {row.status === "under_review" && (
+          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem onClick={() => navigate(`/lending/applications/${r.id}`)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
+            {r.status?.code === "loanStatusType.submitted.and.pending.approval" && (
               <>
-                <DropdownMenuItem onClick={() => handleStatusChange(row, "approved")}>
-                  <CheckCircle className="mr-2 h-4 w-4 text-emerald-600" /> Approve
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusChange(row, "rejected")}>
-                  <XCircle className="mr-2 h-4 w-4 text-red-600" /> Reject
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange(r, "approve")}><CheckCircle className="mr-2 h-4 w-4 text-emerald-600" /> Approve</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleStatusChange(r, "reject")}><XCircle className="mr-2 h-4 w-4 text-red-600" /> Reject</DropdownMenuItem>
               </>
             )}
-            {row.status === "approved" && (
-              <DropdownMenuItem onClick={() => handleStatusChange(row, "disbursed")}>
-                <DollarSign className="mr-2 h-4 w-4 text-emerald-600" /> Disburse
-              </DropdownMenuItem>
+            {r.status?.code === "loanStatusType.approved" && (
+              <DropdownMenuItem onClick={() => handleStatusChange(r, "disburse")}><DollarSign className="mr-2 h-4 w-4 text-blue-600" /> Disburse</DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </DropdownMenuItem>
+            {r.status?.code === "loanStatusType.active" && (
+              <DropdownMenuItem onClick={() => handleStatusChange(r, "close")}><XCircle className="mr-2 h-4 w-4 text-gray-600" /> Close</DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
     },
   ];
 
+  if (isError) return (
+    <div className="flex items-center justify-center h-64"><div className="text-center"><AlertTriangle className="mx-auto h-8 w-8 text-red-500 mb-2" /><p className="text-red-600">Failed to load loans: {String(error)}</p><Button variant="outline" className="mt-2" onClick={() => window.location.reload()}>Retry</Button></div></div>
+  );
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Loan Applications"
-        description="Manage loan origination pipeline from application to disbursement"
-        actions={
-          <Button onClick={() => navigate("/lending/applications/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Application
-          </Button>
-        }
-      />
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard title="Total Applications" value={stats.total} icon={FileText} />
-        <StatCard title="Pending Review" value={stats.pending} icon={Clock} variant="warning" />
-        <StatCard title="Approved" value={stats.approved} icon={CheckCircle} variant="success" />
-        <StatCard title="Active Loans" value={stats.active} icon={TrendingUp} variant="success" />
-        <StatCard title="Defaulted" value={stats.defaulted} icon={AlertTriangle} variant="error" />
-        <StatCard title="Total Disbursed" value={formatCurrency(stats.totalDisbursed)} icon={DollarSign} />
-      </div>
-
-      {/* Filters */}
+      <PageHeader title="Loan Applications" description="Manage loan applications, approvals, disbursements and repayments"
+        actions={<Button onClick={() => navigate("/lending/applications/new")}><Plus className="mr-2 h-4 w-4" />New Application</Button>} />
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => (<Skeleton key={i} className="h-24 rounded-xl" />))}</div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard title="Total Loans" value={stats.total} icon={DollarSign} />
+          <StatCard title="Pending Review" value={stats.pending} icon={Clock} variant="warning" />
+          <StatCard title="Approved" value={stats.approved} icon={CheckCircle} variant="success" />
+          <StatCard title="Active Loans" value={stats.active} icon={TrendingUp} variant="success" />
+        </div>
+      )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Loan Applications</CardTitle>
           <div className="flex items-center gap-3">
-            <div className="relative w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by customer, ID, product..."
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as LoanStatus | "all"); setPage(1); }}>
-              <SelectTrigger className="w-40">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
+            <div className="relative w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search by customer, ID, product..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="pl-10" /></div>
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+              <SelectTrigger className="w-40"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="disbursed">Disbursed</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-                <SelectItem value="defaulted">Defaulted</SelectItem>
+                {Object.entries(LOAN_STATUS_CONFIG).map(([code, cfg]) => (<SelectItem key={code} value={code}>{cfg.label}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={paginated} emptyState={{ message: "No loan applications found" }} />
-          {filtered.length > PAGE_SIZE && (
-            <div className="mt-4">
-              <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage}
-                totalItems={filtered.length} pageSize={PAGE_SIZE} />
-            </div>
+          {isLoading ? (<div className="space-y-4">{Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} className="h-12 w-full" />))}</div>) : (
+            <>
+              <DataTable columns={columns} data={filtered} emptyState={{ message: "No loan applications found" }} />
+              {totalPages > 1 && (<div className="mt-4"><Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} totalItems={totalFilteredRecords} pageSize={PAGE_SIZE} /></div>)}
+            </>
           )}
         </CardContent>
       </Card>
-
-      {/* Status Change Confirmation */}
       <Dialog open={!!statusDialog} onOpenChange={() => setStatusDialog(null)}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Change Application Status</DialogTitle>
-            <DialogDescription>
-              Change status of {statusDialog?.app.customerName}'s application
-              ({statusDialog?.app.applicationId}) to{' '}
-              <strong>{statusDialog?.newStatus.replace(/_/g, " ")}</strong>?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setStatusDialog(null)}>Cancel</Button>
-            <Button onClick={confirmStatusChange}>Confirm</Button>
-          </DialogFooter>
+          <DialogHeader><DialogTitle>Change Loan Status</DialogTitle><DialogDescription>Update {statusDialog?.app.clientName ?? `Loan #${statusDialog?.app.id}`} to <strong>{statusDialog?.newCommand}</strong>?</DialogDescription></DialogHeader>
+          <DialogFooter><Button variant="outline" onClick={() => setStatusDialog(null)}>Cancel</Button><Button onClick={confirmStatusChange} disabled={approveMutation.isPending || disburseMutation.isPending || rejectMutation.isPending || closeMutation.isPending}>{approveMutation.isPending || disburseMutation.isPending || rejectMutation.isPending || closeMutation.isPending ? "Processing…" : "Confirm"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
