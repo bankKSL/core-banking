@@ -7,7 +7,6 @@ const client = axios.create({
     headers: {
         "Fineract-Platform-TenantId": "default",
         "Content-Type": "application/json",
-        Authorization: "Basic bWlmb3M6cGFzc3dvcmQ=",
     },
     timeout: 30_000,
 });
@@ -15,10 +14,14 @@ const client = axios.create({
 // ─── Request Interceptor ──────────────────────────────────────
 client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        // Attach Basic Auth credentials from Zustand store
+        // Attach Basic Auth credentials from Zustand store.
+        // The login endpoint is called before the user is authenticated,
+        // so no Authorization header is sent until login succeeds.
         const basicAuth = useAuthStore.getState().basicAuth;
         if (basicAuth) {
             config.headers.Authorization = `Basic ${basicAuth}`;
+        } else {
+            delete config.headers.Authorization;
         }
         // Fineract requires this header for tenant identification
         config.headers["Fineract-Platform-TenantId"] = "default";

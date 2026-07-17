@@ -1,31 +1,88 @@
-// ─── Auth Store ──────────────────────────────────────────────
-export interface AuthUser {
-    name: string;
-    email: string;
-    role: string;
+import { create } from "zustand";
+import { login } from "@/features/authentication/api/login";
+import type { AuthUser, FineractLoginResponse } from "@/features/authentication/types/auth";
+
+export type { AuthUser } from "@/features/authentication/types/auth";
+
+const AUTH_STORAGE_KEY = "corebank-auth-session";
+
+type PersistedAuth = Pick<AuthState, "isAuthenticated" | "user" | "basicAuth">;
+
+function getPersistedAuth(): Partial<PersistedAuth> {
+    try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        return raw ? (JSON.parse(raw) as Partial<PersistedAuth>) : {};
+    } catch {
+        return {};
+    }
 }
 
+function persistAuth(state: PersistedAuth) {
+    try {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
+    } catch {
+        // Ignore storage errors (e.g. private browsing mode).
+    }
+}
+
+function mapLoginResponseToAuthUser(response: FineractLoginResponse): AuthUser {
+    return {
+        userId: response.userId,
+        username: response.username,
+        officeId: response.officeId,
+        officeName: response.officeName,
+        permissions: response.permissions ?? [],
+    };
+}
+
+function mapLoginError(error: unknown): string {
+    if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+            response?: {
+                status?: number;
+                data?: { message?: string; defaultUserMessage?: string; error?: string };
+            };
+        };
+        if (axiosError.response?.status === 401) {
+            return "Invalid username or password.";
+        }
+        const serverMessage =
+            axiosError.response?.data?.message ??
+            axiosError.response?.data?.defaultUserMessage ??
+            axiosError.response?.data?.error;
+        if (serverMessage) return serverMessage;
+    }
+    if (error instanceof Error && error.message.toLowerCase().includes("network")) {
+        return "Unable to connect to server. Please check your connection.";
+    }
+    return "Unable to sign in. Please try again.";
+}
+
+// ─── Auth Store ──────────────────────────────────────────────
 interface AuthState {
     isAuthenticated: boolean;
     user: AuthUser | null;
-    /** Base64-encoded "username:password" for Basic Auth */
+    /** Base64-encoded authentication key returned by Fineract. */
     basicAuth: string | null;
     loginError: string | null;
     isLoggingIn: boolean;
     resetPasswordSent: boolean;
     isSendingReset: boolean;
     resetError: string | null;
-    login: (email: string, password: string) => Promise<boolean>;
+    login: (username: string, password: string) => Promise<boolean>;
+    setAuth: (user: AuthUser, basicAuth: string) => void;
     logout: () => void;
     clearLoginError: () => void;
     forgotPassword: (email: string) => Promise<boolean>;
     clearResetState: () => void;
 }
 
+const persistedAuth = getPersistedAuth();
+
 export const useAuthStore = create<AuthState>((set) => ({
-    isAuthenticated: false,
-    user: null,
-    basicAuth: null,
+    isAuthenticated: persistedAuth.isAuthenticated ?? false,
+    user: persistedAuth.user ?? null,
+    basicAuth: persistedAuth.basicAuth ?? null,
     loginError: null,
     isLoggingIn: false,
     resetPasswordSent: false,
@@ -34,21 +91,38 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: async (username, password) => {
         set({ isLoggingIn: true, loginError: null });
         try {
-            const basic = btoa(`${username}:${password}`);
-            set({
+            const response = await login({ username, password });
+            if (!response.authenticated) {
+                set({ isLoggingIn: false, loginError: "Invalid username or password." });
+                persistAuth({ isAuthenticated: false, user: null, basicAuth: null });
+                return false;
+            }
+            const user = mapLoginResponseToAuthUser(response);
+            const next: Pick<AuthState, "isAuthenticated" | "isLoggingIn" | "loginError" | "basicAuth" | "user"> = {
                 isAuthenticated: true,
                 isLoggingIn: false,
                 loginError: null,
-                basicAuth: basic,
-                user: { name: username, email: username, role: "User" },
-            });
+                basicAuth: response.base64EncodedAuthenticationKey,
+                user,
+            };
+            set(next);
+            persistAuth({ isAuthenticated: true, user, basicAuth: response.base64EncodedAuthenticationKey });
             return true;
-        } catch {
-            set({ isLoggingIn: false, loginError: "Invalid credentials. Please try again." });
+        } catch (error) {
+            const message = mapLoginError(error);
+            set({ isLoggingIn: false, loginError: message });
+            persistAuth({ isAuthenticated: false, user: null, basicAuth: null });
             return false;
         }
     },
-    logout: () => set({ isAuthenticated: false, user: null, basicAuth: null, loginError: null }),
+    setAuth: (user, basicAuth) => {
+        set({ isAuthenticated: true, user, basicAuth, loginError: null, isLoggingIn: false });
+        persistAuth({ isAuthenticated: true, user, basicAuth });
+    },
+    logout: () => {
+        set({ isAuthenticated: false, user: null, basicAuth: null, loginError: null });
+        persistAuth({ isAuthenticated: false, user: null, basicAuth: null });
+    },
     clearLoginError: () => set({ loginError: null }),
     forgotPassword: async (email) => {
         set({ isSendingReset: true, resetError: null });
@@ -64,7 +138,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     clearResetState: () => set({ resetPasswordSent: false, resetError: null }),
 }));
 
-import { create } from "zustand";
 import type {
     Campaign,
     Category,

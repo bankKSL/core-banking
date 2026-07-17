@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Bell, Menu, Moon, Sun, User, LogOut, ChevronDown, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore, useAuthStore } from "@/store";
+import { useLogout } from "@/features/authentication";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +71,7 @@ function useBreadcrumbs() {
 const TopNav: FC = () => {
     const { sidebarCollapsed, toggleSidebar, theme, toggleTheme } = useUIStore();
     const user = useAuthStore((s) => s.user);
-    const logout = useAuthStore((s) => s.logout);
+    const logout = useLogout();
     const navigate = useNavigate();
     const [searchValue, setSearchValue] = useState("");
     const [searchFocused, setSearchFocused] = useState(false);
@@ -171,9 +172,9 @@ const TopNav: FC = () => {
                         <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuLabel>
                                 <div className="flex flex-col gap-0.5">
-                                    <span>{user?.name ?? "Admin User"}</span>
+                                    <span>{user?.username ?? "Admin User"}</span>
                                     <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                        {user?.email ?? "admin@corebank.com"}
+                                        {user?.officeName ?? "Head Office"}
                                     </span>
                                 </div>
                             </DropdownMenuLabel>

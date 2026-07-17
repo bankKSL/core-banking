@@ -1,21 +1,44 @@
-import { type FC, useState, type FormEvent, useEffect, useRef } from "react";
+import { type FC, useState, useEffect, useRef, type Ref } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { LayoutDashboard, Eye, EyeOff, Loader2, AlertCircle, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginSchema, type LoginFormValues, useLogin } from "@/features/authentication";
+
+/** Merge a manual ref with a React Hook Form register ref. */
+function mergeRefs<T>(...refs: Array<Ref<T> | undefined>) {
+    return (value: T | null) => {
+        refs.forEach((ref) => {
+            if (typeof ref === "function") {
+                ref(value);
+            } else if (ref && "current" in ref) {
+                (ref as React.MutableRefObject<T | null>).current = value;
+            }
+        });
+    };
+}
 
 const LoginPage: FC = () => {
     const navigate = useNavigate();
-    const { login, isLoggingIn, loginError, clearLoginError, isAuthenticated } = useAuthStore();
+    const { isAuthenticated, loginError, clearLoginError } = useAuthStore();
     const { theme, toggleTheme } = useUIStore();
+    const loginMutation = useLogin();
 
-    const [email, setEmail] = useState("mifos");
-    const [password, setPassword] = useState("password");
     const [showPassword, setShowPassword] = useState(false);
     const passwordInputRef = useRef<HTMLInputElement>(null);
+
+    const form = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            username: "mifos",
+            password: "password",
+        },
+    });
 
     // Redirect if already authenticated
     useEffect(() => {
@@ -29,21 +52,15 @@ const LoginPage: FC = () => {
         passwordInputRef.current?.focus();
     }, []);
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = form.handleSubmit((values) => {
         clearLoginError();
+        loginMutation.mutate(values);
+    });
 
-        const success = await login(email.trim(), password);
-        if (success) {
-            navigate("/", { replace: true });
-        }
-    };
-
-    // Clear error when user starts typing
-    const handleInputChange = (setter: (v: string) => void, value: string) => {
-        if (loginError) clearLoginError();
-        setter(value);
-    };
+    const usernameError = form.formState.errors.username?.message;
+    const passwordError = form.formState.errors.password?.message;
+    const displayError = loginError ?? (usernameError || passwordError || null);
+    const isSubmitting = form.formState.isSubmitting || loginMutation.isPending;
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-950">
@@ -71,37 +88,34 @@ const LoginPage: FC = () => {
                             <LayoutDashboard className="h-7 w-7 text-white" />
                         </div>
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">CoreBank</h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Formula Engine &amp; Banking Platform</p>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Sign in to your account</p>
                     </div>
 
                     {/* Error alert */}
-                    {loginError && (
-                        <div className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/50 dark:text-red-400">
+                    {displayError && (
+                        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300">
                             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                            <span>{loginError}</span>
+                            <span>{displayError}</span>
                         </div>
                     )}
 
-                    {/* Login form */}
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        <div className="space-y-2">
-                            <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Email address
+                        <div className="space-y-1.5">
+                            <Label htmlFor="username" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Username
                             </Label>
                             <Input
-                                id="email"
-
-                                placeholder="you@corebank.com"
-                                value={email}
-                                onChange={(e) => handleInputChange(setEmail, e.target.value)}
-                                required
-                                autoComplete="email"
-                                disabled={isLoggingIn}
-                                className={cn("h-11", loginError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700")}
+                                id="username"
+                                type="text"
+                                placeholder="Enter your username"
+                                autoComplete="username"
+                                disabled={isSubmitting}
+                                className={cn("h-11", displayError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700")}
+                                {...form.register("username")}
                             />
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Password
@@ -115,21 +129,24 @@ const LoginPage: FC = () => {
                                 </button>
                             </div>
                             <div className="relative">
-                                <Input
-                                    id="password"
-                                    ref={passwordInputRef}
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => handleInputChange(setPassword, e.target.value)}
-                                    required
-                                    autoComplete="current-password"
-                                    disabled={isLoggingIn}
-                                    className={cn(
-                                        "h-11 pr-10",
-                                        loginError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700",
-                                    )}
-                                />
+                                {(() => {
+                                    const passwordRegister = form.register("password");
+                                    return (
+                                        <Input
+                                            id="password"
+                                            {...passwordRegister}
+                                            ref={mergeRefs(passwordInputRef, passwordRegister.ref)}
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter your password"
+                                            autoComplete="current-password"
+                                            disabled={isSubmitting}
+                                            className={cn(
+                                                "h-11 pr-10",
+                                                displayError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700",
+                                            )}
+                                        />
+                                    );
+                                })()}
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
@@ -144,10 +161,10 @@ const LoginPage: FC = () => {
 
                         <Button
                             type="submit"
-                            disabled={isLoggingIn}
+                            disabled={isSubmitting}
                             className="h-11 w-full bg-[#D32F2F] text-white hover:bg-primary-600 dark:bg-[#D32F2F] dark:hover:bg-primary-600"
                         >
-                            {isLoggingIn ? (
+                            {isSubmitting ? (
                                 <span className="flex items-center gap-2">
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                     Signing in...
@@ -161,8 +178,8 @@ const LoginPage: FC = () => {
                     {/* Footer */}
                     <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
                         Demo credentials pre-filled. Use{" "}
-                        <span className="font-medium text-gray-500 dark:text-gray-400">admin@corebank.com</span> /{" "}
-                        <span className="font-medium text-gray-500 dark:text-gray-400">admin123</span>
+                        <span className="font-medium text-gray-500 dark:text-gray-400">mifos</span>{" / "}
+                        <span className="font-medium text-gray-500 dark:text-gray-400">password</span>
                     </p>
                 </div>
 
