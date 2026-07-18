@@ -1,4 +1,18 @@
 import client from "@/api/client";
+
+/**
+ * Convert yyyy-MM-dd (HTML date input) → dd MMMM yyyy (Fineract format).
+ * Returns undefined if empty or already in Fineract format.
+ */
+function toFineractDate(isoDate?: string): string | undefined {
+    if (!isoDate) return undefined;
+    if (/[A-Za-z]/.test(isoDate)) return isoDate;
+    const [y, m, d] = isoDate.split("-").map(Number);
+    if (!y || !m || !d) return isoDate;
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return `${d} ${months[m - 1]} ${y}`;
+}
+
 import type {
     Loan,
     LoanListResponse,
@@ -56,7 +70,13 @@ export async function fetchLoanTemplate(clientId?: number, productId?: number): 
 }
 
 export async function createLoan(payload: LoanCreateRequest): Promise<LoanCommandResponse> {
-    const { data } = await client.post<LoanCommandResponse>("/loans", payload);
+    const { data } = await client.post<LoanCommandResponse>("/loans", {
+        ...payload,
+        submittedOnDate: toFineractDate(payload.submittedOnDate),
+        expectedDisbursementDate: toFineractDate(payload.expectedDisbursementDate),
+        locale: "en",
+        dateFormat: "dd MMMM yyyy",
+    });
     return data;
 }
 
@@ -130,7 +150,7 @@ export async function makeRepayment(
 ): Promise<LoanCommandResponse> {
     const { data } = await client.post<LoanCommandResponse>(
         `/loans/${loanId}/transactions`,
-        payload,
+        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
         { params: { command: "repayment" } }
     );
     return data;

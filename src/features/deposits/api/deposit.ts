@@ -1,4 +1,18 @@
 import client from "@/api/client";
+
+/**
+ * Convert yyyy-MM-dd (HTML date input) → dd MMMM yyyy (Fineract format).
+ * Returns undefined if empty or already in Fineract format.
+ */
+function toFineractDate(isoDate?: string): string | undefined {
+    if (!isoDate) return undefined;
+    if (/[A-Za-z]/.test(isoDate)) return isoDate;
+    const [y, m, d] = isoDate.split("-").map(Number);
+    if (!y || !m || !d) return isoDate;
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return `${d} ${months[m - 1]} ${y}`;
+}
+
 import type {
     SavingsAccount,
     SavingsAccountListResponse,
@@ -60,7 +74,12 @@ export async function fetchSavingsAccountTemplate(clientId?: number, productId?:
 }
 
 export async function createSavingsAccount(payload: SavingsAccountCreateRequest): Promise<SavingsCommandResponse> {
-    const { data } = await client.post<SavingsCommandResponse>("/savingsaccounts", payload);
+    const { data } = await client.post<SavingsCommandResponse>("/savingsaccounts", {
+        ...payload,
+        submittedOnDate: toFineractDate(payload.submittedOnDate),
+        dateFormat: "dd MMMM yyyy",
+        locale: "en",
+    });
     return data;
 }
 
@@ -110,7 +129,7 @@ export async function fetchDepositTemplate(accountId: number): Promise<SavingsTr
 export async function makeDeposit(accountId: number, payload: SavingsTransactionRequest): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>(
         `/savingsaccounts/${accountId}/transactions`,
-        payload,
+        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
         { params: { command: "deposit" } }
     );
     return data;
@@ -127,13 +146,83 @@ export async function fetchWithdrawTemplate(accountId: number): Promise<SavingsT
 export async function makeWithdrawal(accountId: number, payload: SavingsTransactionRequest): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>(
         `/savingsaccounts/${accountId}/transactions`,
-        payload,
+        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
         { params: { command: "withdrawal" } }
     );
     return data;
 }
 
-// ─── Fixed Deposits ──────────────────────────────────────────────
+// ─── Fixed Deposit Lifecycle Commands ───────────────────────────
+// Section 10.4 — POST /fixeddepositaccounts/{id}?command={command}
+
+export async function fixedDepositCommand(
+    accountId: number,
+    command: string,
+    data: Record<string, unknown> = {}
+): Promise<SavingsCommandResponse> {
+    // Convert any date fields from yyyy-MM-dd to dd MMMM yyyy
+    const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
+    const converted: Record<string, unknown> = { locale: "en", dateFormat: "dd MMMM yyyy" };
+    for (const [k, v] of Object.entries(data)) {
+        converted[k] = dateFields.includes(k) ? toFineractDate(v as string | undefined) : v;
+    }
+    const { data: result } = await client.post<SavingsCommandResponse>(
+        `/fixeddepositaccounts/${accountId}`,
+        converted,
+        { params: { command } }
+    );
+    return result;
+}
+
+export async function approveFixedDeposit(accountId: number, approvedOnDate?: string) {
+    return fixedDepositCommand(accountId, "approve", approvedOnDate ? { approvedOnDate } : { approvedOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export async function activateFixedDeposit(accountId: number, activatedOnDate?: string) {
+    return fixedDepositCommand(accountId, "activate", activatedOnDate ? { activatedOnDate } : { activatedOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export async function closeFixedDeposit(accountId: number, closedOnDate?: string) {
+    return fixedDepositCommand(accountId, "close", closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export async function prematureCloseFixedDeposit(accountId: number, closedOnDate?: string) {
+    return fixedDepositCommand(accountId, "prematureClose", closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export async function rejectFixedDeposit(accountId: number, rejectedOnDate?: string) {
+    return fixedDepositCommand(accountId, "reject", rejectedOnDate ? { rejectedOnDate } : { rejectedOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export async function withdrawFixedDeposit(accountId: number, withdrawnOnDate?: string) {
+    return fixedDepositCommand(accountId, "withdrawnByApplicant", withdrawnOnDate ? { withdrawnOnDate } : { withdrawnOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export async function undoApprovalFixedDeposit(accountId: number) {
+    return fixedDepositCommand(accountId, "undoApproval");
+}
+
+export async function undoActivationFixedDeposit(accountId: number) {
+    return fixedDepositCommand(accountId, "undoActivation");
+}
+
+export async function calculatePrematureAmount(accountId: number, closedOnDate?: string) {
+    return fixedDepositCommand(accountId, "calculatePrematureAmount", closedOnDate ? { closedOnDate } : {});
+}
+
+// ─── Create Fixed Deposit (10.2) ──────────────────────────────
+
+export async function createFixedDepositAccount(payload: Record<string, unknown>): Promise<SavingsCommandResponse> {
+    const { data } = await client.post<SavingsCommandResponse>("/fixeddepositaccounts", {
+        locale: "en",
+        dateFormat: "dd MMMM yyyy",
+        ...payload,
+        submittedOnDate: toFineractDate(payload.submittedOnDate as string | undefined),
+    });
+    return data;
+}
+
+// ─── Fetch Fixed Deposits (10.1, 10.3) ────────────────────────
 
 export async function fetchFixedDepositAccounts(params: FixedDepositListParams = {}): Promise<{ totalFilteredRecords: number; pageItems: FixedDepositAccount[] }> {
     const { data } = await client.get<{ totalFilteredRecords: number; pageItems: FixedDepositAccount[] }>("/fixeddepositaccounts", { params });
@@ -142,11 +231,6 @@ export async function fetchFixedDepositAccounts(params: FixedDepositListParams =
 
 export async function fetchFixedDepositAccount(accountId: number | string): Promise<FixedDepositAccount> {
     const { data } = await client.get<FixedDepositAccount>(`/fixeddepositaccounts/${accountId}`);
-    return data;
-}
-
-export async function createFixedDepositAccount(payload: Record<string, unknown>): Promise<SavingsCommandResponse> {
-    const { data } = await client.post<SavingsCommandResponse>("/fixeddepositaccounts", payload);
     return data;
 }
 

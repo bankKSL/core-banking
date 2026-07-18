@@ -26,6 +26,8 @@ export {
     DEPOSIT_ACCOUNTS_PAGE_SIZE,
     DEPOSIT_SEARCH_DEBOUNCE_MS,
     DEPOSIT_TYPE_LABELS,
+    DEPOSIT_PERIOD_FREQUENCIES,
+    FIXED_DEPOSIT_STATUS_CONFIG,
 } from "./constants/status";
 
 export {
@@ -56,6 +58,15 @@ export {
     fetchFixedDepositAccounts,
     fetchFixedDepositAccount,
     createFixedDepositAccount,
+    approveFixedDeposit,
+    activateFixedDeposit,
+    closeFixedDeposit,
+    prematureCloseFixedDeposit,
+    rejectFixedDeposit,
+    withdrawFixedDeposit,
+    undoApprovalFixedDeposit,
+    undoActivationFixedDeposit,
+    calculatePrematureAmount,
     fetchRecurringDepositAccounts,
     fetchRecurringDepositAccount,
     createRecurringDepositAccount,
