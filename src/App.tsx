@@ -13,6 +13,7 @@ import ExecutionLogsPage from "./pages/ExecutionLogsPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import SettingsPage from "./pages/SettingsPage";
 import LoanApplicationsPage from "./pages/LoanApplicationsPage";
+import LoanApplicationDetailPage from "./pages/LoanApplicationDetailPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
 import RepaymentSchedulePage from "./pages/RepaymentSchedulePage";
 import CollateralPage from "./pages/CollateralPage";
@@ -29,6 +30,8 @@ import EditClientPage from "@/features/clients/pages/EditClientPage";
 import ScoreGradePage from "./pages/ScoreGradePage";
 import CreateLoanApplicationPage from "./pages/CreateLoanApplicationPage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
+import DepositAccountDetailPage from "./pages/DepositAccountDetailPage";
+import SavingsProductsPage from "./pages/SavingsProductsPage";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { useAuthStore } from "./store";
@@ -93,12 +96,15 @@ function App() {
                                     {/* Lending */}
                                     <Route path="/lending/applications" element={<LoanApplicationsPage />} />
                                     <Route path="/lending/applications/new" element={<CreateLoanApplicationPage />} />
+                                    <Route path="/lending/applications/:id" element={<LoanApplicationDetailPage />} />
                                     <Route path="/lending/products" element={<LoanProductsPage />} />
                                     <Route path="/lending/repayments" element={<RepaymentSchedulePage />} />
                                     <Route path="/lending/collateral" element={<CollateralPage />} />
                                     {/* Deposits */}
+                                    <Route path="/deposits/products" element={<SavingsProductsPage />} />
                                     <Route path="/deposits/accounts" element={<DepositAccountsPage />} />
                                     <Route path="/deposits/accounts/new" element={<CreateDepositAccountPage />} />
+                                    <Route path="/deposits/accounts/:id" element={<DepositAccountDetailPage />} />
                                     <Route path="/deposits/transactions" element={<DepositTransactionsPage />} />
                                     <Route path="/deposits/withdrawals" element={<WithdrawalsPage />} />
                                     <Route path="/deposits/fixed" element={<FixedDepositsPage />} />

@@ -39,15 +39,16 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             groupId: null,
             dateOfBirth: client?.dateOfBirth ? client.dateOfBirth.split("T")[0] : "",
             genderId: client?.gender?.id ?? null,
-            legalFormId: null,
+            legalFormId: client?.legalForm?.id ?? (mode === "create" ? 1 : null),
             externalId: client?.externalId ?? "",
             mobileNo: client?.mobileNo ?? "",
             emailAddress: client?.emailAddress ?? "",
             activationDate: client?.activationDate ? client.activationDate.split("T")[0] : mode === "create" ? defaultDate : "",
-            submittedOnDate: defaultDate,
+            submittedOnDate: mode === "create" ? defaultDate : "",
             dateFormat: "yyyy-MM-dd",
             locale: "en",
-            active: mode === "create" ? false : (client?.active ?? false),
+            active: mode === "create" ? true : (client?.active ?? false),
+            savingsProductId: null,
         },
     });
 
@@ -65,6 +66,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             genderId: values.genderId ?? undefined,
             legalFormId: values.legalFormId ?? undefined,
             groupId: values.groupId ?? undefined,
+            savingsProductId: values.savingsProductId ?? undefined,
         };
         await onSubmit(cleaned as CreateClientFormValues);
     };
@@ -200,6 +202,46 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Savings Product — Section 5: optional, omit if no products exist */}
+            {template?.savingsProductOptions && template.savingsProductOptions.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Savings Product (optional)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="flex flex-col gap-1.5">
+                            <Label>Default Savings Product</Label>
+                            <Select
+                                disabled={isSubmitting}
+                                onValueChange={(v) => setValue("savingsProductId", v === "" ? null : Number(v))}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="None — skip to omit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">None (skip)</SelectItem>
+                                    {template.savingsProductOptions.map((p) => (
+                                        <SelectItem key={p.id} value={String(p.id)}>
+                                            {p.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-[11px] text-gray-400">Optional. Omit if you don't need a default savings product.</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+            {template?.savingsProductOptions && template.savingsProductOptions.length === 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    No savings products available.{" "}
+                    <a href="/deposits/products" className="underline font-medium">
+                        Create one first
+                    </a>{" "}
+                    or skip this field — it's optional.
+                </div>
+            )}
 
             {/* Contact Information */}
             <Card>

@@ -6,6 +6,7 @@ type StatusType = CampaignStatus | ExecutionStatus | LoanStatus | InstallmentSta
 
 interface StatusBadgeProps {
     status: StatusType;
+    label?: string;
     className?: string;
     size?: "sm" | "md" | "lg";
 }
@@ -107,9 +108,9 @@ const sizeClasses: Record<"sm" | "md" | "lg", string> = {
     lg: "h-8 px-3 text-sm gap-1.5",
 };
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className, size = "md" }) => {
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label: labelOverride, className, size = "md" }) => {
     const config = getStatusConfig(status);
-    const label = statusLabelMap[status] ?? status;
+    const label = labelOverride ?? statusLabelMap[status] ?? status;
 
     // For draft, skipped, waived — render as a secondary/outline style
     if (status === "draft" || status === "skipped" || status === "waived" || status === "released" || status === "reversed") {

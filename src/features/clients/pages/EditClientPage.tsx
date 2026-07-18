@@ -10,10 +10,19 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useUpdateClient } from "../hooks/useUpdateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
+import { useAuthStore } from "@/store";
+
+function toFineractDate(isoDate: string): string {
+    if (!isoDate) return "";
+    const [y, m, d] = isoDate.split("-").map(Number);
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return `${d} ${months[m - 1]} ${y}`;
+}
 
 const EditClientPage: FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
+    const officeId = useAuthStore((s) => s.user?.officeId);
     const { data: client, isLoading: clientLoading, isError, refetch } = useClient(id);
     const { data: template, isLoading: templateLoading } = useClientTemplate();
     const updateMutation = useUpdateClient();
@@ -23,16 +32,22 @@ const EditClientPage: FC = () => {
             if (!client) return;
             const payload = {
                 ...values,
-                dateFormat: "yyyy-MM-dd",
+                officeId: officeId ?? 1,
+                dateFormat: "dd MMMM yyyy",
                 locale: "en",
+                activationDate: values.activationDate ? toFineractDate(values.activationDate) : undefined,
+                submittedOnDate: values.submittedOnDate ? toFineractDate(values.submittedOnDate) : undefined,
+                dateOfBirth: values.dateOfBirth ? toFineractDate(values.dateOfBirth) : undefined,
+                legalFormId: values.legalFormId ?? undefined,
+                savingsProductId: values.savingsProductId ?? undefined,
             };
             await updateMutation.mutateAsync({
                 clientId: client.id,
-                payload: payload as unknown as Parameters<typeof updateMutation.mutateAsync>[0]["payload"],
+                payload: payload as any,
             });
             navigate(`/clients/${client.id}`);
         },
-        [client, updateMutation, navigate],
+        [client, updateMutation, navigate, officeId],
     );
 
     if (clientLoading || templateLoading) {

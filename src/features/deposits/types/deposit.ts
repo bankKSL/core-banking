@@ -20,8 +20,11 @@ export interface SavingsProduct {
     shortName?: string;
     description?: string;
     currency: {
-        code: string; name: string; decimalPlaces: number;
-        inMultiplesOf?: number; displaySymbol: string;
+        code: string;
+        name: string;
+        decimalPlaces: number;
+        inMultiplesOf?: number;
+        displaySymbol: string;
     };
     nominalAnnualInterestRate: number;
     minRequiredOpeningBalance: number;
@@ -39,11 +42,14 @@ export interface SavingsProduct {
     daysToDormancy?: number;
     daysToEscheat?: number;
     charges: Array<{
-        id: number; chargeId: number; name: string;
+        id: number;
+        chargeId: number;
+        name: string;
         amount: number;
         chargeTimeType: { id: number; code: string; value: string };
         chargeCalculationType: { id: number; code: string; value: string };
-        isPenalty: boolean; isActive: boolean;
+        isPenalty: boolean;
+        isActive: boolean;
     }>;
 }
 
@@ -82,10 +88,14 @@ export interface SavingsAccount {
     lastActiveTransactionDate?: string;
     statusBlock?: unknown;
     timeline: {
-        submittedOnDate?: string; submittedByUsername?: string;
-        approvedOnDate?: string; approvedByUsername?: string;
-        activatedOnDate?: string; activatedByUsername?: string;
-        closedOnDate?: string; closedByUsername?: string;
+        submittedOnDate?: string;
+        submittedByUsername?: string;
+        approvedOnDate?: string;
+        approvedByUsername?: string;
+        activatedOnDate?: string;
+        activatedByUsername?: string;
+        closedOnDate?: string;
+        closedByUsername?: string;
     };
     client?: { id: number; displayName: string };
     group?: { id: number; name: string };
@@ -131,16 +141,20 @@ export interface SavingsAccountListResponse {
 }
 
 export interface SavingsAccountListParams {
-    offset?: number; limit?: number;
-    orderBy?: string; sortOrder?: "ASC" | "DESC";
-    clientId?: number; accountNo?: string;
+    offset?: number;
+    limit?: number;
+    orderBy?: string;
+    sortOrder?: "ASC" | "DESC";
+    clientId?: number;
+    accountNo?: string;
     status?: number;
 }
 
 // ─── Savings Template ────────────────────────────────────────────
 
 export interface SavingsAccountTemplate {
-    clientId?: number; clientName?: string;
+    clientId?: number;
+    clientName?: string;
     productOptions: Array<{ id: number; name: string }>;
     clientOptions?: Array<{ id: number; displayName: string }>;
     groupId?: number;
@@ -240,8 +254,10 @@ export interface FixedDepositAccount {
     interestCalculationType: { id: number; code: string; value: string };
     interestCalculationDaysInYearType: { id: number; code: string; value: string };
     timeline: {
-        submittedOnDate?: string; approvedOnDate?: string;
-        activatedOnDate?: string; maturedOnDate?: string;
+        submittedOnDate?: string;
+        approvedOnDate?: string;
+        activatedOnDate?: string;
+        maturedOnDate?: string;
         closedOnDate?: string;
     };
     maturityDate?: string;
@@ -253,9 +269,12 @@ export interface FixedDepositAccount {
 }
 
 export interface FixedDepositListParams {
-    offset?: number; limit?: number;
-    orderBy?: string; sortOrder?: "ASC" | "DESC";
-    clientId?: number; status?: number;
+    offset?: number;
+    limit?: number;
+    orderBy?: string;
+    sortOrder?: "ASC" | "DESC";
+    clientId?: number;
+    status?: number;
 }
 
 // ─── Recurring Deposit ───────────────────────────────────────────
@@ -283,7 +302,8 @@ export interface RecurringDepositAccount {
     expectedFirstDepositOnDate?: string;
     expectedMaturityDate?: string;
     timeline: {
-        submittedOnDate?: string; approvedOnDate?: string;
+        submittedOnDate?: string;
+        approvedOnDate?: string;
         activatedOnDate?: string;
     };
     prematureClosure?: boolean;
@@ -293,12 +313,23 @@ export interface RecurringDepositAccount {
 
 export interface SavingsProductCreateRequest {
     name: string;
-    shortName?: string;
+    /** Short unique identifier — no spaces (per Fineract spec) */
+    shortName: string;
     description?: string;
     currencyCode: string;
-    digitsAfterDecimal?: number;
+    digitsAfterDecimal: number;
     inMultiplesOf?: number;
+    locale: string;
+    dateFormat: string;
     nominalAnnualInterestRate: number;
+    /** 1=Daily, 4=Monthly, 5=Quarterly, 6=Semi-Annual, 7=Annual */
+    interestCompoundingPeriodType: number;
+    /** 1=Monthly, 4=Quarterly, 5=Semi-Annual, 7=Annual */
+    interestPostingPeriodType: number;
+    /** 1=Daily balance, 2=Average daily balance */
+    interestCalculationType: number;
+    /** 360, 364, 365 */
+    interestCalculationDaysInYearType: number;
     minRequiredOpeningBalance?: number;
     lockinPeriodFrequency?: number;
     lockinPeriodFrequencyType?: number;
@@ -307,12 +338,14 @@ export interface SavingsProductCreateRequest {
     overdraftLimit?: number;
     minRequiredBalance?: number;
     enforceMinRequiredBalance?: boolean;
-    accountingRule?: number;
-    locale?: string;
-    dateFormat?: string;
+    accountingRule: number;
     charges?: Array<{ chargeId: number }>;
     isDormancyTrackingActive?: boolean;
     daysToInactive?: number;
     daysToDormancy?: number;
     daysToEscheat?: number;
+    /** Section 6: Enable tax withholding */
+    withHoldTax?: boolean;
+    /** Section 6: Payment account mapping key */
+    accountMappingForPayment?: string;
 }

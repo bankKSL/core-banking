@@ -62,7 +62,7 @@ const RepaymentSchedulePage: React.FC = () => {
       cell: (r) => {
         const isPaid = r.totalOutstandingForPeriod <= 0;
         const isOverdue = !isPaid && new Date(r.dueDate) < new Date();
-        return <StatusBadge status={isPaid ? "success" : isOverdue ? "error" : "warning"} size="sm">{isPaid ? "Paid" : isOverdue ? "Overdue" : "Pending"}</StatusBadge>;
+        return <StatusBadge status={isPaid ? "paid" : isOverdue ? "overdue" : "pending"} label={isPaid ? "Paid" : isOverdue ? "Overdue" : "Pending"} size="sm" />;
       },
     },
     { key: "daysInPeriod", header: "Days" },

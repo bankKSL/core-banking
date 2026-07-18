@@ -35,14 +35,8 @@ export {
     REPAYMENT_FREQ_LABELS,
 } from "./constants/status";
 
-export {
-    createLoanSchema,
-    createLoanProductSchema,
-} from "./schemas/loan.schema";
-export type {
-    CreateLoanFormValues,
-    CreateLoanProductFormValues,
-} from "./schemas/loan.schema";
+export { createLoanSchema, createLoanProductSchema } from "./schemas/loan.schema";
+export type { CreateLoanFormValues, CreateLoanProductFormValues } from "./schemas/loan.schema";
 
 export {
     fetchLoans,
@@ -67,30 +61,19 @@ export {
     updateLoanProduct,
 } from "./api/loan";
 
-export {
-    useLoans,
-    loanKeys,
-} from "./hooks/useLoans";
+export { useLoans, loanKeys } from "./hooks/useLoans";
 
 export { useLoan as useLoanDetail } from "./hooks/useLoan";
 
-export {
-    useLoanProducts,
-    useLoanProduct,
-} from "./hooks/useLoanProducts";
+export { useLoanProducts, useLoanProduct } from "./hooks/useLoanProducts";
 
 export { useLoanTemplate } from "./hooks/useLoanTemplate";
 
 export { useCreateLoan } from "./hooks/useCreateLoan";
 
-export {
-    useApproveLoan,
-    useDisburseLoan,
-    useRejectLoan,
-    useCloseLoan,
-    useUndoApproval,
-    useUndoDisbursal,
-} from "./hooks/useLoanCommands";
+export { useLoan } from "./hooks/useLoan";
+
+export { useApproveLoan, useDisburseLoan, useRejectLoan, useCloseLoan, useUndoApproval, useUndoDisbursal } from "./hooks/useLoanCommands";
 
 export { useRepaymentSchedule } from "./hooks/useRepaymentSchedule";
 

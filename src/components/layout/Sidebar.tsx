@@ -25,6 +25,7 @@ import {
     Users,
     UserCheck,
     Shield,
+    LayoutGrid,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -68,6 +69,7 @@ const sections: NavSectionConfig[] = [
         defaultOpen: true,
         items: [
             { label: "Deposit Accounts", path: "/deposits/accounts", icon: PiggyBank },
+            { label: "Savings Products", path: "/deposits/products", icon: LayoutGrid },
             { label: "Transactions", path: "/deposits/transactions", icon: Receipt },
             { label: "Withdrawals", path: "/deposits/withdrawals", icon: ArrowUpCircle },
             { label: "Fixed Deposits", path: "/deposits/fixed", icon: Wallet },

@@ -23,50 +23,7 @@ export async function fetchClient(clientId: number | string): Promise<Client> {
 
 // ─── Create Client ────────────────────────────────────────────
 export async function createClient(payload: ClientCreateRequest): Promise<{ clientId: number; resourceId: number; officeId: number }> {
-    const { data } = await client.post<{ clientId: number; resourceId: number; officeId: number }>("/clients", {
-        officeId: 1,
-        legalFormId: 1,
-        firstname: "Petra",
-        lastname: "Yton",
-        externalId: "786YYH7",
-        dateFormat: "dd MMMM yyyy",
-        locale: "en",
-        active: true,
-        activationDate: "04 March 2009",
-        submittedOnDate: "04 March 2009",
-        savingsProductId: 1,
-        datatables: [
-            {
-                registeredTableName: "Family Details",
-                data: {
-                    locale: "en",
-                    "Number of members": "5",
-                    "Number of dependents": "3",
-                    "No of Children": "2",
-                    "Date of verification": "14 December 2016",
-                    dateFormat: "dd MMMM yyyy",
-                },
-            },
-            {
-                registeredTableName: "Residency Address",
-                data: {
-                    locale: "en",
-                    "Address Line": "Basavana Gudi Road",
-                    Street: "Gandhi Bazaar",
-                    Landmark: "Aashrama",
-                    COUNTRY_cd_Country: 17,
-                    STATE_cd_State: "7",
-                    DISTRICT_cd_District: "13",
-                    Pincode: "560040",
-                },
-                clientId: 2,
-                groupId: 1,
-                officeId: 1,
-                resourceExternalId: "123-456",
-                resourceId: 2,
-            },
-        ],
-    });
+    const { data } = await client.post<{ clientId: number; resourceId: number; officeId: number }>("/clients", payload);
     return data;
 }
 
@@ -93,6 +50,66 @@ export async function activateClient(
 // ─── Delete Client ────────────────────────────────────────────
 export async function deleteClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
     const { data } = await client.delete<{ clientId: number; resourceId: number }>(`/clients/${clientId}`);
+    return data;
+}
+
+// ─── Client Accounts Overview ──────────────────────────────────
+// GET /clients/{clientId}/accounts — returns loanAccounts[] and savingsAccounts[]
+
+export interface ClientLoanAccount {
+    id: number;
+    accountNo: string;
+    productId: number;
+    productName: string;
+    status: {
+        id: number;
+        code: string;
+        description: string;
+        pendingApproval: boolean;
+        waitingForDisbursal: boolean;
+        active: boolean;
+        closed: boolean;
+        overpaid: boolean;
+    };
+    loanType?: { id: number; code: string; description: string };
+    loanCycle: number;
+    currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+    originalLoan?: number;
+    loanBalance?: number;
+    amountPaid?: number;
+    amountOutstanding?: number;
+    accountBalance?: number;
+}
+
+export interface ClientSavingsAccount {
+    id: number;
+    accountNo: string;
+    productId: number;
+    productName: string;
+    status: {
+        id: number;
+        code: string;
+        description: string;
+        submittedAndPendingApproval: boolean;
+        approved: boolean;
+        active: boolean;
+        closed: boolean;
+        rejected: boolean;
+    };
+    currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+    accountBalance: number;
+    totalDeposits?: number;
+    totalWithdrawals?: number;
+    totalInterestEarned?: number;
+}
+
+export interface ClientAccountsResponse {
+    loanAccounts: ClientLoanAccount[];
+    savingsAccounts: ClientSavingsAccount[];
+}
+
+export async function fetchClientAccounts(clientId: number | string): Promise<ClientAccountsResponse> {
+    const { data } = await client.get<ClientAccountsResponse>(`/clients/${clientId}/accounts`);
     return data;
 }
 

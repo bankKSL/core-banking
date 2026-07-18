@@ -1,4 +1,4 @@
-import { type FC, useCallback } from "react";
+import { type FC, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -9,23 +9,62 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useCreateClient } from "../hooks/useCreateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
+import { useAuthStore } from "@/store";
+
+/** Convert yyyy-MM-dd → dd MMMM yyyy (Fineract expected format) */
+function toFineractDate(isoDate: string): string {
+    if (!isoDate) return "";
+    const [y, m, d] = isoDate.split("-").map(Number);
+    const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+    return `${d} ${months[m - 1]} ${y}`;
+}
 
 const CreateClientPage: FC = () => {
     const navigate = useNavigate();
+    const officeId = useAuthStore((s) => s.user?.officeId);
+    const staffId = useAuthStore((s) => s.user?.userId);
     const { data: template, isLoading: templateLoading } = useClientTemplate();
     const createMutation = useCreateClient();
 
     const handleSubmit = useCallback(
         async (values: CreateClientFormValues) => {
             const payload = {
-                ...values,
-                dateFormat: "yyyy-MM-dd",
+                officeId: officeId ?? 1,
+                firstname: values.firstname || undefined,
+                lastname: values.lastname || undefined,
+                fullname: values.fullname || undefined,
+                externalId: values.externalId || undefined,
+                dateFormat: "dd MMMM yyyy",
                 locale: "en",
+                active: values.active ?? true,
+                activationDate: values.activationDate ? toFineractDate(values.activationDate) : undefined,
+                submittedOnDate: values.submittedOnDate ? toFineractDate(values.submittedOnDate) : undefined,
+                savingsProductId: values.savingsProductId ?? undefined,
+                legalFormId: values.legalFormId ?? 1,
+                mobileNo: values.mobileNo || undefined,
+                emailAddress: values.emailAddress || undefined,
+                dateOfBirth: values.dateOfBirth ? toFineractDate(values.dateOfBirth) : undefined,
+                genderId: values.genderId ?? undefined,
+                staffId: values.staffId ?? undefined,
             };
-            const result = await createMutation.mutateAsync(payload as unknown as Parameters<typeof createMutation.mutateAsync>[0]);
+
+            const result = await createMutation.mutateAsync(payload as any);
             navigate(`/clients/${result.clientId}`);
         },
-        [createMutation, navigate],
+        [createMutation, navigate, officeId],
     );
 
     if (templateLoading) {

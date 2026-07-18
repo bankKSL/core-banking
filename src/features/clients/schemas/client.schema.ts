@@ -29,6 +29,7 @@ export const createClientSchema = z.object({
 
     // ── Identifiers ───────────────────────────────────────────
     externalId: z.string().max(100).optional().or(z.literal("")),
+    savingsProductId: z.number().int().optional().nullable(),
 
     // ── Contact ───────────────────────────────────────────────
     mobileNo: z

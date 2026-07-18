@@ -100,7 +100,7 @@ const LoanApplicationsPage: React.FC = () => {
     { key: "principal", header: "Amount", cell: (r) => <span className="font-mono text-sm font-medium">{formatCurrency(r.principal ?? 0)}</span> },
     { key: "numberOfRepayments", header: "Tenure", cell: (r) => `${r.numberOfRepayments} × ${r.repaymentEvery} ${r.repaymentFrequencyType?.value?.toLowerCase() ?? "mo"}` },
     { key: "annualInterestRate", header: "Rate", cell: (r) => `${r.annualInterestRate ?? 0}%` },
-    { key: "status", header: "Status", cell: (r) => { const c = LOAN_STATUS_CONFIG[r.status?.code ?? ""]; return <StatusBadge status={c?.variant ?? "default"} size="sm">{c?.label ?? r.status?.code ?? "Unknown"}</StatusBadge>; } },
+    { key: "status", header: "Status", cell: (r) => { const c = LOAN_STATUS_CONFIG[r.status?.code ?? ""]; return <StatusBadge status={c?.variant ?? "default"} label={c?.label ?? r.status?.code ?? "Unknown"} size="sm" />; } },
     { key: "loanOfficerName", header: "Officer", cell: (r) => <span className="text-xs">{r.loanOfficerName ?? "—"}</span> },
     { key: "timeline", header: "Submitted", cell: (r) => <span className="text-xs">{r.timeline?.submittedOnDate ? new Date(r.timeline.submittedOnDate).toLocaleDateString() : "—"}</span> },
     {

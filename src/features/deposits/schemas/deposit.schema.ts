@@ -33,14 +33,19 @@ export const depositTransactionSchema = z.object({
 
 export type DepositTransactionFormValues = z.infer<typeof depositTransactionSchema>;
 
-/** Schema for savings product creation */
+/** Schema for savings product creation — matches Fineract POST /savingsproducts */
 export const createSavingsProductSchema = z.object({
     name: z.string().min(1, "Name is required").max(100),
-    shortName: z.string().max(20).optional(),
+    shortName: z.string().min(1, "Short name is required").max(20).regex(/^\S+$/, "No spaces allowed"),
     description: z.string().max(500).optional(),
     currencyCode: z.string().min(1, "Currency is required"),
-    digitsAfterDecimal: z.number().int().min(0).default(2),
+    digitsAfterDecimal: z.number().int().min(0).max(6).default(2),
+    inMultiplesOf: z.number().int().min(0).optional(),
     nominalAnnualInterestRate: z.number({ message: "Interest rate is required" }).min(0),
+    interestCompoundingPeriodType: z.number({ message: "Required" }).int(),
+    interestPostingPeriodType: z.number({ message: "Required" }).int(),
+    interestCalculationType: z.number({ message: "Required" }).int(),
+    interestCalculationDaysInYearType: z.number({ message: "Required" }).int(),
     minRequiredOpeningBalance: z.number().min(0).optional(),
     lockinPeriodFrequency: z.number().int().positive().optional(),
     lockinPeriodFrequencyType: z.number().int().optional(),
@@ -50,8 +55,14 @@ export const createSavingsProductSchema = z.object({
     minRequiredBalance: z.number().optional(),
     enforceMinRequiredBalance: z.boolean().optional(),
     accountingRule: z.number().int().optional(),
+    isDormancyTrackingActive: z.boolean().optional(),
+    daysToInactive: z.number().int().min(0).optional(),
+    daysToDormancy: z.number().int().min(0).optional(),
+    daysToEscheat: z.number().int().min(0).optional(),
+    withHoldTax: z.boolean().optional(),
+    // accountMappingForPayment: z.string().max(100).optional(),
     locale: z.string().default("en"),
-    dateFormat: z.string().default("yyyy-MM-dd"),
+    dateFormat: z.string().default("dd MMMM yyyy"),
 });
 
 export type CreateSavingsProductFormValues = z.infer<typeof createSavingsProductSchema>;

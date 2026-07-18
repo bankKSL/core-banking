@@ -16,26 +16,14 @@ export type {
 } from "./types/client";
 
 // Constants
-export {
-    CLIENT_STATUS_LABELS,
-    CLIENT_STATUS_CONFIG,
-    STATUS_ID_MAP,
-    CLIENTS_PAGE_SIZE,
-    SEARCH_DEBOUNCE_MS,
-} from "./constants/status";
+export { CLIENT_STATUS_LABELS, CLIENT_STATUS_CONFIG, STATUS_ID_MAP, CLIENTS_PAGE_SIZE, SEARCH_DEBOUNCE_MS } from "./constants/status";
 
 // Schemas
 export { createClientSchema, editClientSchema } from "./schemas/client.schema";
 export type { CreateClientFormValues, EditClientFormValues } from "./schemas/client.schema";
 
 // Utils
-export {
-    getClientDisplayName,
-    formatClientName,
-    getClientStatus,
-    formatClientDate,
-    calculateAge,
-} from "./utils/client";
+export { getClientDisplayName, formatClientName, getClientStatus, formatClientDate, calculateAge } from "./utils/client";
 
 // API
 export {
@@ -46,6 +34,7 @@ export {
     activateClient,
     deleteClient,
     fetchClientTemplate,
+    fetchClientAccounts,
 } from "./api/client";
 
 // Hooks
@@ -56,6 +45,7 @@ export { useUpdateClient } from "./hooks/useUpdateClient";
 export { useActivateClient } from "./hooks/useActivateClient";
 export { useDeleteClient } from "./hooks/useDeleteClient";
 export { useClientTemplate } from "./hooks/useClientTemplate";
+export { useClientAccounts } from "./hooks/useClientAccounts";
 
 // Components
 export { default as ClientTable } from "./components/ClientTable";
