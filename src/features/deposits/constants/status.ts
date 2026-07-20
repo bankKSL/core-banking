@@ -28,6 +28,27 @@ export const SAVINGS_STATUS_CONFIG: Record<string, {
 export const DEPOSIT_ACCOUNTS_PAGE_SIZE = 15;
 export const DEPOSIT_SEARCH_DEBOUNCE_MS = 400;
 
+/** Section 11.6: Pre-Closure Penalty Interest On Types */
+export const PRE_CLOSURE_PENALTY_TYPES = [
+    { id: 1, label: "Principal Amount" },
+    { id: 2, label: "Interest Amount" },
+    { id: 3, label: "Principal + Interest" },
+];
+
+/** Section 11.6: Chart Slab Period Types */
+export const CHART_SLAB_PERIOD_TYPES = [
+    { id: 0, label: "Days" },
+    { id: 2, label: "Months" },
+    { id: 3, label: "Years" },
+];
+
+/** Accounting rule types */
+export const ACCOUNTING_RULES = [
+    { id: 1, label: "None" },
+    { id: 2, label: "Cash" },
+    { id: 3, label: "Accrual" },
+];
+
 /** Deposit account type display labels */
 export const DEPOSIT_TYPE_LABELS: Record<string, string> = {
     savings: "Savings",

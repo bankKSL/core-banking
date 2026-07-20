@@ -18,6 +18,8 @@ export type {
     RecurringDepositAccount,
     SavingsProductCreateRequest,
     DepositAccountType,
+    FixedDepositProduct,
+    FixedDepositProductCreateRequest,
 } from "./types/deposit";
 
 export {
@@ -28,6 +30,9 @@ export {
     DEPOSIT_TYPE_LABELS,
     DEPOSIT_PERIOD_FREQUENCIES,
     FIXED_DEPOSIT_STATUS_CONFIG,
+    PRE_CLOSURE_PENALTY_TYPES,
+    CHART_SLAB_PERIOD_TYPES,
+    ACCOUNTING_RULES,
 } from "./constants/status";
 
 export {
@@ -67,6 +72,9 @@ export {
     undoApprovalFixedDeposit,
     undoActivationFixedDeposit,
     calculatePrematureAmount,
+    fetchFixedDepositProducts,
+    fetchFixedDepositProduct,
+    createFixedDepositProduct,
     fetchRecurringDepositAccounts,
     fetchRecurringDepositAccount,
     createRecurringDepositAccount,

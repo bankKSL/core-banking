@@ -26,6 +26,7 @@ import {
     UserCheck,
     Shield,
     LayoutGrid,
+    Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -73,6 +74,7 @@ const sections: NavSectionConfig[] = [
             { label: "Transactions", path: "/deposits/transactions", icon: Receipt },
             { label: "Withdrawals", path: "/deposits/withdrawals", icon: ArrowUpCircle },
             { label: "Fixed Deposits", path: "/deposits/fixed", icon: Wallet },
+            { label: "FD Products", path: "/deposits/fixed-products", icon: Calendar },
         ],
     },
     {

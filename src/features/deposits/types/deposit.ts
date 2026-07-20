@@ -349,3 +349,79 @@ export interface SavingsProductCreateRequest {
     /** Section 6: Payment account mapping key */
     accountMappingForPayment?: string;
 }
+
+// ─── Fixed Deposit Product (Section 11) ───────────────────────
+
+export interface FixedDepositProduct {
+    id: number;
+    name: string;
+    shortName?: string;
+    description?: string;
+    currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string; inMultiplesOf?: number };
+    minDepositTerm: number;
+    maxDepositTerm?: number;
+    minDepositTermType: { id: number; code: string; description: string };
+    maxDepositTermType?: { id: number; code: string; description: string };
+    preClosurePenalApplicable: boolean;
+    preClosurePenalInterest?: number;
+    preClosurePenalInterestOnType?: { id: number; code: string; description: string };
+    interestCompoundingPeriodType: { id: number; code: string; description: string };
+    interestPostingPeriodType: { id: number; code: string; description: string };
+    interestCalculationType: { id: number; code: string; description: string };
+    interestCalculationDaysInYearType: { id: number; code: string; description: string };
+    accountingRule: { id: number; code: string; description: string };
+    activeChart?: {
+        id: number;
+        fromDate: string;
+        endDate?: string;
+        chartSlabs: Array<{
+            id: number;
+            description: string;
+            periodType: { id: number; code: string; description: string };
+            fromPeriod: number;
+            toPeriod: number;
+            annualInterestRate: number;
+        }>;
+    };
+    withHoldTax?: boolean;
+    taxGroupId?: number;
+}
+
+export interface FixedDepositProductCreateRequest {
+    name: string;
+    shortName: string;
+    description: string;
+    currencyCode: string;
+    digitsAfterDecimal: number;
+    inMultiplesOf: number;
+    locale: string;
+    interestCompoundingPeriodType: number;
+    interestPostingPeriodType: number;
+    interestCalculationType: number;
+    interestCalculationDaysInYearType: number;
+    accountingRule: number;
+    minDepositTerm: number;
+    minDepositTermTypeId: number;
+    depositAmount: number;
+    maxDepositTerm?: number;
+    maxDepositTermTypeId?: number;
+    preClosurePenalApplicable?: boolean;
+    preClosurePenalInterest?: number;
+    preClosurePenalInterestOnTypeId?: number;
+    withHoldTax?: boolean;
+    taxGroupId?: number;
+    charges?: Array<{ chargeId: number }>;
+    charts?: Array<{
+        fromDate?: string;
+        endDate?: string;
+        locale?: string;
+        dateFormat?: string;
+        chartSlabs: Array<{
+            description: string;
+            periodType: number;
+            fromPeriod: number;
+            toPeriod: number;
+            annualInterestRate: number;
+        }>;
+    }>;
+}

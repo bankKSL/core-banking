@@ -27,6 +27,8 @@ import type {
     FixedDepositAccount,
     FixedDepositListParams,
     RecurringDepositAccount,
+    FixedDepositProduct,
+    FixedDepositProductCreateRequest,
 } from "../types/deposit";
 
 // ─── Savings Products ────────────────────────────────────────────
@@ -248,5 +250,31 @@ export async function fetchRecurringDepositAccount(accountId: number | string): 
 
 export async function createRecurringDepositAccount(payload: Record<string, unknown>): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>("/recurringdepositaccounts", payload);
+    return data;
+}
+
+// ─── Fixed Deposit Products (Section 11) ──────────────────────
+
+export async function fetchFixedDepositProducts(): Promise<FixedDepositProduct[]> {
+    const { data } = await client.get<FixedDepositProduct[]>("/fixeddepositproducts");
+    return data;
+}
+
+export async function fetchFixedDepositProduct(productId: number): Promise<FixedDepositProduct> {
+    const { data } = await client.get<FixedDepositProduct>(`/fixeddepositproducts/${productId}`);
+    return data;
+}
+
+export async function createFixedDepositProduct(payload: FixedDepositProductCreateRequest): Promise<{ resourceId: number }> {
+    // Convert chart slab dates from yyyy-MM-dd → dd MMMM yyyy
+    const charts = payload.charts?.map((chart) => ({
+        ...chart,
+        fromDate: chart.fromDate ? toFineractDate(chart.fromDate) : undefined,
+        endDate: chart.endDate ? toFineractDate(chart.endDate) : undefined,
+    }));
+    const { data } = await client.post<{ resourceId: number }>("/fixeddepositproducts", {
+        ...payload,
+        charts,
+    });
     return data;
 }

@@ -23,6 +23,7 @@ import WithdrawalsPage from "./pages/WithdrawalsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
 import FixedDepositDetailPage from "./pages/FixedDepositDetailPage";
+import FixedDepositProductsPage from "./pages/FixedDepositProductsPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import CustomerPage from "./pages/CustomerPage";
 import ClientListPage from "@/features/clients/pages/ClientListPage";
@@ -112,6 +113,7 @@ function App() {
                                     <Route path="/deposits/fixed" element={<FixedDepositsPage />} />
                                     <Route path="/deposits/fixed/new" element={<CreateFixedDepositPage />} />
                                     <Route path="/deposits/fixed/:id" element={<FixedDepositDetailPage />} />
+                                    <Route path="/deposits/fixed-products" element={<FixedDepositProductsPage />} />
                                     {/* Exchange Rates */}
                                     <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                                     {/* CRM */}
