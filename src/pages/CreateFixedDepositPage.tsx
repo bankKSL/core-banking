@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Wallet } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Save, Wallet, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,18 @@ import { useSavingsProducts } from "@/features/deposits";
 
 const CreateFixedDepositPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const clientIdParam = searchParams.get("clientId");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [form, setForm] = useState({
-        clientId: 0,
+        clientId: clientIdParam ? Number(clientIdParam) : 0,
         productId: 0,
+        externalId: "",
         depositAmount: 0,
         depositPeriod: 12,
         depositPeriodFrequencyId: 2,
         submittedOnDate: new Date().toISOString().split("T")[0],
+        nominalAnnualInterestRate: 0,
     });
 
     const { data: clientsData, isLoading: clientsLoading } = useClients({ limit: 100 });
@@ -29,12 +33,28 @@ const CreateFixedDepositPage: React.FC = () => {
     const clients = clientsData?.pageItems ?? [];
     const isLoading = clientsLoading || productsLoading;
 
+    const sortedClients = [...clients].sort((a, b) => {
+        if (a.id === form.clientId) return -1;
+        if (b.id === form.clientId) return 1;
+        return 0;
+    });
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.clientId || !form.productId || form.depositAmount <= 0) return;
         setIsSubmitting(true);
         try {
-            await createFixedDepositAccount(form);
+            await createFixedDepositAccount({
+                clientId: form.clientId,
+                productId: form.productId,
+                externalId: form.externalId || undefined,
+                depositAmount: form.depositAmount,
+                depositPeriod: form.depositPeriod,
+                depositPeriodFrequencyId: form.depositPeriodFrequencyId,
+                submittedOnDate: form.submittedOnDate,
+                locale: "en",
+                dateFormat: "dd MMMM yyyy",
+            });
             navigate("/deposits/fixed");
         } catch (err) {
             console.error(err);
@@ -84,13 +104,18 @@ const CreateFixedDepositPage: React.FC = () => {
                                     <SelectValue placeholder="Select client" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {clients.map((c) => (
+                                    {sortedClients.map((c) => (
                                         <SelectItem key={c.id} value={String(c.id)}>
                                             {c.displayName ?? `#${c.id}`}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <div className="mt-1">
+                                <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/clients/new", "_blank")}>
+                                    <ExternalLink className="mr-1 h-3 w-3" />Create New Client
+                                </Button>
+                            </div>
                         </div>
                         <div>
                             <Label>Savings Product *</Label>
@@ -109,6 +134,11 @@ const CreateFixedDepositPage: React.FC = () => {
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <div className="mt-1">
+                                <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/deposits/fixed-products", "_blank")}>
+                                    <ExternalLink className="mr-1 h-3 w-3" />Create New Product
+                                </Button>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -117,6 +147,10 @@ const CreateFixedDepositPage: React.FC = () => {
                         <CardTitle>Deposit Details (Section 10.7)</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2">
+                            <Label htmlFor="externalId">External ID</Label>
+                            <Input id="externalId" value={form.externalId} onChange={(e) => setField("externalId", e.target.value)} placeholder="Optional external reference" />
+                        </div>
                         <div>
                             <Label>Deposit Amount *</Label>
                             <Input
@@ -150,6 +184,10 @@ const CreateFixedDepositPage: React.FC = () => {
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+                        <div>
+                            <Label>Interest Rate</Label>
+                            <Input type="number" step="0.01" value={form.nominalAnnualInterestRate || ""} onChange={(e) => setField("nominalAnnualInterestRate", parseFloat(e.target.value) || 0)} placeholder="Inherited from product" />
                         </div>
                         <div>
                             <Label>Submitted Date</Label>

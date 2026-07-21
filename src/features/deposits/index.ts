@@ -113,3 +113,30 @@ export {
     useRecurringDepositAccounts,
     useRecurringDepositAccount,
 } from "./hooks/useRecurringDeposits";
+
+// API — Savings Charges
+export { fetchSavingsCharges, fetchSavingsChargesTemplate, createSavingsCharge, waiveSavingsCharge, deleteSavingsCharge } from "./api/deposit";
+export type { SavingsCharge, SavingsChargeListResponse, PostSavingsChargeRequest, SavingsChargesTemplate } from "./api/deposit";
+
+// API — Savings Commands
+export { rejectSavingsAccount, withdrawSavingsAccount, undoRejectSavingsAccount } from "./api/deposit";
+
+// API — Savings Transactions
+export { fetchSavingsTransactions, undoSavingsTransaction } from "./api/deposit";
+
+// API — Fixed Deposit Transactions
+export { fetchFixedDepositTransactions, undoFixedDepositTransaction } from "./api/deposit";
+export type { FixedDepositTransaction } from "./api/deposit";
+
+// Hooks — Savings Charges
+export { useSavingsCharges, useSavingsChargesTemplate, useCreateSavingsCharge, useWaiveSavingsCharge, useDeleteSavingsCharge, savingsChargeKeys } from "./hooks/useSavingsCharges";
+
+// Hooks — Savings Commands
+export { useRejectSavingsAccount, useWithdrawSavingsAccount, useUndoRejectSavingsAccount } from "./hooks/useSavingsCommands";
+
+// Hooks — Savings Transactions
+export { useSavingsTransactions, useUndoSavingsTransaction, savingsTransactionKeys } from "./hooks/useSavingsTransactions";
+
+// Hooks — Fixed Deposit Transactions
+export { useFixedDepositTransactions, useUndoFixedDepositTransaction, fdTransactionKeys } from "./hooks/useFixedDepositTransactions";
+

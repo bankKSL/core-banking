@@ -1,24 +1,26 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, PiggyBank } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Save, PiggyBank, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useCreateSavingsAccount, useSavingsTemplate, useSavingsProducts } from "@/features/deposits";
 import { useClients } from "@/features/clients";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const CreateDepositAccountPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const clientIdParam = searchParams.get("clientId");
     const createAccount = useCreateSavingsAccount();
 
     const [form, setForm] = useState({
-        clientId: 0,
+        clientId: clientIdParam ? Number(clientIdParam) : 0,
         productId: 0,
+        externalId: "",
         submittedOnDate: new Date().toISOString().split("T")[0],
         nominalAnnualInterestRate: 0,
         minRequiredOpeningBalance: 0,
@@ -30,8 +32,17 @@ const CreateDepositAccountPage: React.FC = () => {
     const { data: clientsData, isLoading: clientsLoading } = useClients({ limit: 100 });
 
     const clients = clientsData?.pageItems ?? [];
-
     const isLoading = productsLoading || clientsLoading;
+
+    // Sort pre-selected client to top
+    const sortedClients = useMemo(() =>
+        [...clients].sort((a, b) => {
+            if (a.id === form.clientId) return -1;
+            if (b.id === form.clientId) return 1;
+            return 0;
+        }),
+        [clients, form.clientId],
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,6 +51,7 @@ const CreateDepositAccountPage: React.FC = () => {
             await createAccount.mutateAsync({
                 clientId: form.clientId,
                 productId: form.productId,
+                externalId: form.externalId || undefined,
                 submittedOnDate: form.submittedOnDate,
                 nominalAnnualInterestRate: form.nominalAnnualInterestRate || undefined,
                 minRequiredOpeningBalance: form.minRequiredOpeningBalance || undefined,
@@ -85,9 +97,14 @@ const CreateDepositAccountPage: React.FC = () => {
                                 <Select value={form.clientId ? String(form.clientId) : ""} onValueChange={(v) => setField("clientId", Number(v))}>
                                     <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
                                     <SelectContent>
-                                        {clients.map((c) => (<SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `Client #${c.id}`}</SelectItem>))}
+                                        {sortedClients.map((c) => (<SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `Client #${c.id}`}</SelectItem>))}
                                     </SelectContent>
                                 </Select>
+                                <div className="mt-1">
+                                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/clients/new", "_blank")}>
+                                        <ExternalLink className="mr-1 h-3 w-3" />Create New Client
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
@@ -105,6 +122,15 @@ const CreateDepositAccountPage: React.FC = () => {
                                         {products.map((p) => (<SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>))}
                                     </SelectContent>
                                 </Select>
+                                <div className="mt-1">
+                                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/deposits/products", "_blank")}>
+                                        <ExternalLink className="mr-1 h-3 w-3" />Create New Product
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="col-span-2">
+                                <Label htmlFor="externalId">External ID</Label>
+                                <Input id="externalId" value={form.externalId} onChange={(e) => setField("externalId", e.target.value)} placeholder="Optional external reference" />
                             </div>
                             <div>
                                 <Label htmlFor="nominalAnnualInterestRate">Interest Rate (% annual)</Label>

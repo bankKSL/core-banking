@@ -253,6 +253,35 @@ export async function createRecurringDepositAccount(payload: Record<string, unkn
     return data;
 }
 
+// ─── Fixed Deposit Transactions (Section 4 & 5 of fixed.md) ────
+
+export interface FixedDepositTransaction {
+    id: number;
+    accountId: number;
+    officeId?: number;
+    type?: { id: number; code: string; value: string };
+    date?: string;
+    transactionDate?: string;
+    amount: number;
+    currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
+    reversed?: boolean;
+    runningBalance?: number;
+    paymentTypeId?: number;
+    paymentTypeName?: string;
+}
+
+/** GET /fixeddepositaccounts/{accountId}/transactions */
+export async function fetchFixedDepositTransactions(accountId: number | string): Promise<{ totalFilteredRecords?: number; pageItems?: FixedDepositTransaction[] }> {
+    const { data } = await client.get(`/fixeddepositaccounts/${accountId}/transactions`, { params: { offset: 0, limit: 100 } });
+    return data;
+}
+
+/** POST /fixeddepositaccounts/{accountId}/transactions/{transactionId}?command=undo */
+export async function undoFixedDepositTransaction(accountId: number | string, transactionId: number | string): Promise<{ resourceId: number }> {
+    const { data } = await client.post(`/fixeddepositaccounts/${accountId}/transactions/${transactionId}`, {}, { params: { command: "undo" } });
+    return data;
+}
+
 // ─── Fixed Deposit Products (Section 11) ──────────────────────
 
 export async function fetchFixedDepositProducts(): Promise<FixedDepositProduct[]> {
@@ -278,3 +307,125 @@ export async function createFixedDepositProduct(payload: FixedDepositProductCrea
     });
     return data;
 }
+
+// ─── Savings Charges (Section 5) ──────────────────────────────────
+
+export interface SavingsCharge {
+    id: number;
+    chargeId: number;
+    savingsAccountId: number;
+    name?: string;
+    chargeTimeType?: { id: number; code: string; value: string };
+    chargeCalculationType?: { id: number; code: string; value: string };
+    currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
+    amount: number;
+    amountPaid?: number;
+    amountOutstanding?: number;
+    amountWaived?: number;
+    amountWrittenOff?: number;
+    dueDate?: string;
+    isActive?: boolean;
+    isPaid?: boolean;
+    isWaived?: boolean;
+    waiverable?: boolean;
+    penalty?: boolean;
+}
+
+export interface SavingsChargeListResponse {
+    totalFilteredRecords?: number;
+    pageItems?: SavingsCharge[];
+}
+
+export interface PostSavingsChargeRequest {
+    chargeId: number;
+    amount: number;
+    dueDate?: string;
+    dateFormat?: string;
+    locale?: string;
+}
+
+export interface SavingsChargesTemplate {
+    chargeOptions?: Array<{ id: number; name: string; amount?: number; chargeTimeType?: { id: number; code: string; value: string }; chargeCalculationType?: { id: number; code: string; value: string }; currency?: { code: string; name: string; decimalPlaces: number } }>;
+}
+
+/** GET /savingsaccounts/{savingsAccountId}/charges */
+export async function fetchSavingsCharges(savingsAccountId: number | string): Promise<SavingsChargeListResponse> {
+    const { data } = await client.get<SavingsChargeListResponse>(`/savingsaccounts/${savingsAccountId}/charges`);
+    return data;
+}
+
+/** GET /savingsaccounts/{savingsAccountId}/charges/template */
+export async function fetchSavingsChargesTemplate(savingsAccountId: number | string): Promise<SavingsChargesTemplate> {
+    const { data } = await client.get<SavingsChargesTemplate>(`/savingsaccounts/${savingsAccountId}/charges/template`);
+    return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}/charges */
+export async function createSavingsCharge(savingsAccountId: number | string, payload: PostSavingsChargeRequest): Promise<{ savingsAccountId: number; resourceId: number; officeId?: number }> {
+    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/charges`, payload);
+    return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}/charges/{chargeId}?command=waive */
+export async function waiveSavingsCharge(savingsAccountId: number | string, chargeId: number | string): Promise<{ savingsAccountId: number; resourceId: number }> {
+    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/charges/${chargeId}`, {}, { params: { command: "waive" } });
+    return data;
+}
+
+/** DELETE /savingsaccounts/{savingsAccountId}/charges/{chargeId} */
+export async function deleteSavingsCharge(savingsAccountId: number | string, chargeId: number | string): Promise<{ savingsAccountId: number; resourceId: number }> {
+    const { data } = await client.delete(`/savingsaccounts/${savingsAccountId}/charges/${chargeId}`);
+    return data;
+}
+
+// ─── Savings Commands (Section 4) ────────────────────────────────
+
+/** POST /savingsaccounts/{savingsAccountId}?command=reject */
+export async function rejectSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "reject" } });
+    return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=withdrawnByApplicant */
+export async function withdrawSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "withdrawnByApplicant" } });
+    return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=undoRejection */
+export async function undoRejectSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "undoRejection" } });
+    return data;
+}
+
+// ─── Savings Transactions (Section 4) ────────────────────────────
+
+export interface SavingsTransaction {
+    id: number;
+    accountId: number;
+    officeId?: number;
+    type?: { id: number; code: string; value: string };
+    date?: string;
+    transactionDate?: string;
+    amount: number;
+    currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
+    reversed?: boolean;
+    runningBalance?: number;
+    paymentTypeId?: number;
+    paymentTypeName?: string;
+}
+
+/** GET /savingsaccounts/{savingsAccountId}/transactions?offset=0&limit=100 */
+export async function fetchSavingsTransactions(savingsAccountId: number | string): Promise<{ totalFilteredRecords?: number; pageItems?: SavingsTransaction[] }> {
+    const { data } = await client.get(`/savingsaccounts/${savingsAccountId}/transactions`, {
+        params: { offset: 0, limit: 100 },
+    });
+    return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}/transactions/{transactionId}?command=undo */
+export async function undoSavingsTransaction(savingsAccountId: number | string, transactionId: number | string): Promise<{ resourceId: number }> {
+    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/transactions/${transactionId}`, {}, { params: { command: "undo" } });
+    return data;
+}
+
