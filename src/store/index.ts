@@ -46,10 +46,7 @@ function mapLoginError(error: unknown): string {
         if (axiosError.response?.status === 401) {
             return "Invalid username or password.";
         }
-        const serverMessage =
-            axiosError.response?.data?.message ??
-            axiosError.response?.data?.defaultUserMessage ??
-            axiosError.response?.data?.error;
+        const serverMessage = axiosError.response?.data?.message ?? axiosError.response?.data?.defaultUserMessage ?? axiosError.response?.data?.error;
         if (serverMessage) return serverMessage;
     }
     if (error instanceof Error && error.message.toLowerCase().includes("network")) {
@@ -157,7 +154,6 @@ import type {
     FixedDeposit,
     RecurringDeposit,
     ExchangeRate,
-    Customer,
 } from "../types";
 
 // ─── Campaign Store ──────────────────────────────────────────
@@ -495,9 +491,7 @@ export const useDepositStore = create<DepositState>((set) => ({
     updateAccountBalance: (id, newBalance) =>
         set((state) => ({
             accounts: state.accounts.map((a) =>
-                a.id === id
-                    ? { ...a, balance: newBalance, lastTransactionDate: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    : a,
+                a.id === id ? { ...a, balance: newBalance, lastTransactionDate: new Date().toISOString(), updatedAt: new Date().toISOString() } : a,
             ),
         })),
     addTransaction: (txn) => set((state) => ({ transactions: [...state.transactions, txn] })),
@@ -550,24 +544,4 @@ export const useExchangeRateStore = create<ExchangeRateState>((set) => ({
             rates: s.rates.map((r) => (r.id === id ? { ...r, ...data, lastUpdated: new Date().toISOString() } : r)),
         })),
     removeRate: (id) => set((s) => ({ rates: s.rates.filter((r) => r.id !== id) })),
-}));
-
-// ─── Customer Store ──────────────────────────────────────────
-interface CustomerState {
-    customers: Customer[];
-    setCustomers: (list: Customer[]) => void;
-    addCustomer: (c: Customer) => void;
-    updateCustomer: (id: string, data: Partial<Customer>) => void;
-    removeCustomer: (id: string) => void;
-}
-
-export const useCustomerStore = create<CustomerState>((set) => ({
-    customers: [],
-    setCustomers: (list) => set({ customers: list }),
-    addCustomer: (c) => set((s) => ({ customers: [...s.customers, c] })),
-    updateCustomer: (id, data) =>
-        set((s) => ({
-            customers: s.customers.map((c) => (c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c)),
-        })),
-    removeCustomer: (id) => set((s) => ({ customers: s.customers.filter((c) => c.id !== id) })),
 }));

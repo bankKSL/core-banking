@@ -146,3 +146,47 @@ export async function fetchClientTemplate(): Promise<ClientTemplate> {
     const { data } = await client.get<ClientTemplate>("/clients/template");
     return data;
 }
+
+// ─── Client Commands ──────────────────────────────────────────
+export async function rejectClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
+    const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
+        params: { command: "reject" },
+    });
+    return data;
+}
+
+export async function withdrawClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
+    const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
+        params: { command: "withdraw" },
+    });
+    return data;
+}
+
+export async function closeClient(clientId: number | string, payload?: { closureDate?: string; dateFormat?: string; locale?: string }): Promise<{ clientId: number; resourceId: number }> {
+    const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, payload ?? {}, {
+        params: { command: "close" },
+    });
+    return data;
+}
+
+export async function reactivateClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
+    const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
+        params: { command: "reactivate" },
+    });
+    return data;
+}
+
+export async function undoRejectClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
+    const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
+        params: { command: "undoreject" },
+    });
+    return data;
+}
+
+export async function undoWithdrawClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
+    const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
+        params: { command: "undowithdraw" },
+    });
+    return data;
+}
+

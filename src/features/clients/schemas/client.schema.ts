@@ -9,11 +9,14 @@ import { z } from "zod";
  * - firstname/lastname are required for Person (legalFormId=1); fullname for Entity
  * - Fineract default dateFormat is "dd MMMM yyyy" but we override for HTML compatibility
  */
-export const createClientSchema = z.object({
+/**
+ * Base object schema (no conditional refine) — used by editClientSchema.partial()
+ */
+const createClientSchemaBase = z.object({
     // ── Personal ──────────────────────────────────────────────
-    firstname: z.string().min(1, "First name is required for individuals").max(100).optional().or(z.literal("")),
+    firstname: z.string().max(100).optional().or(z.literal("")),
     middlename: z.string().max(100).optional().or(z.literal("")),
-    lastname: z.string().min(1, "Last name is required for individuals").max(100).optional().or(z.literal("")),
+    lastname: z.string().max(100).optional().or(z.literal("")),
     /** Required for Entity / Group clients */
     fullname: z.string().max(200).optional().or(z.literal("")),
 
@@ -50,12 +53,47 @@ export const createClientSchema = z.object({
     locale: z.string(),
 });
 
+/**
+ * Validation schema for creating a new Fineract client.
+ * - Person (legalFormId=1 or unspecified): firstname + lastname required
+ * - Entity (legalFormId=2): fullname required
+ */
+export const createClientSchema = createClientSchemaBase.superRefine((data, ctx) => {
+    const isEntity = data.legalFormId === 2;
+
+    if (isEntity) {
+        if (!data.fullname || data.fullname.trim() === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Full name is required for organizations",
+                path: ["fullname"],
+            });
+        }
+    } else {
+        if (!data.firstname || data.firstname.trim() === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "First name is required",
+                path: ["firstname"],
+            });
+        }
+        if (!data.lastname || data.lastname.trim() === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Last name is required",
+                path: ["lastname"],
+            });
+        }
+    }
+});
+
 export type CreateClientFormValues = z.infer<typeof createClientSchema>;
 
 /**
  * Validation schema for editing an existing Fineract client.
  * All fields are optional — only changed fields need to be sent.
+ * No conditional refine because we don't enforce required fields during edit.
  */
-export const editClientSchema = createClientSchema.partial();
+export const editClientSchema = createClientSchemaBase.partial();
 
 export type EditClientFormValues = z.infer<typeof editClientSchema>;

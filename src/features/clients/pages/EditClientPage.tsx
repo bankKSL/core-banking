@@ -10,19 +10,17 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useUpdateClient } from "../hooks/useUpdateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
-import { useAuthStore } from "@/store";
 
 function toFineractDate(isoDate: string): string {
     if (!isoDate) return "";
     const [y, m, d] = isoDate.split("-").map(Number);
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${d} ${months[m - 1]} ${y}`;
 }
 
 const EditClientPage: FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const officeId = useAuthStore((s) => s.user?.officeId);
     const { data: client, isLoading: clientLoading, isError, refetch } = useClient(id);
     const { data: template, isLoading: templateLoading } = useClientTemplate();
     const updateMutation = useUpdateClient();
@@ -30,24 +28,37 @@ const EditClientPage: FC = () => {
     const handleSubmit = useCallback(
         async (values: CreateClientFormValues) => {
             if (!client) return;
-            const payload = {
-                ...values,
-                officeId: officeId ?? 1,
-                dateFormat: "dd MMMM yyyy",
-                locale: "en",
-                activationDate: values.activationDate ? toFineractDate(values.activationDate) : undefined,
-                submittedOnDate: values.submittedOnDate ? toFineractDate(values.submittedOnDate) : undefined,
+            // Fineract PUT /clients/{id} only accepts specific fields.
+            // Fields like officeId, staffId, groupId, active are NOT supported on update.
+            const payload: Record<string, unknown> = {
+                firstname: values.firstname || undefined,
+                middlename: values.middlename || undefined,
+                lastname: values.lastname || undefined,
+                fullname: values.fullname || undefined,
+                externalId: values.externalId || undefined,
+                mobileNo: values.mobileNo || undefined,
+                emailAddress: values.emailAddress || undefined,
                 dateOfBirth: values.dateOfBirth ? toFineractDate(values.dateOfBirth) : undefined,
+                genderId: values.genderId ?? undefined,
                 legalFormId: values.legalFormId ?? undefined,
                 savingsProductId: values.savingsProductId ?? undefined,
+                dateFormat: "dd MMMM yyyy",
+                locale: "en",
             };
+            // Only include activationDate if a value was provided
+            if (values.activationDate) {
+                payload.activationDate = toFineractDate(values.activationDate);
+            }
+            if (values.submittedOnDate) {
+                payload.submittedOnDate = toFineractDate(values.submittedOnDate);
+            }
             await updateMutation.mutateAsync({
                 clientId: client.id,
                 payload: payload as any,
             });
             navigate(`/clients/${client.id}`);
         },
-        [client, updateMutation, navigate, officeId],
+        [client, updateMutation, navigate],
     );
 
     if (clientLoading || templateLoading) {
@@ -59,7 +70,9 @@ const EditClientPage: FC = () => {
                         <div key={i} className="space-y-4 rounded-xl border p-6">
                             <Skeleton className="h-5 w-32" />
                             <div className="grid grid-cols-3 gap-4">
-                                {[1, 2, 3].map((j) => (<Skeleton key={j} className="h-10 w-full" />))}
+                                {[1, 2, 3].map((j) => (
+                                    <Skeleton key={j} className="h-10 w-full" />
+                                ))}
                             </div>
                         </div>
                     ))}
@@ -71,23 +84,20 @@ const EditClientPage: FC = () => {
     if (isError || !client) {
         return (
             <div className="p-6">
-                <ErrorState
-                    title="Client not found"
-                    message="Could not load client data for editing."
-                    onRetry={() => refetch()}
-                />
+                <ErrorState title="Client not found" message="Could not load client data for editing." onRetry={() => refetch()} />
             </div>
         );
     }
 
     return (
-        <div className="p-6 max-w-3xl">
+        <div className="p-6 max-w-3xl m-auto">
             <PageHeader
                 title="Edit Client"
                 description={`Editing client #${client.id}`}
                 actions={
                     <Button variant="outline" onClick={() => navigate(`/clients/${client.id}`)}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />Back to Details
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Details
                     </Button>
                 }
             />

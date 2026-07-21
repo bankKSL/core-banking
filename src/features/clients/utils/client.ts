@@ -17,31 +17,65 @@ export function getClientStatus(client: Client): string {
     return client.status?.code ?? client.status?.value ?? "unknown";
 }
 
-/** Format date string for display */
-export function formatClientDate(dateStr?: string): string {
-    if (!dateStr) return "—";
+/**
+ * Normalize a date value from Fineract to a Date object.
+ * Handles:
+ *  - string in "yyyy-MM-dd" format
+ *  - string in "dd MMMM yyyy" format
+ *  - number array [year, month, day] (Fineract array format)
+ *  - ISO date string with "T"
+ */
+function normalizeDate(value: unknown): Date | null {
+    if (!value) return null;
+
+    // Number array [year, month, day]
+    if (Array.isArray(value) && value.length >= 3) {
+        const [y, m, d] = value;
+        return new Date(y, m - 1, d);
+    }
+
+    if (typeof value === "string") {
+        // Already in "dd MMMM yyyy" (contains alpha month)
+        const parsed = Date.parse(value);
+        if (!isNaN(parsed)) return new Date(parsed);
+
+        // Try yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
+        const dashMatch = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (dashMatch) {
+            return new Date(Number(dashMatch[1]), Number(dashMatch[2]) - 1, Number(dashMatch[3]));
+        }
+
+        // Fallback
+        const fallback = new Date(value);
+        if (!isNaN(fallback.getTime())) return fallback;
+    }
+
+    return null;
+}
+
+/** Format date for display — handles string or Fineract number[] */
+export function formatClientDate(dateStr?: unknown): string {
+    const date = normalizeDate(dateStr);
+    if (!date) return "—";
     try {
-        const date = dateStr.includes("T") ? new Date(dateStr) : new Date(`${dateStr}T00:00:00`);
         return date.toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
             day: "numeric",
         });
     } catch {
-        return dateStr;
+        return String(dateStr);
     }
 }
 
-/** Calculate age from date of birth */
-export function calculateAge(dateOfBirth?: string): number | null {
-    if (!dateOfBirth) return null;
-    const [y, m, d] = dateOfBirth.split("-").map(Number);
-    if (!y || !m || !d) return null;
-    const birth = new Date(y, m - 1, d);
+/** Calculate age — handles string or Fineract number[] */
+export function calculateAge(dateOfBirth?: unknown): number | null {
+    const date = normalizeDate(dateOfBirth);
+    if (!date) return null;
     const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    let age = today.getFullYear() - date.getFullYear();
+    const monthDiff = today.getMonth() - date.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
         age--;
     }
     return age;
