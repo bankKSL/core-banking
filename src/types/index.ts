@@ -185,18 +185,18 @@ export interface LoanProduct {
   description: string;
   minAmount: number;
   maxAmount: number;
-  minTenure: number;       // months
-  maxTenure: number;       // months
+  minTenure: number; // months
+  maxTenure: number; // months
   interestType: InterestType;
   baseInterestRate: number; // percentage
-  floatingMargin?: number;  // for floating rate loans
+  floatingMargin?: number; // for floating rate loans
   processingFeePercent: number;
   latePaymentPenaltyPercent: number;
   prepaymentPenaltyPercent: number;
   isActive: boolean;
   requiresCollateral: boolean;
   minCreditScore: number;
-  maxLTVRatio?: number;     // Loan to Value ratio
+  maxLTVRatio?: number; // Loan to Value ratio
   gracePeriodDays: number;
   createdAt: string;
   updatedAt: string;
@@ -204,16 +204,7 @@ export interface LoanProduct {
 
 // ─── Loan Application ────────────────────────────────────────
 export type LoanStatus =
-  | "draft"
-  | "pending"
-  | "under_review"
-  | "approved"
-  | "rejected"
-  | "disbursed"
-  | "active"
-  | "closed"
-  | "defaulted"
-  | "restructured";
+  "draft" | "pending" | "under_review" | "approved" | "rejected" | "disbursed" | "active" | "closed" | "defaulted" | "restructured";
 
 export interface LoanApplication {
   id: string;
@@ -225,7 +216,7 @@ export interface LoanApplication {
   productName: string;
   productType: LoanProductType;
   amount: number;
-  tenure: number;           // months
+  tenure: number; // months
   interestRate: number;
   interestType: InterestType;
   amortizationType: AmortizationType;
@@ -340,7 +331,7 @@ export interface DepositAccount {
   status: DepositAccountStatus;
   balance: number;
   currency: string;
-  interestRate: number;       // annual %
+  interestRate: number; // annual %
   branchName: string;
   branchCode: string;
   openedDate: string;
@@ -466,41 +457,6 @@ export interface DepositStats {
   recurringDepositsActive: number;
 }
 // ─── Exchange Rate ───────────────────────────────────────────
-
-// ─── Customer ────────────────────────────────────────────────
-export type CustomerType = "individual" | "business";
-export type CustomerStatus = "active" | "inactive" | "suspended";
-export type KycStatus = "verified" | "pending" | "rejected" | "expired";
-export type RiskRating = "low" | "medium" | "high";
-
-export interface Customer {
-  id: string;
-  customerId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  gender: "male" | "female" | "other";
-  nationalId: string;
-  customerType: CustomerType;
-  status: CustomerStatus;
-  kycStatus: KycStatus;
-  riskRating: RiskRating;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    postalCode: string;
-  };
-  branchName: string;
-  relationshipManager: string;
-  onboardingDate: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 export interface ExchangeRate {
   id: string;
   currencyCode: string;
@@ -522,8 +478,8 @@ export interface Office {
   name: string;
   nameDecorated: string;
   externalId: string;
-  openingDate: string;       // ISO date
-  hierarchy: string;          // e.g. ".1.2."
+  openingDate: string; // ISO date
+  hierarchy: string; // e.g. ".1.2."
   parentId: number | null;
   parentName: string | null;
 }
@@ -545,4 +501,3 @@ export interface OfficeUpdateRequest {
   dateFormat?: string;
   locale?: string;
 }
-
