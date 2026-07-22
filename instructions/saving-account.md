@@ -231,27 +231,94 @@ Endpoint: GET /api/v2/savingsaccounts/{accountId}
 Response: SavingsAccountData
 Populates: - account.clientId = data.clientId - account.productId = data.savingsProductId - interestRate = data.nominalAnnualInterestRate - submittedOnDate from data.timeline.submittedOnDate (number[] -> Date)
 
---- FORM FIELDS ---
+--- FORM FIELDS (template) ---
 
-Client: using ClientSearchComponent (with create new client option)
-Savings Product (select from products, with create new product option)
-External ID (text input)
-Interest Rate (number, bound separately - missing from model)
-Submitted On Date (datepicker)
+Grid layout: 2 columns
+
+Section 1 - Client Selection (full width row):
+ClientSearchComponent with "create new client" button
+[label]="'COMMON.CLIENT_ID'", [required]="true"
+(clientSelected) -> account.clientId = $event
+
+Section 2 - Product Selection (full width row):
+Product select dropdown with "create new product" button
+[disabled]="isEditMode"
+Options loaded from SavingsProductService.getSavingsproducts()
+(ngModel) on account.productId
+
+Section 3 - Details (2-column grid):
+Row 1: - Submitted On Date (datepicker, REQUIRED)
+Row 2: - Nominal Annual Interest Rate (number input, bound to interestRate separately)
+NOTE: No % suffix in template
+
+NOTE: There is NO External ID field in the UI template despite
+PostSavingsAccountsRequest having externalId as an optional field
+
+--- CLASS PROPERTIES ---
+
+account: PostSavingsAccountsRequest = {};
+Typed model (not Record), fields: clientId?, productId?, submittedOnDate?,
+dateFormat?, externalId?, locale?
+
+interestRate = 0;
+Bound separately because nominalAnnualInterestRate is NOT in PostSavingsAccountsRequest
+(API model mismatch -- must be added via Record cast in the payload)
+
+submittedOnDate: Date = new Date();
+
+products: GetSavingsProductsResponse[] = [];
+Loaded on init (unlike Fixed which loads after client selection)
+
+--- API CALL: Load Products ---
+
+Service: SavingsProductService.getSavingsproducts()
+Endpoint: GET /api/v2/savingsproducts
+Response: GetSavingsProductsResponse[]
+Timing: Called in ngOnInit(), ALWAYS loads all products (no clientId filter)
+Populates: products dropdown
+
+--- API CALL: Load Account Data (Edit mode) ---
+
+Service: SavingsAccountService.getSavingsaccountsAccountId()
+Endpoint: GET /api/v2/savingsaccounts/{accountId}
+Response: SavingsAccountData
+Populates: - account.clientId = data.clientId - account.productId = data.savingsProductId - interestRate = data.nominalAnnualInterestRate || 0 - submittedOnDate from data.timeline.submittedOnDate (number[] -> Date)
 
 --- API CALL: Create Savings Account ---
 
 Service: SavingsAccountService.postSavingsaccounts()
 Endpoint: POST /api/v2/savingsaccounts
-Body (via Record<string,unknown>):
-{ clientId, productId, externalId?, submittedOnDate,
-nominalAnnualInterestRate, dateFormat, locale }
+Body: PostSavingsAccountsRequest (built as Record<string,unknown>)
+{
+clientId: number,
+productId: number,
+submittedOnDate: string (formatted via formatDateToFineract),
+dateFormat: 'yyyy-MM-dd',
+locale: 'en',
+nominalAnnualInterestRate: number // added via Record spread
+}
+
+Payload construction:
+account.submittedOnDate = formatDateToFineract(submittedOnDate)
+account.dateFormat = FINERACT_DATE_FORMAT
+account.locale = FINERACT_LOCALE
+payload = { ...account, nominalAnnualInterestRate: interestRate }
+
+MANDATORY fields per API: clientId, productId, submittedOnDate
 
 --- API CALL: Update Savings Account ---
 
 Service: SavingsAccountService.putSavingsaccountsAccountId()
 Endpoint: PUT /api/v2/savingsaccounts/{accountId}
-Body: Record<string, unknown> (same fields)
+Body: Record<string, unknown> (same built payload as create)
+{
+clientId: number,
+productId: number,
+submittedOnDate: string,
+dateFormat: 'yyyy-MM-dd',
+locale: 'en',
+nominalAnnualInterestRate: number
+}
 
 --- ON SUCCESS NAVIGATION ---
 
@@ -307,7 +374,144 @@ note: string
 On success: router.navigate(['/products/savings-accounts'])
 On cancel: router.navigate(['/products/savings-accounts'])
 
-================================================================================ 5. SAVINGS CHARGES LIST (SavingsChargesListComponent)
+================================================================================ 5. SAVINGS ACCOUNT ACTION FORM (AccountActionFormComponent) [NEW]
+================================================================================
+
+FILE: account-action-form.component.ts (~599 lines)
+NOTE: SHARED component for savings, fixed, recurring, AND loan accounts
+ROUTE: /products/{accountType}/{accountId}/action/{command}
+
+--- ROUTE & COMMANDS ---
+
+accountType: 'savings' | 'fixed' | 'recurring' | 'loan' (from route param)
+accountId: number (from route param)
+command: string (from route param, default: 'approve')
+
+Commands for savings:
+approve -> 'ACTIONS.APPROVE_ACCOUNT' / approval date
+activate -> 'ACTIONS.ACTIVATE_ACCOUNT' / activation date
+close -> 'ACTIONS.CLOSE_ACCOUNT' / closure date
+block -> (falls back to approve config)
+reject -> (falls back to approve config)
+
+Commands for loan only:
+disburse, assignloanofficer, unassignloanofficer, applycharges
+
+--- API CALL: Load Account Details ---
+
+Determined by accountType:
+savings: SavingsAccountService.getSavingsaccountsAccountId(id)
+fixed: FixedDepositAccountService (retrieveOne14 dynamic)
+recurring: RecurringDepositAccountService (retrieveOne18 dynamic)
+loan: LoansService.retrieveLoan(id)
+
+Response populates accountDetails (Record<string,unknown>)
+
+Summary panel fields: Account No, Client/Group Name, Product Name,
+Amount (depositAmount/principal) with currency, Interest Rate %,
+Term (depositPeriod/numberOfRepayments) with frequency, Submitted On Date
+
+--- FORM FIELDS (template) ---
+
+1. Staff select (ONLY for assignloanofficer)
+   Loaded from StaffService.getStaff() -> staffOptions[]
+
+2. Charge select + Amount (ONLY for applycharges)
+   Loaded from ChargesService.getCharges(), filtered active+Loan
+   onChargeSelected auto-fills amount
+
+3. Action Date (datepicker, REQUIRED)
+   Default: new Date(), label varies by command
+
+4. Expected Disbursement Date (ONLY for loan approve)
+   datepicker, required
+
+5. Note (textarea, optional, 4 rows)
+
+--- API CALL: Execute Savings Action ---
+
+Service: SavingsAccountService.postSavingsaccountsAccountId()
+Endpoint: POST /api/v2/savingsaccounts/{accountId}?command={command}
+Body: Record<string, unknown>
+{
+dateFormat: 'yyyy-MM-dd',
+locale: 'en',
+note?: string, // included for all EXCEPT 'activate'
+approvedOnDate?: string, // for 'approve'
+activatedOnDate?: string, // for 'activate'
+closedOnDate?: string // for 'close'
+}
+
+--- NAVIGATION ON SUCCESS/CANCEL ---
+
+Based on accountType:
+savings: router.navigate(['/products/savings-accounts'])
+fixed: router.navigate(['/products/fixed-deposits'])
+recurring: router.navigate(['/products/recurring-deposits'])
+loan: router.navigate(['/loans/view', accountId])
+
+--- COMPLETE SAVINGS ACCOUNT LIFECYCLE FLOW ---
+
+CREATED (Submitted and pending approval)
+Component: SavingsAccountFormComponent
+Page: /products/savings-accounts/create
+API: POST /api/v2/savingsaccounts
+
+    --> APPROVE
+      Component:  AccountActionFormComponent
+      Page:       /products/savings/{id}/action/approve
+      API:        POST /api/v2/savingsaccounts/{id}?command=approve
+                  { approvedOnDate, dateFormat, locale, note }
+
+    --> REJECT (alternative from pending)
+      Component:  AccountActionFormComponent
+      Page:       /products/savings/{id}/action/reject
+      API:        POST /api/v2/savingsaccounts/{id}?command=reject
+
+APPROVED
+--> ACTIVATE
+Component: AccountActionFormComponent
+Page: /products/savings/{id}/action/activate
+API: POST /api/v2/savingsaccounts/{id}?command=activate
+{ activatedOnDate, dateFormat, locale }
+NOTE: Note is NOT included for activate
+
+ACTIVE (status.active === true)
+--> DEPOSIT
+Component: SavingsAccountTransactionFormComponent
+Page: /products/savings-accounts/{id}/transactions/deposit
+API: POST /api/v2/savingsaccounts/{id}/transactions?command=deposit
+
+    --> WITHDRAWAL
+      Component:  SavingsAccountTransactionFormComponent
+      Page:       /products/savings-accounts/{id}/transactions/withdrawal
+      API:        POST /api/v2/savingsaccounts/{id}/transactions?command=withdrawal
+
+    --> BLOCK
+      Component:  AccountActionFormComponent
+      Page:       /products/savings/{id}/action/block
+      API:        POST /api/v2/savingsaccounts/{id}?command=block
+
+    --> CLOSE
+      Component:  AccountActionFormComponent
+      Page:       /products/savings/{id}/action/close
+      API:        POST /api/v2/savingsaccounts/{id}?command=close
+                  { closedOnDate, dateFormat, locale, note }
+
+CLOSED - End of lifecycle
+
+--- PERMISSIONS ---
+
+'APPROVE_SAVINGSACCOUNT' -> Approve
+'ACTIVATE_SAVINGSACCOUNT' -> Activate
+'CLOSE_SAVINGSACCOUNT' -> Close
+'REJECT_SAVINGSACCOUNT' -> Reject
+'DEPOSIT_SAVINGSACCOUNT' -> Deposit
+'WITHDRAW_SAVINGSACCOUNT' -> Withdrawal
+
+================================================================================
+
+================================================================================ 6. SAVINGS CHARGES LIST (SavingsChargesListComponent)
 ================================================================================
 
 FILE: savings-charges/savings-charges-list.component.ts
@@ -335,7 +539,7 @@ Uses window.confirm()
 
 onCreate(): /products/savings-accounts/{savingsAccountId}/charges/create
 
-================================================================================ 6. SAVINGS CHARGE CREATE FORM (SavingsChargeFormComponent)
+================================================================================ 7. SAVINGS CHARGE CREATE FORM (SavingsChargeFormComponent)
 ================================================================================
 
 FILE: savings-charges/savings-charge-form.component.ts
@@ -360,14 +564,14 @@ Due Date (datepicker, optional)
 Service: SavingsChargesService.postSavingsaccountsSavingsAccountIdCharges()
 Endpoint: POST /api/v2/savingsaccounts/{savingsAccountId}/charges
 Body: PostSavingsAccountsSavingsAccountIdChargesRequest
-{ chargeId, amount, dueDate, dateFormat:'dd MMMM yyyy', locale:'en' }
+{ chargeId, amount, dueDate, dateFormat:'yyyy-MM-dd', locale:'en' }
 
 --- NAVIGATION ---
 
 On success: /products/savings-accounts/{savingsAccountId}/charges
 On cancel: /products/savings-accounts/{savingsAccountId}/charges
 
-================================================================================ 7. SHARED UTILITY: ACCOUNT TYPE RESOLVER
+================================================================================ 8. SHARED UTILITY: ACCOUNT TYPE RESOLVER
 ================================================================================
 
 FILE: core/utils/account-type-resolver.ts
@@ -388,25 +592,25 @@ default -> 'savings-accounts'
 
 Used extensively for dynamic navigation across savings-related routes.
 
-================================================================================ 8. DATE FORMATTING
+================================================================================ 9. DATE FORMATTING
 ================================================================================
 
 FILE: core/utils/date-formatter.ts
 
-formatDateToFineract(date): 'dd MMMM yyyy' format
+formatDateToFineract(date): 'yyyy-MM-dd' format
 Used in: Create/Update Savings Account, Savings Charge Create
 
 EXCEPTION: Transaction form uses raw 'yyyy-MM-dd' format inline
 (NOT using the shared formatDateToFineract utility)
 
-================================================================================ 9. PERMISSION DIRECTIVE
+================================================================================ 10. PERMISSION DIRECTIVE
 ================================================================================
 
 FILE: shared/directives/has-permission.directive.ts
 
 Permissions used: - 'CREATE_SAVINGSACCOUNT' - 'UPDATE_SAVINGSACCOUNT' - 'DELETE_SAVINGSACCOUNT' - 'APPROVE_SAVINGSACCOUNT' - 'REJECT_SAVINGSACCOUNT' - 'WITHDRAW_SAVINGSACCOUNT' - 'DEPOSIT_SAVINGSACCOUNT'
 
-================================================================================ 10. I18N TRANSLATION KEY PREFIXES
+================================================================================ 11. I18N TRANSLATION KEY PREFIXES
 ================================================================================
 
 SAVINGS.* - Savings account labels
@@ -414,6 +618,88 @@ SAVINGS_CHARGES.* - Savings charges labels
 COMMON.* - Shared labels
 HELP.* - Help text tooltips
 nav.savingsAccounts - List page title
+
+================================================================================ 12. SAVINGS PRODUCT FORM (SavingsProductFormComponent)
+================================================================================
+
+FILE: savings-product-form.component.ts (~264 lines)
+NOTE: Route is /products/savings (create / edit)
+
+--- MODE DETECTION ---
+
+isEditMode = route has :id param (via paramMap subscription)
+If edit: productId = +params.get('id')
+
+--- DEFAULTS ---
+
+product: PostSavingsProductsRequest = {
+currencyCode: 'USD',
+digitsAfterDecimal: 2,
+interestCompoundingPeriodType: 1,
+interestPostingPeriodType: 4,
+interestCalculationType: 1,
+interestCalculationDaysInYearType: 365,
+accountingRule: 1,
+};
+
+--- API CALL: Load Product Data (Edit mode) ---
+
+Service: SavingsProductService.getSavingsproductsProductId()
+Endpoint: GET /api/v2/savingsproducts/{productId}
+Response: GetSavingsProductsProductIdResponse
+Populates: - product.name = data.name - product.shortName = data.shortName - product.description = data.description - product.currencyCode = data.currency?.code - product.digitsAfterDecimal = data.currency?.decimalPlaces - product.nominalAnnualInterestRate = data.nominalAnnualInterestRate
+
+IMPORTANT: interestCompoundingPeriodType, interestPostingPeriodType,
+interestCalculationType, interestCalculationDaysInYearType
+are OVERWRITTEN back to defaults (1,4,1,365) — NOT from API
+
+--- FORM FIELDS (template layout) ---
+
+Grid layout: 2 columns
+
+Row 1 - Name (text, REQUIRED) [full width via full-width class]
+matTooltip: 'HELP.PRODUCT_NAME_DESC'
+ngModel: product.name
+
+Row 2: - Short Name (text, REQUIRED, maxlength 4)
+matTooltip: 'HELP.SHORT_NAME_DESC'
+ngModel: product.shortName - Currency Code (select, REQUIRED)
+matTooltip: 'HELP.CURRENCY_DESC'
+Options: USD, EUR, INR (hardcoded, NOT from API)
+ngModel: product.currencyCode
+
+Row 3: - Description (textarea, 3 rows, full width)
+matTooltip: 'HELP.DESCRIPTION_DESC'
+ngModel: product.description
+(empty cell)
+
+Row 4: - Digits After Decimal (number, REQUIRED)
+matTooltip: 'HELP.DECIMAL_PLACES_DESC'
+ngModel: product.digitsAfterDecimal - Nominal Annual Interest Rate (number, REQUIRED, no % suffix)
+matTooltip: 'HELP.INTEREST_RATE_DESC'
+ngModel: product.nominalAnnualInterestRate
+
+--- API CALL: Create ---
+
+Service: SavingsProductService.postSavingsproducts()
+Endpoint: POST /api/v2/savingsproducts
+Body: PostSavingsProductsRequest (typed)
+{ name, shortName, description?, currencyCode, digitsAfterDecimal,
+nominalAnnualInterestRate?, interestCompoundingPeriodType,
+interestPostingPeriodType, interestCalculationType,
+interestCalculationDaysInYearType, accountingRule, locale:'en' }
+
+--- API CALL: Update ---
+
+Service: SavingsProductService.putSavingsproductsProductId()
+Endpoint: PUT /api/v2/savingsproducts/{productId}
+Body: PutSavingsProductsProductIdRequest (product cast)
+SAME fields as create (no charts needed unlike Fixed)
+
+--- NAVIGATION ---
+
+On success: router.navigate(['/products/savings'])
+On cancel: router.navigate(['/products/savings'])
 
 ================================================================================
 END OF DOCUMENT

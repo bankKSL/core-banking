@@ -189,13 +189,16 @@ const ClientDetailPage: FC = () => {
                 <TabsContent value="accounts" className="mt-0 space-y-6">
                     <div className="flex flex-wrap items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => navigate(`/lending/applications/new?clientId=${client.id}`)}>
-                            <Plus className="mr-1 h-4 w-4" />New Loan
+                            <Plus className="mr-1 h-4 w-4" />
+                            New Loan
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/accounts/new?clientId=${client.id}`)}>
-                            <Plus className="mr-1 h-4 w-4" />New Savings
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/saving-accounts/new?clientId=${client.id}`)}>
+                            <Plus className="mr-1 h-4 w-4" />
+                            New Savings
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/fixed/new?clientId=${client.id}`)}>
-                            <Plus className="mr-1 h-4 w-4" />New Fixed Deposit
+                            <Plus className="mr-1 h-4 w-4" />
+                            New Fixed Deposit
                         </Button>
                     </div>
                     {accountsLoading ? (
@@ -280,7 +283,7 @@ const ClientDetailPage: FC = () => {
                                                 <div
                                                     key={sav.id}
                                                     className="rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                                                    onClick={() => navigate(`/deposits/accounts/${sav.id}`)}
+                                                    onClick={() => navigate(`/deposits/saving-accounts/${sav.id}`)}
                                                 >
                                                     <div className="flex items-center justify-between mb-1">
                                                         <span className="font-mono text-xs font-semibold">{sav.accountNo}</span>

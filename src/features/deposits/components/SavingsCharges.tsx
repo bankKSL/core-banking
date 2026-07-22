@@ -60,7 +60,7 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
         async (values: ChargeFormValues) => {
             await createMutation.mutateAsync({
                 accountId,
-                payload: { chargeId: Number(values.chargeId), amount: Number(values.amount), dueDate: values.dueDate || undefined, dateFormat: "dd MMMM yyyy", locale: "en" },
+                payload: { chargeId: Number(values.chargeId), amount: Number(values.amount), dueDate: values.dueDate || undefined, dateFormat: "yyyy-MM-dd", locale: "en" },
             });
             setDialogOpen(false);
         },

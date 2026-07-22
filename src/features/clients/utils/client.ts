@@ -21,7 +21,7 @@ export function getClientStatus(client: Client): string {
  * Normalize a date value from Fineract to a Date object.
  * Handles:
  *  - string in "yyyy-MM-dd" format
- *  - string in "dd MMMM yyyy" format
+ *  - string in "yyyy-MM-dd" format
  *  - number array [year, month, day] (Fineract array format)
  *  - ISO date string with "T"
  */
@@ -35,7 +35,7 @@ function normalizeDate(value: unknown): Date | null {
     }
 
     if (typeof value === "string") {
-        // Already in "dd MMMM yyyy" (contains alpha month)
+        // Already in "yyyy-MM-dd" (contains alpha month)
         const parsed = Date.parse(value);
         if (!isNaN(parsed)) return new Date(parsed);
 

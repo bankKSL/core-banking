@@ -69,13 +69,13 @@ const sections: NavSectionConfig[] = [
         title: "Deposits",
         defaultOpen: true,
         items: [
-            { label: "Deposit Accounts", path: "/deposits/accounts", icon: PiggyBank },
+            { label: "Savings Accounts", path: "/deposits/saving-accounts", icon: PiggyBank },
             { label: "Fixed Deposits", path: "/deposits/fixed", icon: Wallet },
 
             { label: "Transactions", path: "/deposits/transactions", icon: Receipt },
             { label: "Withdrawals", path: "/deposits/withdrawals", icon: ArrowUpCircle },
 
-            { label: "Savings Products", path: "/deposits/products", icon: LayoutGrid },
+            { label: "Savings Accounts Products", path: "/deposits/products", icon: LayoutGrid },
             { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
         ],
     },

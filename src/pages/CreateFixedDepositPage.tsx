@@ -53,7 +53,7 @@ const CreateFixedDepositPage: React.FC = () => {
                 depositPeriodFrequencyId: form.depositPeriodFrequencyId,
                 submittedOnDate: form.submittedOnDate,
                 locale: "en",
-                dateFormat: "dd MMMM yyyy",
+                dateFormat: "yyyy-MM-dd",
             });
             navigate("/deposits/fixed");
         } catch (err) {
@@ -96,10 +96,7 @@ const CreateFixedDepositPage: React.FC = () => {
                     <CardContent className="grid grid-cols-1 gap-4">
                         <div>
                             <Label>Client *</Label>
-                            <Select
-                                value={form.clientId ? String(form.clientId) : ""}
-                                onValueChange={(v) => setField("clientId", Number(v))}
-                            >
+                            <Select value={form.clientId ? String(form.clientId) : ""} onValueChange={(v) => setField("clientId", Number(v))}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select client" />
                                 </SelectTrigger>
@@ -113,16 +110,14 @@ const CreateFixedDepositPage: React.FC = () => {
                             </Select>
                             <div className="mt-1">
                                 <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/clients/new", "_blank")}>
-                                    <ExternalLink className="mr-1 h-3 w-3" />Create New Client
+                                    <ExternalLink className="mr-1 h-3 w-3" />
+                                    Create New Client
                                 </Button>
                             </div>
                         </div>
                         <div>
                             <Label>Savings Product *</Label>
-                            <Select
-                                value={form.productId ? String(form.productId) : ""}
-                                onValueChange={(v) => setField("productId", Number(v))}
-                            >
+                            <Select value={form.productId ? String(form.productId) : ""} onValueChange={(v) => setField("productId", Number(v))}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select product" />
                                 </SelectTrigger>
@@ -136,7 +131,8 @@ const CreateFixedDepositPage: React.FC = () => {
                             </Select>
                             <div className="mt-1">
                                 <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/deposits/fixed-products", "_blank")}>
-                                    <ExternalLink className="mr-1 h-3 w-3" />Create New Product
+                                    <ExternalLink className="mr-1 h-3 w-3" />
+                                    Create New Product
                                 </Button>
                             </div>
                         </div>
@@ -153,26 +149,15 @@ const CreateFixedDepositPage: React.FC = () => {
                         </div>
                         <div>
                             <Label>Deposit Amount *</Label>
-                            <Input
-                                type="number"
-                                value={form.depositAmount || ""}
-                                onChange={(e) => setField("depositAmount", Number(e.target.value))}
-                            />
+                            <Input type="number" value={form.depositAmount || ""} onChange={(e) => setField("depositAmount", Number(e.target.value))} />
                         </div>
                         <div>
                             <Label>Period Length *</Label>
-                            <Input
-                                type="number"
-                                value={form.depositPeriod || ""}
-                                onChange={(e) => setField("depositPeriod", Number(e.target.value))}
-                            />
+                            <Input type="number" value={form.depositPeriod || ""} onChange={(e) => setField("depositPeriod", Number(e.target.value))} />
                         </div>
                         <div>
                             <Label>Frequency (Section 10.7)</Label>
-                            <Select
-                                value={String(form.depositPeriodFrequencyId)}
-                                onValueChange={(v) => setField("depositPeriodFrequencyId", Number(v))}
-                            >
+                            <Select value={String(form.depositPeriodFrequencyId)} onValueChange={(v) => setField("depositPeriodFrequencyId", Number(v))}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -187,7 +172,13 @@ const CreateFixedDepositPage: React.FC = () => {
                         </div>
                         <div>
                             <Label>Interest Rate</Label>
-                            <Input type="number" step="0.01" value={form.nominalAnnualInterestRate || ""} onChange={(e) => setField("nominalAnnualInterestRate", parseFloat(e.target.value) || 0)} placeholder="Inherited from product" />
+                            <Input
+                                type="number"
+                                step="0.01"
+                                value={form.nominalAnnualInterestRate || ""}
+                                onChange={(e) => setField("nominalAnnualInterestRate", parseFloat(e.target.value) || 0)}
+                                placeholder="Inherited from product"
+                            />
                         </div>
                         <div>
                             <Label>Submitted Date</Label>

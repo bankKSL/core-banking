@@ -62,7 +62,7 @@ export const createSavingsProductSchema = z.object({
     withHoldTax: z.boolean().optional(),
     // accountMappingForPayment: z.string().max(100).optional(),
     locale: z.string().default("en"),
-    dateFormat: z.string().default("dd MMMM yyyy"),
+    dateFormat: z.string().default("yyyy-MM-dd"),
 });
 
 export type CreateSavingsProductFormValues = z.infer<typeof createSavingsProductSchema>;

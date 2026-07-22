@@ -161,7 +161,7 @@ close: { closureDate, dateFormat, locale, closureReasonId? }
 reactivate: { reactivationDate, dateFormat, locale }
 undoReject: { reopenedDate, dateFormat, locale }
 undoWithdraw:{ reopenedDate, dateFormat, locale }
-(dateFormat='dd MMMM yyyy', locale='en')
+(dateFormat='yyyy-MM-dd', locale='en')
 
 --- API CALL: Delete Client ---
 
@@ -685,13 +685,13 @@ Undo button disabled when row.reversed === true
 --- DATE FORMATTING (core/utils/date-formatter.ts) ---
 
 formatDateToFineract(date: Date|string|null|undefined): string
-Converts to 'dd MMMM yyyy' format (e.g. "21 July 2026")
+Converts to 'yyyy-MM-dd' format (e.g. "21 July 2026")
 
 formatArrayDate(value: unknown): string
 Converts number[] date [year, month, day] from Fineract API to string
 
 Constants:
-FINERACT_DATE_FORMAT = 'dd MMMM yyyy'
+FINERACT_DATE_FORMAT = 'yyyy-MM-dd'
 FINERACT_LOCALE = 'en'
 
 Usage: All create/update payloads include { dateFormat, locale }

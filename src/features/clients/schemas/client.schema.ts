@@ -7,7 +7,7 @@ import { z } from "zod";
  * Notes:
  * - Dates are sent as yyyy-MM-dd (HTML date input) with dateFormat="yyyy-MM-dd"
  * - firstname/lastname are required for Person (legalFormId=1); fullname for Entity
- * - Fineract default dateFormat is "dd MMMM yyyy" but we override for HTML compatibility
+ * - Fineract default dateFormat is "yyyy-MM-dd" but we override for HTML compatibility
  */
 /**
  * Base object schema (no conditional refine) — used by editClientSchema.partial()

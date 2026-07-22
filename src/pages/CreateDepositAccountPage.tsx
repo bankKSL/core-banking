@@ -35,12 +35,13 @@ const CreateDepositAccountPage: React.FC = () => {
     const isLoading = productsLoading || clientsLoading;
 
     // Sort pre-selected client to top
-    const sortedClients = useMemo(() =>
-        [...clients].sort((a, b) => {
-            if (a.id === form.clientId) return -1;
-            if (b.id === form.clientId) return 1;
-            return 0;
-        }),
+    const sortedClients = useMemo(
+        () =>
+            [...clients].sort((a, b) => {
+                if (a.id === form.clientId) return -1;
+                if (b.id === form.clientId) return 1;
+                return 0;
+            }),
         [clients, form.clientId],
     );
 
@@ -58,7 +59,7 @@ const CreateDepositAccountPage: React.FC = () => {
                 locale: "en",
                 dateFormat: "yyyy-MM-dd",
             });
-            navigate("/deposits/accounts");
+            navigate("/deposits/saving-accounts");
         } catch (err) {
             console.error("Failed to create savings account:", err);
         }
@@ -82,27 +83,40 @@ const CreateDepositAccountPage: React.FC = () => {
                 description="Open a new savings account for a client"
                 actions={
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" onClick={() => navigate("/deposits/accounts")}><ArrowLeft className="mr-2 h-4 w-4" /> Cancel</Button>
+                        <Button variant="outline" onClick={() => navigate("/deposits/saving-accounts")}>
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+                        </Button>
                     </div>
                 }
             />
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card>
-                    <CardHeader><CardTitle className="flex items-center gap-2"><PiggyBank className="h-5 w-5" /> Customer Information</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <PiggyBank className="h-5 w-5" /> Customer Information
+                        </CardTitle>
+                    </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2">
                                 <Label htmlFor="clientId">Client *</Label>
                                 <Select value={form.clientId ? String(form.clientId) : ""} onValueChange={(v) => setField("clientId", Number(v))}>
-                                    <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a client" />
+                                    </SelectTrigger>
                                     <SelectContent>
-                                        {sortedClients.map((c) => (<SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `Client #${c.id}`}</SelectItem>))}
+                                        {sortedClients.map((c) => (
+                                            <SelectItem key={c.id} value={String(c.id)}>
+                                                {c.displayName ?? `Client #${c.id}`}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                                 <div className="mt-1">
                                     <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/clients/new", "_blank")}>
-                                        <ExternalLink className="mr-1 h-3 w-3" />Create New Client
+                                        <ExternalLink className="mr-1 h-3 w-3" />
+                                        Create New Client
                                     </Button>
                                 </div>
                             </div>
@@ -111,20 +125,29 @@ const CreateDepositAccountPage: React.FC = () => {
                 </Card>
 
                 <Card>
-                    <CardHeader><CardTitle>Account Details</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle>Account Details</CardTitle>
+                    </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2">
                                 <Label htmlFor="productId">Savings Product *</Label>
                                 <Select value={form.productId ? String(form.productId) : ""} onValueChange={(v) => setField("productId", Number(v))}>
-                                    <SelectTrigger><SelectValue placeholder="Select a savings product" /></SelectTrigger>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a savings product" />
+                                    </SelectTrigger>
                                     <SelectContent>
-                                        {products.map((p) => (<SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>))}
+                                        {products.map((p) => (
+                                            <SelectItem key={p.id} value={String(p.id)}>
+                                                {p.name}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                                 <div className="mt-1">
                                     <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/deposits/products", "_blank")}>
-                                        <ExternalLink className="mr-1 h-3 w-3" />Create New Product
+                                        <ExternalLink className="mr-1 h-3 w-3" />
+                                        Create New Product
                                     </Button>
                                 </div>
                             </div>
@@ -134,11 +157,22 @@ const CreateDepositAccountPage: React.FC = () => {
                             </div>
                             <div>
                                 <Label htmlFor="nominalAnnualInterestRate">Interest Rate (% annual)</Label>
-                                <Input id="nominalAnnualInterestRate" type="number" step="0.01" value={form.nominalAnnualInterestRate || ""} onChange={(e) => setField("nominalAnnualInterestRate", parseFloat(e.target.value) || 0)} />
+                                <Input
+                                    id="nominalAnnualInterestRate"
+                                    type="number"
+                                    step="0.01"
+                                    value={form.nominalAnnualInterestRate || ""}
+                                    onChange={(e) => setField("nominalAnnualInterestRate", parseFloat(e.target.value) || 0)}
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="minRequiredOpeningBalance">Opening Balance</Label>
-                                <Input id="minRequiredOpeningBalance" type="number" value={form.minRequiredOpeningBalance || ""} onChange={(e) => setField("minRequiredOpeningBalance", parseFloat(e.target.value) || 0)} />
+                                <Input
+                                    id="minRequiredOpeningBalance"
+                                    type="number"
+                                    value={form.minRequiredOpeningBalance || ""}
+                                    onChange={(e) => setField("minRequiredOpeningBalance", parseFloat(e.target.value) || 0)}
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="submittedOnDate">Submitted Date</Label>
@@ -149,8 +183,12 @@ const CreateDepositAccountPage: React.FC = () => {
                 </Card>
 
                 <div className="flex justify-end gap-3">
-                    <Button variant="outline" type="button" onClick={() => navigate("/deposits/accounts")}><ArrowLeft className="mr-2 h-4 w-4" /> Cancel</Button>
-                    <Button type="submit" disabled={createAccount.isPending}><Save className="mr-2 h-4 w-4" /> {createAccount.isPending ? "Opening…" : "Open Account"}</Button>
+                    <Button variant="outline" type="button" onClick={() => navigate("/deposits/saving-accounts")}>
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+                    </Button>
+                    <Button type="submit" disabled={createAccount.isPending}>
+                        <Save className="mr-2 h-4 w-4" /> {createAccount.isPending ? "Opening…" : "Open Account"}
+                    </Button>
                 </div>
             </form>
         </div>

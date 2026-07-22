@@ -132,7 +132,7 @@ Body: PostFixedDepositAccountsRequest (via Record<string,unknown>)
 {
 clientId, productId, submittedOnDate, depositAmount,
 depositPeriod, depositPeriodFrequencyId,
-locale: 'en', dateFormat: 'dd MMMM yyyy'
+locale: 'en', dateFormat: 'yyyy-MM-dd'
 }
 
 MANDATORY fields: clientId, productId, submittedOnDate,
@@ -145,7 +145,7 @@ Endpoint: PUT /api/v2/fixeddepositaccounts/{accountId}
 Body: PutFixedDepositAccountsAccountIdRequest & Record<string,unknown>
 {
 depositAmount, depositPeriod?, depositPeriodFrequencyId?,
-nominalAnnualInterestRate?, locale: 'en', dateFormat: 'dd MMMM yyyy'
+nominalAnnualInterestRate?, locale: 'en', dateFormat: 'yyyy-MM-dd'
 }
 
 NOTE: Update payload ONLY includes deposit fields (different from create)
@@ -341,7 +341,7 @@ On cancel: router.navigate(['/products/fixed'])
 ================================================================================ 7. DATE FORMATTING
 ================================================================================
 
-Account forms use: 'dd MMMM yyyy' (via formatDateToFineract utility)
+Account forms use: 'yyyy-MM-dd' (via formatDateToFineract utility)
 Product forms use: 'yyyy-MM-dd' (hardcoded inline)
 
 ================================================================================ 8. I18N TRANSLATION KEY PREFIXES

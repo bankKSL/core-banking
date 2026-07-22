@@ -22,7 +22,7 @@ export const officeService = {
     create: async (payload: OfficeCreateRequest): Promise<Office> => {
         const body = {
             ...payload,
-            dateFormat: payload.dateFormat ?? "dd MMMM yyyy",
+            dateFormat: payload.dateFormat ?? "yyyy-MM-dd",
             locale: payload.locale ?? "en",
         };
         const { data } = await api.post<{ officeId: number; resourceId: number }>(OFFICES, body);
@@ -33,7 +33,7 @@ export const officeService = {
     update: async (id: number, payload: OfficeUpdateRequest): Promise<Office> => {
         const body = {
             ...payload,
-            dateFormat: payload.dateFormat ?? "dd MMMM yyyy",
+            dateFormat: payload.dateFormat ?? "yyyy-MM-dd",
             locale: payload.locale ?? "en",
         };
         const { data } = await api.put<{ officeId: number; resourceId: number }>(`${OFFICES}/${id}`, body);
@@ -47,6 +47,6 @@ function normalizeOffice(raw: any): Office {
         ...raw,
         openingDate: Array.isArray(raw.openingDate)
             ? new Date(raw.openingDate[0], raw.openingDate[1] - 1, raw.openingDate[2]).toISOString().split("T")[0]
-            : raw.openingDate ?? "",
+            : (raw.openingDate ?? ""),
     };
 }

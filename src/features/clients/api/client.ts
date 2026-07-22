@@ -1,41 +1,20 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → dd MMMM yyyy (Fineract format).
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
  * Returns undefined if the input is empty or already in Fineract format.
  */
 function toFineractDate(isoDate?: string): string | undefined {
     if (!isoDate) return undefined;
-    // Already in "dd MMMM yyyy" format (contains alphabetic month)?
+    // Already in "yyyy-MM-dd" format (contains alphabetic month)?
     if (/[A-Za-z]/.test(isoDate)) return isoDate;
     const [y, m, d] = isoDate.split("-").map(Number);
     if (!y || !m || !d) return isoDate;
-    const months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${d} ${months[m - 1]} ${y}`;
 }
 
-import type {
-    Client,
-    ClientListResponse,
-    ClientListParams,
-    ClientCreateRequest,
-    ClientUpdateRequest,
-    ClientTemplate,
-    ClientActivateRequest,
-} from "../types/client";
+import type { Client, ClientListResponse, ClientListParams, ClientCreateRequest, ClientUpdateRequest, ClientTemplate, ClientActivateRequest } from "../types/client";
 
 // ─── List Clients ─────────────────────────────────────────────
 export async function fetchClients(params: ClientListParams = {}): Promise<ClientListResponse> {
@@ -56,19 +35,13 @@ export async function createClient(payload: ClientCreateRequest): Promise<{ clie
 }
 
 // ─── Update Client ────────────────────────────────────────────
-export async function updateClient(
-    clientId: number | string,
-    payload: ClientUpdateRequest,
-): Promise<{ clientId: number; resourceId: number; officeId: number }> {
+export async function updateClient(clientId: number | string, payload: ClientUpdateRequest): Promise<{ clientId: number; resourceId: number; officeId: number }> {
     const { data } = await client.put<{ clientId: number; resourceId: number; officeId: number }>(`/clients/${clientId}`, payload);
     return data;
 }
 
 // ─── Activate Client ──────────────────────────────────────────
-export async function activateClient(
-    clientId: number | string,
-    payload: ClientActivateRequest = {},
-): Promise<{ clientId: number; resourceId: number }> {
+export async function activateClient(clientId: number | string, payload: ClientActivateRequest = {}): Promise<{ clientId: number; resourceId: number }> {
     const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
         params: { command: "activate", ...payload },
     });
@@ -162,7 +135,10 @@ export async function withdrawClient(clientId: number | string): Promise<{ clien
     return data;
 }
 
-export async function closeClient(clientId: number | string, payload?: { closureDate?: string; dateFormat?: string; locale?: string }): Promise<{ clientId: number; resourceId: number }> {
+export async function closeClient(
+    clientId: number | string,
+    payload?: { closureDate?: string; dateFormat?: string; locale?: string },
+): Promise<{ clientId: number; resourceId: number }> {
     const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, payload ?? {}, {
         params: { command: "close" },
     });
@@ -189,4 +165,3 @@ export async function undoWithdrawClient(clientId: number | string): Promise<{ c
     });
     return data;
 }
-

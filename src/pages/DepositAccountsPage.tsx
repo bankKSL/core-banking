@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Eye, Wallet, PiggyBank, Building2, TrendingUp, AlertTriangle } from "lucide-react";
+import { Search, Plus, Eye, Pencil, ArrowDownCircle, ArrowUpCircle, CheckCircle2, Wallet, PiggyBank, Building2, TrendingUp, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -54,8 +54,7 @@ const DepositAccountsPage: React.FC = () => {
         return result;
     }, [data, search, statusFilter]);
 
-    const formatCurrency = (n: number) =>
-        new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+    const formatCurrency = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
     const columns: ColumnDef<SavingsAccount>[] = [
         { key: "accountNo", header: "Account No", cell: (r) => <code className="text-xs font-mono">{r.accountNo}</code> },
@@ -84,9 +83,34 @@ const DepositAccountsPage: React.FC = () => {
             key: "actions",
             header: "",
             cell: (r) => (
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/deposits/accounts/${r.accountNo}`)}>
-                    <Eye className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+                    {r.status?.code?.includes("submitted") && (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 text-emerald-600" onClick={() => navigate(`/deposits/savings/${r.id}/action/approve`)} title="Approve">
+                            <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                    )}
+                    <Button variant="ghost" size="sm" className="h-8 w-8 text-blue-600" onClick={() => navigate(`/deposits/saving-accounts//edit/${r.id}`)} title="Edit">
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 text-emerald-600"
+                        onClick={() => navigate(`/deposits/savings/${r.id}/transactions/deposit`)}
+                        title="Deposit"
+                    >
+                        <ArrowDownCircle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 text-amber-600"
+                        onClick={() => navigate(`/deposits/savings/${r.id}/transactions/withdrawal`)}
+                        title="Withdraw"
+                    >
+                        <ArrowUpCircle className="h-4 w-4" />
+                    </Button>
+                </div>
             ),
         },
     ];
@@ -110,7 +134,7 @@ const DepositAccountsPage: React.FC = () => {
                 title="Deposit Accounts"
                 description="Manage savings, current, fixed deposit and recurring deposit accounts"
                 actions={
-                    <Button onClick={() => navigate("/deposits/accounts/new")}>
+                    <Button onClick={() => navigate("/deposits/saving-accounts/new")}>
                         <Plus className="mr-2 h-4 w-4" />
                         New Account
                     </Button>
@@ -128,11 +152,7 @@ const DepositAccountsPage: React.FC = () => {
                     <StatCard title="Total Accounts" value={stats.total} icon={Building2} />
                     <StatCard title="Active" value={stats.active} variant="success" />
                     <StatCard title="Total Balance" value={formatCurrency(stats.totalBalance)} variant="success" />
-                    <StatCard
-                        title="Dormant/Frozen"
-                        value={data.filter((a) => a.subStatus?.code === "dormant" || a.subStatus?.code === "frozen").length}
-                        variant="warning"
-                    />
+                    <StatCard title="Dormant/Frozen" value={data.filter((a) => a.subStatus?.code === "dormant" || a.subStatus?.code === "frozen").length} variant="warning" />
                 </div>
             )}
 
@@ -142,12 +162,7 @@ const DepositAccountsPage: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <div className="relative w-80">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                                placeholder="Search by customer or account..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10"
-                            />
+                            <Input placeholder="Search by customer or account..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
                         </div>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger className="w-36">
@@ -176,13 +191,7 @@ const DepositAccountsPage: React.FC = () => {
                             <DataTable columns={columns} data={filtered} emptyState={{ message: "No deposit accounts found" }} />
                             {totalPages > 1 && (
                                 <div className="mt-4">
-                                    <Pagination
-                                        currentPage={safePage}
-                                        totalPages={totalPages}
-                                        onPageChange={setPage}
-                                        totalItems={totalFilteredRecords}
-                                        pageSize={PAGE_SIZE}
-                                    />
+                                    <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} totalItems={totalFilteredRecords} pageSize={PAGE_SIZE} />
                                 </div>
                             )}
                         </>

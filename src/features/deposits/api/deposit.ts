@@ -1,7 +1,7 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → dd MMMM yyyy (Fineract format).
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
  * Returns undefined if empty or already in Fineract format.
  */
 function toFineractDate(isoDate?: string): string | undefined {
@@ -62,7 +62,10 @@ export async function fetchSavingsAccounts(params: SavingsAccountListParams = {}
 
 export async function fetchSavingsAccount(accountId: number | string): Promise<SavingsAccount> {
     const { data } = await client.get<SavingsAccount>(`/savingsaccounts/${accountId}`, {
-        params: { associations: "all" },
+        params: {
+            staffInSelectedOfficeOnly: false,
+            loanOfficerId: "all",
+        },
     });
     return data;
 }
@@ -79,7 +82,7 @@ export async function createSavingsAccount(payload: SavingsAccountCreateRequest)
     const { data } = await client.post<SavingsCommandResponse>("/savingsaccounts", {
         ...payload,
         submittedOnDate: toFineractDate(payload.submittedOnDate),
-        dateFormat: "dd MMMM yyyy",
+        dateFormat: "yyyy-MM-dd",
         locale: "en",
     });
     return data;
@@ -126,11 +129,7 @@ export async function fetchDepositTemplate(accountId: number): Promise<SavingsTr
 }
 
 export async function makeDeposit(accountId: number, payload: SavingsTransactionRequest): Promise<SavingsCommandResponse> {
-    const { data } = await client.post<SavingsCommandResponse>(
-        `/savingsaccounts/${accountId}/transactions`,
-        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
-        { params: { command: "deposit" } },
-    );
+    const { data } = await client.post<SavingsCommandResponse>(`/savingsaccounts/${accountId}/transactions`, { ...payload, locale: "en" }, { params: { command: "deposit" } });
     return data;
 }
 
@@ -142,7 +141,7 @@ export async function fetchWithdrawTemplate(accountId: number): Promise<SavingsT
 export async function makeWithdrawal(accountId: number, payload: SavingsTransactionRequest): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>(
         `/savingsaccounts/${accountId}/transactions`,
-        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
+        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "yyyy-MM-dd" },
         { params: { command: "withdrawal" } },
     );
     return data;
@@ -152,9 +151,9 @@ export async function makeWithdrawal(accountId: number, payload: SavingsTransact
 // Section 10.4 — POST /fixeddepositaccounts/{id}?command={command}
 
 export async function fixedDepositCommand(accountId: number, command: string, data: Record<string, unknown> = {}): Promise<SavingsCommandResponse> {
-    // Convert any date fields from yyyy-MM-dd to dd MMMM yyyy
+    // Convert any date fields from yyyy-MM-dd to yyyy-MM-dd
     const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
-    const converted: Record<string, unknown> = { locale: "en", dateFormat: "dd MMMM yyyy" };
+    const converted: Record<string, unknown> = { locale: "en", dateFormat: "yyyy-MM-dd" };
     for (const [k, v] of Object.entries(data)) {
         converted[k] = dateFields.includes(k) ? toFineractDate(v as string | undefined) : v;
     }
@@ -203,7 +202,7 @@ export async function calculatePrematureAmount(accountId: number, closedOnDate?:
 export async function createFixedDepositAccount(payload: Record<string, unknown>): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>("/fixeddepositaccounts", {
         locale: "en",
-        dateFormat: "dd MMMM yyyy",
+        dateFormat: "yyyy-MM-dd",
         ...payload,
         submittedOnDate: toFineractDate(payload.submittedOnDate as string | undefined),
     });

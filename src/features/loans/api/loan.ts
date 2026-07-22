@@ -1,7 +1,7 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → dd MMMM yyyy (Fineract format).
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
  * Returns undefined if empty or already in Fineract format.
  */
 function toFineractDate(isoDate?: string): string | undefined {
@@ -9,7 +9,7 @@ function toFineractDate(isoDate?: string): string | undefined {
     if (/[A-Za-z]/.test(isoDate)) return isoDate;
     const [y, m, d] = isoDate.split("-").map(Number);
     if (!y || !m || !d) return isoDate;
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${d} ${months[m - 1]} ${y}`;
 }
 
@@ -75,7 +75,7 @@ export async function createLoan(payload: LoanCreateRequest): Promise<LoanComman
         submittedOnDate: toFineractDate(payload.submittedOnDate),
         expectedDisbursementDate: toFineractDate(payload.expectedDisbursementDate),
         locale: "en",
-        dateFormat: "dd MMMM yyyy",
+        dateFormat: "yyyy-MM-dd",
     });
     return data;
 }
@@ -121,37 +121,39 @@ export async function closeLoan(loanId: number, payload: LoanCommandRequest = {}
 }
 
 export async function undoApproval(loanId: number): Promise<LoanCommandResponse> {
-    const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, {}, {
-        params: { command: "undoApproval" },
-    });
+    const { data } = await client.post<LoanCommandResponse>(
+        `/loans/${loanId}`,
+        {},
+        {
+            params: { command: "undoApproval" },
+        },
+    );
     return data;
 }
 
 export async function undoDisbursal(loanId: number): Promise<LoanCommandResponse> {
-    const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, {}, {
-        params: { command: "undoDisbursal" },
-    });
+    const { data } = await client.post<LoanCommandResponse>(
+        `/loans/${loanId}`,
+        {},
+        {
+            params: { command: "undoDisbursal" },
+        },
+    );
     return data;
 }
 
 // ─── Repayments ──────────────────────────────────────────────────
 
 export async function fetchRepaymentTemplate(loanId: number): Promise<RepaymentTemplate> {
-    const { data } = await client.get<RepaymentTemplate>(
-        `/loans/${loanId}/transactions/template`,
-        { params: { command: "repayment" } }
-    );
+    const { data } = await client.get<RepaymentTemplate>(`/loans/${loanId}/transactions/template`, { params: { command: "repayment" } });
     return data;
 }
 
-export async function makeRepayment(
-    loanId: number,
-    payload: RepaymentTransactionRequest
-): Promise<LoanCommandResponse> {
+export async function makeRepayment(loanId: number, payload: RepaymentTransactionRequest): Promise<LoanCommandResponse> {
     const { data } = await client.post<LoanCommandResponse>(
         `/loans/${loanId}/transactions`,
-        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
-        { params: { command: "repayment" } }
+        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "yyyy-MM-dd" },
+        { params: { command: "repayment" } },
     );
     return data;
 }

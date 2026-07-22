@@ -42,7 +42,7 @@ const EditClientPage: FC = () => {
                 genderId: values.genderId ?? undefined,
                 legalFormId: values.legalFormId ?? undefined,
                 savingsProductId: values.savingsProductId ?? undefined,
-                dateFormat: "dd MMMM yyyy",
+                dateFormat: "yyyy-MM-dd",
                 locale: "en",
             };
             // Only include activationDate if a value was provided

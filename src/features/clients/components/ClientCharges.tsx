@@ -26,9 +26,11 @@ const chargeSchema = z.object({
 
 type ChargeFormValues = z.infer<typeof chargeSchema>;
 
-const formatCurrency = (n?: number) => n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n) : "—";
+const formatCurrency = (n?: number) => (n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n) : "—");
 
-interface ClientChargesProps { clientId: number }
+interface ClientChargesProps {
+    clientId: number;
+}
 
 const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
     const { data: chargesData, isLoading } = useClientCharges(clientId);
@@ -42,7 +44,13 @@ const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
 
     const charges = chargesData?.pageItems ?? [];
 
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ChargeFormValues>({
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setValue,
+        formState: { errors },
+    } = useForm<ChargeFormValues>({
         resolver: zodResolver(chargeSchema),
     });
 
@@ -51,12 +59,15 @@ const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
         setDialogOpen(true);
     }, [reset]);
 
-    const onSubmit = useCallback(async (values: ChargeFormValues) => {
-        const payload = { chargeId: Number(values.chargeId), amount: Number(values.amount), dateFormat: "dd MMMM yyyy", locale: "en" };
-        if (values.dueDate) (payload as any).dueDate = values.dueDate;
-        await createMutation.mutateAsync({ clientId, payload: payload as any });
-        setDialogOpen(false);
-    }, [clientId, createMutation]);
+    const onSubmit = useCallback(
+        async (values: ChargeFormValues) => {
+            const payload = { chargeId: Number(values.chargeId), amount: Number(values.amount), dateFormat: "yyyy-MM-dd", locale: "en" };
+            if (values.dueDate) (payload as any).dueDate = values.dueDate;
+            await createMutation.mutateAsync({ clientId, payload: payload as any });
+            setDialogOpen(false);
+        },
+        [clientId, createMutation],
+    );
 
     const handleWaive = useCallback(async () => {
         if (!waiveId) return;
@@ -76,40 +87,115 @@ const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
         { key: "amountPaid", header: "Paid", accessorFn: (row) => <span className="text-sm font-mono">{formatCurrency(row.amountPaid)}</span> },
         { key: "amountOutstanding", header: "Outstanding", accessorFn: (row) => <span className="text-sm font-mono">{formatCurrency(row.amountOutstanding)}</span> },
         { key: "dueDate", header: "Due Date", accessorFn: (row) => <span className="text-sm">{formatClientDate(row.dueDate)}</span> },
-        { key: "isPaid", header: "Status", accessorFn: (row) => row.isPaid ? <Badge variant="success" size="sm">Paid</Badge> : row.isWaived ? <Badge variant="default" size="sm">Waived</Badge> : <Badge variant="warning" size="sm">Pending</Badge> },
-        { key: "penalty", header: "Penalty", accessorFn: (row) => row.penalty ? <Badge variant="error" size="sm">Yes</Badge> : <span className="text-sm text-gray-400">—</span> },
-        { key: "actions", header: "Actions", accessorFn: (row) => (
-            <div className="flex items-center gap-1">
-                {!row.isPaid && !row.isWaived && row.waiverable && (
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setWaiveId(row.id); }} title="Waive"><Ban className="h-4 w-4 text-amber-500" /></Button>
-                )}
-                {!row.isPaid && (
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setDeleteId(row.id); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
-                )}
-            </div>
-        )},
+        {
+            key: "isPaid",
+            header: "Status",
+            accessorFn: (row) =>
+                row.isPaid ? (
+                    <Badge variant="success" size="sm">
+                        Paid
+                    </Badge>
+                ) : row.isWaived ? (
+                    <Badge variant="default" size="sm">
+                        Waived
+                    </Badge>
+                ) : (
+                    <Badge variant="warning" size="sm">
+                        Pending
+                    </Badge>
+                ),
+        },
+        {
+            key: "penalty",
+            header: "Penalty",
+            accessorFn: (row) =>
+                row.penalty ? (
+                    <Badge variant="error" size="sm">
+                        Yes
+                    </Badge>
+                ) : (
+                    <span className="text-sm text-gray-400">—</span>
+                ),
+        },
+        {
+            key: "actions",
+            header: "Actions",
+            accessorFn: (row) => (
+                <div className="flex items-center gap-1">
+                    {!row.isPaid && !row.isWaived && row.waiverable && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setWaiveId(row.id);
+                            }}
+                            title="Waive"
+                        >
+                            <Ban className="h-4 w-4 text-amber-500" />
+                        </Button>
+                    )}
+                    {!row.isPaid && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteId(row.id);
+                            }}
+                        >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                    )}
+                </div>
+            ),
+        },
     ];
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium flex items-center gap-2"><Receipt className="h-5 w-5" />Charges</h3>
-                <Button onClick={openCreate} size="sm"><Plus className="mr-1 h-4 w-4" />Apply Charge</Button>
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                    <Receipt className="h-5 w-5" />
+                    Charges
+                </h3>
+                <Button onClick={openCreate} size="sm">
+                    <Plus className="mr-1 h-4 w-4" />
+                    Apply Charge
+                </Button>
             </div>
-            <Card><CardContent className="p-0">
-                <DataTable columns={columns} data={charges} loading={isLoading} minWidth={800}
-                    emptyState={{ icon: <Receipt className="h-8 w-8 text-gray-300" />, message: "No charges applied." }} />
-            </CardContent></Card>
+            <Card>
+                <CardContent className="p-0">
+                    <DataTable
+                        columns={columns}
+                        data={charges}
+                        loading={isLoading}
+                        minWidth={800}
+                        emptyState={{ icon: <Receipt className="h-8 w-8 text-gray-300" />, message: "No charges applied." }}
+                    />
+                </CardContent>
+            </Card>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent>
-                    <DialogHeader><DialogTitle>Apply Charge</DialogTitle><DialogDescription>Select a charge type and enter amount.</DialogDescription></DialogHeader>
+                    <DialogHeader>
+                        <DialogTitle>Apply Charge</DialogTitle>
+                        <DialogDescription>Select a charge type and enter amount.</DialogDescription>
+                    </DialogHeader>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div className="flex flex-col gap-1.5">
                             <Label>Charge Type *</Label>
                             <Select onValueChange={(v) => setValue("chargeId", Number(v), { shouldValidate: true })}>
-                                <SelectTrigger><SelectValue placeholder="Select charge" /></SelectTrigger>
-                                <SelectContent>{template?.chargeOptions?.map((o) => <SelectItem key={o.id} value={String(o.id)}>{o.name} ({formatCurrency(o.amount)})</SelectItem>)}</SelectContent>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select charge" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {template?.chargeOptions?.map((o) => (
+                                        <SelectItem key={o.id} value={String(o.id)}>
+                                            {o.name} ({formatCurrency(o.amount)})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
                             </Select>
                             {errors.chargeId && <p className="text-xs text-red-500">{errors.chargeId.message}</p>}
                         </div>
@@ -130,11 +216,26 @@ const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
                 </DialogContent>
             </Dialog>
 
-            <ConfirmDialog open={!!waiveId} onOpenChange={() => setWaiveId(null)} title="Waive Charge"
+            <ConfirmDialog
+                open={!!waiveId}
+                onOpenChange={() => setWaiveId(null)}
+                title="Waive Charge"
                 description="Are you sure you want to waive this charge? The outstanding amount will be forgiven."
-                onConfirm={handleWaive} variant="default" confirmLabel="Waive" loading={waiveMutation.isPending} />
-            <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete Charge"
-                description="Are you sure? This cannot be undone." onConfirm={handleDelete} variant="destructive" confirmLabel="Delete" loading={deleteMutation.isPending} />
+                onConfirm={handleWaive}
+                variant="default"
+                confirmLabel="Waive"
+                loading={waiveMutation.isPending}
+            />
+            <ConfirmDialog
+                open={!!deleteId}
+                onOpenChange={() => setDeleteId(null)}
+                title="Delete Charge"
+                description="Are you sure? This cannot be undone."
+                onConfirm={handleDelete}
+                variant="destructive"
+                confirmLabel="Delete"
+                loading={deleteMutation.isPending}
+            />
         </div>
     );
 };

@@ -11,24 +11,11 @@ import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
 import { useAuthStore } from "@/store";
 
-/** Convert yyyy-MM-dd → dd MMMM yyyy (Fineract expected format) */
+/** Convert yyyy-MM-dd → yyyy-MM-dd (Fineract expected format) */
 function toFineractDate(isoDate: string): string {
     if (!isoDate) return "";
     const [y, m, d] = isoDate.split("-").map(Number);
-    const months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${d} ${months[m - 1]} ${y}`;
 }
 
@@ -47,7 +34,7 @@ const CreateClientPage: FC = () => {
                 lastname: values.lastname || undefined,
                 fullname: values.fullname || undefined,
                 externalId: values.externalId || undefined,
-                dateFormat: "dd MMMM yyyy",
+                dateFormat: "yyyy-MM-dd",
                 locale: "en",
                 active: values.active ?? true,
                 activationDate: values.activationDate ? toFineractDate(values.activationDate) : undefined,
@@ -90,11 +77,7 @@ const CreateClientPage: FC = () => {
     if (createMutation.isError) {
         return (
             <div className="p-6">
-                <ErrorState
-                    title="Failed to create client"
-                    message={createMutation.error?.message ?? "An unexpected error occurred."}
-                    onRetry={() => createMutation.reset()}
-                />
+                <ErrorState title="Failed to create client" message={createMutation.error?.message ?? "An unexpected error occurred."} onRetry={() => createMutation.reset()} />
             </div>
         );
     }
@@ -111,13 +94,7 @@ const CreateClientPage: FC = () => {
                     </Button>
                 }
             />
-            <ClientForm
-                template={template}
-                onSubmit={handleSubmit}
-                isSubmitting={createMutation.isPending}
-                error={createMutation.error ?? null}
-                mode="create"
-            />
+            <ClientForm template={template} onSubmit={handleSubmit} isSubmitting={createMutation.isPending} error={createMutation.error ?? null} mode="create" />
         </div>
     );
 };
