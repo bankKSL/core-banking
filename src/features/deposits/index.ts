@@ -110,6 +110,11 @@ export {
 } from "./hooks/useFixedDeposits";
 
 export {
+    useFixedDepositProducts,
+    useFixedDepositProduct,
+} from "./hooks/useFixedDepositProducts";
+
+export {
     useRecurringDepositAccounts,
     useRecurringDepositAccount,
 } from "./hooks/useRecurringDeposits";

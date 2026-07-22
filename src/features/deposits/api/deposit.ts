@@ -9,7 +9,7 @@ function toFineractDate(isoDate?: string): string | undefined {
     if (/[A-Za-z]/.test(isoDate)) return isoDate;
     const [y, m, d] = isoDate.split("-").map(Number);
     if (!y || !m || !d) return isoDate;
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${d} ${months[m - 1]} ${y}`;
 }
 
@@ -121,10 +121,7 @@ export async function closeSavingsAccount(accountId: number, payload: { closedOn
 // ─── Deposit / Withdraw ──────────────────────────────────────────
 
 export async function fetchDepositTemplate(accountId: number): Promise<SavingsTransactionTemplate> {
-    const { data } = await client.get<SavingsTransactionTemplate>(
-        `/savingsaccounts/${accountId}/transactions/template`,
-        { params: { command: "deposit" } }
-    );
+    const { data } = await client.get<SavingsTransactionTemplate>(`/savingsaccounts/${accountId}/transactions/template`, { params: { command: "deposit" } });
     return data;
 }
 
@@ -132,16 +129,13 @@ export async function makeDeposit(accountId: number, payload: SavingsTransaction
     const { data } = await client.post<SavingsCommandResponse>(
         `/savingsaccounts/${accountId}/transactions`,
         { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
-        { params: { command: "deposit" } }
+        { params: { command: "deposit" } },
     );
     return data;
 }
 
 export async function fetchWithdrawTemplate(accountId: number): Promise<SavingsTransactionTemplate> {
-    const { data } = await client.get<SavingsTransactionTemplate>(
-        `/savingsaccounts/${accountId}/transactions/template`,
-        { params: { command: "withdrawal" } }
-    );
+    const { data } = await client.get<SavingsTransactionTemplate>(`/savingsaccounts/${accountId}/transactions/template`, { params: { command: "withdrawal" } });
     return data;
 }
 
@@ -149,7 +143,7 @@ export async function makeWithdrawal(accountId: number, payload: SavingsTransact
     const { data } = await client.post<SavingsCommandResponse>(
         `/savingsaccounts/${accountId}/transactions`,
         { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "dd MMMM yyyy" },
-        { params: { command: "withdrawal" } }
+        { params: { command: "withdrawal" } },
     );
     return data;
 }
@@ -157,22 +151,14 @@ export async function makeWithdrawal(accountId: number, payload: SavingsTransact
 // ─── Fixed Deposit Lifecycle Commands ───────────────────────────
 // Section 10.4 — POST /fixeddepositaccounts/{id}?command={command}
 
-export async function fixedDepositCommand(
-    accountId: number,
-    command: string,
-    data: Record<string, unknown> = {}
-): Promise<SavingsCommandResponse> {
+export async function fixedDepositCommand(accountId: number, command: string, data: Record<string, unknown> = {}): Promise<SavingsCommandResponse> {
     // Convert any date fields from yyyy-MM-dd to dd MMMM yyyy
     const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
     const converted: Record<string, unknown> = { locale: "en", dateFormat: "dd MMMM yyyy" };
     for (const [k, v] of Object.entries(data)) {
         converted[k] = dateFields.includes(k) ? toFineractDate(v as string | undefined) : v;
     }
-    const { data: result } = await client.post<SavingsCommandResponse>(
-        `/fixeddepositaccounts/${accountId}`,
-        converted,
-        { params: { command } }
-    );
+    const { data: result } = await client.post<SavingsCommandResponse>(`/fixeddepositaccounts/${accountId}`, converted, { params: { command } });
     return result;
 }
 
@@ -295,15 +281,8 @@ export async function fetchFixedDepositProduct(productId: number): Promise<Fixed
 }
 
 export async function createFixedDepositProduct(payload: FixedDepositProductCreateRequest): Promise<{ resourceId: number }> {
-    // Convert chart slab dates from yyyy-MM-dd → dd MMMM yyyy
-    const charts = payload.charts?.map((chart) => ({
-        ...chart,
-        fromDate: chart.fromDate ? toFineractDate(chart.fromDate) : undefined,
-        endDate: chart.endDate ? toFineractDate(chart.endDate) : undefined,
-    }));
     const { data } = await client.post<{ resourceId: number }>("/fixeddepositproducts", {
         ...payload,
-        charts,
     });
     return data;
 }
@@ -345,7 +324,14 @@ export interface PostSavingsChargeRequest {
 }
 
 export interface SavingsChargesTemplate {
-    chargeOptions?: Array<{ id: number; name: string; amount?: number; chargeTimeType?: { id: number; code: string; value: string }; chargeCalculationType?: { id: number; code: string; value: string }; currency?: { code: string; name: string; decimalPlaces: number } }>;
+    chargeOptions?: Array<{
+        id: number;
+        name: string;
+        amount?: number;
+        chargeTimeType?: { id: number; code: string; value: string };
+        chargeCalculationType?: { id: number; code: string; value: string };
+        currency?: { code: string; name: string; decimalPlaces: number };
+    }>;
 }
 
 /** GET /savingsaccounts/{savingsAccountId}/charges */
@@ -361,7 +347,10 @@ export async function fetchSavingsChargesTemplate(savingsAccountId: number | str
 }
 
 /** POST /savingsaccounts/{savingsAccountId}/charges */
-export async function createSavingsCharge(savingsAccountId: number | string, payload: PostSavingsChargeRequest): Promise<{ savingsAccountId: number; resourceId: number; officeId?: number }> {
+export async function createSavingsCharge(
+    savingsAccountId: number | string,
+    payload: PostSavingsChargeRequest,
+): Promise<{ savingsAccountId: number; resourceId: number; officeId?: number }> {
     const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/charges`, payload);
     return data;
 }
@@ -428,4 +417,3 @@ export async function undoSavingsTransaction(savingsAccountId: number | string, 
     const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/transactions/${transactionId}`, {}, { params: { command: "undo" } });
     return data;
 }
-

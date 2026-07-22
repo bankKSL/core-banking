@@ -1,14 +1,6 @@
 // ─── Apache Fineract Savings / Deposit Types ────────────────────
 
-export type SavingsAccountStatus =
-    | "Submitted and pending approval"
-    | "Approved"
-    | "Active"
-    | "Closed"
-    | "Rejected"
-    | "Withdrawn by applicant"
-    | "Matured"
-    | "Premature Closed";
+export type SavingsAccountStatus = "Submitted and pending approval" | "Approved" | "Active" | "Closed" | "Rejected" | "Withdrawn by applicant" | "Matured" | "Premature Closed";
 
 export type DepositAccountType = "savings" | "fixed_deposit" | "recurring_deposit";
 
@@ -320,7 +312,7 @@ export interface SavingsProductCreateRequest {
     digitsAfterDecimal: number;
     inMultiplesOf?: number;
     locale: string;
-    dateFormat: string;
+    dateFormat?: string;
     nominalAnnualInterestRate: number;
     /** 1=Daily, 4=Monthly, 5=Quarterly, 6=Semi-Annual, 7=Annual */
     interestCompoundingPeriodType: number;
@@ -390,7 +382,7 @@ export interface FixedDepositProduct {
 export interface FixedDepositProductCreateRequest {
     name: string;
     shortName: string;
-    description: string;
+    description: string | undefined;
     currencyCode: string;
     digitsAfterDecimal: number;
     inMultiplesOf: number;

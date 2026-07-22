@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Plus, Search, Pencil, AlertTriangle, Calendar } from "lucide-react";
+import { Plus, Search, Pencil, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -10,43 +10,20 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createFixedDepositProduct, fetchFixedDepositProducts } from "@/features/deposits";
-import { useFixedDepositProducts } from "@/features/deposits/hooks/useFixedDepositProducts";
-import { DEPOSIT_PERIOD_FREQUENCIES, PRE_CLOSURE_PENALTY_TYPES, ACCOUNTING_RULES } from "@/features/deposits";
+import { useFixedDepositProducts, createFixedDepositProduct } from "@/features/deposits";
 import type { FixedDepositProduct, FixedDepositProductCreateRequest } from "@/features/deposits";
+import { currentDate } from "@/lib/utils";
 
-const COMPOUNDING_OPTS = [
-    { id: 1, label: "Daily" },
-    { id: 4, label: "Monthly" },
-    { id: 5, label: "Quarterly" },
-    { id: 6, label: "Semi-Annual" },
-    { id: 7, label: "Annual" },
-];
-const POSTING_OPTS = [
-    { id: 1, label: "Monthly" },
-    { id: 4, label: "Quarterly" },
-    { id: 5, label: "Semi-Annual" },
-    { id: 7, label: "Annual" },
-];
-const CALC_OPTS = [
-    { id: 1, label: "Daily Balance" },
-    { id: 2, label: "Avg Daily Balance" },
-];
-const DAYS_YEAR_OPTS = [
-    { id: 360, label: "360" },
-    { id: 364, label: "364" },
-    { id: 365, label: "365" },
-];
-const CHART_PERIODS = [
+const CURRENCIES = ["USD", "EUR", "GBP", "INR", "JPY", "AUD"];
+
+const DEPOSIT_PERIOD_FREQUENCIES = [
     { id: 0, label: "Days" },
+    { id: 1, label: "Weeks" },
     { id: 2, label: "Months" },
     { id: 3, label: "Years" },
 ];
 
-const formatCurrency = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
-
-const CURRENCIES = ["USD", "EUR", "GBP", "INR", "JPY", "AUD"];
+const formatCurrency = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
 
 const FixedDepositProductsPage: React.FC = () => {
     const { data: products = [], isLoading, isError, error, refetch } = useFixedDepositProducts();
@@ -59,29 +36,43 @@ const FixedDepositProductsPage: React.FC = () => {
         description: "",
         currencyCode: "USD",
         digitsAfterDecimal: 2,
-        inMultiplesOf: 0,
-        interestCompoundingPeriodType: 1,
-        interestPostingPeriodType: 4,
-        interestCalculationType: 1,
-        interestCalculationDaysInYearType: 365,
-        accountingRule: 1,
-        minDepositTerm: 6,
-        minDepositTermTypeId: 2,
         depositAmount: 1000,
+        minDepositTerm: 1,
+        minDepositTermTypeId: 2,
         locale: "en",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [slabs, setSlabs] = useState([{ description: "", periodType: 2, fromPeriod: 6, toPeriod: 6, annualInterestRate: 5 }]);
 
     const filtered = useMemo(() => {
         const q = search.toLowerCase();
         return products.filter((p) => p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q));
     }, [products, search]);
 
+    const openCreate = () => {
+        setForm({
+            name: "",
+            shortName: "",
+            description: "",
+            currencyCode: "USD",
+            digitsAfterDecimal: 2,
+            depositAmount: 1000,
+            minDepositTerm: 1,
+            minDepositTermTypeId: 2,
+            locale: "en",
+        });
+        setErrors({});
+        setDialogOpen(true);
+    };
+
     const validate = (): boolean => {
         const e: Record<string, string> = {};
-        if (!form.name?.trim()) e.name = "Required";
-        if (!form.shortName?.trim()) e.shortName = "Required";
+        if (!form.name?.trim()) e.name = "Product name is required";
+        if (!form.shortName?.trim()) e.shortName = "Short name is required";
+        if (!form.currencyCode) e.currencyCode = "Currency is required";
+        if (form.digitsAfterDecimal == null || form.digitsAfterDecimal < 0) e.digitsAfterDecimal = "Valid decimal places required";
+        if (!form.depositAmount || form.depositAmount <= 0) e.depositAmount = "Deposit amount is required";
+        if (!form.minDepositTerm || form.minDepositTerm <= 0) e.minDepositTerm = "Min deposit term is required";
+        if (!form.minDepositTermTypeId) e.minDepositTermTypeId = "Term type is required";
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -89,17 +80,39 @@ const FixedDepositProductsPage: React.FC = () => {
     const handleSave = async () => {
         if (!validate()) return;
         setSaving(true);
+        console.log(currentDate());
+
         try {
             await createFixedDepositProduct({
-                ...(form as FixedDepositProductCreateRequest),
+                name: form.name!,
+                shortName: form.shortName!,
+                description: form.description || undefined,
+                currencyCode: form.currencyCode!,
+                digitsAfterDecimal: form.digitsAfterDecimal!,
+                inMultiplesOf: 0,
+                interestCompoundingPeriodType: 1,
+                interestPostingPeriodType: 4,
+                interestCalculationType: 1,
+                interestCalculationDaysInYearType: 365,
+                accountingRule: 1,
+                minDepositTerm: form.minDepositTerm!,
+                minDepositTermTypeId: form.minDepositTermTypeId!,
+                depositAmount: form.depositAmount!,
+                locale: "en",
                 charts: [
                     {
-                        fromDate: new Date().toISOString().split("T")[0],
+                        fromDate: currentDate(),
+                        dateFormat: "yyyy-MM-dd",
                         locale: "en",
-                        dateFormat: "dd MMMM yyyy",
-                        chartSlabs: slabs
-                            .filter((s) => s.description && s.annualInterestRate > 0)
-                            .map((s) => ({ ...s, fromDate: undefined as any })),
+                        chartSlabs: [
+                            {
+                                description: "Default",
+                                periodType: 2,
+                                fromPeriod: 1,
+                                toPeriod: 1,
+                                annualInterestRate: 5,
+                            },
+                        ],
                     },
                 ],
             });
@@ -115,80 +128,63 @@ const FixedDepositProductsPage: React.FC = () => {
     const columns: ColumnDef<FixedDepositProduct>[] = [
         { key: "name", header: "Name", cell: (r) => <span className="font-semibold">{r.name}</span> },
         { key: "shortName", header: "Code", cell: (r) => <code className="text-xs">{r.shortName ?? "—"}</code> },
-        { key: "currency", header: "Currency", cell: (r) => <code className="text-xs">{r.currency.code}</code> },
+        { key: "currency.code", header: "Currency", cell: (r) => <code className="text-xs">{r.currency.code}</code> },
+        {
+            key: "nominalAnnualInterestRate",
+            header: "Rate",
+            cell: (r) => <span className="font-mono text-sm">{r.activeChart?.chartSlabs?.[0]?.annualInterestRate ?? "—"}%</span>,
+        },
         {
             key: "minDepositTerm",
             header: "Min Term",
             cell: (r) => `${r.minDepositTerm} ${r.minDepositTermType?.description?.toLowerCase() ?? "mo"}`,
         },
         {
-            key: "preClosurePenalApplicable",
-            header: "Penalty?",
+            key: "actions",
+            header: "",
             cell: (r) => (
-                <Badge variant={r.preClosurePenalApplicable ? "warning" : "default"} size="sm">
-                    {r.preClosurePenalApplicable ? "Yes" : "No"}
-                </Badge>
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" className="h-8 w-8" onClick={() => window.open(`/deposits/fixed-products/${r.id}`, "_blank")}>
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                </div>
             ),
-        },
-        {
-            key: "activeChart",
-            header: "Rate",
-            cell: (r) => (r.activeChart?.chartSlabs?.[0] ? `${r.activeChart.chartSlabs[0].annualInterestRate}%` : "—"),
         },
     ];
 
-    if (isError)
+    if (isError) {
         return (
-            <div className="p-8 text-center text-red-600">
-                Failed to load FD products: {String(error)}{" "}
-                <Button variant="outline" className="ml-4" onClick={() => refetch()}>
-                    Retry
-                </Button>
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <AlertTriangle className="mx-auto h-8 w-8 text-red-500 mb-2" />
+                    <p className="text-red-600">Failed to load: {String(error)}</p>
+                    <Button variant="outline" className="mt-2" onClick={() => refetch()}>
+                        Retry
+                    </Button>
+                </div>
             </div>
         );
+    }
 
     return (
-        <div className="space-y-6">
+        <div className="p-6 space-y-6">
             <PageHeader
                 title="Fixed Deposit Products"
-                description="Section 11: Manage FD product configurations with interest rate slabs"
+                description="Manage fixed deposit products available in the system"
                 actions={
-                    <Button
-                        onClick={() => {
-                            setForm({
-                                name: "",
-                                shortName: "",
-                                description: "",
-                                currencyCode: "USD",
-                                digitsAfterDecimal: 2,
-                                inMultiplesOf: 0,
-                                interestCompoundingPeriodType: 1,
-                                interestPostingPeriodType: 4,
-                                interestCalculationType: 1,
-                                interestCalculationDaysInYearType: 365,
-                                accountingRule: 1,
-                                minDepositTerm: 6,
-                                minDepositTermTypeId: 2,
-                                depositAmount: 1000,
-                                locale: "en",
-                            });
-                            setSlabs([{ description: "", periodType: 2, fromPeriod: 6, toPeriod: 6, annualInterestRate: 5 }]);
-                            setDialogOpen(true);
-                        }}
-                    >
+                    <Button onClick={openCreate}>
                         <Plus className="mr-2 h-4 w-4" />
-                        New FD Product
+                        Create FD Product
                     </Button>
                 }
             />
+
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>
-                        {products.length} Product{products.length !== 1 && "s"}
-                    </CardTitle>
-                    <div className="relative w-80">
+                    <CardTitle>Products</CardTitle>
+                    <div className="relative w-72">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+                        <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -199,39 +195,33 @@ const FixedDepositProductsPage: React.FC = () => {
                             ))}
                         </div>
                     ) : (
-                        <DataTable columns={columns} data={filtered} emptyState={{ message: "No FD products found" }} />
+                        <DataTable columns={columns} data={filtered} emptyState={{ message: "No fixed deposit products found" }} />
                     )}
                 </CardContent>
             </Card>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
                         <DialogTitle>Create Fixed Deposit Product</DialogTitle>
-                        <DialogDescription>Section 11.1: Configure product with interest rate slabs.</DialogDescription>
+                        <DialogDescription>Fields marked with * are required.</DialogDescription>
                     </DialogHeader>
                     <div className="grid grid-cols-2 gap-4 py-4">
+                        {/* Row 1: Name (full width) */}
+                        <div className="col-span-2">
+                            <Input label="Product Name *" value={form.name ?? ""} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={errors.name} />
+                        </div>
+
+                        {/* Row 2: Short Name + Currency */}
                         <Input
-                            label="Name *"
-                            value={form.name ?? ""}
-                            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                            error={errors.name}
-                        />
-                        <Input
-                            label="Short Code *"
+                            label="Short Name *"
                             value={form.shortName ?? ""}
                             onChange={(e) => setForm((f) => ({ ...f, shortName: e.target.value }))}
                             error={errors.shortName}
+                            placeholder="No spaces"
                         />
-                        <div className="col-span-2">
-                            <Textarea
-                                label="Description"
-                                value={form.description ?? ""}
-                                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                            />
-                        </div>
                         <div>
-                            <label className="text-sm font-medium">Currency</label>
+                            <label className="text-sm font-medium">Currency *</label>
                             <Select value={form.currencyCode ?? "USD"} onValueChange={(v) => setForm((f) => ({ ...f, currencyCode: v }))}>
                                 <SelectTrigger>
                                     <SelectValue />
@@ -245,296 +235,54 @@ const FixedDepositProductsPage: React.FC = () => {
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Row 3: Description (full width) */}
+                        <div className="col-span-2">
+                            <Textarea
+                                label="Description"
+                                placeholder="Brief product description"
+                                value={form.description ?? ""}
+                                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                            />
+                        </div>
+
+                        {/* Row 4: Decimal Places + Deposit Amount */}
                         <Input
-                            label="Decimal Places"
+                            label="Decimal Places *"
                             type="number"
                             value={form.digitsAfterDecimal ?? 2}
                             onChange={(e) => setForm((f) => ({ ...f, digitsAfterDecimal: Number(e.target.value) }))}
                         />
-                        <div>
-                            <label className="text-sm font-medium">Compounding *</label>
-                            <Select
-                                value={String(form.interestCompoundingPeriodType ?? 1)}
-                                onValueChange={(v) => setForm((f) => ({ ...f, interestCompoundingPeriodType: Number(v) }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {COMPOUNDING_OPTS.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Posting *</label>
-                            <Select
-                                value={String(form.interestPostingPeriodType ?? 4)}
-                                onValueChange={(v) => setForm((f) => ({ ...f, interestPostingPeriodType: Number(v) }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {POSTING_OPTS.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Calculation *</label>
-                            <Select
-                                value={String(form.interestCalculationType ?? 1)}
-                                onValueChange={(v) => setForm((f) => ({ ...f, interestCalculationType: Number(v) }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {CALC_OPTS.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Days/Year *</label>
-                            <Select
-                                value={String(form.interestCalculationDaysInYearType ?? 365)}
-                                onValueChange={(v) => setForm((f) => ({ ...f, interestCalculationDaysInYearType: Number(v) }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {DAYS_YEAR_OPTS.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Accounting Rule *</label>
-                            <Select
-                                value={String(form.accountingRule ?? 1)}
-                                onValueChange={(v) => setForm((f) => ({ ...f, accountingRule: Number(v) }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {ACCOUNTING_RULES.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div />
                         <Input
                             label="Deposit Amount *"
                             type="number"
                             value={form.depositAmount ?? ""}
                             onChange={(e) => setForm((f) => ({ ...f, depositAmount: Number(e.target.value) }))}
+                            error={errors.depositAmount}
                         />
+
+                        {/* Row 5: Min Deposit Term + Min Term Type */}
                         <Input
                             label="Min Deposit Term *"
                             type="number"
                             value={form.minDepositTerm ?? ""}
                             onChange={(e) => setForm((f) => ({ ...f, minDepositTerm: Number(e.target.value) }))}
+                            error={errors.minDepositTerm}
                         />
                         <div>
                             <label className="text-sm font-medium">Min Term Type *</label>
-                            <Select
-                                value={String(form.minDepositTermTypeId ?? 2)}
-                                onValueChange={(v) => setForm((f) => ({ ...f, minDepositTermTypeId: Number(v) }))}
-                            >
+                            <Select value={String(form.minDepositTermTypeId ?? 2)} onValueChange={(v) => setForm((f) => ({ ...f, minDepositTermTypeId: Number(v) }))}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {DEPOSIT_PERIOD_FREQUENCIES.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
+                                    {DEPOSIT_PERIOD_FREQUENCIES.map((f) => (
+                                        <SelectItem key={f.id} value={String(f.id)}>
+                                            {f.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-                        <Input
-                            label="Max Deposit Term"
-                            type="number"
-                            value={form.maxDepositTerm ?? ""}
-                            onChange={(e) => setForm((f) => ({ ...f, maxDepositTerm: Number(e.target.value) || undefined }))}
-                        />
-                        <div>
-                            <label className="text-sm font-medium">Max Term Type</label>
-                            <Select
-                                value={String(form.maxDepositTermTypeId ?? "")}
-                                onValueChange={(v) => setForm((f) => ({ ...f, maxDepositTermTypeId: v ? Number(v) : undefined }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="—" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {DEPOSIT_PERIOD_FREQUENCIES.map((o) => (
-                                        <SelectItem key={o.id} value={String(o.id)}>
-                                            {o.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Section 11.6: Pre-closure penalty */}
-                        <div className="col-span-2 border-t pt-3">
-                            <p className="text-sm font-medium mb-2 text-gray-500">Pre-Closure Penalty (Section 11.6)</p>
-                            <label className="flex items-center gap-2 text-sm">
-                                <input
-                                    type="checkbox"
-                                    className="accent-[#D32F2F]"
-                                    checked={!!form.preClosurePenalApplicable}
-                                    onChange={(e) => setForm((f) => ({ ...f, preClosurePenalApplicable: e.target.checked }))}
-                                />{" "}
-                                Penalty applicable
-                            </label>
-                            {form.preClosurePenalApplicable && (
-                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                    <Input
-                                        label="Penalty Rate (%)"
-                                        type="number"
-                                        step="0.01"
-                                        value={form.preClosurePenalInterest ?? ""}
-                                        onChange={(e) => setForm((f) => ({ ...f, preClosurePenalInterest: Number(e.target.value) }))}
-                                    />
-                                    <div>
-                                        <label className="text-sm font-medium">Applies To</label>
-                                        <Select
-                                            value={String(form.preClosurePenalInterestOnTypeId ?? 1)}
-                                            onValueChange={(v) => setForm((f) => ({ ...f, preClosurePenalInterestOnTypeId: Number(v) }))}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {PRE_CLOSURE_PENALTY_TYPES.map((o) => (
-                                                    <SelectItem key={o.id} value={String(o.id)}>
-                                                        {o.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Rate Slabs */}
-                        <div className="col-span-2 border-t pt-3">
-                            <div className="flex items-center justify-between mb-2">
-                                <p className="text-sm font-medium text-gray-500">Interest Rate Slabs</p>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        setSlabs([
-                                            ...slabs,
-                                            { description: "", periodType: 2, fromPeriod: 1, toPeriod: 12, annualInterestRate: 5 },
-                                        ])
-                                    }
-                                >
-                                    + Add Slab
-                                </Button>
-                            </div>
-                            {slabs.map((s, i) => (
-                                <div key={i} className="grid grid-cols-5 gap-2 mb-2 p-2 border rounded">
-                                    <Input
-                                        placeholder="Label"
-                                        value={s.description}
-                                        onChange={(e) => {
-                                            const ns = [...slabs];
-                                            ns[i] = { ...ns[i], description: e.target.value };
-                                            setSlabs(ns);
-                                        }}
-                                    />
-                                    <div>
-                                        <Select
-                                            value={String(s.periodType)}
-                                            onValueChange={(v) => {
-                                                const ns = [...slabs];
-                                                ns[i] = { ...ns[i], periodType: Number(v) };
-                                                setSlabs(ns);
-                                            }}
-                                        >
-                                            <SelectTrigger className="h-9 text-xs">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {CHART_PERIODS.map((o) => (
-                                                    <SelectItem key={o.id} value={String(o.id)}>
-                                                        {o.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <Input
-                                        placeholder="From"
-                                        type="number"
-                                        value={s.fromPeriod || ""}
-                                        onChange={(e) => {
-                                            const ns = [...slabs];
-                                            ns[i] = { ...ns[i], fromPeriod: Number(e.target.value) };
-                                            setSlabs(ns);
-                                        }}
-                                    />
-                                    <Input
-                                        placeholder="To"
-                                        type="number"
-                                        value={s.toPeriod || ""}
-                                        onChange={(e) => {
-                                            const ns = [...slabs];
-                                            ns[i] = { ...ns[i], toPeriod: Number(e.target.value) };
-                                            setSlabs(ns);
-                                        }}
-                                    />
-                                    <div className="flex gap-1">
-                                        <Input
-                                            placeholder="Rate%"
-                                            type="number"
-                                            step="0.01"
-                                            value={s.annualInterestRate || ""}
-                                            onChange={(e) => {
-                                                const ns = [...slabs];
-                                                ns[i] = { ...ns[i], annualInterestRate: Number(e.target.value) };
-                                                setSlabs(ns);
-                                            }}
-                                        />
-                                        {slabs.length > 1 && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-9 w-9 text-red-500"
-                                                onClick={() => setSlabs(slabs.filter((_, j) => j !== i))}
-                                            >
-                                                ×
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
                         </div>
                     </div>
                     <DialogFooter>

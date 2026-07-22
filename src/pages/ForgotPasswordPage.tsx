@@ -9,8 +9,7 @@ import { Label } from "@/components/ui/label";
 
 const ForgotPasswordPage: FC = () => {
     const navigate = useNavigate();
-    const { forgotPassword, isSendingReset, resetPasswordSent, resetError, clearResetState, isAuthenticated } =
-        useAuthStore();
+    const { forgotPassword, isSendingReset, resetPasswordSent, resetError, clearResetState, isAuthenticated } = useAuthStore();
     const { theme, toggleTheme } = useUIStore();
 
     const [email, setEmail] = useState("");
@@ -68,12 +67,8 @@ const ForgotPasswordPage: FC = () => {
                         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/25">
                             <LayoutDashboard className="h-7 w-7 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                            CoreBank
-                        </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Reset your password
-                        </p>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">CoreBank</h1>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Reset your password</p>
                     </div>
 
                     {resetPasswordSent ? (
@@ -81,22 +76,13 @@ const ForgotPasswordPage: FC = () => {
                             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50">
                                 <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
                             </div>
-                            <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                                Check your email
-                            </h2>
+                            <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Check your email</h2>
                             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                If an account exists for{" "}
-                                <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>,
-                                you&apos;ll receive a password reset link shortly.
+                                If an account exists for <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>, you&apos;ll receive a password reset link
+                                shortly.
                             </p>
-                            <p className="mb-6 text-xs text-gray-400 dark:text-gray-500">
-                                Didn&apos;t receive it? Check your spam folder or try again.
-                            </p>
-                            <Button
-                                variant="outline"
-                                onClick={handleBackToLogin}
-                                className="w-full"
-                            >
+                            <p className="mb-6 text-xs text-gray-400 dark:text-gray-500">Didn&apos;t receive it? Check your spam folder or try again.</p>
+                            <Button variant="outline" onClick={handleBackToLogin} className="w-full">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Back to login
                             </Button>
@@ -110,17 +96,11 @@ const ForgotPasswordPage: FC = () => {
                                 </div>
                             )}
 
-                            <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
-                                Enter your email address and we&apos;ll send you a link to
-                                reset your password.
-                            </p>
+                            <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">Enter your email address and we&apos;ll send you a link to reset your password.</p>
 
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div className="space-y-2">
-                                    <Label
-                                        htmlFor="reset-email"
-                                        className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                                    >
+                                    <Label htmlFor="reset-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Email address
                                     </Label>
                                     <div className="relative">
@@ -134,11 +114,7 @@ const ForgotPasswordPage: FC = () => {
                                             required
                                             autoComplete="email"
                                             disabled={isSendingReset}
-                                            className={cn(
-                                                "h-11 pl-10",
-                                                resetError &&
-                                                    "border-red-300 focus-visible:ring-red-500 dark:border-red-700",
-                                            )}
+                                            className={cn("h-11 pl-10", resetError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700")}
                                         />
                                         <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                     </div>
@@ -147,7 +123,7 @@ const ForgotPasswordPage: FC = () => {
                                 <Button
                                     type="submit"
                                     disabled={isSendingReset}
-                                    className="h-11 w-full bg-[#D32F2F] text-white hover:bg-[#c62828] dark:bg-[#D32F2F] dark:hover:bg-[#c62828]"
+                                    className="h-11 w-full bg-[#D32F2F] text-white hover:bg-primary-600 dark:bg-[#D32F2F] dark:hover:bg-primary-600"
                                 >
                                     {isSendingReset ? (
                                         <span className="flex items-center gap-2">
@@ -164,7 +140,7 @@ const ForgotPasswordPage: FC = () => {
                                 <button
                                     type="button"
                                     onClick={handleBackToLogin}
-                                    className="inline-flex items-center gap-1.5 text-sm font-medium text-[#D32F2F] hover:text-[#b71c1c] transition-colors"
+                                    className="inline-flex items-center gap-1.5 text-sm font-medium text-[#D32F2F] hover:text-primary-700 transition-colors"
                                 >
                                     <ArrowLeft className="h-3.5 w-3.5" />
                                     Back to login
@@ -174,9 +150,7 @@ const ForgotPasswordPage: FC = () => {
                     )}
                 </div>
 
-                <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">
-                    &copy; {new Date().getFullYear()} CoreBank. All rights reserved.
-                </p>
+                <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">&copy; {new Date().getFullYear()} CoreBank. All rights reserved.</p>
             </div>
         </div>
     );
