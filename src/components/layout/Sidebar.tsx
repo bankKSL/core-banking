@@ -27,6 +27,7 @@ import {
     Shield,
     LayoutGrid,
     Calendar,
+    ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -84,6 +85,17 @@ const sections: NavSectionConfig[] = [
         title: "Treasury",
         defaultOpen: true,
         items: [{ label: "Exchange Rates", path: "/exchange-rates", icon: Globe }],
+    },
+    {
+        id: "transfers",
+        title: "Transfers",
+        defaultOpen: true,
+        items: [
+            { label: "Transfer History", path: "/transfers/history", icon: ArrowRightLeft },
+            { label: "New Transfer", path: "/transfers/new", icon: ArrowRightLeft },
+            { label: "Standing Instructions", path: "/transfers/standing-instructions", icon: FileText },
+            { label: "SI History", path: "/transfers/standing-instructions/history", icon: FileText },
+        ],
     },
     {
         id: "crm",

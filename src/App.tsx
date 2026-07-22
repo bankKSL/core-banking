@@ -38,6 +38,11 @@ import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { useAuthStore } from "./store";
 import DepositAccountDetailPage from "./pages/DepositAccountDetailPage";
+import TransferListPage from "./pages/TransferListPage";
+import TransferFormPage from "./pages/TransferFormPage";
+import StandingInstructionsPage from "./pages/StandingInstructionsPage";
+import StandingInstructionFormPage from "./pages/StandingInstructionFormPage";
+import StandingInstructionHistoryPage from "./pages/StandingInstructionHistoryPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -131,6 +136,13 @@ function App() {
                                     <Route path="/clients/new" element={<CreateClientPage />} />
                                     <Route path="/clients/:id" element={<ClientDetailPage />} />
                                     <Route path="/clients/:id/edit" element={<EditClientPage />} />
+                                    {/* Transfers */}
+                                    <Route path="/transfers/history" element={<TransferListPage />} />
+                                    <Route path="/transfers/new" element={<TransferFormPage />} />
+                                    <Route path="/transfers/standing-instructions" element={<StandingInstructionsPage />} />
+                                    <Route path="/transfers/standing-instructions/new" element={<StandingInstructionFormPage />} />
+                                    <Route path="/transfers/standing-instructions/edit/:id" element={<StandingInstructionFormPage />} />
+                                    <Route path="/transfers/standing-instructions/history" element={<StandingInstructionHistoryPage />} />
                                 </Routes>
                             </AppLayout>
                         </RequireAuth>
