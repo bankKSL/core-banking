@@ -149,14 +149,65 @@ export async function fetchRepaymentTemplate(loanId: number): Promise<RepaymentT
     return data;
 }
 
-export async function makeRepayment(loanId: number, payload: RepaymentTransactionRequest): Promise<LoanCommandResponse> {
+// ─── Loan Transaction Template ──────────────────────────────
+
+export async function fetchTransactionTemplate(loanId: number, command?: string): Promise<any> {
+    const { data } = await client.get<any>(`/loans/${loanId}/transactions/template`, {
+        params: command ? { command } : undefined,
+    });
+    return data;
+}
+
+// ─── Generic Transaction Posting ────────────────────────────
+
+export async function makeTransaction(loanId: number, payload: Record<string, unknown>, command: string): Promise<LoanCommandResponse> {
     const { data } = await client.post<LoanCommandResponse>(
         `/loans/${loanId}/transactions`,
-        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "yyyy-MM-dd" },
-        { params: { command: "repayment" } },
+        { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
+        { params: { command } },
     );
     return data;
 }
+
+// ─── Additional Lifecycle Commands ──────────────────────────
+
+export async function waiveInterest(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    return makeTransaction(loanId, payload, "waiveinterest");
+}
+
+export async function prepayLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    return makeTransaction(loanId, payload, "prepayLoan");
+}
+
+export async function forecloseLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    return makeTransaction(loanId, payload, "foreclosure");
+}
+
+export async function writeOffLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    return makeTransaction(loanId, payload, "writeoff");
+}
+
+export async function rejectLoanApplication(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+        params: { command: "reject" },
+    });
+    return data;
+}
+
+export async function withdrawLoanApplication(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+        params: { command: "withdrawnByClient" },
+    });
+    return data;
+}
+
+export async function closeLoanAsRescheduled(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+    const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+        params: { command: "closeAsRescheduled" },
+    });
+    return data;
+}
+
 
 // ─── Loan Repayment Schedule ──────────────────────────────────────
 

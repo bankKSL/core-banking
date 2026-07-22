@@ -85,8 +85,8 @@ const sections: NavSectionConfig[] = [
         items: [
             { label: "Transfer History", path: "/transfers/history", icon: ArrowRightLeft },
             { label: "New Transfer", path: "/transfers/new", icon: ArrowRightLeft },
-            { label: "Standing Instructions", path: "/transfers/standing-instructions", icon: FileText },
-            { label: "SI History", path: "/transfers/standing-instructions/history", icon: FileText },
+            // { label: "Standing Instructions", path: "/transfers/standing-instructions", icon: FileText },
+            // { label: "SI History", path: "/transfers/standing-instructions/history", icon: FileText },
         ],
     },
     {

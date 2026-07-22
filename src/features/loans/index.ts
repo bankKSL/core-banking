@@ -52,13 +52,21 @@ export {
     undoApproval,
     undoDisbursal,
     fetchRepaymentTemplate,
-    makeRepayment,
     fetchRepaymentSchedule,
     fetchLoanTransactions,
     fetchLoanProducts,
     fetchLoanProduct,
     createLoanProduct,
     updateLoanProduct,
+    fetchTransactionTemplate,
+    makeTransaction,
+    waiveInterest,
+    prepayLoan,
+    forecloseLoan,
+    writeOffLoan,
+    rejectLoanApplication,
+    withdrawLoanApplication,
+    closeLoanAsRescheduled,
 } from "./api/loan";
 
 export { useLoans, loanKeys } from "./hooks/useLoans";
@@ -75,8 +83,28 @@ export { useLoan } from "./hooks/useLoan";
 
 export { useApproveLoan, useDisburseLoan, useRejectLoan, useCloseLoan, useUndoApproval, useUndoDisbursal } from "./hooks/useLoanCommands";
 
+export { useUpdateLoan } from "./hooks/useUpdateLoan";
+
 export { useRepaymentSchedule } from "./hooks/useRepaymentSchedule";
 
 export { useCreateLoan as useCreateLoanMutation } from "./hooks/useCreateLoan";
 
 export { useLoanTemplate as useLoanTemplateQuery } from "./hooks/useLoanTemplate";
+
+// ─── Pages ─────────────────────────────────────────────────
+export { default as LoansListPage } from "./pages/LoansListPage";
+export { default as LoanFormPage } from "./pages/LoanFormPage";
+export { default as LoanViewPage } from "./pages/LoanViewPage";
+export { default as LoanTransactionFormPage } from "./pages/LoanTransactionFormPage";
+
+// ─── Components ────────────────────────────────────────────
+export { default as LoanTable } from "./components/LoanTable";
+export { default as LoanFilters } from "./components/LoanFilters";
+export { default as LoanForm } from "./components/LoanForm";
+export { default as LoanDetails } from "./components/LoanDetails";
+export { default as LoanCommands } from "./components/LoanCommands";
+export { default as LoanStatusBadge } from "./components/LoanStatusBadge";
+export { default as LoanTransactionsTable } from "./components/LoanTransactionsTable";
+export { default as LoanTransactionForm } from "./components/LoanTransactionForm";
+export type { TransactionFormValues } from "./components/LoanTransactionForm";
+

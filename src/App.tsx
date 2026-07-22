@@ -16,6 +16,12 @@ import LoanApplicationDetailPage from "./pages/LoanApplicationDetailPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
 import RepaymentSchedulePage from "./pages/RepaymentSchedulePage";
 import CollateralPage from "./pages/CollateralPage";
+import {
+    LoansListPage,
+    LoanFormPage,
+    LoanViewPage,
+    LoanTransactionFormPage,
+} from "@/features/loans";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
@@ -105,6 +111,12 @@ function App() {
                                     <Route path="/lending/products" element={<LoanProductsPage />} />
                                     <Route path="/lending/repayments" element={<RepaymentSchedulePage />} />
                                     <Route path="/lending/collateral" element={<CollateralPage />} />
+                                    {/* Loans (new module) */}
+                                    <Route path="/loans" element={<LoansListPage />} />
+                                    <Route path="/loans/create" element={<LoanFormPage />} />
+                                    <Route path="/loans/edit/:id" element={<LoanFormPage />} />
+                                    <Route path="/loans/view/:id" element={<LoanViewPage />} />
+                                    <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
                                     {/* Deposits */}
                                     <Route path="/deposits/products" element={<SavingsProductsPage />} />
                                     <Route path="/deposits/products/new" element={<SavingsProductsPage />} />
