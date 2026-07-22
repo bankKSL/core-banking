@@ -120,15 +120,9 @@ const StandingInstructionsPage: React.FC = () => {
                             ))}
                         </div>
                     ) : instructions.length === 0 ? (
-                        <EmptyState message="No standing instructions found." />
+                        <EmptyState title="No standing instructions found." />
                     ) : (
-                        <DataTable
-                            columns={columns}
-                            data={instructions}
-                            onRowClick={(row) =>
-                                navigate(`/transfers/standing-instructions/edit/${row.id}`)
-                            }
-                        />
+                        <DataTable columns={columns} data={instructions} onRowClick={(row) => navigate(`/transfers/standing-instructions/edit/${row.id}`)} />
                     )}
                 </CardContent>
             </Card>

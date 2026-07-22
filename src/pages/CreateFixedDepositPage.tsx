@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { createFixedDepositAccount, DEPOSIT_PERIOD_FREQUENCIES } from "@/features/deposits";
 import { useClients } from "@/features/clients";
-import { useSavingsProducts } from "@/features/deposits";
+import { useFixedDepositProducts } from "@/features/deposits";
+import { currentDate } from "@/lib/utils";
 
 const CreateFixedDepositPage: React.FC = () => {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ const CreateFixedDepositPage: React.FC = () => {
     });
 
     const { data: clientsData, isLoading: clientsLoading } = useClients({ limit: 100 });
-    const { data: products = [], isLoading: productsLoading } = useSavingsProducts();
+    const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
     const clients = clientsData?.pageItems ?? [];
     const isLoading = clientsLoading || productsLoading;
 
@@ -51,7 +52,7 @@ const CreateFixedDepositPage: React.FC = () => {
                 depositAmount: form.depositAmount,
                 depositPeriod: form.depositPeriod,
                 depositPeriodFrequencyId: form.depositPeriodFrequencyId,
-                submittedOnDate: form.submittedOnDate,
+                submittedOnDate: currentDate(form.submittedOnDate),
                 locale: "en",
                 dateFormat: "yyyy-MM-dd",
             });
@@ -116,7 +117,7 @@ const CreateFixedDepositPage: React.FC = () => {
                             </div>
                         </div>
                         <div>
-                            <Label>Savings Product *</Label>
+                            <Label>Fixed Deposit Product *</Label>
                             <Select value={form.productId ? String(form.productId) : ""} onValueChange={(v) => setField("productId", Number(v))}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select product" />

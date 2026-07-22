@@ -8,14 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { fetchTransfers, parseDate } from "@/features/transfers";
 import type { Transfer } from "@/features/transfers";
 
@@ -89,7 +82,7 @@ const TransferListPage: React.FC = () => {
                             ))}
                         </div>
                     ) : transfers.length === 0 ? (
-                        <EmptyState message="No transfers found." />
+                        <EmptyState title="No transfers found." />
                     ) : (
                         <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 overflow-x-auto">
                             <Table>

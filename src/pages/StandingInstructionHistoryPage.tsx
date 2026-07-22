@@ -14,8 +14,11 @@ function formatDate(dateVal: number[] | undefined): string {
     const d = parseDate(dateVal);
     if (!d) return "—";
     return d.toLocaleDateString("en-US", {
-        year: "numeric", month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
     });
 }
 
@@ -71,10 +74,7 @@ const StandingInstructionHistoryPage: React.FC = () => {
     if (isError) {
         return (
             <div className="p-6">
-                <PageHeader
-                    title="Standing Instruction History"
-                    description="Execution history of recurring transfers"
-                />
+                <PageHeader title="Standing Instruction History" description="Execution history of recurring transfers" />
                 <ErrorState message="Failed to load history." onRetry={refetch} />
             </div>
         );
@@ -82,10 +82,7 @@ const StandingInstructionHistoryPage: React.FC = () => {
 
     return (
         <div className="p-6 space-y-6">
-            <PageHeader
-                title="Standing Instruction History"
-                description="Execution history of recurring transfers"
-            />
+            <PageHeader title="Standing Instruction History" description="Execution history of recurring transfers" />
 
             <Card>
                 <CardHeader>
@@ -102,7 +99,7 @@ const StandingInstructionHistoryPage: React.FC = () => {
                             ))}
                         </div>
                     ) : items.length === 0 ? (
-                        <EmptyState message="No execution history found." />
+                        <EmptyState title="No execution history found." />
                     ) : (
                         <DataTable columns={columns} data={items} />
                     )}

@@ -4,14 +4,6 @@ import client from "@/api/client";
  * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
  * Returns undefined if empty or already in Fineract format.
  */
-function toFineractDate(isoDate?: string): string | undefined {
-    if (!isoDate) return undefined;
-    if (/[A-Za-z]/.test(isoDate)) return isoDate;
-    const [y, m, d] = isoDate.split("-").map(Number);
-    if (!y || !m || !d) return isoDate;
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return `${d} ${months[m - 1]} ${y}`;
-}
 
 import type {
     SavingsAccount,
@@ -30,6 +22,7 @@ import type {
     FixedDepositProduct,
     FixedDepositProductCreateRequest,
 } from "../types/deposit";
+import { currentDate } from "@/lib/utils";
 
 // ─── Savings Products ────────────────────────────────────────────
 
@@ -81,7 +74,7 @@ export async function fetchSavingsAccountTemplate(clientId?: number, productId?:
 export async function createSavingsAccount(payload: SavingsAccountCreateRequest): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>("/savingsaccounts", {
         ...payload,
-        submittedOnDate: toFineractDate(payload.submittedOnDate),
+        submittedOnDate: currentDate(payload.submittedOnDate),
         dateFormat: "yyyy-MM-dd",
         locale: "en",
     });
@@ -155,7 +148,7 @@ export async function fixedDepositCommand(accountId: number, command: string, da
     const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
     const converted: Record<string, unknown> = { locale: "en", dateFormat: "yyyy-MM-dd" };
     for (const [k, v] of Object.entries(data)) {
-        converted[k] = dateFields.includes(k) ? toFineractDate(v as string | undefined) : v;
+        converted[k] = dateFields.includes(k) ? currentDate(v as string | undefined) : v;
     }
     const { data: result } = await client.post<SavingsCommandResponse>(`/fixeddepositaccounts/${accountId}`, converted, { params: { command } });
     return result;
@@ -203,17 +196,17 @@ export async function createFixedDepositAccount(payload: Record<string, unknown>
     const { data } = await client.post<SavingsCommandResponse>("/fixeddepositaccounts", {
         locale: "en",
         dateFormat: "yyyy-MM-dd",
+        nominalAnnualInterestRate: 1,
         ...payload,
-        submittedOnDate: toFineractDate(payload.submittedOnDate as string | undefined),
     });
     return data;
 }
 
 // ─── Fetch Fixed Deposits (10.1, 10.3) ────────────────────────
 
-export async function fetchFixedDepositAccounts(params: FixedDepositListParams = {}): Promise<{ totalFilteredRecords: number; pageItems: FixedDepositAccount[] }> {
-    const { data } = await client.get<{ totalFilteredRecords: number; pageItems: FixedDepositAccount[] }>("/fixeddepositaccounts", { params });
-    return data;
+export async function fetchFixedDepositAccounts(params: FixedDepositListParams = {}): Promise<FixedDepositAccount[]> {
+    const { data } = await client.get<FixedDepositAccount[]>("/fixeddepositaccounts", { params });
+    return data ?? [];
 }
 
 export async function fetchFixedDepositAccount(accountId: number | string): Promise<FixedDepositAccount> {
