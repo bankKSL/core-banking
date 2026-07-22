@@ -54,7 +54,7 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
                     <InfoRow icon={<DollarSign className="h-4 w-4 text-emerald-500" />} label="Principal" value={formatCurrency(loan.principal ?? 0)} />
                     <InfoRow icon={<Percent className="h-4 w-4 text-blue-500" />} label="Interest Rate" value={`${loan.annualInterestRate ?? loan.interestRatePerPeriod ?? 0}%`} />
                     <InfoRow icon={<Clock className="h-4 w-4" />} label="Repayments" value={`${loan.numberOfRepayments ?? "—"} × ${loan.repaymentEvery ?? "—"} ${loan.repaymentFrequencyType?.value ?? "months"}`} />
-                    <InfoRow icon={<Clock className="h-4 w-4" />} label="Term" value={`${loan.termFrequency ?? "—"} ${loan.termPeriodFrequencyType === 0 ? "Days" : loan.termPeriodFrequencyType === 1 ? "Weeks" : loan.termPeriodFrequencyType === 2 ? "Months" : "Years"}`} />
+                    <InfoRow icon={<Clock className="h-4 w-4" />} label="Term" value={`${loan.termFrequency ?? "—"} ${loan.termPeriodFrequencyType?.value ?? "Years"}`} />
                     <InfoRow icon={<Percent className="h-4 w-4" />} label="Amortization" value={loan.amortizationType?.value ?? "—"} />
                     <InfoRow icon={<Percent className="h-4 w-4" />} label="Interest Type" value={loan.interestType?.value ?? "—"} />
                 </CardContent>

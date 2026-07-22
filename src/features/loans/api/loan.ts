@@ -169,19 +169,19 @@ export async function makeTransaction(loanId: number, payload: Record<string, un
 // ─── Additional Lifecycle Commands ──────────────────────────
 
 export async function waiveInterest(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
-    return makeTransaction(loanId, payload, "waiveinterest");
+    return makeTransaction(loanId, payload as Record<string, unknown>, "waiveinterest");
 }
 
 export async function prepayLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
-    return makeTransaction(loanId, payload, "prepayLoan");
+    return makeTransaction(loanId, payload as Record<string, unknown>, "prepayLoan");
 }
 
 export async function forecloseLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
-    return makeTransaction(loanId, payload, "foreclosure");
+    return makeTransaction(loanId, payload as Record<string, unknown>, "foreclosure");
 }
 
 export async function writeOffLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
-    return makeTransaction(loanId, payload, "writeoff");
+    return makeTransaction(loanId, payload as Record<string, unknown>, "writeoff");
 }
 
 export async function rejectLoanApplication(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {

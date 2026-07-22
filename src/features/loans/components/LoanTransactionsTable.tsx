@@ -14,7 +14,7 @@ const formatCurrency = (n: number, code = "USD") =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
 
 const getTransactionStatus = (tx: LoanTransaction): string => {
-    if (tx.reversed) return "reversed";
+    if (tx.manuallyReversed) return "reversed";
     return "completed";
 };
 
@@ -96,7 +96,7 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
                                 <TableCell className="text-right font-mono text-sm text-emerald-600">{formatCurrency(tx.principalPortion ?? 0)}</TableCell>
                                 <TableCell className="text-right font-mono text-sm text-amber-600">{formatCurrency(tx.interestPortion ?? 0)}</TableCell>
                                 <TableCell>
-                                    <StatusBadge status={getTransactionStatus(tx)} label={tx.reversed ? "Reversed" : "Completed"} size="sm" />
+                                    <StatusBadge status={getTransactionStatus(tx)} label={tx.manuallyReversed ? "Reversed" : "Completed"} size="sm" />
                                 </TableCell>
                             </TableRow>
                         ))}

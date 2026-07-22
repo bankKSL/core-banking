@@ -215,6 +215,7 @@ export interface LoanTransaction {
     date: string;
     currency: { code: string; displaySymbol: string };
     amount: number;
+    principalPortion?: number;
     interestPortion?: number;
     feeChargesPortion?: number;
     penaltyChargesPortion?: number;

@@ -30,8 +30,11 @@ const LoanFormPage: FC = () => {
 
     const handleSubmit = useCallback(
         async (values: CreateLoanFormValues) => {
+            // Strip null values since LoanCreateRequest doesn't accept null
+            const cleaned = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== null)) as Record<string, unknown>;
+
             const payload = {
-                ...values,
+                ...cleaned,
                 clientId: clientId ?? values.clientId,
                 submittedOnDate: currentDate(values.submittedOnDate),
                 expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
