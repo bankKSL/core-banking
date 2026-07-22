@@ -4,7 +4,6 @@ import {
     LayoutDashboard,
     Megaphone,
     Tags,
-    Package,
     Filter,
     Calculator,
     Play,
@@ -18,12 +17,9 @@ import {
     CalendarClock,
     Briefcase,
     Wallet,
-    ArrowUpCircle,
-    Receipt,
     PiggyBank,
     Globe,
     Users,
-    UserCheck,
     Shield,
     LayoutGrid,
     Calendar,
@@ -72,10 +68,6 @@ const sections: NavSectionConfig[] = [
         items: [
             { label: "Savings Accounts", path: "/deposits/saving-accounts", icon: PiggyBank },
             { label: "Fixed Deposits", path: "/deposits/fixed", icon: Wallet },
-
-            { label: "Transactions", path: "/deposits/transactions", icon: Receipt },
-            { label: "Withdrawals", path: "/deposits/withdrawals", icon: ArrowUpCircle },
-
             { label: "Savings Accounts Products", path: "/deposits/products", icon: LayoutGrid },
             { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
         ],

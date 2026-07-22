@@ -17,8 +17,6 @@ import LoanProductsPage from "./pages/LoanProductsPage";
 import RepaymentSchedulePage from "./pages/RepaymentSchedulePage";
 import CollateralPage from "./pages/CollateralPage";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
-import DepositTransactionsPage from "./pages/DepositTransactionsPage";
-import WithdrawalsPage from "./pages/WithdrawalsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
 import FixedDepositDetailPage from "./pages/FixedDepositDetailPage";
@@ -118,8 +116,6 @@ function App() {
                                     <Route path="/deposits/saving-accounts/:id/transactions/:command" element={<SavingsTransactionFormPage />} />
                                     <Route path="/deposits/saving-accounts/:id/action/:command" element={<AccountActionPage />} />
                                     <Route path="/deposits/:accountType/:accountId/action/:command" element={<AccountActionPage />} />
-                                    <Route path="/deposits/transactions" element={<DepositTransactionsPage />} />
-                                    <Route path="/deposits/withdrawals" element={<WithdrawalsPage />} />
                                     <Route path="/deposits/fixed" element={<FixedDepositsPage />} />
                                     <Route path="/deposits/fixed/new" element={<CreateFixedDepositPage />} />
                                     <Route path="/deposits/fixed/:id" element={<FixedDepositDetailPage />} />
