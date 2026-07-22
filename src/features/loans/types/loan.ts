@@ -16,13 +16,9 @@ export type AmortizationType = "Equal installments" | "Equal principal payments"
 export type InterestType = "Flat" | "Declining Balance";
 export type InterestCalculationPeriodType = "daily" | "same as repayment period";
 
-export type RepaymentFrequency =
-    | "Daily" | "Weekly" | "Every two weeks" | "Monthly"
-    | "Every two months" | "Quarterly" | "Semi Annual" | "Annual";
+export type RepaymentFrequency = "Daily" | "Weekly" | "Every two weeks" | "Monthly" | "Every two months" | "Quarterly" | "Semi Annual" | "Annual";
 
-export type LoanTransactionType =
-    | "disbursement" | "repayment" | "waiveInterest"
-    | "waiveCharges" | "writeOff" | "recoveryPayment" | "accrual";
+export type LoanTransactionType = "disbursement" | "repayment" | "waiveInterest" | "waiveCharges" | "writeOff" | "recoveryPayment" | "accrual";
 
 // ─── Loan Product ────────────────────────────────────────────────
 
@@ -37,8 +33,13 @@ export interface LoanProduct {
     startDate?: string;
     closeDate?: string;
     currency: {
-        code: string; name: string; decimalPlaces: number;
-        inMultiplesOf?: number; displaySymbol: string; nameCode: string; displayLabel: string;
+        code: string;
+        name: string;
+        decimalPlaces: number;
+        inMultiplesOf?: number;
+        displaySymbol: string;
+        nameCode: string;
+        displayLabel: string;
     };
     principal: number;
     minPrincipal: number;
@@ -66,12 +67,15 @@ export interface LoanProduct {
     daysInYearType?: { id: number; code: string; value: string };
     isInterestRecalculationEnabled?: boolean;
     charges: Array<{
-        id: number; chargeId: number; name: string;
+        id: number;
+        chargeId: number;
+        name: string;
         chargeTimeType: { id: number; code: string; value: string };
         chargeCalculationType: { id: number; code: string; value: string };
         amount: number;
         chargePaymentMode: { id: number; code: string; value: string };
-        isPenalty: boolean; isActive: boolean;
+        isPenalty: boolean;
+        isActive: boolean;
     }>;
     accountingMappings?: unknown;
 }
@@ -129,43 +133,79 @@ export interface Loan {
     emiAmount?: number;
     fixedEmiAmount?: number;
     maxOutstandingLoanBalance?: number;
+    expectedDisbursementDate?: string;
+    submittedOnDate?: string;
 }
 
 export interface LoanSummary {
     currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
-    principalDisbursed: number; principalPaid: number; principalWrittenOff: number;
-    principalOutstanding: number; principalOverdue: number;
-    interestOutstanding: number; interestPaid: number; interestWrittenOff: number; interestOverdue: number;
-    feeChargesOutstanding: number; feeChargesPaid: number; feeChargesWrittenOff: number; feeChargesOverdue: number;
-    penaltyChargesOutstanding: number; penaltyChargesPaid: number; penaltyChargesWrittenOff: number; penaltyChargesOverdue: number;
-    totalExpectedRepayment: number; totalRepayment: number;
-    totalExpectedCostOfLoan: number; totalCostOfLoan: number;
-    totalWaived: number; totalWrittenOff: number;
-    totalOutstanding: number; totalOverdue: number;
-    overdueSinceDate?: string; lastRepaymentDate?: string;
+    principalDisbursed: number;
+    principalPaid: number;
+    principalWrittenOff: number;
+    principalOutstanding: number;
+    principalOverdue: number;
+    interestOutstanding: number;
+    interestPaid: number;
+    interestWrittenOff: number;
+    interestOverdue: number;
+    feeChargesOutstanding: number;
+    feeChargesPaid: number;
+    feeChargesWrittenOff: number;
+    feeChargesOverdue: number;
+    penaltyChargesOutstanding: number;
+    penaltyChargesPaid: number;
+    penaltyChargesWrittenOff: number;
+    penaltyChargesOverdue: number;
+    totalExpectedRepayment: number;
+    totalRepayment: number;
+    totalExpectedCostOfLoan: number;
+    totalCostOfLoan: number;
+    totalWaived: number;
+    totalWrittenOff: number;
+    totalOutstanding: number;
+    totalOverdue: number;
+    overdueSinceDate?: string;
+    lastRepaymentDate?: string;
 }
 
 export interface LoanTimeline {
-    submittedOnDate?: string; submittedByUsername?: string;
-    expectedDisbursementDate?: string; expectedMaturityDate?: string;
+    submittedOnDate?: string;
+    submittedByUsername?: string;
+    expectedDisbursementDate?: string;
+    expectedMaturityDate?: string;
     actualDisbursementDate?: string;
-    approvedOnDate?: string; approvedByUsername?: string;
-    rejectedOnDate?: string; rejectedByUsername?: string;
-    closedOnDate?: string; closedByUsername?: string;
+    approvedOnDate?: string;
+    approvedByUsername?: string;
+    rejectedOnDate?: string;
+    rejectedByUsername?: string;
+    closedOnDate?: string;
+    closedByUsername?: string;
 }
 
 export interface LoanRepaymentPeriod {
     period: number;
-    fromDate: string; dueDate: string;
-    principalOriginalDue: number; principalDue: number; principalOutstanding: number;
-    principalPaid: number; principalWrittenOff?: number;
-    interestOriginalDue: number; interestDue: number; interestOutstanding: number;
-    interestPaid: number; interestWrittenOff?: number;
-    feeChargesDue: number; feeChargesOutstanding: number; feeChargesPaid: number;
+    fromDate: string;
+    dueDate: string;
+    principalOriginalDue: number;
+    principalDue: number;
+    principalOutstanding: number;
+    principalPaid: number;
+    principalWrittenOff?: number;
+    interestOriginalDue: number;
+    interestDue: number;
+    interestOutstanding: number;
+    interestPaid: number;
+    interestWrittenOff?: number;
+    feeChargesDue: number;
+    feeChargesOutstanding: number;
+    feeChargesPaid: number;
     penaltyChargesDue: number;
-    totalOriginalDueForPeriod: number; totalDueForPeriod: number;
-    totalOutstandingForPeriod: number; totalPaidForPeriod?: number;
-    daysInPeriod: number; complete?: boolean;
+    totalOriginalDueForPeriod: number;
+    totalDueForPeriod: number;
+    totalOutstandingForPeriod: number;
+    totalPaidForPeriod?: number;
+    daysInPeriod: number;
+    complete?: boolean;
     obligationMetOnDate?: string;
 }
 
@@ -175,7 +215,9 @@ export interface LoanTransaction {
     date: string;
     currency: { code: string; displaySymbol: string };
     amount: number;
-    interestPortion?: number; feeChargesPortion?: number; penaltyChargesPortion?: number;
+    interestPortion?: number;
+    feeChargesPortion?: number;
+    penaltyChargesPortion?: number;
     outstandingLoanBalance?: number;
     submittedOnDate: string;
     manuallyReversed: boolean;
@@ -189,16 +231,22 @@ export interface LoanListResponse {
 }
 
 export interface LoanListParams {
-    offset?: number; limit?: number;
-    orderBy?: string; sortOrder?: "ASC" | "DESC";
-    officeId?: number; clientId?: number;
-    accountNo?: string; loanStatus?: number;
+    offset?: number;
+    limit?: number;
+    orderBy?: string;
+    sortOrder?: "ASC" | "DESC";
+    officeId?: number;
+    clientId?: number;
+    accountNo?: string;
+    loanStatus?: number;
 }
 
 // ─── Loan Template ───────────────────────────────────────────────
 
 export interface LoanTemplate {
-    clientId?: number; clientName?: string; clientOfficeId?: number;
+    clientId?: number;
+    clientName?: string;
+    clientOfficeId?: number;
     loanProductId?: number;
     loanProductOptions: Array<{ id: number; name: string }>;
     currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
@@ -255,8 +303,10 @@ export interface LoanCreateRequest {
     maxOutstandingLoanBalance?: number;
     charges?: Array<{ chargeId: number; amount: number; dueDate?: string }>;
     disbursementData?: Array<{
-        expectedDisbursementDate: string; principal: number;
-        approvedPrincipal?: number; netDisbursalAmount?: number;
+        expectedDisbursementDate: string;
+        principal: number;
+        approvedPrincipal?: number;
+        netDisbursalAmount?: number;
     }>;
     datatables?: Array<{ data: unknown; registeredTableName: string }>;
     dateFormat?: string;
@@ -264,30 +314,47 @@ export interface LoanCreateRequest {
 }
 
 export interface LoanCommandRequest {
-    command?: string; locale?: string; dateFormat?: string; note?: string;
-    approvedOnDate?: string; expectedDisbursementDate?: string;
-    actualDisbursementDate?: string; transactionAmount?: number;
-    paymentTypeId?: number; transactionDate?: string;
-    rejectedOnDate?: string; closedOnDate?: string; writeoffReason?: string;
+    command?: string;
+    locale?: string;
+    dateFormat?: string;
+    note?: string;
+    approvedOnDate?: string;
+    expectedDisbursementDate?: string;
+    actualDisbursementDate?: string;
+    transactionAmount?: number;
+    paymentTypeId?: number;
+    transactionDate?: string;
+    rejectedOnDate?: string;
+    closedOnDate?: string;
+    writeoffReason?: string;
 }
 
 export interface LoanCommandResponse {
-    officeId: number; clientId: number; loanId: number;
-    resourceId?: number; changes?: Record<string, unknown>;
+    officeId: number;
+    clientId: number;
+    loanId: number;
+    resourceId?: number;
+    changes?: Record<string, unknown>;
 }
 
 // ─── Repayment ───────────────────────────────────────────────────
 
 export interface RepaymentTransactionRequest {
-    transactionDate: string; transactionAmount: number;
-    paymentTypeId?: number; accountNumber?: string;
-    checkNumber?: string; routingCode?: string;
-    receiptNumber?: string; bankNumber?: string;
-    locale?: string; dateFormat?: string;
+    transactionDate: string;
+    transactionAmount: number;
+    paymentTypeId?: number;
+    accountNumber?: string;
+    checkNumber?: string;
+    routingCode?: string;
+    receiptNumber?: string;
+    bankNumber?: string;
+    locale?: string;
+    dateFormat?: string;
 }
 
 export interface RepaymentTemplate {
-    amount: number; date: string;
+    amount: number;
+    date: string;
     currency: { code: string; name: string; displaySymbol: string };
     paymentTypeOptions: Array<{ id: number; name: string }>;
     outstandingLoanBalance: number;
@@ -296,16 +363,40 @@ export interface RepaymentTemplate {
 // ─── Loan Product Create ─────────────────────────────────────────
 
 export interface LoanProductCreateRequest {
-    name: string; shortName?: string; description?: string;
-    currencyCode: string; digitsAfterDecimal?: number; inMultiplesOf?: number;
-    principal: number; minPrincipal?: number; maxPrincipal?: number;
-    numberOfRepayments: number; minNumberOfRepayments?: number; maxNumberOfRepayments?: number;
-    repaymentEvery: number; repaymentFrequencyType: number;
-    interestRatePerPeriod: number; minInterestRatePerPeriod?: number; maxInterestRatePerPeriod?: number;
+    name: string;
+    shortName?: string;
+    description?: string;
+    externalId?: string;
+    fundId?: number;
+    delinquencyBucketId?: number;
+    currencyCode: string;
+    digitsAfterDecimal?: number;
+    inMultiplesOf?: number;
+    principal: number;
+    numberOfRepayments: number;
+    repaymentEvery: number;
+    repaymentFrequencyType: number;
+    interestRatePerPeriod: number;
     interestRateFrequencyType?: number;
-    amortizationType: number; interestType: number; interestCalculationPeriodType: number;
-    transactionProcessingStrategyId?: number;
-    isLinkedToFloatingInterestRates?: boolean;
-    fundId?: number; startDate?: string; closeDate?: string;
-    locale?: string; dateFormat?: string;
+    amortizationType: number;
+    interestType: number;
+    interestCalculationPeriodType: number;
+    loanScheduleType?: string;
+    loanScheduleProcessingType?: string;
+    transactionProcessingStrategyCode?: string;
+    daysInYearType?: number;
+    daysInMonthType?: number;
+    isInterestRecalculationEnabled?: boolean;
+    paymentAllocation?: unknown[];
+    creditAllocation?: unknown[];
+    accountingRule?: number;
+    startDate?: string;
+    closeDate?: string;
+    locale?: string;
+    dateFormat?: string;
+}
+
+export interface Fund {
+    id: number;
+    name: string;
 }

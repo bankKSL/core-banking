@@ -1,200 +1,516 @@
 import React, { useState, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2, Percent, Clock } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLoanProducts, createLoanProduct, updateLoanProduct } from "@/features/loans";
+import { useNavigate } from "react-router-dom";
+import { useLoanProducts, createLoanProduct, updateLoanProduct, useFunds } from "@/features/loans";
 import type { LoanProduct, LoanProductCreateRequest } from "@/features/loans";
 
-const INTEREST_TYPE_OPTIONS = [
-  { id: 0, label: "Flat Rate", code: "Flat" },
-  { id: 1, label: "Reducing Balance", code: "Declining Balance" },
-];
+/** Extract string value from Fineract enum objects {id,code,value} or primitive */
+function enumVal(v: any, fallback = ""): string {
+    if (v == null) return fallback;
+    if (typeof v === "object") return v.code ?? v.value ?? String(v.id) ?? fallback;
+    return String(v);
+}
+
+/** Extract number id from Fineract enum objects {id,code,value} or primitive */
+function enumId(v: any, fallback = 0): number {
+    if (v == null) return fallback;
+    if (typeof v === "object") return v.id ?? fallback;
+    return Number(v);
+}
 
 const AMORTIZATION_OPTIONS = [
-  { id: 1, label: "Equal Installments (EMI)", code: "Equal installments" },
-  { id: 2, label: "Equal Principal", code: "Equal principal payments" },
+    { id: 1, label: "Equal Installments" },
+    { id: 0, label: "Equal Principal" },
 ];
 
 const REPAYMENT_FREQ_OPTIONS = [
-  { id: 0, label: "Daily" },
-  { id: 1, label: "Weekly" },
-  { id: 2, label: "Monthly" },
-  { id: 3, label: "Quarterly" },
-  { id: 4, label: "Semi-Annual" },
-  { id: 5, label: "Annual" },
+    { id: 0, label: "Days" },
+    { id: 1, label: "Weeks" },
+    { id: 2, label: "Months" },
 ];
 
-const CURRENCY_OPTIONS = ["USD", "EUR", "GBP", "INR", "JPY", "AUD"];
+const CURRENCY_OPTIONS = ["USD", "EUR", "INR"];
+
+const STRATEGY_OPTIONS = [
+    { id: "mifos-standard-strategy", label: "Mifos Standard Strategy" },
+    { id: "heavensfamily-strategy", label: "Heavensfamily Strategy" },
+    { id: "early-repayment-strategy", label: "Early Repayment Strategy" },
+    { id: "advance-payment-allocation-strategy", label: "Advance Payment Allocation Strategy" },
+    { id: "principal-interest-penalty-fees-order-strategy", label: "P-I-Penalty-Fees Order" },
+    { id: "interest-principal-penalty-fees-order-strategy", label: "I-P-Penalty-Fees Order" },
+    { id: "penalties-fees-interest-principal-order-strategy", label: "Penalties-Fees-I-P Order" },
+];
 
 const LoanProductsPage: React.FC = () => {
-  const { data: products = [], isLoading, isError, error, refetch } = useLoanProducts();
-  const [search, setSearch] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<LoanProduct | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<Partial<LoanProductCreateRequest>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+    const navigate = useNavigate();
+    const { data: products = [], isLoading, refetch } = useLoanProducts();
+    const { data: funds = [] } = useFunds();
+    const [search, setSearch] = useState("");
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<LoanProduct | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState<Record<string, any>>({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return products.filter((p) => p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q));
-  }, [products, search]);
+    const isProgressive = enumVal(form.loanScheduleType) === "PROGRESSIVE";
 
-  const openCreate = () => {
-    setEditingId(null);
-    setForm({ name: "", currencyCode: "USD", principal: 0, numberOfRepayments: 12, repaymentEvery: 1, repaymentFrequencyType: 2, interestRatePerPeriod: 0, amortizationType: 1, interestType: 1, interestCalculationPeriodType: 0, digitsAfterDecimal: 2 });
-    setErrors({});
-    setDialogOpen(true);
-  };
+    const filtered = useMemo(() => {
+        const q = search.toLowerCase();
+        return products.filter((p) => p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q));
+    }, [products, search]);
 
-  const openEdit = (p: LoanProduct) => {
-    setEditingId(p.id);
-    setForm({ name: p.name, shortName: p.shortName, description: p.description, currencyCode: p.currency.code, principal: p.principal, minPrincipal: p.minPrincipal, maxPrincipal: p.maxPrincipal, numberOfRepayments: p.numberOfRepayments, repaymentEvery: p.repaymentEvery, repaymentFrequencyType: p.repaymentFrequencyType.id, interestRatePerPeriod: p.interestRatePerPeriod, amortizationType: p.amortizationType.id, interestType: p.interestType.id, interestCalculationPeriodType: p.interestCalculationPeriodType.id });
-    setErrors({});
-    setDialogOpen(true);
-  };
+    const openCreate = () => {
+        setEditingId(null);
+        setForm({
+            name: "",
+            description: "",
+            externalId: "",
+            shortName: "",
+            fundId: undefined,
+            currencyCode: "USD",
+            principal: 0,
+            numberOfRepayments: 12,
+            repaymentEvery: 1,
+            repaymentFrequencyType: 2,
+            amortizationType: 1,
+            interestCalculationPeriodType: 0,
+            transactionProcessingStrategyCode: "mifos-standard-strategy",
+            loanScheduleType: "CUMULATIVE",
+            daysInYearType: 1,
+            daysInMonthType: 1,
+            isInterestRecalculationEnabled: false,
+            interestRatePerPeriod: 0,
+            interestType: 0,
+            interestRateFrequencyType: 3,
+            digitsAfterDecimal: 2,
+            inMultiplesOf: 0,
+            accountingRule: 1,
+            locale: "en",
+            dateFormat: "yyyy-MM-dd",
+        });
+        setErrors({});
+        setDialogOpen(true);
+    };
 
-  const validate = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!form.name?.trim()) e.name = "Required";
-    if (!(form.principal ?? 0)) e.principal = "Must be > 0";
-    if (!(form.numberOfRepayments ?? 0)) e.numberOfRepayments = "Required";
-    if (!(form.interestRatePerPeriod ?? 0)) e.interestRatePerPeriod = "Must be >= 0";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+    const openEdit = (p: any) => {
+        setEditingId(p.id);
+        setForm({
+            name: p.name,
+            shortName: p.shortName,
+            description: p.description,
+            externalId: p.externalId,
+            fundId: p.fundId,
+            currencyCode: p.currency?.code ?? "USD",
+            principal: p.principal,
+            numberOfRepayments: p.numberOfRepayments,
+            repaymentEvery: p.repaymentEvery,
+            repaymentFrequencyType: enumId(p.repaymentFrequencyType, 2),
+            amortizationType: enumId(p.amortizationType, 1),
+            interestCalculationPeriodType: enumId(p.interestCalculationPeriodType, 0),
+            transactionProcessingStrategyCode: p.transactionProcessingStrategyCode ?? "mifos-standard-strategy",
+            loanScheduleType: enumVal(p.loanScheduleType, "CUMULATIVE"),
+            daysInYearType: enumId(p.daysInYearType, 1),
+            daysInMonthType: enumId(p.daysInMonthType, 1),
+            isInterestRecalculationEnabled: !!p.isInterestRecalculationEnabled,
+            interestRatePerPeriod: p.interestRatePerPeriod,
+            interestType: enumId(p.interestType, 0),
+            interestRateFrequencyType: enumId(p.interestRateFrequencyType, 3),
+            digitsAfterDecimal: p.currency?.decimalPlaces ?? 2,
+            inMultiplesOf: p.currency?.inMultiplesOf ?? 0,
+            accountingRule: enumId(p.accountingRule, 1),
+            locale: "en",
+            dateFormat: "yyyy-MM-dd",
+        });
+        setErrors({});
+        setDialogOpen(true);
+    };
 
-  const handleSave = async () => {
-    if (!validate()) return;
-    setSaving(true);
-    try {
-      if (editingId) {
-        await updateLoanProduct(editingId, form);
-      } else {
-        await createLoanProduct(form as LoanProductCreateRequest);
-      }
-      setDialogOpen(false);
-      refetch();
-    } finally {
-      setSaving(false);
-    }
-  };
+    const validate = (): boolean => {
+        const e: Record<string, string> = {};
+        if (!form.name?.trim()) e.name = "Name is required";
+        if (!form.currencyCode) e.currencyCode = "Currency is required";
+        if (!form.principal || form.principal <= 0) e.principal = "Principal must be > 0";
+        if (!form.numberOfRepayments || form.numberOfRepayments <= 0) e.numberOfRepayments = "Required";
+        if (!form.repaymentEvery || form.repaymentEvery <= 0) e.repaymentEvery = "Required";
+        if (form.interestRatePerPeriod == null || form.interestRatePerPeriod < 0) e.interestRatePerPeriod = "Required";
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
 
-  const handleDelete = async () => {
-    if (deleteTarget) {
-      try { await updateLoanProduct(deleteTarget.id, {}); } catch { /* no-op */ }
-      setDeleteTarget(null);
-      refetch();
-    }
-  };
+    const handleSave = async () => {
+        if (!validate()) return;
+        setSaving(true);
+        try {
+            const payload: Record<string, any> = { ...form };
+            Object.keys(payload).forEach((k) => {
+                if (payload[k] === undefined) delete payload[k];
+            });
+            // Hidden defaults per spec
+            payload.locale = "en";
+            payload.accountingRule = 1;
+            payload.inMultiplesOf = 0;
+            payload.dateFormat = "yyyy-MM-dd";
 
-  const formatCurrency = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+            if (editingId) {
+                await updateLoanProduct(editingId, payload as any);
+            } else {
+                await createLoanProduct(payload as any);
+            }
+            setDialogOpen(false);
+            refetch();
+        } catch (err) {
+            console.error("Failed to save product", err);
+        } finally {
+            setSaving(false);
+        }
+    };
 
-  const columns: ColumnDef<LoanProduct>[] = [
-    { key: "name", header: "Name", cell: (r) => <span className="font-semibold">{r.name}</span> },
-    { key: "currency", header: "Currency", cell: (r) => <code className="text-xs">{r.currency.code}</code> },
-    { key: "principal", header: "Principal Range", cell: (r) => <span className="text-sm">{formatCurrency(r.minPrincipal)} – {formatCurrency(r.maxPrincipal)}</span> },
-    { key: "numberOfRepayments", header: "Repayments", cell: (r) => `${r.minNumberOfRepayments} – ${r.maxNumberOfRepayments}` },
-    { key: "interestRatePerPeriod", header: "Rate", cell: (r) => <span className="font-mono text-sm">{r.interestRatePerPeriod}%</span> },
-    { key: "interestType", header: "Interest Type", cell: (r) => <Badge variant="info" size="sm">{r.interestType.value}</Badge> },
-    { key: "amortizationType", header: "Amortization", cell: (r) => <span className="text-xs">{r.amortizationType.value}</span> },
-    {
-      key: "actions", header: "",
-      cell: (r) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => setDeleteTarget(r)}><Trash2 className="h-4 w-4" /></Button>
+    const handleDelete = () => {
+        setDeleteTarget(null);
+    };
+
+    const setField = (key: string, value: any) => setForm((f) => ({ ...f, [key]: value }));
+
+    const columns: ColumnDef<any>[] = [
+        { key: "name", header: "Name", accessorFn: (r) => <span className="font-medium">{r.name}</span> },
+        { key: "shortName", header: "Short Name", accessorFn: (r) => <span className="text-sm text-gray-500">{r.shortName ?? "—"}</span> },
+        { key: "currency", header: "Currency", accessorFn: (r) => <span>{r.currency?.code ?? "—"}</span> },
+        { key: "principal", header: "Principal", accessorFn: (r) => <span className="font-mono">{r.principal?.toLocaleString()}</span> },
+        { key: "rate", header: "Rate", accessorFn: (r) => <span>{r.interestRatePerPeriod}%</span> },
+        {
+            key: "repayments",
+            header: "Repayments",
+            accessorFn: (r) => (
+                <span>
+                    {r.numberOfRepayments} × {r.repaymentEvery}
+                </span>
+            ),
+        },
+        {
+            key: "scheduleType",
+            header: "Schedule",
+            accessorFn: (r) => {
+                const st = enumVal(r.loanScheduleType, "CUMULATIVE");
+                return <Badge>{st}</Badge>;
+            },
+        },
+        {
+            key: "actions",
+            header: "",
+            cell: (r) => (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/lending/products/view/${r.id}`)}>
+                        <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => openEdit(r)}>
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(r)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                </div>
+            ),
+        },
+    ];
+
+    return (
+        <div className="space-y-6">
+            <PageHeader
+                title="Loan Products"
+                description="Manage loan product definitions"
+                actions={
+                    <Button onClick={openCreate} className="bg-[#D32F2F] hover:bg-red-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Product
+                    </Button>
+                }
+            />
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Search className="h-4 w-4 text-gray-400" />
+                        All Products
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="mb-4">
+                        <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
+                    </div>
+                    {isLoading ? (
+                        <div className="space-y-4">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <Skeleton key={i} className="h-12 w-full" />
+                            ))}
+                        </div>
+                    ) : (
+                        <DataTable columns={columns} data={filtered} emptyState={{ message: "No products found." }} minWidth={900} />
+                    )}
+                </CardContent>
+            </Card>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>{editingId ? "Edit Loan Product" : "Create Loan Product"}</DialogTitle>
+                        <DialogDescription>Configure the loan product terms and settings.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4 max-h-[65vh] overflow-y-auto">
+                        {/* Row 1: Name | Short Name */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Name *</label>
+                            <Input value={form.name ?? ""} onChange={(e) => setField("name", e.target.value)} error={errors.name} />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Short Name</label>
+                            <Input value={form.shortName ?? ""} onChange={(e) => setField("shortName", e.target.value)} />
+                        </div>
+                        {/* Row 2 FULL: Description */}
+                        <div className="space-y-1.5 col-span-2">
+                            <label className="block text-sm font-medium">Description</label>
+                            <Textarea placeholder="Brief product description" rows={3} value={form.description ?? ""} onChange={(e) => setField("description", e.target.value)} />
+                        </div>
+                        {/* Row 3 FULL: External ID */}
+                        <div className="space-y-1.5 col-span-2">
+                            <label className="block text-sm font-medium">External ID</label>
+                            <Input value={form.externalId ?? ""} onChange={(e) => setField("externalId", e.target.value)} />
+                        </div>
+                        {/* Row 4: Fund | Currency Code */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Fund</label>
+                            <Select value={form.fundId ? String(form.fundId) : ""} onValueChange={(v) => setField("fundId", Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select fund" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {funds.map((f: any) => (
+                                        <SelectItem key={f.id} value={String(f.id)}>
+                                            {f.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Currency Code *</label>
+                            <Select value={form.currencyCode ?? "USD"} onValueChange={(v) => setField("currencyCode", v)}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CURRENCY_OPTIONS.map((c) => (
+                                        <SelectItem key={c} value={c}>
+                                            {c}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.currencyCode && <p className="text-xs text-red-500">{errors.currencyCode}</p>}
+                        </div>
+                        {/* Row 5: Principal | # Repayments */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Principal *</label>
+                            <Input type="number" value={form.principal ?? ""} onChange={(e) => setField("principal", Number(e.target.value))} error={errors.principal} />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium"># Repayments *</label>
+                            <Input
+                                type="number"
+                                value={form.numberOfRepayments ?? ""}
+                                onChange={(e) => setField("numberOfRepayments", Number(e.target.value))}
+                                error={errors.numberOfRepayments}
+                            />
+                        </div>
+                        {/* Row 6: Repayment Every | Repayment Frequency Type */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Repayment Every</label>
+                            <Input
+                                type="number"
+                                value={form.repaymentEvery ?? ""}
+                                onChange={(e) => setField("repaymentEvery", Number(e.target.value))}
+                                error={errors.repaymentEvery}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Repayment Frequency Type *</label>
+                            <Select value={String(form.repaymentFrequencyType ?? 2)} onValueChange={(v) => setField("repaymentFrequencyType", Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {REPAYMENT_FREQ_OPTIONS.map((o) => (
+                                        <SelectItem key={o.id} value={String(o.id)}>
+                                            {o.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {/* Row 7: Interest Rate | Amortization Type */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Interest Rate (% per period)</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                value={form.interestRatePerPeriod ?? ""}
+                                onChange={(e) => setField("interestRatePerPeriod", Number(e.target.value))}
+                                error={errors.interestRatePerPeriod}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Amortization Type *</label>
+                            <Select value={String(form.amortizationType ?? 1)} onValueChange={(v) => setField("amortizationType", Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {AMORTIZATION_OPTIONS.map((o) => (
+                                        <SelectItem key={o.id} value={String(o.id)}>
+                                            {o.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {/* Row 8: Interest Type | Interest Calc Period Type */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Interest Type</label>
+                            <Select value={String(form.interestType ?? 0)} onValueChange={(v) => setField("interestType", Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Declining Balance</SelectItem>
+                                    <SelectItem value="1">Flat</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Interest Calc Period Type *</label>
+                            <Select value={String(form.interestCalculationPeriodType ?? 0)} onValueChange={(v) => setField("interestCalculationPeriodType", Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Daily</SelectItem>
+                                    <SelectItem value="1">Same as Repayment</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {/* Row 9: Loan Schedule Type | Transaction Processing Strategy Code */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Loan Schedule Type</label>
+                            <Select
+                                value={enumVal(form.loanScheduleType, "CUMULATIVE")}
+                                onValueChange={(v) => {
+                                    setField("loanScheduleType", v);
+                                    if (v === "PROGRESSIVE") setField("transactionProcessingStrategyCode", "");
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="CUMULATIVE">Cumulative</SelectItem>
+                                    <SelectItem value="PROGRESSIVE">Progressive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Transaction Processing Strategy Code *</label>
+                            <Select
+                                value={form.transactionProcessingStrategyCode ?? ""}
+                                onValueChange={(v) => setField("transactionProcessingStrategyCode", v)}
+                                disabled={isProgressive}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select strategy" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(isProgressive
+                                        ? STRATEGY_OPTIONS.filter((s) => s.id === "advance-payment-allocation-strategy")
+                                        : STRATEGY_OPTIONS.filter((s) => s.id !== "advance-payment-allocation-strategy")
+                                    ).map((o) => (
+                                        <SelectItem key={o.id} value={o.id}>
+                                            {o.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.transactionProcessingStrategyCode && <p className="text-xs text-red-500">{errors.transactionProcessingStrategyCode}</p>}
+                        </div>
+                        {/* Row 10: Days In Year Type */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium">Days In Year Type</label>
+                            <Select value={String(form.daysInYearType ?? 1)} onValueChange={(v) => setField("daysInYearType", Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="1">Actual (365/366)</SelectItem>
+                                    <SelectItem value="360">360 Days</SelectItem>
+                                    <SelectItem value="365">365 Days</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div />
+                        {/* Row 11 FULL: Interest Recalculation Enabled */}
+                        <div
+                            className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                            onClick={() => setField("isInterestRecalculationEnabled", !form.isInterestRecalculationEnabled)}
+                        >
+                            <Checkbox
+                                id="isInterestRecalculationEnabled"
+                                checked={!!form.isInterestRecalculationEnabled}
+                                onCheckedChange={(v) => setField("isInterestRecalculationEnabled", v === true)}
+                            />
+                            <Label htmlFor="isInterestRecalculationEnabled" className="text-sm font-normal cursor-pointer">
+                                Interest Recalculation Enabled
+                            </Label>
+                        </div>
+                        {/* Row 12 Progressive only: Payment Credit Allocation Editor */}
+                        {isProgressive && (
+                            <div className="col-span-2 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-400 text-center">
+                                Payment/Credit Allocation Editor — Custom child component (not yet implemented)
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving…" : editingId ? "Save Changes" : "Create"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <ConfirmDialog
+                open={!!deleteTarget}
+                onOpenChange={() => setDeleteTarget(null)}
+                onConfirm={handleDelete}
+                title="Delete Loan Product"
+                description={`Delete "${deleteTarget?.name}"?`}
+                confirmLabel="Delete"
+                variant="destructive"
+            />
         </div>
-      ),
-    },
-  ];
-
-  if (isError) return <div className="p-8 text-center text-red-600">Failed to load loan products: {String(error)} <Button variant="outline" className="ml-4" onClick={() => refetch()}>Retry</Button></div>;
-
-  return (
-    <div className="space-y-6">
-      <PageHeader title="Loan Products" description="Configure and manage loan product offerings" actions={<Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" />New Product</Button>} />
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Products</CardTitle>
-          <div className="relative w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" /></div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (<div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} className="h-12 w-full" />))}</div>) : (
-            <DataTable columns={columns} data={filtered} emptyState={{ message: "No loan products found" }} />
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{editingId ? "Edit" : "Create"} Loan Product</DialogTitle><DialogDescription>Configure the loan product parameters. Financial fields default to your organization currency.</DialogDescription></DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <Input label="Product Name *" value={form.name ?? ""} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={errors.name} />
-            <Input label="Short Code" value={form.shortName ?? ""} onChange={(e) => setForm((f) => ({ ...f, shortName: e.target.value }))} />
-            <div className="col-span-2">
-              <label className="text-sm font-medium">Currency *</label>
-              <Select value={form.currencyCode ?? "USD"} onValueChange={(v) => setForm((f) => ({ ...f, currencyCode: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CURRENCY_OPTIONS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-            <Input label="Principal *" type="number" value={form.principal ?? ""} onChange={(e) => setForm((f) => ({ ...f, principal: Number(e.target.value) }))} error={errors.principal} />
-            <Input label="Min Principal" type="number" value={form.minPrincipal ?? ""} onChange={(e) => setForm((f) => ({ ...f, minPrincipal: Number(e.target.value) }))} />
-            <Input label="Max Principal" type="number" value={form.maxPrincipal ?? ""} onChange={(e) => setForm((f) => ({ ...f, maxPrincipal: Number(e.target.value) }))} />
-            <div />
-            <Input label="# Repayments *" type="number" value={form.numberOfRepayments ?? ""} onChange={(e) => setForm((f) => ({ ...f, numberOfRepayments: Number(e.target.value) }))} error={errors.numberOfRepayments} />
-            <Input label="Repayment Every" type="number" value={form.repaymentEvery ?? ""} onChange={(e) => setForm((f) => ({ ...f, repaymentEvery: Number(e.target.value) }))} />
-            <div>
-              <label className="text-sm font-medium">Frequency</label>
-              <Select value={String(form.repaymentFrequencyType ?? 2)} onValueChange={(v) => setForm((f) => ({ ...f, repaymentFrequencyType: Number(v) }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{REPAYMENT_FREQ_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-            <Input label="Min Repayments" type="number" value={form.minNumberOfRepayments ?? ""} onChange={(e) => setForm((f) => ({ ...f, minNumberOfRepayments: Number(e.target.value) }))} />
-            <Input label="Max Repayments" type="number" value={form.maxNumberOfRepayments ?? ""} onChange={(e) => setForm((f) => ({ ...f, maxNumberOfRepayments: Number(e.target.value) }))} />
-            <div />
-            <Input label="Interest Rate (% per period) *" type="number" step="0.01" value={form.interestRatePerPeriod ?? ""} onChange={(e) => setForm((f) => ({ ...f, interestRatePerPeriod: Number(e.target.value) }))} error={errors.interestRatePerPeriod} />
-            <div>
-              <label className="text-sm font-medium">Interest Type</label>
-              <Select value={String(form.interestType ?? 1)} onValueChange={(v) => setForm((f) => ({ ...f, interestType: Number(v) }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{INTEREST_TYPE_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Amortization</label>
-              <Select value={String(form.amortizationType ?? 1)} onValueChange={(v) => setForm((f) => ({ ...f, amortizationType: Number(v) }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{AMORTIZATION_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-            <div className="col-span-2">
-              <Textarea label="Description" placeholder="Brief product description" value={form.description ?? ""} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving}>{saving ? "Saving…" : editingId ? "Save Changes" : "Create"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <ConfirmDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Delete Loan Product" description={`Delete "${deleteTarget?.name}"?`} confirmLabel="Delete" variant="destructive" />
-    </div>
-  );
+    );
 };
 
 export default LoanProductsPage;

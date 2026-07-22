@@ -2,7 +2,7 @@ import { type FC, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     CheckCircle2, XCircle, DollarSign, Ban, Undo2, RotateCcw,
-    FileText, Loader2, Pencil,
+    FileText, Loader2, Pencil, Receipt, Gem,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -13,7 +13,6 @@ import {
     useApproveLoan, useDisburseLoan, useRejectLoan, useCloseLoan,
     useUndoApproval, useUndoDisbursal,
 } from "../hooks/useLoanCommands";
-import { LOAN_STATUS_ID_MAP } from "../constants/status";
 import type { Loan } from "../types/loan";
 
 interface LoanCommandsProps { loan: Loan; onSuccess?: () => void; }
@@ -52,6 +51,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                 setDateDialog(false); break;
             case "undoApproval": await undoApprovalMut.mutateAsync(loan.id); break;
             case "undoDisbursal": await undoDisbursalMut.mutateAsync(loan.id); break;
+            case "withdrawnByClient": await rejectMut.mutateAsync({ loanId: loan.id }); break;
         }
         setCommand(null);
         onSuccess?.();
@@ -68,6 +68,17 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
     return (
         <>
             <div className="flex flex-wrap items-center gap-2">
+                {/* All statuses */}
+                <Button variant="outline" size="sm" onClick={() => navigate(`/loans/${loan.id}/transactions/addCharge`)}>
+                    <Receipt className="mr-1 h-4 w-4" />Add Charge
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/loans/${loan.id}/transactions/addCollateral`)}>
+                    <Gem className="mr-1 h-4 w-4" />Add Collateral
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/loans/edit/${loan.id}`)}>
+                    <Pencil className="mr-1 h-4 w-4" />Edit
+                </Button>
+
                 {isPending && (
                     <>
                         <Button variant="outline" size="sm" onClick={() => openDateDialog("approve")} className="text-emerald-600 border-emerald-200 hover:bg-emerald-50">
@@ -75,6 +86,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setCommand("reject")} className="text-red-600 border-red-200 hover:bg-red-50">
                             <XCircle className="mr-1 h-4 w-4" />Reject
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setCommand("withdrawnByClient")} className="text-amber-600 border-amber-200 hover:bg-amber-50">
+                            <Ban className="mr-1 h-4 w-4" />Withdraw
                         </Button>
                     </>
                 )}
@@ -96,8 +110,14 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                         <Button variant="outline" size="sm" onClick={() => navigate(`/loans/${loan.id}/transactions/waiveinterest`)}>
                             <Ban className="mr-1 h-4 w-4" />Waive Interest
                         </Button>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/loans/${loan.id}/transactions/prepayLoan`)}>
+                            <DollarSign className="mr-1 h-4 w-4" />Prepay
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => navigate(`/loans/${loan.id}/transactions/writeoff`)} className="text-red-600 border-red-200 hover:bg-red-50">
                             <FileText className="mr-1 h-4 w-4" />Write Off
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/loans/${loan.id}/transactions/foreclosure`)} className="text-red-600 border-red-200 hover:bg-red-50">
+                            <Ban className="mr-1 h-4 w-4" />Foreclose
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => openDateDialog("close")} className="text-gray-600">
                             <Ban className="mr-1 h-4 w-4" />Close
@@ -110,9 +130,6 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                 {(isClosed || isOverpaid) && (
                     <span className="text-sm text-gray-400 italic">No actions available</span>
                 )}
-                <Button variant="outline" size="sm" onClick={() => navigate(`/loans/edit/${loan.id}`)}>
-                    <Pencil className="mr-1 h-4 w-4" />Edit
-                </Button>
             </div>
 
             <Dialog open={dateDialog} onOpenChange={setDateDialog}>
@@ -140,6 +157,11 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                 <ConfirmDialog open={!!command} onOpenChange={() => setCommand(null)} title="Reject Loan"
                     description={`Reject loan ${loan.accountNo ?? `#${loan.id}`}?`}
                     onConfirm={() => handleCommand("reject")} variant="destructive" confirmLabel="Reject" loading={isMutating} />
+            )}
+            {command === "withdrawnByClient" && (
+                <ConfirmDialog open={!!command} onOpenChange={() => setCommand(null)} title="Withdraw Loan"
+                    description={`Withdraw loan application ${loan.accountNo ?? `#${loan.id}`}?`}
+                    onConfirm={() => handleCommand("withdrawnByClient")} variant="destructive" confirmLabel="Withdraw" loading={isMutating} />
             )}
             {command === "undoApproval" && (
                 <ConfirmDialog open={!!command} onOpenChange={() => setCommand(null)} title="Undo Approval"

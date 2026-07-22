@@ -5,9 +5,8 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Button } from "@/components/ui/button";
 import { useLoan } from "../hooks/useLoan";
-import { useLoanTemplate } from "../hooks/useLoanTemplate";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { makeTransaction, approveLoan, disburseLoan, undoDisbursal, fetchTransactionTemplate } from "../api/loan";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { makeTransaction, approveLoan, disburseLoan, undoDisbursal, fetchRepaymentTemplate } from "../api/loan";
 import { loanKeys } from "../hooks/useLoans";
 import LoanTransactionForm, { type TransactionFormValues } from "../components/LoanTransactionForm";
 
@@ -25,7 +24,12 @@ const LoanTransactionFormPage: FC = () => {
     const qc = useQueryClient();
 
     const { data: loan, isLoading: loanLoading } = useLoan(loanId);
-    const templateQuery = useLoanTemplate();
+
+    const templateQuery = useQuery({
+        queryKey: loanKeys.repaymentTemplate(Number(loanId)),
+        queryFn: () => fetchRepaymentTemplate(Number(loanId)),
+        enabled: !!loanId,
+    });
 
     const mutation = useMutation({
         mutationFn: async (values: TransactionFormValues) => {

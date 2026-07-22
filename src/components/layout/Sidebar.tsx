@@ -55,7 +55,7 @@ const sections: NavSectionConfig[] = [
         title: "Lending",
         defaultOpen: true,
         items: [
-            { label: "Loan Applications", path: "/lending/applications", icon: Banknote },
+            { label: "Loans", path: "/loans", icon: Banknote },
             { label: "Loan Products", path: "/lending/products", icon: Briefcase },
             { label: "Repayment Schedule", path: "/lending/repayments", icon: CalendarClock },
             { label: "Collateral", path: "/lending/collateral", icon: Landmark },

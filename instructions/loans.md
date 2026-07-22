@@ -218,7 +218,102 @@ ConfirmDialogComponent before execution
 Amount NOT sent for: writeoff,foreclosure,close,waiveinterest
 (computed server-side from outstanding balance)
 
-================================================================================ 5. ADDITIONAL FEATURES & SUB-COMPONENTS
+================================================================================
+================================================================================
+
+5. LOAN PRODUCTS LIST (LoanProductsListComponent)
+   \================================================================================
+
+FILE: loan-products-list.component.ts
+ROUTE: /products/loan
+
+--- API CALL: List Loan Products ---
+
+Service: LoanProductsService.getLoanproducts()
+Endpoint: GET /api/v2/loanproducts
+Parameters: (none)
+Response: GetLoanProductsResponse[]
+
+NOTE: loanScheduleType missing from model - read via cast to unknown
+
+--- COLUMNS (DataTable, localLogic) ---
+
+name, shortName, description, loanScheduleType (mat-chip, color accent=PROGRESSIVE/primary=CUMULATIVE), actions (View + Edit)
+
+--- NAVIGATION ---
+
+onCreateProduct(): /products/loan/create
+onEditProduct(p): /products/loan/edit/{id}
+onViewProduct(p): /products/loan/view/{id}
+
+================================================================================ 6. LOAN PRODUCT FORM (LoanProductFormComponent)
+================================================================================
+
+FILE: loan-product-form.component.ts (~569 lines)
+ROUTES: /products/loan/create, /products/loan/edit/:id
+
+--- API CALLS ---
+
+Load Funds: FundsService.retrieveFunds() -> GET /api/v2/funds
+Load Delinquency Buckets: GET /api/v2/delinquency/buckets
+Load Product (edit): GET /api/v2/loanproducts/{id}
+
+--- DEFAULTS ---
+
+{ currencyCode:'USD', digitsAfterDecimal:2, inMultiplesOf:0,
+principal:10000, interestRatePerPeriod:12, numberOfRepayments:12,
+repaymentEvery:1, repaymentFrequencyType:2, interestRateFrequencyType:3,
+amortizationType:1, interestType:0, interestCalculationPeriodType:1,
+accountingRule:1, daysInYearType:1, daysInMonthType:1,
+isInterestRecalculationEnabled:false, loanScheduleType:'CUMULATIVE' }
+
+--- FORM FIELDS (2 columns) ---
+
+Row 1: Name (req) | Short Name (req, maxlength 4)
+Row 2 (full): Description (textarea, 3 rows)
+Row 3 (full): External ID
+Row 4: Fund (select) | Delinquency Bucket (select)
+Row 5: Currency (USD/EUR/INR) | Digits After Decimal
+Row 6: Principal (req) | Interest Rate Per Period (req)
+Row 7: Number of Repayments (req) | Repayment Every (req)
+Row 8: Repayment Freq Type (0=Days,1=Weeks,2=Months) | Interest Rate Freq Type (2=Per month,3=Per annum)
+Row 9: Amortization Type (1=Equal Installments,0=Equal Principal) | Interest Type (0=Declining,1=Flat)
+Row 10: Interest Calc Period Type (0=Daily,1=Same as Repayment) | Loan Schedule Type (select)
+Row 11: Transaction Processing Strategy (disabled for progressive) | Loan Schedule Processing Type (progressive only)
+Row 12: Days In Year Type | Days In Month Type
+Row 13: Interest Recalculation Enabled (checkbox)
+Row 14 (if progressive): Payment Credit Allocation Editor
+
+--- BUSINESS LOGIC ---
+
+onLoanScheduleTypeChange(type):
+Sets isProgressive = (type === 'PROGRESSIVE')
+Filters transactionProcessingStrategyOptions:
+PROGRESSIVE -> only ADVANCED_PAYMENT_ALLOCATION strategies
+CUMULATIVE -> hide ADVANCED_PAYMENT_ALLOCATION strategies
+Auto-selects first available strategy
+
+--- API: Create/Update Product ---
+
+Create: LoanProductsService.postLoanproducts(product)
+-> POST /api/v2/loanproducts
+Update: LoanProductsService.putLoanproductsProductId(id, product)
+-> PUT /api/v2/loanproducts/{id}
+
+Body: PostLoanProductsRequest (with Record cast)
+{ name, shortName, description?, externalId?, fundId?, delinquencyBucketId?,
+currencyCode, digitsAfterDecimal, inMultiplesOf,
+principal, interestRatePerPeriod, numberOfRepayments, repaymentEvery,
+repaymentFrequencyType, interestRateFrequencyType,
+amortizationType, interestType, interestCalculationPeriodType,
+loanScheduleType, loanScheduleProcessingType?,
+transactionProcessingStrategyCode,
+daysInYearType, daysInMonthType,
+isInterestRecalculationEnabled?,
+paymentAllocation?, creditAllocation?,
+accountingRule, locale: 'en' }
+
+================================================================================ 7. ADDITIONAL FEATURES & SUB-COMPONENTS
 ================================================================================
 
 Charges List: GET /api/v2/loans/{loanId}/charges
@@ -227,7 +322,7 @@ Documents: GET /api/v2/loans/{loanId}/documents
 Reschedule: GET /api/v2/loans/{loanId}/reschedule
 Bulk Reassignment, COB Catchup, Point in Time, Schedule Modify
 
-================================================================================ 6. COMPLETE LOAN LIFECYCLE
+================================================================================ 8. COMPLETE LOAN LIFECYCLE
 ================================================================================
 
 CREATED (status 100): /loans/create (LoanFormComponent)
@@ -238,11 +333,41 @@ ACTIVE (status 300)
 -> repayment, waiveinterest, prepayLoan, writeoff, close, foreclosure
 CLOSED (600) / WRITTEN OFF (601)
 
-================================================================================ 7. I18N TRANSLATION KEY PREFIXES
+================================================================================ 9. I18N TRANSLATION KEY PREFIXES
 ================================================================================
 
 LOANS._, MODULES._, HELP._, COMMON._, PRODUCTS._, CLIENTS._
 
 ================================================================================
+================================================================================
+
+10. LOAN PRODUCT VIEW (LoanProductViewComponent)
+    \================================================================================
+
+FILE: loan-product-view.component.ts (~252 lines)
+ROUTE: /products/loan/view/:id
+
+--- API CALL ---
+
+Service: LoanProductsService.getLoanproductsProductId()
+Endpoint: GET /api/v2/loanproducts/{id}
+Response: GetLoanProductsProductIdResponse
+
+--- DISPLAY ---
+
+Header: name + shortName, Edit + Back buttons
+Details: Currency, Principal, Interest Rate, Repayments Count,
+Amortization Type, Interest Type, Interest Calc Period,
+Repayment Every + Frequency, Loan Schedule Type (chip),
+Transaction Processing Strategy Code
+Progressive only: Payment Allocation rules + Credit Allocation rules
+
+--- NAVIGATION ---
+
+onEdit(): /products/loan/edit/{id}
+onBack(): /products/loan
+
+================================================================================
+
 END OF DOCUMENT
 ================================================================================

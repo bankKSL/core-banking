@@ -18,6 +18,18 @@ const getTransactionStatus = (tx: LoanTransaction): string => {
     return "completed";
 };
 
+/** Format date from Fineract (can be array [y,m,d] or string) */
+const formatTxDate = (tx: LoanTransaction): string => {
+    const raw = tx.date ?? tx.submittedOnDate;
+    if (!raw) return "—";
+    if (Array.isArray(raw) && raw.length >= 3) {
+        const [y, m, d] = raw;
+        return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    }
+    if (typeof raw === "string") return new Date(raw).toLocaleDateString();
+    return "—";
+};
+
 const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, loading }) => {
     if (loading) {
         return (
@@ -78,9 +90,7 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
                     <TableBody>
                         {transactions.map((tx) => (
                             <TableRow key={tx.id}>
-                                <TableCell className="font-mono text-xs">
-                                    {tx.date ? new Array(tx.date).join("-") : tx.submittedOnDate ? new Date(tx.submittedOnDate).toLocaleDateString() : "—"}
-                                </TableCell>
+                                <TableCell className="font-mono text-xs">{formatTxDate(tx)}</TableCell>
                                 <TableCell className="text-sm">{tx.type?.value ?? "—"}</TableCell>
                                 <TableCell className="text-right font-mono text-sm">{formatCurrency(tx.amount ?? 0)}</TableCell>
                                 <TableCell className="text-right font-mono text-sm text-emerald-600">{formatCurrency(tx.principalPortion ?? 0)}</TableCell>

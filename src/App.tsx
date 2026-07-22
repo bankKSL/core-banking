@@ -11,8 +11,6 @@ import SimulationPage from "./pages/SimulationPage";
 import ExecutionLogsPage from "./pages/ExecutionLogsPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import SettingsPage from "./pages/SettingsPage";
-import LoanApplicationsPage from "./pages/LoanApplicationsPage";
-import LoanApplicationDetailPage from "./pages/LoanApplicationDetailPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
 import RepaymentSchedulePage from "./pages/RepaymentSchedulePage";
 import CollateralPage from "./pages/CollateralPage";
@@ -33,7 +31,6 @@ import CreateClientPage from "@/features/clients/pages/CreateClientPage";
 import ClientDetailPage from "@/features/clients/pages/ClientDetailPage";
 import EditClientPage from "@/features/clients/pages/EditClientPage";
 import ScoreGradePage from "./pages/ScoreGradePage";
-import CreateLoanApplicationPage from "./pages/CreateLoanApplicationPage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
 import SavingsProductsPage from "./pages/SavingsProductsPage";
 import AccountActionPage from "./pages/AccountActionPage";
@@ -105,9 +102,6 @@ function App() {
                                     <Route path="/audit-logs" element={<AuditLogsPage />} />
                                     <Route path="/settings" element={<SettingsPage />} />
                                     {/* Lending */}
-                                    <Route path="/lending/applications" element={<LoanApplicationsPage />} />
-                                    <Route path="/lending/applications/new" element={<CreateLoanApplicationPage />} />
-                                    <Route path="/lending/applications/:id" element={<LoanApplicationDetailPage />} />
                                     <Route path="/lending/products" element={<LoanProductsPage />} />
                                     <Route path="/lending/repayments" element={<RepaymentSchedulePage />} />
                                     <Route path="/lending/collateral" element={<CollateralPage />} />

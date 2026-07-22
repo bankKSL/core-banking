@@ -22,6 +22,7 @@ export type {
     InterestCalculationPeriodType,
     RepaymentFrequency,
     LoanTransactionType,
+    Fund,
 } from "./types/loan";
 
 export {
@@ -90,6 +91,8 @@ export { useRepaymentSchedule } from "./hooks/useRepaymentSchedule";
 export { useCreateLoan as useCreateLoanMutation } from "./hooks/useCreateLoan";
 
 export { useLoanTemplate as useLoanTemplateQuery } from "./hooks/useLoanTemplate";
+
+export { useFunds } from "./hooks/useFunds";
 
 // ─── Pages ─────────────────────────────────────────────────
 export { default as LoansListPage } from "./pages/LoansListPage";

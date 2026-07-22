@@ -14,8 +14,7 @@ import LoanDetails from "../components/LoanDetails";
 import LoanCommands from "../components/LoanCommands";
 import LoanTransactionsTable from "../components/LoanTransactionsTable";
 
-const formatCurrency = (n: number, code = "USD") =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
+const formatCurrency = (n: number, code = "USD") => new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
 
 const LoanViewPage: FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -24,14 +23,18 @@ const LoanViewPage: FC = () => {
     const { data: scheduleData } = useRepaymentSchedule(id ? Number(id) : undefined);
     const [activeTab, setActiveTab] = useState("details");
 
-    const handleSuccess = useCallback(() => { refetch(); }, [refetch]);
+    const handleSuccess = useCallback(() => {
+        refetch();
+    }, [refetch]);
 
     if (isLoading) {
         return (
             <div className="p-6 max-w-4xl m-auto space-y-6">
                 <Skeleton className="h-10 w-64" />
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {[1, 2, 3, 4].map((i) => (<Skeleton key={i} className="h-40 rounded-xl" />))}
+                    {[1, 2, 3, 4].map((i) => (
+                        <Skeleton key={i} className="h-40 rounded-xl" />
+                    ))}
                 </div>
             </div>
         );
@@ -58,14 +61,19 @@ const LoanViewPage: FC = () => {
                 description={`${loan.loanProductName} — ${loan.clientName ?? `Client #${loan.clientId}`}`}
                 actions={
                     <div className="flex items-center gap-2">
-                        <Badge variant={statusCfg?.variant === "success" ? "success" : statusCfg?.variant === "error" ? "error" : statusCfg?.variant === "warning" ? "warning" : "default"}>
+                        <Badge
+                            variant={
+                                statusCfg?.variant === "success" ? "success" : statusCfg?.variant === "error" ? "error" : statusCfg?.variant === "warning" ? "warning" : "default"
+                            }
+                        >
                             {statusCfg?.label ?? statusCode}
                         </Badge>
                         <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isRefetching}>
                             <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
                         </Button>
                         <Button variant="outline" onClick={() => navigate("/loans")}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />Back
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back
                         </Button>
                     </div>
                 }
@@ -75,7 +83,7 @@ const LoanViewPage: FC = () => {
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList>
-                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="details">General</TabsTrigger>
                     <TabsTrigger value="transactions">Transactions ({transactions.length})</TabsTrigger>
                     <TabsTrigger value="schedule">Schedule ({schedulePeriods.length})</TabsTrigger>
                 </TabsList>
@@ -107,8 +115,8 @@ const LoanViewPage: FC = () => {
                                         <th className="px-4 py-3 text-right font-medium text-gray-500">Outstanding</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {schedulePeriods.map((p: any, i: number) => (
+                                {/* <tbody>
+                                    {schedulePeriods?.map((p: any, i: number) => (
                                         <tr key={i} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <td className="px-4 py-3 font-mono text-xs">{p.period}</td>
                                             <td className="px-4 py-3">{new Date(p.dueDate).toLocaleDateString()}</td>
@@ -119,7 +127,7 @@ const LoanViewPage: FC = () => {
                                             <td className="px-4 py-3 text-right font-mono text-red-600">{formatCurrency(p.totalOutstandingForPeriod)}</td>
                                         </tr>
                                     ))}
-                                </tbody>
+                                </tbody> */}
                             </table>
                         </div>
                     )}

@@ -11,13 +11,7 @@ import { useUpdateLoan } from "../hooks/useUpdateLoan";
 import { useLoan } from "../hooks/useLoan";
 import LoanForm from "../components/LoanForm";
 import type { CreateLoanFormValues } from "../schemas/loan.schema";
-
-function toFineractDate(isoDate: string): string {
-    if (!isoDate) return "";
-    const [y, m, d] = isoDate.split("-").map(Number);
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return `${d} ${months[m - 1]} ${y}`;
-}
+import { currentDate } from "@/lib/utils";
 
 const LoanFormPage: FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -39,10 +33,12 @@ const LoanFormPage: FC = () => {
             const payload = {
                 ...values,
                 clientId: clientId ?? values.clientId,
-                submittedOnDate: toFineractDate(values.submittedOnDate),
-                expectedDisbursementDate: toFineractDate(values.expectedDisbursementDate),
+                submittedOnDate: currentDate(values.submittedOnDate),
+                expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
                 dateFormat: "yyyy-MM-dd" as const,
                 locale: "en" as const,
+                loanType: "individual",
+                transactionProcessingStrategyCode: "mifos-standard-strategy",
             };
 
             if (isEditMode && id) {
@@ -62,7 +58,18 @@ const LoanFormPage: FC = () => {
         return (
             <div className="p-6 max-w-4xl m-auto">
                 <Skeleton className="h-8 w-48 mb-6" />
-                <div className="space-y-6">{[1, 2, 3].map((i) => (<div key={i} className="space-y-4 rounded-xl border p-6"><Skeleton className="h-5 w-32" /><div className="grid grid-cols-3 gap-4">{[1, 2, 3].map((j) => (<Skeleton key={j} className="h-10 w-full" />))}</div></div>))}</div>
+                <div className="space-y-6">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="space-y-4 rounded-xl border p-6">
+                            <Skeleton className="h-5 w-32" />
+                            <div className="grid grid-cols-3 gap-4">
+                                {[1, 2, 3].map((j) => (
+                                    <Skeleton key={j} className="h-10 w-full" />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -84,15 +91,7 @@ const LoanFormPage: FC = () => {
                     <ErrorState title="Failed to save loan" message={createMutation.error?.message ?? "An unexpected error occurred."} onRetry={() => createMutation.reset()} />
                 </div>
             )}
-            <LoanForm
-                products={products}
-                loan={loan}
-                onSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-                error={error}
-                mode={isEditMode ? "edit" : "create"}
-                clientId={clientId}
-            />
+            <LoanForm products={products} loan={loan} onSubmit={handleSubmit} isSubmitting={isSubmitting} error={error} mode={isEditMode ? "edit" : "create"} clientId={clientId} />
         </div>
     );
 };

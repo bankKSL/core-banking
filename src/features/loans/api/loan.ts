@@ -26,6 +26,7 @@ import type {
     LoanProduct,
     LoanProductCreateRequest,
 } from "../types/loan";
+import { currentDate } from "@/lib/utils";
 
 // ─── Loan Products ───────────────────────────────────────────────
 
@@ -72,8 +73,8 @@ export async function fetchLoanTemplate(clientId?: number, productId?: number): 
 export async function createLoan(payload: LoanCreateRequest): Promise<LoanCommandResponse> {
     const { data } = await client.post<LoanCommandResponse>("/loans", {
         ...payload,
-        submittedOnDate: toFineractDate(payload.submittedOnDate),
-        expectedDisbursementDate: toFineractDate(payload.expectedDisbursementDate),
+        submittedOnDate: currentDate(payload.submittedOnDate),
+        expectedDisbursementDate: currentDate(payload.expectedDisbursementDate),
         locale: "en",
         dateFormat: "yyyy-MM-dd",
     });
@@ -161,11 +162,7 @@ export async function fetchTransactionTemplate(loanId: number, command?: string)
 // ─── Generic Transaction Posting ────────────────────────────
 
 export async function makeTransaction(loanId: number, payload: Record<string, unknown>, command: string): Promise<LoanCommandResponse> {
-    const { data } = await client.post<LoanCommandResponse>(
-        `/loans/${loanId}/transactions`,
-        { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
-        { params: { command } },
-    );
+    const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}/transactions`, { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" }, { params: { command } });
     return data;
 }
 
@@ -207,7 +204,6 @@ export async function closeLoanAsRescheduled(loanId: number, payload: LoanComman
     });
     return data;
 }
-
 
 // ─── Loan Repayment Schedule ──────────────────────────────────────
 
