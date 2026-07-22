@@ -94,8 +94,7 @@ function DataTable<T>({
             if (aVal == null) return 1;
             if (bVal == null) return -1;
 
-            const comparison =
-                typeof aVal === "string" && typeof bVal === "string" ? aVal.localeCompare(bVal) : aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+            const comparison = typeof aVal === "string" && typeof bVal === "string" ? aVal.localeCompare(bVal) : aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
 
             return sortDirection === "desc" ? -comparison : comparison;
         });
@@ -150,10 +149,7 @@ function DataTable<T>({
                     responsive ? "block w-full max-w-full overflow-x-auto" : "w-full overflow-auto",
                 )}
             >
-                <Table
-                    className={cn(responsive && "w-full")}
-                    style={responsive ? { minWidth: `${minWidth}px` } : undefined}
-                >
+                <Table className={cn(responsive && "w-full")} style={responsive ? { minWidth: `${minWidth}px` } : undefined}>
                     <TableHeader>
                         <TableRow>
                             {selectable && (
@@ -209,20 +205,12 @@ function DataTable<T>({
                 responsive ? "block w-full max-w-full overflow-x-auto" : "w-full overflow-auto",
             )}
         >
-            <Table
-                className={cn(responsive && "w-full")}
-                style={responsive ? { minWidth: `${minWidth}px` } : undefined}
-            >
+            <Table className={cn(responsive && "w-full")} style={responsive ? { minWidth: `${minWidth}px` } : undefined}>
                 <TableHeader>
                     <TableRow>
                         {selectable && (
                             <TableHead className="w-12">
-                                <Checkbox
-                                    checked={allSelected}
-                                    indeterminate={someSelected}
-                                    onCheckedChange={handleSelectAll}
-                                    aria-label="Select all"
-                                />
+                                <Checkbox checked={allSelected} indeterminate={someSelected} onCheckedChange={handleSelectAll} aria-label="Select all" />
                             </TableHead>
                         )}
                         {columns.map((col) => (

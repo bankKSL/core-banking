@@ -110,10 +110,8 @@ function App() {
                                     <Route path="/deposits/saving-accounts/new" element={<CreateDepositAccountPage />} />
                                     <Route path="/deposits/saving-accounts/edit/:id" element={<CreateDepositAccountPage />} />
                                     <Route path="/deposits/saving-accounts/:id" element={<DepositAccountDetailPage />} />
-                                    <Route path="/deposits/savings/:id/transactions/:command" element={<SavingsTransactionFormPage />} />
-                                    <Route path="/deposits/savings/:id/action/:command" element={<AccountActionPage />} />
-                                    <Route path="/deposits/:accountType/:accountId/action/:command" element={<AccountActionPage />} />
-
+                                    <Route path="/deposits/saving-accounts/:id/transactions/:command" element={<SavingsTransactionFormPage />} />
+                                    <Route path="/deposits/saving-accounts/:id/action/:command" element={<AccountActionPage />} />
                                     <Route path="/deposits/:accountType/:accountId/action/:command" element={<AccountActionPage />} />
                                     <Route path="/deposits/transactions" element={<DepositTransactionsPage />} />
                                     <Route path="/deposits/withdrawals" element={<WithdrawalsPage />} />

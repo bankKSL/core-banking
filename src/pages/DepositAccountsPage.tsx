@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Eye, Pencil, ArrowDownCircle, ArrowUpCircle, CheckCircle2, Wallet, PiggyBank, Building2, TrendingUp, AlertTriangle } from "lucide-react";
+import { Search, Plus, Eye, Pencil, ArrowDownCircle, ArrowUpCircle, CheckCircle2, Wallet, PiggyBank, Building2, TrendingUp, AlertTriangle, EyeIcon } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -85,18 +85,24 @@ const DepositAccountsPage: React.FC = () => {
             cell: (r) => (
                 <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                     {r.status?.code?.includes("submitted") && (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 text-emerald-600" onClick={() => navigate(`/deposits/savings/${r.id}/action/approve`)} title="Approve">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 text-emerald-600"
+                            onClick={() => navigate(`/deposits/savings-accounts/${r.id}/action/approve`)}
+                            title="Approve"
+                        >
                             <CheckCircle2 className="h-4 w-4" />
                         </Button>
                     )}
-                    <Button variant="ghost" size="sm" className="h-8 w-8 text-blue-600" onClick={() => navigate(`/deposits/saving-accounts//edit/${r.id}`)} title="Edit">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 text-blue-600" onClick={() => navigate(`/deposits/saving-accounts/edit/${r.id}`)} title="Edit">
                         <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 text-emerald-600"
-                        onClick={() => navigate(`/deposits/savings/${r.id}/transactions/deposit`)}
+                        onClick={() => navigate(`/deposits/saving-accounts/${r.id}/transactions/deposit`)}
                         title="Deposit"
                     >
                         <ArrowDownCircle className="h-4 w-4" />
@@ -105,10 +111,13 @@ const DepositAccountsPage: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 text-amber-600"
-                        onClick={() => navigate(`/deposits/savings/${r.id}/transactions/withdrawal`)}
+                        onClick={() => navigate(`/deposits/saving-accounts/${r.id}/transactions/withdrawal`)}
                         title="Withdraw"
                     >
                         <ArrowUpCircle className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8" onClick={() => navigate(`/deposits/saving-accounts/${r.id}`)} title="View">
+                        <EyeIcon className="h-4 w-4" />
                     </Button>
                 </div>
             ),
@@ -188,7 +197,12 @@ const DepositAccountsPage: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            <DataTable columns={columns} data={filtered} emptyState={{ message: "No deposit accounts found" }} />
+                            <DataTable
+                                columns={columns}
+                                data={filtered}
+                                emptyState={{ message: "No deposit accounts found" }}
+                                onRowClick={(r) => navigate(`/deposits/saving-accounts/${r.id}`)}
+                            />
                             {totalPages > 1 && (
                                 <div className="mt-4">
                                     <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} totalItems={totalFilteredRecords} pageSize={PAGE_SIZE} />

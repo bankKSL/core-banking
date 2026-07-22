@@ -138,7 +138,34 @@ Parameters: - accountId: number - staffInSelectedOfficeOnly?: boolean (false) - 
 
 Response: SavingsAccountData (very large composite object, ~140 properties)
 
-Key properties: - id, accountNo, savingsProductId, savingsProductName - clientId, clientName, groupId, groupName - status: SavingsAccountStatusEnumData - subStatus: SavingsAccountSubStatusEnumData - currency: CurrencyData - depositType: EnumOptionData (id: 100=Savings, 200=Fixed, 300=Recurring) - summary: SavingsAccountSummaryData - timeline: SavingsAccountApplicationTimelineData - transactions: Array<SavingsAccountTransactionData> - charges: Array<SavingsAccountChargeData> - nominalAnnualInterestRate - interestCompoundingPeriodType, interestCalculationType - interestPostingPeriodType, interestCalculationDaysInYearType - minRequiredBalance, minRequiredOpeningBalance - allowOverdraft, overdraftLimit - lockinPeriodFrequency, lockinPeriodFrequencyType - withdrawalFeeForTransfers, withHoldTax - clientData, fieldOfficerId, fieldOfficerName - savingsProduct, productOptions, chargeOptions, datatables
+Key properties:
+- id, accountNo, savingsProductId, savingsProductName
+- clientId, clientName, fieldOfficerId
+- depositType: { id, code, value } (id: 100=Savings, 200=Fixed, 300=Recurring)
+- status: SavingsAccountStatusEnumData
+  { active?, approved?, closed?, submittedAndPendingApproval?, rejected?,
+    withdrawnByApplicant?, prematureClosed?, transferInProgress?, transferOnHold?,
+    matured?, code?, id?, value? }
+- subStatus: { code, value, none?, inactive?, dormant?, escheat?, block?, blockCredit?, blockDebit? }
+- currency: { code, name, decimalPlaces, displaySymbol }
+- summary: { accountBalance, availableBalance, totalDeposits, totalInterestEarned,
+    totalInterestPosted, currency }
+- timeline: { submittedOnDate (number[]), approvedOnDate (number[]),
+    activatedOnDate (number[]), submittedByUsername, approvedByUsername,
+    activatedByUsername }
+- nominalAnnualInterestRate: number
+- interestCompoundingPeriodType: { id, code, value }
+- interestCalculationType: { id, code, value }
+- interestPostingPeriodType: { id, code, value }
+- interestCalculationDaysInYearType: { id, code, value }
+- minRequiredOpeningBalance: number
+- withdrawalFeeForTransfers: boolean
+- allowOverdraft: boolean
+- enforceMinRequiredBalance: boolean
+- withHoldTax: boolean
+- lastActiveTransactionDate: number[]
+- savingsAccountTransactionData: Array<SavingsAccountTransactionData>
+- charges: Array<SavingsAccountChargeData>
 
 SavingsAccountStatusEnumData:
 { active?, approved?, closed?, matured?, prematureClosed?, rejected?,

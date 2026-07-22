@@ -64,7 +64,7 @@ export async function fetchSavingsAccount(accountId: number | string): Promise<S
     const { data } = await client.get<SavingsAccount>(`/savingsaccounts/${accountId}`, {
         params: {
             staffInSelectedOfficeOnly: false,
-            loanOfficerId: "all",
+            associations: "all",
         },
     });
     return data;
@@ -141,7 +141,7 @@ export async function fetchWithdrawTemplate(accountId: number): Promise<SavingsT
 export async function makeWithdrawal(accountId: number, payload: SavingsTransactionRequest): Promise<SavingsCommandResponse> {
     const { data } = await client.post<SavingsCommandResponse>(
         `/savingsaccounts/${accountId}/transactions`,
-        { ...payload, transactionDate: toFineractDate(payload.transactionDate), locale: "en", dateFormat: "yyyy-MM-dd" },
+        { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
         { params: { command: "withdrawal" } },
     );
     return data;
@@ -408,11 +408,5 @@ export async function fetchSavingsTransactions(savingsAccountId: number | string
     const { data } = await client.get(`/savingsaccounts/${savingsAccountId}/transactions`, {
         params: { offset: 0, limit: 100 },
     });
-    return data;
-}
-
-/** POST /savingsaccounts/{savingsAccountId}/transactions/{transactionId}?command=undo */
-export async function undoSavingsTransaction(savingsAccountId: number | string, transactionId: number | string): Promise<{ resourceId: number }> {
-    const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/transactions/${transactionId}`, {}, { params: { command: "undo" } });
     return data;
 }
