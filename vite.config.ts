@@ -12,16 +12,16 @@ export default defineConfig({
         },
     },
 
-    server: {
-        host: "0.0.0.0",
-        allowedHosts: ["https://e1a9-202-137-134-22.ngrok-free.app"],
-        proxy: {
-            // Proxy Fineract API to avoid CORS + SSL certificate issues in dev
-            "/fineract-provider": {
-                target: "https://localhost:8443",
-                changeOrigin: true,
-                secure: false, // accept self-signed cert
-            },
-        },
-    },
+    // server: {
+    //     host: "0.0.0.0",
+    //     allowedHosts: ["https://e1a9-202-137-134-22.ngrok-free.app"],
+    //     proxy: {
+    //         // Proxy Fineract API to avoid CORS + SSL certificate issues in dev
+    //         "/fineract-provider": {
+    //             target: "https://localhost:8443",
+    //             changeOrigin: true,
+    //             secure: false, // accept self-signed cert
+    //         },
+    //     },
+    // },
 });

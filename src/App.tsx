@@ -12,14 +12,7 @@ import ExecutionLogsPage from "./pages/ExecutionLogsPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import SettingsPage from "./pages/SettingsPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
-import RepaymentSchedulePage from "./pages/RepaymentSchedulePage";
-import CollateralPage from "./pages/CollateralPage";
-import {
-    LoansListPage,
-    LoanFormPage,
-    LoanViewPage,
-    LoanTransactionFormPage,
-} from "@/features/loans";
+import { LoansListPage, LoanFormPage, LoanViewPage, LoanTransactionFormPage } from "@/features/loans";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
@@ -103,8 +96,6 @@ function App() {
                                     <Route path="/settings" element={<SettingsPage />} />
                                     {/* Lending */}
                                     <Route path="/lending/products" element={<LoanProductsPage />} />
-                                    <Route path="/lending/repayments" element={<RepaymentSchedulePage />} />
-                                    <Route path="/lending/collateral" element={<CollateralPage />} />
                                     {/* Loans (new module) */}
                                     <Route path="/loans" element={<LoansListPage />} />
                                     <Route path="/loans/create" element={<LoanFormPage />} />
