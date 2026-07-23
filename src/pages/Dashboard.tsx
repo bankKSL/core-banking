@@ -1,279 +1,302 @@
-import React, { useMemo } from "react";
-import {
-    LayoutDashboard,
-    PlayCircle,
-    Clock,
-    AlertCircle,
-    ArrowRight,
-    Banknote,
-    Users,
-    TrendingUp,
-    DollarSign,
-    PiggyBank,
-    ArrowDownCircle,
-    ArrowUpCircle,
-    Wallet,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Landmark, PiggyBank, Settings, DollarSign, Calendar, ArrowUpRight, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { campaigns, executionLogs, loanApplications, depositAccounts, depositTransactions } from "@/mock/data";
-import type { Campaign } from "@/types";
-import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { fetchClients } from "@/features/clients";
+import { fetchLoans } from "@/features/loans";
+import { fetchSavingsAccounts } from "@/features/deposits";
+import { LOAN_STATUS_ID_MAP } from "@/features/loans/constants/status";
+import type { Loan } from "@/features/loans/types/loan";
+
+// ─── Constants ───────────────────────────────────────────────────────────
+
+const LOAN_STATUS_PENDING = 100;
+const LOAN_STATUS_ACTIVE = 300;
+const LOAN_STATUS_CLOSED = 600;
+
+const LOAN_DONUT_COLORS = {
+    active: "#2ecc71",
+    pending: "#f39c12",
+    closed: "#95a5a6",
+} as const;
+
+const SAVINGS_DONUT_COLORS = {
+    active: "#3498db",
+    pending: "#f39c12",
+} as const;
+
+// ─── SVG Donut Chart Component ──────────────────────────────────────────
+
+interface DonutChartProps {
+    data: Array<{ label: string; value: number; color: string }>;
+}
+
+const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
+    const total = data.reduce((s, d) => s + d.value, 0);
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+
+    let cumulative = 0;
+    const segments = data.map((d) => {
+        const fraction = total > 0 ? d.value / total : 0;
+        const offset = cumulative * circumference;
+        const length = fraction * circumference;
+        cumulative += fraction;
+        return { ...d, offset, length };
+    });
+
+    return (
+        <div className="flex flex-col items-center gap-3">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="12" />
+                {segments.map((seg) => (
+                    <circle
+                        key={seg.label}
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        fill="none"
+                        stroke={seg.color}
+                        strokeWidth="12"
+                        strokeDasharray={`${seg.length} ${circumference - seg.length}`}
+                        strokeDashoffset={-seg.offset}
+                        transform="rotate(-90 50 50)"
+                        style={{ transition: "stroke-dasharray 0.5s ease" }}
+                    />
+                ))}
+                <text x="50" y="48" textAnchor="middle" className="text-lg font-bold fill-gray-900 dark:fill-gray-100" fontSize="16">
+                    {total}
+                </text>
+                <text x="50" y="62" textAnchor="middle" className="text-[8px] fill-gray-500 dark:fill-gray-400" fontSize="8">
+                    Total
+                </text>
+            </svg>
+            <div className="flex flex-wrap justify-center gap-3">
+                {segments.map((seg) => (
+                    <div key={seg.label} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: seg.color }} />
+                        <span>{seg.label}</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{seg.value}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+const formatCurrency = (n: number, code = "USD") => new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(n);
+
+const formatDate = (d: string) => {
+    const date = new Date(d);
+    return isNaN(date.getTime()) ? d : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+const resolveStatusString = (loan: Loan): string => {
+    if (loan.status?.code) return loan.status.code;
+    if (loan.status?.id != null) return LOAN_STATUS_ID_MAP[loan.status.id] ?? "Unknown";
+    return "Unknown";
+};
+
+// ─── Dashboard Component ─────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [clientCount, setClientCount] = useState(0);
+    const [activeLoans, setActiveLoans] = useState(0);
+    const [pendingLoans, setPendingLoans] = useState<Loan[]>([]);
+    const [closedLoans, setClosedLoans] = useState(0);
+    const [savingsCount, setSavingsCount] = useState(0);
+    const [savingsPending, setSavingsPending] = useState(0);
+    const [savingsActive, setSavingsActive] = useState(0);
+    const [apiUrl, setApiUrl] = useState("");
 
-    const stats = useMemo(() => {
-        const total = campaigns.length;
-        const active = campaigns.filter((c) => c.status === "active").length;
-        const scheduled = campaigns.filter((c) => c.status === "scheduled").length;
-        const expired = campaigns.filter((c) => c.status === "expired").length;
-        return { total, active, scheduled, expired };
+    useEffect(() => {
+        setApiUrl(import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080");
     }, []);
 
-    const recentCampaigns = useMemo(() => {
-        return [...campaigns].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5);
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadDashboard() {
+            setLoading(true);
+            try {
+                const [clientRes, activeRes, pendingRes, closedRes, savingsRes] = await Promise.all([
+                    fetchClients({ offset: 0, limit: 1 }),
+                    fetchLoans({ offset: 0, limit: 1, loanStatus: LOAN_STATUS_ACTIVE }),
+                    fetchLoans({ offset: 0, limit: 50, loanStatus: LOAN_STATUS_PENDING }),
+                    fetchLoans({ offset: 0, limit: 1, loanStatus: LOAN_STATUS_CLOSED }),
+                    fetchSavingsAccounts({ offset: 0, limit: 100 }),
+                ]);
+
+                if (cancelled) return;
+
+                setClientCount(clientRes.totalFilteredRecords ?? 0);
+                setActiveLoans(activeRes.totalFilteredRecords ?? 0);
+                setPendingLoans(pendingRes.pageItems ?? []);
+                setClosedLoans(closedRes.totalFilteredRecords ?? 0);
+
+                const totalSavings = savingsRes.totalFilteredRecords ?? 0;
+                setSavingsCount(totalSavings);
+
+                const items = savingsRes.pageItems ?? [];
+                let act = 0;
+                let pend = 0;
+                for (const acct of items) {
+                    if (acct.status?.id === 300) act++;
+                    if (acct.status?.id === 100) pend++;
+                }
+                setSavingsActive(act);
+                setSavingsPending(pend);
+            } catch {
+                // Silently handle — dashboard should not crash the app
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        loadDashboard();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
-    const recentLogs = useMemo(() => {
-        return [...executionLogs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 5);
-    }, []);
+    const loanChartData = [
+        { label: "Active", value: activeLoans, color: LOAN_DONUT_COLORS.active },
+        { label: "Pending", value: pendingLoans.length, color: LOAN_DONUT_COLORS.pending },
+        { label: "Closed", value: closedLoans, color: LOAN_DONUT_COLORS.closed },
+    ];
 
-    const formatDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-
-    const formatCurrency = (n: number) =>
-        new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
-
-    const lendingStats = useMemo(() => {
-        const total = loanApplications.length;
-        const pending = loanApplications.filter((a) => a.status === "pending" || a.status === "under_review").length;
-        const approved = loanApplications.filter((a) => a.status === "approved" || a.status === "disbursed").length;
-        const active = loanApplications.filter((a) => a.status === "active").length;
-        const disbursed = loanApplications
-            .filter((a) => a.status === "active" || a.status === "disbursed" || a.status === "closed")
-            .reduce((sum, a) => sum + a.amount, 0);
-        return { total, pending, approved, active, disbursed };
-    }, []);
-
-    const depositStats = useMemo(
-        () => ({
-            totalAccounts: depositAccounts.filter((a) => a.status === "active").length,
-            totalBalance: depositAccounts.filter((a) => a.status === "active").reduce((s, a) => s + a.balance, 0),
-            totalCredits: depositTransactions
-                .filter((t) => ["cash_deposit", "transfer_in", "cheque_deposit", "interest_credit"].includes(t.type))
-                .reduce((s, t) => s + t.amount, 0),
-            totalDebits: depositTransactions
-                .filter((t) => ["cash_withdrawal", "transfer_out", "atm_withdrawal", "pos_payment"].includes(t.type))
-                .reduce((s, t) => s + t.amount, 0),
-        }),
-        [],
-    );
-
-    const priorityLabel: Record<Campaign["priority"], string> = {
-        1: "P1 - Critical",
-        2: "P2 - High",
-        3: "P3 - Medium",
-        4: "P4 - Low",
-        5: "P5 - Lowest",
-    };
-    const priorityColor: Record<Campaign["priority"], string> = {
-        1: "text-red-600 dark:text-red-400 font-semibold",
-        2: "text-orange-600 dark:text-orange-400 font-semibold",
-        3: "text-yellow-600 dark:text-yellow-400",
-        4: "text-blue-600 dark:text-blue-400",
-        5: "text-gray-500 dark:text-gray-400",
-    };
+    const savingsChartData = [
+        { label: "Active", value: savingsActive, color: SAVINGS_DONUT_COLORS.active },
+        { label: "Pending", value: savingsPending, color: SAVINGS_DONUT_COLORS.pending },
+    ];
 
     return (
-        <div className="space-y-8">
-            <PageHeader title="Dashboard" description="Formula Engine Overview" actions={<></>} />
+        <div className="space-y-6">
+            <PageHeader title="Dashboard" description="Core Banking System Overview" actions={<></>} />
+
+            {/* ─── Widget Cards ───────────────────────────────────────── */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard title="Total Campaigns" value={stats.total} icon={LayoutDashboard} variant="default" />
-                <StatCard title="Active" value={stats.active} icon={PlayCircle} variant="success" />
-                <StatCard title="Scheduled" value={stats.scheduled} icon={Clock} variant="warning" />
-                <StatCard title="Expired" value={stats.expired} icon={AlertCircle} variant="error" />
+                <StatCard title="Total Clients" value={loading ? "—" : clientCount.toLocaleString()} icon={Users} variant="default" />
+                <StatCard title="Active Loans" value={loading ? "—" : activeLoans.toLocaleString()} icon={Landmark} variant="success" />
+                <StatCard title="Savings Accounts" value={loading ? "—" : savingsCount.toLocaleString()} icon={PiggyBank} variant="default" />
+                <StatCard title="API Configuration" value={loading ? "—" : "Connected"} icon={Settings} variant="default" />
             </div>
 
-            {/* Lending Overview */}
-            <div className="mt-2">
-                <h2 className="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-300">Lending Overview</h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    <StatCard title="Loan Applications" value={lendingStats.total} icon={Banknote} />
-                    <StatCard title="Pending Review" value={lendingStats.pending} variant="warning" />
-                    <StatCard title="Approved" value={lendingStats.approved} icon={Users} variant="success" />
-                    <StatCard title="Active Loans" value={lendingStats.active} icon={TrendingUp} variant="success" />
-                    <StatCard title="Total Disbursed" value={formatCurrency(lendingStats.disbursed)} icon={DollarSign} />
-                </div>
+            {/* ─── Donut Charts Row ───────────────────────────────────── */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                            <DollarSign className="h-4 w-4 text-emerald-500" />
+                            Loan Portfolio
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {loading ? (
+                            <div className="flex justify-center py-6">
+                                <Skeleton className="h-24 w-24 rounded-full" />
+                            </div>
+                        ) : (
+                            <DonutChart data={loanChartData} />
+                        )}
+                    </CardContent>
+                </Card>
+                <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                            <PiggyBank className="h-4 w-4 text-blue-500" />
+                            Savings
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {loading ? (
+                            <div className="flex justify-center py-6">
+                                <Skeleton className="h-24 w-24 rounded-full" />
+                            </div>
+                        ) : (
+                            <DonutChart data={savingsChartData} />
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
-            {/* Deposits Overview */}
-            <div className="mt-2">
-                <h2 className="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-300">Deposits Overview</h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard title="Active Accounts" value={depositStats.totalAccounts} icon={PiggyBank} />
-                    <StatCard title="Total Balance" value={formatCurrency(depositStats.totalBalance)} icon={Wallet} variant="success" />
-                    <StatCard
-                        title="Total Deposits"
-                        value={formatCurrency(depositStats.totalCredits)}
-                        icon={ArrowDownCircle}
-                        variant="success"
-                    />
-                    <StatCard
-                        title="Total Withdrawals"
-                        value={formatCurrency(depositStats.totalDebits)}
-                        icon={ArrowUpCircle}
-                        variant="error"
-                    />
-                </div>
-            </div>
-
-            {/* Recent Loan Applications */}
+            {/* ─── Pending Approvals Table ────────────────────────────── */}
             <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold">Recent Loan Applications</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => navigate("/lending/applications")}>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <Calendar className="h-4 w-4 text-amber-500" />
+                        Pending Loan Approvals
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => navigate("/loans")} className="text-xs">
                         View All
-                        <ArrowRight className="ml-1 h-4 w-4" />
+                        <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                     </Button>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Application ID</TableHead>
-                                <TableHead>Customer</TableHead>
-                                <TableHead>Product</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Date</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loanApplications.slice(0, 5).map((app) => (
-                                <TableRow key={app.id} className="cursor-pointer" onClick={() => navigate("/lending/applications")}>
-                                    <TableCell className="font-mono text-xs">{app.applicationId}</TableCell>
-                                    <TableCell className="font-medium">{app.customerName}</TableCell>
-                                    <TableCell>{app.productName}</TableCell>
-                                    <TableCell>{formatCurrency(app.amount)}</TableCell>
-                                    <TableCell>
-                                        <StatusBadge status={app.status} size="sm" />
-                                    </TableCell>
-                                    <TableCell className="text-xs text-gray-500">
-                                        {new Date(app.appliedDate).toLocaleDateString()}
-                                    </TableCell>
-                                </TableRow>
+                    {loading ? (
+                        <div className="space-y-2 p-4">
+                            {Array.from({ length: 4 }).map((_, i) => (
+                                <Skeleton key={i} className="h-10 w-full" />
                             ))}
-                            {loanApplications.length === 0 && (
+                        </div>
+                    ) : pendingLoans.length === 0 ? (
+                        <p className="px-6 pb-4 text-sm text-gray-400">No pending loan approvals.</p>
+                    ) : (
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                                        No loan applications found
-                                    </TableCell>
+                                    <TableHead>Account No</TableHead>
+                                    <TableHead>Client Name</TableHead>
+                                    <TableHead>Product</TableHead>
+                                    <TableHead className="text-right">Principal</TableHead>
+                                    <TableHead>Submitted On</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="w-10" />
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-
-            {/* Recent Campaigns */}
-            <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold">Recent Campaigns</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => navigate("/campaigns")}>
-                        View All
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                    </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Campaign Name</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Priority</TableHead>
-                                <TableHead>Start Date</TableHead>
-                                <TableHead>End Date</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {recentCampaigns.map((c) => (
-                                <TableRow key={c.id} className="cursor-pointer" onClick={() => navigate("/campaigns")}>
-                                    <TableCell className="font-medium text-gray-900 dark:text-gray-100">{c.name}</TableCell>
-                                    <TableCell>
-                                        <StatusBadge status={c.status} />
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className={priorityColor[c.priority]}>{priorityLabel[c.priority]}</span>
-                                    </TableCell>
-                                    <TableCell>{formatDate(c.startDate)}</TableCell>
-                                    <TableCell>{formatDate(c.endDate)}</TableCell>
-                                </TableRow>
-                            ))}
-                            {recentCampaigns.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center text-gray-500 py-8">
-                                        No campaigns found
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-
-            {/* Recent Execution Logs */}
-            <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold">Recent Execution Logs</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => navigate("/execution-logs")}>
-                        View All
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                    </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Execution ID</TableHead>
-                                <TableHead>Campaign</TableHead>
-                                <TableHead>Matched</TableHead>
-                                <TableHead>Duration</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Timestamp</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {recentLogs.map((log) => (
-                                <TableRow key={log.id}>
-                                    <TableCell className="font-mono text-xs">{log.executionId}</TableCell>
-                                    <TableCell className="max-w-50 truncate">{log.campaignName}</TableCell>
-                                    <TableCell>
-                                        <span
-                                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${log.matched ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"}`}
-                                        >
-                                            {log.matched ? "Yes" : "No"}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>{log.duration} ms</TableCell>
-                                    <TableCell>
-                                        <StatusBadge status={log.status} />
-                                    </TableCell>
-                                    <TableCell className="text-gray-500 text-xs">{new Date(log.timestamp).toLocaleString()}</TableCell>
-                                </TableRow>
-                            ))}
-                            {recentLogs.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                                        No execution logs found
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {pendingLoans.slice(0, 50).map((loan) => (
+                                    <TableRow
+                                        key={loan.id}
+                                        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                        onClick={() => navigate(`/loans/view/${loan.id}`)}
+                                    >
+                                        <TableCell className="font-mono text-xs font-medium">{loan.accountNo ?? `#${loan.id}`}</TableCell>
+                                        <TableCell className="text-sm">{loan.clientName ?? `Client #${loan.clientId}`}</TableCell>
+                                        <TableCell className="text-sm">{loan.loanProductName}</TableCell>
+                                        <TableCell className="text-right font-mono text-sm">{formatCurrency(loan.proposedPrincipal ?? loan.principal ?? 0)}</TableCell>
+                                        <TableCell className="text-xs text-gray-500">{loan.timeline?.submittedOnDate ? formatDate(loan.timeline.submittedOnDate) : "—"}</TableCell>
+                                        <TableCell>
+                                            <StatusBadge status={resolveStatusString(loan)} size="sm" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/loans/view/${loan.id}`);
+                                                }}
+                                            >
+                                                <ExternalLink className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>
