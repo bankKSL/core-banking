@@ -31,6 +31,7 @@ import SavingsTransactionFormPage from "./pages/SavingsTransactionFormPage";
 import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { useAuthStore } from "./store";
+import ApiErrorHandler from "./components/shared/ApiErrorHandler";
 import DepositAccountDetailPage from "./pages/DepositAccountDetailPage";
 import TransferListPage from "./pages/TransferListPage";
 import TransferFormPage from "./pages/TransferFormPage";
@@ -49,7 +50,12 @@ function RedirectIfAuth({ children }: { children: React.ReactNode }) {
 function RequireAuth({ children }: { children: React.ReactNode }) {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-    return <>{children}</>;
+    return (
+        <>
+            <ApiErrorHandler />
+            {children}
+        </>
+    );
 }
 
 function App() {

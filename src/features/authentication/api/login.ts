@@ -7,7 +7,7 @@ export interface LoginCredentials {
 }
 
 /**
- * Authenticate against Apache Fineract.
+ * Authenticate against Finfact.
  *
  * Endpoint: POST /api/v1/authentication?tenantIdentifier=default
  * The request body contains the plaintext credentials; Fineract returns
@@ -15,9 +15,6 @@ export interface LoginCredentials {
  * token for every subsequent request.
  */
 export async function login(credentials: LoginCredentials): Promise<FineractLoginResponse> {
-    const { data } = await api.post<FineractLoginResponse>(
-        "/authentication?tenantIdentifier=default",
-        credentials,
-    );
+    const { data } = await api.post<FineractLoginResponse>("/authentication?tenantIdentifier=default", credentials);
     return data;
 }
