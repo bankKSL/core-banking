@@ -1,5 +1,8 @@
-import { type FC, useState, useEffect } from "react";
+import { type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +28,13 @@ const COMMAND_LABELS: Record<string, string> = {
   block: "Block Account",
 };
 
+const accountActionSchema = z.object({
+  actionDate: z.string().min(1, "Action date is required"),
+  note: z.string().optional(),
+});
+
+type AccountActionFormValues = z.infer<typeof accountActionSchema>;
+
 const AccountActionPage: FC = () => {
   const { accountType, accountId, command } = useParams<{ accountType: string; accountId: string; command: string }>();
   const navigate = useNavigate();
@@ -32,40 +42,42 @@ const AccountActionPage: FC = () => {
   const approveMutation = useApproveSavingsAccount();
   const activateMutation = useActivateSavingsAccount();
   const closeMutation = useCloseSavingsAccount();
-  const [actionDate, setActionDate] = useState(new Date().toISOString().split("T")[0]);
-  const [note, setNote] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
   const commandKey = command ?? "approve";
   const title = COMMAND_LABELS[commandKey] ?? `Execute ${commandKey}`;
 
-  const handleSubmit = async () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<AccountActionFormValues>({
+    resolver: zodResolver(accountActionSchema),
+    defaultValues: {
+      actionDate: new Date().toISOString().split("T")[0],
+      note: "",
+    },
+  });
+
+  const onSubmit = async (values: AccountActionFormValues) => {
     if (!accountId) return;
-    setSubmitting(true);
-    try {
-      const payload: Record<string, unknown> = {
-        dateFormat: "yyyy-MM-dd",
-        locale: "en",
-      };
-      if (commandKey !== "activate") payload.note = note || undefined;
-      if (commandKey === "approve") payload.approvedOnDate = currentDate(actionDate);
-      else if (commandKey === "activate") payload.activatedOnDate = actionDate;
-      else if (commandKey === "close") payload.closedOnDate = actionDate;
+    const payload: Record<string, unknown> = {
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+    };
+    if (commandKey !== "activate") payload.note = values.note || undefined;
+    if (commandKey === "approve") payload.approvedOnDate = currentDate(values.actionDate);
+    else if (commandKey === "activate") payload.activatedOnDate = values.actionDate;
+    else if (commandKey === "close") payload.closedOnDate = values.actionDate;
 
-      if (commandKey === "approve")
-        await approveMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
-      else if (commandKey === "activate")
-        await activateMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
-      else if (commandKey === "close")
-        await closeMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
+    if (commandKey === "approve")
+      await approveMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
+    else if (commandKey === "activate")
+      await activateMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
+    else if (commandKey === "close")
+      await closeMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
 
-      const backRoute = accountType === "fixed" ? "/deposits/fixed" : "/deposits/saving-accounts";
-      navigate(backRoute);
-    } catch {
-      // Error handled globally by ApiErrorHandler → toast
-    } finally {
-      setSubmitting(false);
-    }
+    const backRoute = accountType === "fixed" ? "/deposits/fixed" : "/deposits/saving-accounts";
+    navigate(backRoute);
   };
 
   return (
@@ -90,29 +102,23 @@ const AccountActionPage: FC = () => {
               ))}
             </div>
           ) : (
-            <>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="actionDate">Action Date *</Label>
-                <Input id="actionDate" type="date" value={actionDate} onChange={(e) => setActionDate(e.target.value)} />
+                <Input id="actionDate" type="date" {...register("actionDate")} error={errors.actionDate?.message} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="note">Note {commandKey !== "activate" ? "(optional)" : ""}</Label>
                 {commandKey !== "activate" && (
-                  <Textarea
-                    id="note"
-                    rows={4}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Optional note..."
-                  />
+                  <Textarea id="note" rows={4} {...register("note")} placeholder="Optional note..." />
                 )}
               </div>
-              <Button onClick={handleSubmit} disabled={submitting} className="bg-[#D32F2F] hover:bg-red-700">
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
                 Execute {commandKey}
               </Button>
-            </>
+            </form>
           )}
         </CardContent>
       </Card>

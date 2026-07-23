@@ -1,5 +1,8 @@
-import { type FC, useState, type FormEvent, useEffect, useRef } from "react";
+import { type FC, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { LayoutDashboard, Loader2, AlertCircle, CheckCircle2, ArrowLeft, Moon, Sun, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
@@ -7,13 +10,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+
 const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
   const { forgotPassword, isSendingReset, resetPasswordSent, resetError, clearResetState, isAuthenticated } =
     useAuthStore();
   const { theme, toggleTheme } = useUIStore();
 
-  const [email, setEmail] = useState("");
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
+
+  const emailValue = watch("email");
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -26,15 +44,14 @@ const ForgotPasswordPage: FC = () => {
     return () => {
       clearResetState();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     emailInputRef.current?.focus();
   }, []);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    await forgotPassword(email.trim());
+  const onSubmit = async (values: ForgotPasswordFormValues) => {
+    await forgotPassword(values.email.trim());
   };
 
   const handleBackToLogin = () => {
@@ -42,9 +59,8 @@ const ForgotPasswordPage: FC = () => {
     navigate("/login", { replace: true });
   };
 
-  const handleInputChange = (value: string) => {
+  const handleInputChange = () => {
     if (resetError) clearResetState();
-    setEmail(value);
   };
 
   return (
@@ -77,10 +93,10 @@ const ForgotPasswordPage: FC = () => {
               <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50">
                 <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
-              <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Check your email</h2>
-              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                If an account exists for <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>,
-                you&apos;ll receive a password reset link shortly.
+              <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Check your inbox</h2>
+              <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+                If an account exists for <span className="font-medium">{emailValue}</span>, we&apos;ve sent a password
+                reset link.
               </p>
               <p className="mb-6 text-xs text-gray-400 dark:text-gray-500">
                 Didn&apos;t receive it? Check your spam folder or try again.
@@ -103,7 +119,7 @@ const ForgotPasswordPage: FC = () => {
                 Enter your email address and we&apos;ll send you a link to reset your password.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="reset-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Email address
@@ -111,14 +127,12 @@ const ForgotPasswordPage: FC = () => {
                   <div className="relative">
                     <Input
                       id="reset-email"
-                      ref={emailInputRef}
+                      {...register("email")}
                       type="email"
                       placeholder="you@corebank.com"
-                      value={email}
-                      onChange={(e) => handleInputChange(e.target.value)}
-                      required
                       autoComplete="email"
                       disabled={isSendingReset}
+                      error={errors.email?.message}
                       className={cn(
                         "h-11 pl-10",
                         resetError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700",

@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Wallet, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,21 +16,45 @@ import { useClients } from "@/features/clients";
 import { useFixedDepositProducts } from "@/features/deposits";
 import { currentDate } from "@/lib/utils";
 
+const fixedDepositSchema = z.object({
+  clientId: z.string().min(1, "Client is required"),
+  productId: z.string().min(1, "Product is required"),
+  externalId: z.string().optional(),
+  depositAmount: z.string().min(1, "Deposit amount is required"),
+  depositPeriod: z.string().min(1, "Period is required"),
+  depositPeriodFrequencyId: z.string(),
+  submittedOnDate: z.string().min(1, "Date is required"),
+  nominalAnnualInterestRate: z.string().optional(),
+});
+
+type FixedDepositFormValues = z.infer<typeof fixedDepositSchema>;
+
 const CreateFixedDepositPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clientIdParam = searchParams.get("clientId");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    clientId: clientIdParam ? Number(clientIdParam) : 0,
-    productId: 0,
-    externalId: "",
-    depositAmount: 0,
-    depositPeriod: 12,
-    depositPeriodFrequencyId: 2,
-    submittedOnDate: new Date().toISOString().split("T")[0],
-    nominalAnnualInterestRate: 0,
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<FixedDepositFormValues>({
+    resolver: zodResolver(fixedDepositSchema) as any,
+    defaultValues: {
+      clientId: clientIdParam || "",
+      productId: "",
+      externalId: "",
+      depositAmount: "",
+      depositPeriod: "12",
+      depositPeriodFrequencyId: "2",
+      submittedOnDate: new Date().toISOString().split("T")[0],
+      nominalAnnualInterestRate: "",
+    },
   });
+
+  const clientId = watch("clientId");
 
   const { data: clientsData, isLoading: clientsLoading } = useClients({ limit: 100 });
   const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
@@ -35,36 +62,25 @@ const CreateFixedDepositPage: React.FC = () => {
   const isLoading = clientsLoading || productsLoading;
 
   const sortedClients = [...clients].sort((a, b) => {
-    if (a.id === form.clientId) return -1;
-    if (b.id === form.clientId) return 1;
+    if (String(a.id) === clientId) return -1;
+    if (String(b.id) === clientId) return 1;
     return 0;
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.clientId || !form.productId || form.depositAmount <= 0) return;
-    setIsSubmitting(true);
-    try {
-      await createFixedDepositAccount({
-        clientId: form.clientId,
-        productId: form.productId,
-        externalId: form.externalId || undefined,
-        depositAmount: form.depositAmount,
-        depositPeriod: form.depositPeriod,
-        depositPeriodFrequencyId: form.depositPeriodFrequencyId,
-        submittedOnDate: currentDate(form.submittedOnDate),
-        locale: "en",
-        dateFormat: "yyyy-MM-dd",
-      });
-      navigate("/deposits/fixed");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = async (values: FixedDepositFormValues) => {
+    await createFixedDepositAccount({
+      clientId: Number(values.clientId),
+      productId: Number(values.productId),
+      externalId: values.externalId || undefined,
+      depositAmount: Number(values.depositAmount),
+      depositPeriod: Number(values.depositPeriod),
+      depositPeriodFrequencyId: Number(values.depositPeriodFrequencyId),
+      submittedOnDate: currentDate(values.submittedOnDate),
+      locale: "en",
+      dateFormat: "yyyy-MM-dd",
+    });
+    navigate("/deposits/fixed");
   };
-
-  const setField = (f: string, v: unknown) => setForm({ ...form, [f]: v });
 
   if (isLoading)
     return (
@@ -86,50 +102,36 @@ const CreateFixedDepositPage: React.FC = () => {
           </Button>
         }
       />
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>
-              <Wallet className="inline mr-2 h-5 w-5" />
-              Client & Product
+              <Wallet className="mr-2 inline h-5 w-5" />
+              Client &amp; Product
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4">
+          <CardContent className="grid grid-cols-2 gap-4">
             <div>
               <Label>Client *</Label>
-              <Select
-                value={form.clientId ? String(form.clientId) : ""}
-                onValueChange={(v) => setField("clientId", Number(v))}
-              >
+              <Select value={clientId} onValueChange={(v) => setValue("clientId", v, { shouldValidate: true })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
                   {sortedClients.map((c) => (
                     <SelectItem key={c.id} value={String(c.id)}>
-                      {c.displayName ?? `#${c.id}`}
+                      {c.displayName ?? `Client #${c.id}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <div className="mt-1">
-                <Button
-                  type="button"
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0 text-xs"
-                  onClick={() => window.open("/clients/new", "_blank")}
-                >
-                  <ExternalLink className="mr-1 h-3 w-3" />
-                  Create New Client
-                </Button>
-              </div>
+              {errors.clientId && <p className="text-sm text-red-500 mt-1">{errors.clientId.message}</p>}
             </div>
             <div>
-              <Label>Fixed Deposit Product *</Label>
+              <Label>Product *</Label>
               <Select
-                value={form.productId ? String(form.productId) : ""}
-                onValueChange={(v) => setField("productId", Number(v))}
+                value={watch("productId")}
+                onValueChange={(v) => setValue("productId", v, { shouldValidate: true })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select product" />
@@ -142,18 +144,17 @@ const CreateFixedDepositPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="mt-1">
-                <Button
-                  type="button"
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0 text-xs"
-                  onClick={() => window.open("/deposits/fixed-products", "_blank")}
-                >
-                  <ExternalLink className="mr-1 h-3 w-3" />
-                  Create New Product
-                </Button>
-              </div>
+              {errors.productId && <p className="text-sm text-red-500 mt-1">{errors.productId.message}</p>}
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-xs"
+                onClick={() => window.open("/deposits/fixed-products", "_blank")}
+              >
+                <ExternalLink className="mr-1 h-3 w-3" />
+                Create New Product
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -164,34 +165,21 @@ const CreateFixedDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <Label htmlFor="externalId">External ID</Label>
-              <Input
-                id="externalId"
-                value={form.externalId}
-                onChange={(e) => setField("externalId", e.target.value)}
-                placeholder="Optional external reference"
-              />
+              <Input id="externalId" {...register("externalId")} placeholder="Optional external reference" />
             </div>
             <div>
               <Label>Deposit Amount *</Label>
-              <Input
-                type="number"
-                value={form.depositAmount || ""}
-                onChange={(e) => setField("depositAmount", Number(e.target.value))}
-              />
+              <Input type="number" {...register("depositAmount")} error={errors.depositAmount?.message} />
             </div>
             <div>
               <Label>Period Length *</Label>
-              <Input
-                type="number"
-                value={form.depositPeriod || ""}
-                onChange={(e) => setField("depositPeriod", Number(e.target.value))}
-              />
+              <Input type="number" {...register("depositPeriod")} error={errors.depositPeriod?.message} />
             </div>
             <div>
               <Label>Frequency (Section 10.7)</Label>
               <Select
-                value={String(form.depositPeriodFrequencyId)}
-                onValueChange={(v) => setField("depositPeriodFrequencyId", Number(v))}
+                value={watch("depositPeriodFrequencyId")}
+                onValueChange={(v) => setValue("depositPeriodFrequencyId", v)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -210,18 +198,13 @@ const CreateFixedDepositPage: React.FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                value={form.nominalAnnualInterestRate || ""}
-                onChange={(e) => setField("nominalAnnualInterestRate", parseFloat(e.target.value) || 0)}
+                {...register("nominalAnnualInterestRate")}
                 placeholder="Inherited from product"
               />
             </div>
             <div>
               <Label>Submitted Date</Label>
-              <Input
-                type="date"
-                value={form.submittedOnDate}
-                onChange={(e) => setField("submittedOnDate", e.target.value)}
-              />
+              <Input type="date" {...register("submittedOnDate")} error={errors.submittedOnDate?.message} />
             </div>
           </CardContent>
         </Card>

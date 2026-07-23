@@ -158,6 +158,7 @@ const FixedDepositProductsPage: React.FC = () => {
     if (!form.depositAmount || form.depositAmount <= 0) e.depositAmount = "Deposit amount is required";
     if (!form.minDepositTerm || form.minDepositTerm <= 0) e.minDepositTerm = "Min deposit term is required";
     if (!form.minDepositTermTypeId) e.minDepositTermTypeId = "Term type is required";
+    if (!form.description) e.description = "Description is required";
     slabs.forEach((s, i) => {
       if (!s.description?.trim()) e[`slab_${i}_desc`] = `Slab ${i + 1}: description required`;
       if (s.annualInterestRate == null || s.annualInterestRate < 0)
@@ -355,6 +356,7 @@ const FixedDepositProductsPage: React.FC = () => {
                 placeholder="Brief product description"
                 value={form.description ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                error={errors.description}
               />
             </div>
 

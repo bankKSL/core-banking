@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,15 +38,36 @@ interface SideState {
 
 const INITIAL_SIDE: SideState = { officeId: null, clientId: null, accountType: null, accountId: null };
 
+const transferFormSchema = z.object({
+  transferDate: z.string().min(1, "Transfer date is required"),
+  transferAmount: z
+    .string()
+    .min(1, "Amount is required")
+    .refine((v) => parseFloat(v) > 0, "Amount must be positive"),
+  transferDescription: z.string().optional(),
+});
+
+type TransferFormValues = z.infer<typeof transferFormSchema>;
+
 const TransferFormPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [from, setFrom] = useState<SideState>(INITIAL_SIDE);
   const [to, setTo] = useState<SideState>(INITIAL_SIDE);
-  const [transferDate, setTransferDate] = useState("");
-  const [transferAmount, setTransferAmount] = useState<number | "">("");
-  const [transferDescription, setTransferDescription] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<TransferFormValues>({
+    resolver: zodResolver(transferFormSchema),
+    defaultValues: {
+      transferDate: "",
+      transferAmount: "",
+      transferDescription: "",
+    },
+  });
 
   // ─── Offices ─────────────────────────────────────────────────
   const { data: offices = [] } = useQuery({
@@ -93,154 +117,48 @@ const TransferFormPage: React.FC = () => {
         ? (toAccountsQuery.data?.savingsAccounts ?? STABLE_EMPTY_ACCOUNTS)
         : STABLE_EMPTY_ACCOUNTS;
 
-  // ─── Mutation ────────────────────────────────────────────────
+  // ─── Transfer mutation ──────────────────────────────────────
   const transferMutation = useMutation({
-    mutationFn: () => {
-      if (
-        !from.officeId ||
-        !from.clientId ||
-        !from.accountType ||
-        !from.accountId ||
-        !to.officeId ||
-        !to.clientId ||
-        !to.accountType ||
-        !to.accountId ||
-        !transferDate ||
-        !transferAmount
-      ) {
-        throw new Error("All fields are required");
-      }
-      const payload = buildTransferRequest({
-        fromOfficeId: from.officeId,
-        fromClientId: from.clientId,
-        fromAccountType: from.accountType,
-        fromAccountId: from.accountId,
-        toOfficeId: to.officeId,
-        toClientId: to.clientId,
-        toAccountType: to.accountType,
-        toAccountId: to.accountId,
-        transferDate,
-        transferAmount: Number(transferAmount),
-        transferDescription,
-      });
-      return createTransfer(payload);
-    },
+    mutationFn: createTransfer,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accountTransfers"] });
+      queryClient.invalidateQueries({ queryKey: ["transfers"] as any });
       navigate("/transfers/history");
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    transferMutation.mutate();
-  };
-
   const updateSide = (side: "from" | "to", field: keyof SideState, value: number | null) => {
-    const setter = side === "from" ? setFrom : setTo;
-    if (field === "officeId") {
-      setter((prev) => ({ ...prev, officeId: value ?? null, clientId: null, accountType: null, accountId: null }));
-    } else if (field === "clientId") {
-      setter((prev) => ({ ...prev, clientId: value ?? null, accountType: null, accountId: null }));
-    } else if (field === "accountType") {
-      setter((prev) => ({ ...prev, accountType: value ?? null, accountId: null }));
-    } else {
-      setter((prev) => ({ ...prev, [field]: value ?? null }));
-    }
+    const updater = side === "from" ? setFrom : setTo;
+    updater((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "officeId") {
+        next.clientId = null;
+        next.accountType = null;
+        next.accountId = null;
+      } else if (field === "clientId") {
+        next.accountType = null;
+        next.accountId = null;
+      } else if (field === "accountType") {
+        next.accountId = null;
+      }
+      return next;
+    });
   };
 
-  console.log({ clients: fromClientsQuery.data });
-
-  const renderSide = (side: "from" | "to", state: SideState) => {
-    const clients = side === "from" ? fromClients : toClients;
-    const accounts = side === "from" ? fromAccounts : toAccounts;
-
-    return (
-      <div className="space-y-4">
-        {/* Office */}
-        <div>
-          <Label>Office</Label>
-          <Select
-            value={state.officeId ? String(state.officeId) : ""}
-            onValueChange={(v) => updateSide(side, "officeId", Number(v))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Office" />
-            </SelectTrigger>
-            <SelectContent>
-              {offices.map((o: Office) => (
-                <SelectItem key={o.id} value={String(o.id)}>
-                  {o.nameDecorated || o.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Client */}
-        <div>
-          <Label>Client</Label>
-          <Select
-            value={state.clientId ? String(state.clientId) : ""}
-            onValueChange={(v) => updateSide(side, "clientId", Number(v))}
-            disabled={!state.officeId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Client" />
-            </SelectTrigger>
-            <SelectContent>
-              {clients.map((c: ClientSummary) => (
-                <SelectItem key={c.id} value={String(c.id)}>
-                  {c.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Account Type */}
-        <div>
-          <Label>Account Type</Label>
-          <Select
-            value={state.accountType ? String(state.accountType) : ""}
-            onValueChange={(v) => updateSide(side, "accountType", Number(v))}
-            disabled={!state.clientId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {ACCOUNT_TYPES.map((at) => (
-                <SelectItem key={at.id} value={String(at.id)}>
-                  {at.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Account */}
-        <div>
-          <Label>Account</Label>
-          <Select
-            value={state.accountId ? String(state.accountId) : ""}
-            onValueChange={(v) => updateSide(side, "accountId", Number(v))}
-            disabled={!state.accountType}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Account" />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts.map((a: MiniAccount) => (
-                <SelectItem key={a.id} value={String(a.id)}>
-                  {a.accountNo} - {a.productName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    );
+  const onSubmit = async (values: TransferFormValues) => {
+    const requestPayload = buildTransferRequest({
+      fromOfficeId: from.officeId!,
+      fromClientId: from.clientId!,
+      fromAccountType: from.accountType!,
+      fromAccountId: from.accountId!,
+      toOfficeId: to.officeId!,
+      toClientId: to.clientId!,
+      toAccountType: to.accountType!,
+      toAccountId: to.accountId!,
+      transferDate: values.transferDate,
+      transferAmount: parseFloat(values.transferAmount),
+      transferDescription: values.transferDescription || "",
+    });
+    await transferMutation.mutateAsync(requestPayload);
   };
 
   const isValid =
@@ -251,9 +169,93 @@ const TransferFormPage: React.FC = () => {
     to.officeId &&
     to.clientId &&
     to.accountType &&
-    to.accountId &&
-    transferDate &&
-    transferAmount !== "";
+    to.accountId;
+
+  const renderSide = (side: "from" | "to", state: SideState) => {
+    const officesList = offices as Office[];
+    const currentClients = side === "from" ? fromClients : toClients;
+    const currentAccounts = side === "from" ? fromAccounts : toAccounts;
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label>Office *</Label>
+          <Select
+            value={state.officeId ? String(state.officeId) : ""}
+            onValueChange={(v) => updateSide(side, "officeId", Number(v))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select office" />
+            </SelectTrigger>
+            <SelectContent>
+              {officesList.map((o) => (
+                <SelectItem key={o.id} value={String(o.id)}>
+                  {o.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Client *</Label>
+          <Select
+            value={state.clientId ? String(state.clientId) : ""}
+            onValueChange={(v) => updateSide(side, "clientId", Number(v))}
+            disabled={!state.officeId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={state.officeId ? "Select client" : "Select office first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {currentClients.map((c) => (
+                <SelectItem key={c.id} value={String(c.id)}>
+                  {c.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Account Type *</Label>
+          <Select
+            value={state.accountType ? String(state.accountType) : ""}
+            onValueChange={(v) => updateSide(side, "accountType", Number(v))}
+            disabled={!state.clientId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={state.clientId ? "Select type" : "Select client first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {ACCOUNT_TYPES.map((t) => (
+                <SelectItem key={t.id} value={String(t.id)}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Account *</Label>
+          <Select
+            value={state.accountId ? String(state.accountId) : ""}
+            onValueChange={(v) => updateSide(side, "accountId", Number(v))}
+            disabled={!state.accountType}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={state.accountType ? "Select account" : "Select type first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {currentAccounts.map((a) => (
+                <SelectItem key={a.id} value={String(a.id)}>
+                  {a.accountNo ?? `#${a.id}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
@@ -267,7 +269,7 @@ const TransferFormPage: React.FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* FROM Section */}
           <Card>
@@ -297,9 +299,8 @@ const TransferFormPage: React.FC = () => {
                 <Input
                   id="transferDate"
                   type="date"
-                  value={transferDate}
-                  onChange={(e) => setTransferDate(e.target.value)}
-                  required
+                  {...register("transferDate")}
+                  error={errors.transferDate?.message}
                 />
               </div>
               <div>
@@ -312,9 +313,8 @@ const TransferFormPage: React.FC = () => {
                   step="0.01"
                   min="0"
                   placeholder="0.00"
-                  value={transferAmount}
-                  onChange={(e) => setTransferAmount(e.target.value ? Number(e.target.value) : "")}
-                  required
+                  {...register("transferAmount")}
+                  error={errors.transferAmount?.message}
                 />
               </div>
             </div>
@@ -323,8 +323,7 @@ const TransferFormPage: React.FC = () => {
               <Textarea
                 id="transferDescription"
                 placeholder="Optional description"
-                value={transferDescription}
-                onChange={(e) => setTransferDescription(e.target.value)}
+                {...register("transferDescription")}
                 rows={3}
               />
             </div>
