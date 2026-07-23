@@ -7,9 +7,9 @@ import { clientKeys } from "./useClients";
  * Used by Create/Edit Client forms for dropdowns.
  */
 export function useClientTemplate() {
-    return useQuery({
-        queryKey: clientKeys.template,
-        queryFn: fetchClientTemplate,
-        staleTime: 5 * 60_000, // Template data changes rarely
-    });
+  return useQuery({
+    queryKey: clientKeys.template,
+    queryFn: fetchClientTemplate,
+    staleTime: 5 * 60_000, // Template data changes rarely
+  });
 }

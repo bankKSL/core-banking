@@ -7,5 +7,5 @@ import { useAuthStore } from "@/store";
  * persisted across page reloads via localStorage.
  */
 export function useCurrentUser() {
-    return useAuthStore((s) => s.user);
+  return useAuthStore((s) => s.user);
 }

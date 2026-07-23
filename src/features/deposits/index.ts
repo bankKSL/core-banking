@@ -1,80 +1,88 @@
 // ─── Deposits Feature ───────────────────────────────────────
 
 export type {
-    SavingsAccount,
-    SavingsAccountStatus,
-    SavingsProduct,
-    SavingsTransaction,
-    SavingsSummary,
-    SavingsAccountListResponse,
-    SavingsAccountListParams,
-    SavingsAccountTemplate,
-    SavingsAccountCreateRequest,
-    SavingsCommandResponse,
-    SavingsTransactionRequest,
-    SavingsTransactionTemplate,
-    FixedDepositAccount,
-    FixedDepositListParams,
-    RecurringDepositAccount,
-    SavingsProductCreateRequest,
-    DepositAccountType,
-    FixedDepositProduct,
-    FixedDepositProductCreateRequest,
+  SavingsAccount,
+  SavingsAccountStatus,
+  SavingsProduct,
+  SavingsTransaction,
+  SavingsSummary,
+  SavingsAccountListResponse,
+  SavingsAccountListParams,
+  SavingsAccountTemplate,
+  SavingsAccountCreateRequest,
+  SavingsCommandResponse,
+  SavingsTransactionRequest,
+  SavingsTransactionTemplate,
+  FixedDepositAccount,
+  FixedDepositListParams,
+  RecurringDepositAccount,
+  SavingsProductCreateRequest,
+  DepositAccountType,
+  FixedDepositProduct,
+  FixedDepositProductCreateRequest,
 } from "./types/deposit";
 
 export {
-    SAVINGS_STATUS_LABELS,
-    SAVINGS_STATUS_CONFIG,
-    DEPOSIT_ACCOUNTS_PAGE_SIZE,
-    DEPOSIT_SEARCH_DEBOUNCE_MS,
-    DEPOSIT_TYPE_LABELS,
-    DEPOSIT_PERIOD_FREQUENCIES,
-    FIXED_DEPOSIT_STATUS_CONFIG,
-    PRE_CLOSURE_PENALTY_TYPES,
-    CHART_SLAB_PERIOD_TYPES,
-    ACCOUNTING_RULES,
+  SAVINGS_STATUS_LABELS,
+  SAVINGS_STATUS_CONFIG,
+  DEPOSIT_ACCOUNTS_PAGE_SIZE,
+  DEPOSIT_SEARCH_DEBOUNCE_MS,
+  DEPOSIT_TYPE_LABELS,
+  DEPOSIT_PERIOD_FREQUENCIES,
+  FIXED_DEPOSIT_STATUS_CONFIG,
+  PRE_CLOSURE_PENALTY_TYPES,
+  CHART_SLAB_PERIOD_TYPES,
+  ACCOUNTING_RULES,
 } from "./constants/status";
 
-export { createSavingsAccountSchema, depositTransactionSchema, createSavingsProductSchema } from "./schemas/deposit.schema";
-export type { CreateSavingsAccountFormValues, DepositTransactionFormValues, CreateSavingsProductFormValues } from "./schemas/deposit.schema";
+export {
+  createSavingsAccountSchema,
+  depositTransactionSchema,
+  createSavingsProductSchema,
+} from "./schemas/deposit.schema";
+export type {
+  CreateSavingsAccountFormValues,
+  DepositTransactionFormValues,
+  CreateSavingsProductFormValues,
+} from "./schemas/deposit.schema";
 
 export {
-    fetchSavingsAccounts,
-    fetchSavingsAccount,
-    fetchSavingsAccountTemplate,
-    createSavingsAccount,
-    updateSavingsAccount,
-    deleteSavingsAccount,
-    approveSavingsAccount,
-    activateSavingsAccount,
-    closeSavingsAccount,
-    fetchDepositTemplate,
-    makeDeposit,
-    fetchWithdrawTemplate,
-    makeWithdrawal,
-    fetchFixedDepositAccounts,
-    fetchFixedDepositAccount,
-    createFixedDepositAccount,
-    approveFixedDeposit,
-    activateFixedDeposit,
-    closeFixedDeposit,
-    prematureCloseFixedDeposit,
-    rejectFixedDeposit,
-    withdrawFixedDeposit,
-    undoApprovalFixedDeposit,
-    undoActivationFixedDeposit,
-    calculatePrematureAmount,
-    fetchFixedDepositProducts,
-    fetchFixedDepositProduct,
-    createFixedDepositProduct,
-    updateFixedDepositProduct,
-    fetchRecurringDepositAccounts,
-    fetchRecurringDepositAccount,
-    createRecurringDepositAccount,
-    fetchSavingsProducts,
-    fetchSavingsProduct,
-    createSavingsProduct,
-    updateSavingsProduct,
+  fetchSavingsAccounts,
+  fetchSavingsAccount,
+  fetchSavingsAccountTemplate,
+  createSavingsAccount,
+  updateSavingsAccount,
+  deleteSavingsAccount,
+  approveSavingsAccount,
+  activateSavingsAccount,
+  closeSavingsAccount,
+  fetchDepositTemplate,
+  makeDeposit,
+  fetchWithdrawTemplate,
+  makeWithdrawal,
+  fetchFixedDepositAccounts,
+  fetchFixedDepositAccount,
+  createFixedDepositAccount,
+  approveFixedDeposit,
+  activateFixedDeposit,
+  closeFixedDeposit,
+  prematureCloseFixedDeposit,
+  rejectFixedDeposit,
+  withdrawFixedDeposit,
+  undoApprovalFixedDeposit,
+  undoActivationFixedDeposit,
+  calculatePrematureAmount,
+  fetchFixedDepositProducts,
+  fetchFixedDepositProduct,
+  createFixedDepositProduct,
+  updateFixedDepositProduct,
+  fetchRecurringDepositAccounts,
+  fetchRecurringDepositAccount,
+  createRecurringDepositAccount,
+  fetchSavingsProducts,
+  fetchSavingsProduct,
+  createSavingsProduct,
+  updateSavingsProduct,
 } from "./api/deposit";
 
 export { useSavingsAccounts, useSavingsAccount, depositKeys } from "./hooks/useSavingsAccounts";
@@ -91,13 +99,29 @@ export { useMakeDeposit, useMakeWithdrawal } from "./hooks/useDepositWithdraw";
 
 export { useFixedDepositAccounts, useFixedDepositAccount } from "./hooks/useFixedDeposits";
 
-export { useFixedDepositProducts, useFixedDepositProduct, useCreateFixedDepositProduct, useUpdateFixedDepositProduct } from "./hooks/useFixedDepositProducts";
+export {
+  useFixedDepositProducts,
+  useFixedDepositProduct,
+  useCreateFixedDepositProduct,
+  useUpdateFixedDepositProduct,
+} from "./hooks/useFixedDepositProducts";
 
 export { useRecurringDepositAccounts, useRecurringDepositAccount } from "./hooks/useRecurringDeposits";
 
 // API — Savings Charges
-export { fetchSavingsCharges, fetchSavingsChargesTemplate, createSavingsCharge, waiveSavingsCharge, deleteSavingsCharge } from "./api/deposit";
-export type { SavingsCharge, SavingsChargeListResponse, PostSavingsChargeRequest, SavingsChargesTemplate } from "./api/deposit";
+export {
+  fetchSavingsCharges,
+  fetchSavingsChargesTemplate,
+  createSavingsCharge,
+  waiveSavingsCharge,
+  deleteSavingsCharge,
+} from "./api/deposit";
+export type {
+  SavingsCharge,
+  SavingsChargeListResponse,
+  PostSavingsChargeRequest,
+  SavingsChargesTemplate,
+} from "./api/deposit";
 
 // API — Savings Commands
 export { rejectSavingsAccount, withdrawSavingsAccount, undoRejectSavingsAccount } from "./api/deposit";
@@ -110,13 +134,31 @@ export { fetchFixedDepositTransactions, undoFixedDepositTransaction } from "./ap
 export type { FixedDepositTransaction } from "./api/deposit";
 
 // Hooks — Savings Charges
-export { useSavingsCharges, useSavingsChargesTemplate, useCreateSavingsCharge, useWaiveSavingsCharge, useDeleteSavingsCharge, savingsChargeKeys } from "./hooks/useSavingsCharges";
+export {
+  useSavingsCharges,
+  useSavingsChargesTemplate,
+  useCreateSavingsCharge,
+  useWaiveSavingsCharge,
+  useDeleteSavingsCharge,
+  savingsChargeKeys,
+} from "./hooks/useSavingsCharges";
 
 // Hooks — Savings Commands
-export { useRejectSavingsAccount, useWithdrawSavingsAccount, useUndoRejectSavingsAccount, useApproveSavingsAccount, useActivateSavingsAccount, useCloseSavingsAccount } from "./hooks/useSavingsCommands";
+export {
+  useRejectSavingsAccount,
+  useWithdrawSavingsAccount,
+  useUndoRejectSavingsAccount,
+  useApproveSavingsAccount,
+  useActivateSavingsAccount,
+  useCloseSavingsAccount,
+} from "./hooks/useSavingsCommands";
 
 // Hooks — Savings Transactions
 export { savingsTransactionKeys } from "./hooks/useSavingsTransactions";
 
 // Hooks — Fixed Deposit Transactions
-export { useFixedDepositTransactions, useUndoFixedDepositTransaction, fdTransactionKeys } from "./hooks/useFixedDepositTransactions";
+export {
+  useFixedDepositTransactions,
+  useUndoFixedDepositTransaction,
+  fdTransactionKeys,
+} from "./hooks/useFixedDepositTransactions";

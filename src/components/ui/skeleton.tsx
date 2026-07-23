@@ -15,21 +15,11 @@ const skeletonVariants = cva("animate-pulse bg-gray-200 dark:bg-gray-700", {
   },
 });
 
-export interface SkeletonProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof skeletonVariants> {}
+export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof skeletonVariants> {}
 
-const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
-  ({ className, variant, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(skeletonVariants({ variant, className }))}
-        {...props}
-      />
-    );
-  }
-);
+const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(({ className, variant, ...props }, ref) => {
+  return <div ref={ref} className={cn(skeletonVariants({ variant, className }))} {...props} />;
+});
 Skeleton.displayName = "Skeleton";
 
 export { Skeleton, skeletonVariants };

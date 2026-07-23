@@ -8,13 +8,14 @@ import { clientKeys } from "./useClients";
  * Invalidates both the list and detail queries on success.
  */
 export function useUpdateClient() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: ({ clientId, payload }: { clientId: number | string; payload: ClientUpdateRequest }) => updateClient(clientId, payload),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: clientKeys.all });
-            queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) });
-        },
-    });
+  return useMutation({
+    mutationFn: ({ clientId, payload }: { clientId: number | string; payload: ClientUpdateRequest }) =>
+      updateClient(clientId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.all });
+      queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) });
+    },
+  });
 }

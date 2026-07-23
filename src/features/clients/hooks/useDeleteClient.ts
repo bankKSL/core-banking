@@ -7,12 +7,12 @@ import { clientKeys } from "./useClients";
  * Finfact may or may not support this — handle gracefully.
  */
 export function useDeleteClient() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (clientId: number | string) => deleteClient(clientId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: clientKeys.all });
-        },
-    });
+  return useMutation({
+    mutationFn: (clientId: number | string) => deleteClient(clientId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.all });
+    },
+  });
 }

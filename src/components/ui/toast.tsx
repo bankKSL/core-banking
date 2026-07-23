@@ -13,7 +13,7 @@ const ToastViewport = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse gap-2 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
-      className
+      className,
     )}
     {...props}
   />
@@ -28,8 +28,7 @@ const toastVariants = cva(
         default: "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
         success:
           "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100",
-        error:
-          "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100",
+        error: "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100",
         warning:
           "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100",
         info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-100",
@@ -38,7 +37,7 @@ const toastVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -50,16 +49,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const Toast = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Root> &
-    VariantProps<typeof toastVariants>
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Root> & VariantProps<typeof toastVariants>
 >(({ className, variant, children, ...props }, ref) => {
   const Icon = variant ? iconMap[variant] : null;
   return (
-    <ToastPrimitive.Root
-      ref={ref}
-      className={cn(toastVariants({ variant }), className)}
-      {...props}
-    >
+    <ToastPrimitive.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props}>
       <div className="flex items-start gap-3">
         {Icon && <Icon className="h-5 w-5 shrink-0 mt-0.5" />}
         <div className="flex-1 text-sm font-medium">{children}</div>
@@ -76,11 +70,7 @@ const ToastTitle = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitive.Title
-    ref={ref}
-    className={cn("text-sm font-semibold", className)}
-    {...props}
-  />
+  <ToastPrimitive.Title ref={ref} className={cn("text-sm font-semibold", className)} {...props} />
 ));
 ToastTitle.displayName = ToastPrimitive.Title.displayName;
 
@@ -88,11 +78,7 @@ const ToastDescription = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitive.Description
-    ref={ref}
-    className={cn("text-sm opacity-90", className)}
-    {...props}
-  />
+  <ToastPrimitive.Description ref={ref} className={cn("text-sm opacity-90", className)} {...props} />
 ));
 ToastDescription.displayName = ToastPrimitive.Description.displayName;
 
@@ -104,7 +90,7 @@ const ToastAction = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-transparent px-3 text-sm font-medium transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#D32F2F]/50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-800",
-      className
+      className,
     )}
     {...props}
   />
@@ -119,7 +105,7 @@ const ToastClose = React.forwardRef<
     ref={ref}
     className={cn(
       "absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#D32F2F]/50",
-      className
+      className,
     )}
     toast-close=""
     {...props}
@@ -176,46 +162,37 @@ interface ToastItem {
 export function ToastProviderWrapper({ children }: ToastProviderWrapperProps) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
 
-  const addToast = React.useCallback(
-    (options: ToastOptions) => {
-      const id = crypto.randomUUID();
-      const duration = options.duration ?? 5000;
-      const newToast: ToastItem = {
-        id,
-        title: options.title,
-        description: options.description,
-        variant: options.variant ?? "default",
-        duration,
-        action: options.action,
-        open: true,
-      };
-      setToasts((prev) => [...prev, newToast]);
+  const addToast = React.useCallback((options: ToastOptions) => {
+    const id = crypto.randomUUID();
+    const duration = options.duration ?? 5000;
+    const newToast: ToastItem = {
+      id,
+      title: options.title,
+      description: options.description,
+      variant: options.variant ?? "default",
+      duration,
+      action: options.action,
+      open: true,
+    };
+    setToasts((prev) => [...prev, newToast]);
 
+    setTimeout(() => {
+      setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, open: false } : t)));
       setTimeout(() => {
-        setToasts((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, open: false } : t))
-        );
-        setTimeout(() => {
-          setToasts((prev) => prev.filter((t) => t.id !== id));
-        }, 300);
-      }, duration);
-    },
-    []
-  );
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 300);
+    }, duration);
+  }, []);
 
   const contextValue = React.useMemo<ToastContextValue>(
     () => ({
       toast: addToast,
-      success: (title, description) =>
-        addToast({ title, description, variant: "success" }),
-      error: (title, description) =>
-        addToast({ title, description, variant: "error" }),
-      warning: (title, description) =>
-        addToast({ title, description, variant: "warning" }),
-      info: (title, description) =>
-        addToast({ title, description, variant: "info" }),
+      success: (title, description) => addToast({ title, description, variant: "success" }),
+      error: (title, description) => addToast({ title, description, variant: "error" }),
+      warning: (title, description) => addToast({ title, description, variant: "warning" }),
+      info: (title, description) => addToast({ title, description, variant: "info" }),
     }),
-    [addToast]
+    [addToast],
   );
 
   return (
@@ -229,11 +206,7 @@ export function ToastProviderWrapper({ children }: ToastProviderWrapperProps) {
             open={t.open}
             onOpenChange={(open) => {
               if (!open) {
-                setToasts((prev) =>
-                  prev.map((item) =>
-                    item.id === t.id ? { ...item, open: false } : item
-                  )
-                );
+                setToasts((prev) => prev.map((item) => (item.id === t.id ? { ...item, open: false } : item)));
                 setTimeout(() => {
                   setToasts((prev) => prev.filter((item) => item.id !== t.id));
                 }, 300);
@@ -241,9 +214,7 @@ export function ToastProviderWrapper({ children }: ToastProviderWrapperProps) {
             }}
           >
             {t.title && <ToastTitle>{t.title}</ToastTitle>}
-            {t.description && (
-              <ToastDescription>{t.description}</ToastDescription>
-            )}
+            {t.description && <ToastDescription>{t.description}</ToastDescription>}
             {t.action && (
               <ToastAction asChild altText="action">
                 {t.action}
@@ -258,12 +229,4 @@ export function ToastProviderWrapper({ children }: ToastProviderWrapperProps) {
 }
 
 export type { ToastVariant, ToastOptions };
-export {
-  ToastProvider,
-  ToastViewport,
-  Toast,
-  ToastTitle,
-  ToastDescription,
-  ToastAction,
-  ToastClose,
-};
+export { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose };

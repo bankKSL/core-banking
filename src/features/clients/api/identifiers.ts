@@ -45,12 +45,8 @@ export interface ClientIdentifierCommandResponse {
  * GET /clients/{clientId}/identifiers
  * List all identifiers for a client.
  */
-export async function fetchClientIdentifiers(
-  clientId: number | string,
-): Promise<ClientIdentifier[]> {
-  const { data } = await client.get<ClientIdentifier[]>(
-    `/clients/${clientId}/identifiers`,
-  );
+export async function fetchClientIdentifiers(clientId: number | string): Promise<ClientIdentifier[]> {
+  const { data } = await client.get<ClientIdentifier[]>(`/clients/${clientId}/identifiers`);
   return data;
 }
 
@@ -58,12 +54,8 @@ export async function fetchClientIdentifiers(
  * GET /clients/{clientId}/identifiers/template
  * Get the template for creating a client identifier (loads allowed document types).
  */
-export async function fetchClientIdentifierTemplate(
-  clientId: number | string,
-): Promise<ClientIdentifierTemplate> {
-  const { data } = await client.get<ClientIdentifierTemplate>(
-    `/clients/${clientId}/identifiers/template`,
-  );
+export async function fetchClientIdentifierTemplate(clientId: number | string): Promise<ClientIdentifierTemplate> {
+  const { data } = await client.get<ClientIdentifierTemplate>(`/clients/${clientId}/identifiers/template`);
   return data;
 }
 
@@ -75,9 +67,7 @@ export async function fetchClientIdentifier(
   clientId: number | string,
   identifierId: number | string,
 ): Promise<ClientIdentifier> {
-  const { data } = await client.get<ClientIdentifier>(
-    `/clients/${clientId}/identifiers/${identifierId}`,
-  );
+  const { data } = await client.get<ClientIdentifier>(`/clients/${clientId}/identifiers/${identifierId}`);
   return data;
 }
 
@@ -89,10 +79,7 @@ export async function createClientIdentifier(
   clientId: number | string,
   payload: ClientIdentifierRequest,
 ): Promise<ClientIdentifierCommandResponse> {
-  const { data } = await client.post<ClientIdentifierCommandResponse>(
-    `/clients/${clientId}/identifiers`,
-    payload,
-  );
+  const { data } = await client.post<ClientIdentifierCommandResponse>(`/clients/${clientId}/identifiers`, payload);
   return data;
 }
 

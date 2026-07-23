@@ -8,19 +8,14 @@ import { clientKeys } from "./useClients";
  * Invalidates all client queries on success.
  */
 export function useActivateClient() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: ({
-            clientId,
-            payload = {},
-        }: {
-            clientId: number | string;
-            payload?: ClientActivateRequest;
-        }) => activateClient(clientId, payload),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: clientKeys.all });
-            queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) });
-        },
-    });
+  return useMutation({
+    mutationFn: ({ clientId, payload = {} }: { clientId: number | string; payload?: ClientActivateRequest }) =>
+      activateClient(clientId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientKeys.all });
+      queryClient.invalidateQueries({ queryKey: clientKeys.detail(variables.clientId) });
+    },
+  });
 }
