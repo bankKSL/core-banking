@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { DollarSign, Calendar } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -92,12 +92,14 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
               <TableRow key={tx.id}>
                 <TableCell className="font-mono text-xs">{formatTxDate(tx)}</TableCell>
                 <TableCell className="text-sm">{tx.type?.value ?? "—"}</TableCell>
-                <TableCell className="text-right font-mono text-sm">{formatCurrency(tx.amount ?? 0)}</TableCell>
+                <TableCell className="text-right font-mono text-sm">
+                  {formatCurrency(tx.amount ?? 0, tx.currency.code)}
+                </TableCell>
                 <TableCell className="text-right font-mono text-sm text-emerald-600">
-                  {formatCurrency(tx.principalPortion ?? 0)}
+                  {formatCurrency(tx.principalPortion ?? 0, tx.currency.code)}
                 </TableCell>
                 <TableCell className="text-right font-mono text-sm text-amber-600">
-                  {formatCurrency(tx.interestPortion ?? 0)}
+                  {formatCurrency(tx.interestPortion ?? 0, tx.currency.code)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge

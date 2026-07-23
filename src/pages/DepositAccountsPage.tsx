@@ -3,15 +3,11 @@ import { useNavigate } from "react-router-dom";
 import {
   Search,
   Plus,
-  Eye,
   Pencil,
   ArrowDownCircle,
   ArrowUpCircle,
   CheckCircle2,
-  Wallet,
-  PiggyBank,
   Building2,
-  TrendingUp,
   AlertTriangle,
   EyeIcon,
 } from "lucide-react";
@@ -68,8 +64,8 @@ const DepositAccountsPage: React.FC = () => {
     return result;
   }, [data, search, statusFilter]);
 
-  const formatCurrency = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+  const formatCurrency = (n: number, currency = "USD") =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: currency, maximumFractionDigits: 0 }).format(n);
 
   const columns: ColumnDef<SavingsAccount>[] = [
     { key: "accountNo", header: "Account No", cell: (r) => <code className="text-xs font-mono">{r.accountNo}</code> },
@@ -82,7 +78,11 @@ const DepositAccountsPage: React.FC = () => {
     {
       key: "accountBalance",
       header: "Balance",
-      cell: (r) => <span className="font-mono text-sm font-semibold">{formatCurrency(r.accountBalance ?? 0)}</span>,
+      cell: (r) => (
+        <span className="font-mono text-sm font-semibold">
+          {formatCurrency(r.accountBalance ?? 0, r.currency?.code)}
+        </span>
+      ),
     },
     { key: "nominalAnnualInterestRate", header: "Rate", cell: (r) => `${r.nominalAnnualInterestRate ?? 0}%` },
     {

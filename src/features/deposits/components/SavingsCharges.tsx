@@ -29,8 +29,8 @@ const chargeSchema = z.object({
 });
 type ChargeFormValues = z.infer<typeof chargeSchema>;
 
-const formatCurrency = (n?: number) =>
-  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n) : "—";
+const formatCurrency = (n?: number, currency = "USD") =>
+  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: currency }).format(n) : "—";
 
 interface SavingsChargesProps {
   accountId: number;
@@ -101,12 +101,14 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
     {
       key: "amount",
       header: "Amount",
-      accessorFn: (row) => <span className="text-sm font-mono">{formatCurrency(row.amount)}</span>,
+      accessorFn: (row) => <span className="text-sm font-mono">{formatCurrency(row.amount, row.currency?.code)}</span>,
     },
     {
       key: "amountOutstanding",
       header: "Outstanding",
-      accessorFn: (row) => <span className="text-sm font-mono">{formatCurrency(row.amountOutstanding)}</span>,
+      accessorFn: (row) => (
+        <span className="text-sm font-mono">{formatCurrency(row.amountOutstanding, row.currency?.code)}</span>
+      ),
     },
     { key: "dueDate", header: "Due Date", accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span> },
     {

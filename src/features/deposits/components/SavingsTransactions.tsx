@@ -6,8 +6,8 @@ import { DataTable } from "@/components/shared/DataTable";
 import type { SavingsTransaction } from "../api/deposit";
 import type { ColumnDef } from "@/components/shared/DataTable";
 
-const formatCurrency = (n?: number) =>
-  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n) : "—";
+const formatCurrency = (currency?: string, n?: number) =>
+  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: currency ?? "USD" }).format(n) : "—";
 
 interface SavingsTransactionsProps {
   transactions: SavingsTransaction[];
@@ -35,7 +35,7 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions }) => 
       header: "Amount",
       accessorFn: (row) => (
         <span className={`text-sm font-mono ${row.entryType === "DEBIT" ? "text-red-500" : "text-green-600"}`}>
-          {formatCurrency(Math.abs(row.amount))}
+          {formatCurrency(row.currency?.code, Math.abs(row.amount))}
         </span>
       ),
     },

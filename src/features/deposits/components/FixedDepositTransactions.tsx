@@ -8,8 +8,8 @@ import { useFixedDepositTransactions, useUndoFixedDepositTransaction } from "../
 import type { FixedDepositTransaction } from "../api/deposit";
 import type { ColumnDef } from "@/components/shared/DataTable";
 
-const formatCurrency = (n?: number) =>
-  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n) : "—";
+const formatCurrency = (currency?: string, n?: number) =>
+  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: currency ?? "USD" }).format(n) : "—";
 
 interface FixedDepositTransactionsProps {
   accountId: number;
@@ -57,7 +57,7 @@ const FixedDepositTransactions: FC<FixedDepositTransactionsProps> = ({ accountId
       header: "Amount",
       accessorFn: (row) => (
         <span className={`text-sm font-mono ${row.amount < 0 ? "text-red-500" : "text-green-600"}`}>
-          {formatCurrency(Math.abs(row.amount))}
+          {formatCurrency(row.currency?.code, Math.abs(row.amount))}
         </span>
       ),
     },
