@@ -4,7 +4,7 @@ CLIENTS MODULE - COMPLETE API CALLS & BUSINESS LOGIC
 This document captures every API call and business logic rule across the
 /clients pages of fineract-backoffice-ui (Angular standalone components).
 
-I am migrating Apache Fineract Angular to my existing React application.
+I am migrating Apache Finfact Angular to my existing React application.
 
 My stack:
 

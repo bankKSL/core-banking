@@ -1,4 +1,4 @@
-// ─── Apache Fineract Client Types ─────────────────────────────
+// ─── Finfact Client Types ─────────────────────────────
 
 /** Fineract client status codes */
 export type ClientStatus =

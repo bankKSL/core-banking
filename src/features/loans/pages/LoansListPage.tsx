@@ -85,7 +85,7 @@ const LoansListPage: FC = () => {
         <div className="p-6">
             <PageHeader
                 title="Loans"
-                description="Manage loan accounts in Apache Finfact"
+                description="Manage loan accounts in Finfact"
                 actions={
                     <Button onClick={() => navigate("/loans/create")} className="bg-[#D32F2F] hover:bg-red-700">
                         <Plus className="mr-2 h-4 w-4" />
