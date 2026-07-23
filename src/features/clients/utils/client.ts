@@ -18,11 +18,11 @@ export function getClientStatus(client: Client): string {
 }
 
 /**
- * Normalize a date value from Fineract to a Date object.
+ * Normalize a date value from Finfact to a Date object.
  * Handles:
  *  - string in "yyyy-MM-dd" format
  *  - string in "yyyy-MM-dd" format
- *  - number array [year, month, day] (Fineract array format)
+ *  - number array [year, month, day] (Finfact array format)
  *  - ISO date string with "T"
  */
 function normalizeDate(value: unknown): Date | null {
@@ -53,7 +53,7 @@ function normalizeDate(value: unknown): Date | null {
     return null;
 }
 
-/** Format date for display — handles string or Fineract number[] */
+/** Format date for display — handles string or Finfact number[] */
 export function formatClientDate(dateStr?: unknown): string {
     const date = normalizeDate(dateStr);
     if (!date) return "—";
@@ -68,7 +68,7 @@ export function formatClientDate(dateStr?: unknown): string {
     }
 }
 
-/** Calculate age — handles string or Fineract number[] */
+/** Calculate age — handles string or Finfact number[] */
 export function calculateAge(dateOfBirth?: unknown): number | null {
     const date = normalizeDate(dateOfBirth);
     if (!date) return null;

@@ -40,12 +40,12 @@ const LoansListPage: FC = () => {
         if (status !== "all") {
             const codeToId: Record<string, number> = {
                 "Submitted and pending approval": 100,
-                "Approved": 200,
-                "Active": 300,
+                Approved: 200,
+                Active: 300,
                 "Closed (obligations met)": 600,
                 "Closed (written off)": 601,
                 "Closed (rescheduled)": 602,
-                "Overpaid": 700,
+                Overpaid: 700,
             };
             const statusId = codeToId[status];
             if (statusId) params.status = String(statusId);
@@ -85,10 +85,11 @@ const LoansListPage: FC = () => {
         <div className="p-6">
             <PageHeader
                 title="Loans"
-                description="Manage loan accounts in Apache Fineract"
+                description="Manage loan accounts in Apache Finfact"
                 actions={
                     <Button onClick={() => navigate("/loans/create")} className="bg-[#D32F2F] hover:bg-red-700">
-                        <Plus className="mr-2 h-4 w-4" />Create Loan
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Loan
                     </Button>
                 }
             />
@@ -103,15 +104,7 @@ const LoansListPage: FC = () => {
                 />
             </div>
             <LoanTable data={loans} loading={isLoading} />
-            {totalPages > 1 && (
-                <Pagination
-                    currentPage={safePage}
-                    totalPages={totalPages}
-                    totalItems={totalRecords}
-                    pageSize={LOANS_PAGE_SIZE}
-                    onPageChange={handlePageChange}
-                />
-            )}
+            {totalPages > 1 && <Pagination currentPage={safePage} totalPages={totalPages} totalItems={totalRecords} pageSize={LOANS_PAGE_SIZE} onPageChange={handlePageChange} />}
         </div>
     );
 };

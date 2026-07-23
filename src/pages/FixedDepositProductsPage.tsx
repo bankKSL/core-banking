@@ -14,7 +14,7 @@ import { useFixedDepositProducts, createFixedDepositProduct } from "@/features/d
 import type { FixedDepositProduct, FixedDepositProductCreateRequest } from "@/features/deposits";
 import { currentDate } from "@/lib/utils";
 
-const CURRENCIES = ["USD", "EUR", "GBP", "INR", "JPY", "AUD"];
+const CURRENCIES = ["LAK", "THB", "CNY", "USD"];
 
 const DEPOSIT_PERIOD_FREQUENCIES = [
     { id: 0, label: "Days" },

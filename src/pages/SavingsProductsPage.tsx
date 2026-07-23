@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSavingsProducts, createSavingsProduct, updateSavingsProduct } from "@/features/deposits";
 import type { SavingsProduct, SavingsProductCreateRequest } from "@/features/deposits";
 
-const CURRENCY_OPTIONS = ["USD", "EUR", "GBP", "INR", "JPY", "AUD"];
+const CURRENCY_OPTIONS = ["LAK", "THB", "CNY", "USD"];
 
 const SavingsProductsPage: React.FC = () => {
     const { data: products = [], isLoading, isError, error, refetch } = useSavingsProducts();

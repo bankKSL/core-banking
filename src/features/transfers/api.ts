@@ -1,4 +1,5 @@
 import client from "@/api/client";
+import { currentDate } from "@/lib/utils";
 
 // ─── Transfer Types ─────────────────────────────────────────────
 
@@ -124,17 +125,7 @@ export interface ClientSummary {
 
 // ─── Date Helpers ───────────────────────────────────────────────
 
-/** Convert yyyy-MM-dd (HTML date input) → "dd MMMM yyyy" (Fineract format for transfers) */
-function toFineractDate(isoDate?: string): string | undefined {
-    if (!isoDate) return undefined;
-    if (/[A-Za-z]/.test(isoDate)) return isoDate;
-    const [y, m, d] = isoDate.split("-").map(Number);
-    if (!y || !m || !d) return isoDate;
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return `${d} ${months[m - 1]} ${y}`;
-}
-
-/** Parse Fineract date arrays [yyyy, mm, dd] into a Date */
+/** Parse Finfact date arrays [yyyy, mm, dd] into a Date */
 export function parseDate(transferDate: unknown): Date | null {
     if (transferDate == null) return null;
     if (Array.isArray(transferDate) && transferDate.length >= 3) {
@@ -244,10 +235,10 @@ export function buildTransferRequest(params: {
         toClientId: String(params.toClientId),
         toAccountType: String(params.toAccountType),
         toAccountId: String(params.toAccountId),
-        transferDate: toFineractDate(params.transferDate) ?? params.transferDate,
+        transferDate: currentDate(params.transferDate) ?? params.transferDate,
         transferAmount: String(params.transferAmount),
         transferDescription: params.transferDescription,
-        dateFormat: "dd MMMM yyyy",
+        dateFormat: "yyyy-MM-dd",
         locale: "en",
     };
 }
@@ -288,9 +279,9 @@ export function buildStandingInstructionRequest(params: {
         priority: String(params.priority),
         recurrenceType: String(params.recurrenceType),
         status: String(params.status),
-        validFrom: toFineractDate(params.validFrom) ?? params.validFrom,
-        validTill: params.validTill ? (toFineractDate(params.validTill) ?? params.validTill) : undefined,
-        dateFormat: "dd MMMM yyyy",
+        validFrom: currentDate(params.validFrom) ?? params.validFrom,
+        validTill: params.validTill ? (currentDate(params.validTill) ?? params.validTill) : undefined,
+        dateFormat: "yyyy-MM-dd",
         locale: "en",
         monthDayFormat: "dd MMMM",
     };

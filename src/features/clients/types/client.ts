@@ -146,7 +146,7 @@ export interface ClientCreateRequest {
     clientClassificationId?: number;
     /** Required when creating a client under a group */
     groupId?: number;
-    /** Fineract data tables — dynamic key-value entries */
+    /** Finfact data tables — dynamic key-value entries */
     datatables?: Array<{ data: unknown; registeredTableName: string }>;
 }
 

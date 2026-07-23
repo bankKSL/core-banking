@@ -10,14 +10,7 @@ import { useCreateClient } from "../hooks/useCreateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
 import { useAuthStore } from "@/store";
-
-/** Convert yyyy-MM-dd → yyyy-MM-dd (Fineract expected format) */
-function toFineractDate(isoDate: string): string {
-    if (!isoDate) return "";
-    const [y, m, d] = isoDate.split("-").map(Number);
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return `${d} ${months[m - 1]} ${y}`;
-}
+import { currentDate } from "@/lib/utils";
 
 const CreateClientPage: FC = () => {
     const navigate = useNavigate();
@@ -37,13 +30,13 @@ const CreateClientPage: FC = () => {
                 dateFormat: "yyyy-MM-dd",
                 locale: "en",
                 active: values.active ?? true,
-                activationDate: values.activationDate ? toFineractDate(values.activationDate) : undefined,
-                submittedOnDate: values.submittedOnDate ? toFineractDate(values.submittedOnDate) : undefined,
+                activationDate: values.activationDate ? currentDate(values.activationDate) : undefined,
+                submittedOnDate: values.submittedOnDate ? currentDate(values.submittedOnDate) : undefined,
                 savingsProductId: values.savingsProductId ?? undefined,
                 legalFormId: values.legalFormId ?? 1,
                 mobileNo: values.mobileNo || undefined,
                 emailAddress: values.emailAddress || undefined,
-                dateOfBirth: values.dateOfBirth ? toFineractDate(values.dateOfBirth) : undefined,
+                dateOfBirth: values.dateOfBirth ? currentDate(values.dateOfBirth) : undefined,
                 genderId: values.genderId ?? undefined,
                 staffId: values.staffId ?? undefined,
             };
@@ -86,7 +79,7 @@ const CreateClientPage: FC = () => {
         <div className="p-6 max-w-4xl m-auto">
             <PageHeader
                 title="Create Client"
-                description="Register a new client in Apache Fineract"
+                description="Register a new client in Finfact"
                 actions={
                     <Button variant="outline" onClick={() => navigate("/clients")}>
                         <ArrowLeft className="mr-2 h-4 w-4" />

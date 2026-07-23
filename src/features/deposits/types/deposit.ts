@@ -305,7 +305,7 @@ export interface RecurringDepositAccount {
 
 export interface SavingsProductCreateRequest {
     name: string;
-    /** Short unique identifier — no spaces (per Fineract spec) */
+    /** Short unique identifier — no spaces (per Finfact spec) */
     shortName: string;
     description?: string;
     currencyCode: string;

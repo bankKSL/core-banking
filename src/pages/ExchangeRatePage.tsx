@@ -34,8 +34,15 @@ const sourceColors: Record<ExchangeRate["source"], string> = {
   manual: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
 };
 
+const CURRENCY_OPTIONS: Array<{ code: string; name: string; country: string; symbol: string }> = [
+    { code: "USD", name: "US Dollar", country: "United States", symbol: "$" },
+    { code: "LAK", name: "Lao Kip", country: "Laos", symbol: "₭" },
+    { code: "THB", name: "Thai Baht", country: "Thailand", symbol: "฿" },
+    { code: "CNY", name: "Chinese Yuan", country: "China", symbol: "¥" },
+];
+
 const emptyRate: Omit<ExchangeRate, "id" | "lastUpdated"> = {
-  currencyCode: "", currencyName: "", country: "", symbol: "",
+  currencyCode: "USD", currencyName: "US Dollar", country: "United States", symbol: "$",
   buyRate: 0, sellRate: 0, midRate: 0, spreadPercent: 0,
   source: "commercial_bank", isActive: true,
 };
@@ -192,20 +199,35 @@ const ExchangeRatePage: React.FC = () => {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2">
-              <label className="text-sm font-medium">Currency Code</label>
-              <Input className="mt-1" placeholder="e.g. USD" value={form.currencyCode} onChange={(e) => setForm({ ...form, currencyCode: e.target.value.toUpperCase() })} maxLength={3} />
-            </div>
-            <div className="col-span-2">
-              <label className="text-sm font-medium">Currency Name</label>
-              <Input className="mt-1" placeholder="e.g. US Dollar" value={form.currencyName} onChange={(e) => setForm({ ...form, currencyName: e.target.value })} />
+              <label className="text-sm font-medium">Currency *</label>
+              <Select
+                value={form.currencyCode}
+                onValueChange={(code) => {
+                  const opt = CURRENCY_OPTIONS.find((c) => c.code === code);
+                  if (opt) {
+                    setForm({ ...form, currencyCode: opt.code, currencyName: opt.name, country: opt.country, symbol: opt.symbol });
+                  }
+                }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCY_OPTIONS.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.code} — {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Country</label>
-              <Input className="mt-1" placeholder="e.g. United States" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+              <Input className="mt-1" value={form.country} disabled />
             </div>
             <div>
               <label className="text-sm font-medium">Symbol</label>
-              <Input className="mt-1" placeholder="e.g. $" value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })} />
+              <Input className="mt-1" value={form.symbol} disabled />
             </div>
             <div>
               <label className="text-sm font-medium">Buy Rate</label>

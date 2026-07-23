@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
-const CURRENCIES = ["USD", "EUR", "GBP", "JPY"] as const;
+const CURRENCIES = ["USD", "LAK", "THB", "CNY"] as const;
 const TIMEZONES = [
     "America/New_York (EST)",
     "America/Chicago (CST)",

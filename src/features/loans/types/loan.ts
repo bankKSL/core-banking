@@ -1,4 +1,4 @@
-// ─── Apache Fineract Loan Types ────────────────────────────────
+// ─── Apache Finfact Loan Types ────────────────────────────────
 
 export type LoanStatus =
     | "Submitted and pending approval"

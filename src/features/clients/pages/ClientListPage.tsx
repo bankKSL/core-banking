@@ -77,19 +77,12 @@ const ClientListPage: FC = () => {
         [searchParams, setSearchParams],
     );
 
-    const handlePageChange = useCallback(
-        (newPage: number) => updateParam("page", String(newPage)),
-        [updateParam],
-    );
+    const handlePageChange = useCallback((newPage: number) => updateParam("page", String(newPage)), [updateParam]);
 
     if (isError) {
         return (
             <div className="p-6">
-                <ErrorState
-                    title="Failed to load clients"
-                    message="There was an error fetching the client list. Please try again."
-                    onRetry={() => refetch()}
-                />
+                <ErrorState title="Failed to load clients" message="There was an error fetching the client list. Please try again." onRetry={() => refetch()} />
             </div>
         );
     }
@@ -98,10 +91,11 @@ const ClientListPage: FC = () => {
         <div className="p-6">
             <PageHeader
                 title="Clients"
-                description="Manage clients registered in Apache Fineract"
+                description="Manage clients registered in Finfact"
                 actions={
                     <Button onClick={() => navigate("/clients/new")} className="bg-[#D32F2F] hover:bg-red-700">
-                        <Plus className="mr-2 h-4 w-4" />Create Client
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Client
                     </Button>
                 }
             />
@@ -125,15 +119,7 @@ const ClientListPage: FC = () => {
 
             <ClientTable data={clients} loading={isLoading} />
 
-            {totalPages > 1 && (
-                <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    totalItems={totalRecords}
-                    pageSize={CLIENTS_PAGE_SIZE}
-                    onPageChange={handlePageChange}
-                />
-            )}
+            {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} totalItems={totalRecords} pageSize={CLIENTS_PAGE_SIZE} onPageChange={handlePageChange} />}
         </div>
     );
 };

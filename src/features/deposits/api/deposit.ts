@@ -1,8 +1,8 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
- * Returns undefined if empty or already in Fineract format.
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Finfact format).
+ * Returns undefined if empty or already in Finfact format.
  */
 
 import type {

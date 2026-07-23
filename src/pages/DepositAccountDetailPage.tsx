@@ -42,7 +42,7 @@ import SavingsCharges from "@/features/deposits/components/SavingsCharges";
 import DepositWithdrawDialog from "@/features/deposits/components/DepositWithdrawDialog";
 import SavingsTransactions from "@/features/deposits/components/SavingsTransactions";
 
-/** Normalize a date value from Fineract (string or number[]) to display string */
+/** Normalize a date value from Finfact (string or number[]) to display string */
 function fmtDate(v: unknown): string {
     if (!v) return "—";
     if (Array.isArray(v) && v.length >= 3) {

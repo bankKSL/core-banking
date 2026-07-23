@@ -10,15 +10,14 @@ interface LoanTransactionsTableProps {
     loading?: boolean;
 }
 
-const formatCurrency = (n: number, code = "USD") =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
+const formatCurrency = (n: number, code = "USD") => new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
 
 const getTransactionStatus = (tx: LoanTransaction): string => {
     if (tx.manuallyReversed) return "reversed";
     return "completed";
 };
 
-/** Format date from Fineract (can be array [y,m,d] or string) */
+/** Format date from Finfact (can be array [y,m,d] or string) */
 const formatTxDate = (tx: LoanTransaction): string => {
     const raw = tx.date ?? tx.submittedOnDate;
     if (!raw) return "—";

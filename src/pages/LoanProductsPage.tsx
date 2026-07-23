@@ -17,14 +17,14 @@ import { useNavigate } from "react-router-dom";
 import { useLoanProducts, createLoanProduct, updateLoanProduct, useFunds } from "@/features/loans";
 import type { LoanProduct, LoanProductCreateRequest } from "@/features/loans";
 
-/** Extract string value from Fineract enum objects {id,code,value} or primitive */
+/** Extract string value from Finfact enum objects {id,code,value} or primitive */
 function enumVal(v: any, fallback = ""): string {
     if (v == null) return fallback;
     if (typeof v === "object") return v.code ?? v.value ?? String(v.id) ?? fallback;
     return String(v);
 }
 
-/** Extract number id from Fineract enum objects {id,code,value} or primitive */
+/** Extract number id from Finfact enum objects {id,code,value} or primitive */
 function enumId(v: any, fallback = 0): number {
     if (v == null) return fallback;
     if (typeof v === "object") return v.id ?? fallback;
@@ -42,7 +42,7 @@ const REPAYMENT_FREQ_OPTIONS = [
     { id: 2, label: "Months" },
 ];
 
-const CURRENCY_OPTIONS = ["USD", "EUR", "INR"];
+const CURRENCY_OPTIONS = ["LAK", "THB", "CNY", "USD"];
 
 const STRATEGY_OPTIONS = [
     { id: "mifos-standard-strategy", label: "Mifos Standard Strategy" },

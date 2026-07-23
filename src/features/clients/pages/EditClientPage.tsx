@@ -10,13 +10,7 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useUpdateClient } from "../hooks/useUpdateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
-
-function toFineractDate(isoDate: string): string {
-    if (!isoDate) return "";
-    const [y, m, d] = isoDate.split("-").map(Number);
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return `${d} ${months[m - 1]} ${y}`;
-}
+import { currentDate } from "@/lib/utils";
 
 const EditClientPage: FC = () => {
     const navigate = useNavigate();
@@ -38,7 +32,7 @@ const EditClientPage: FC = () => {
                 externalId: values.externalId || undefined,
                 mobileNo: values.mobileNo || undefined,
                 emailAddress: values.emailAddress || undefined,
-                dateOfBirth: values.dateOfBirth ? toFineractDate(values.dateOfBirth) : undefined,
+                dateOfBirth: values.dateOfBirth ? currentDate(values.dateOfBirth) : undefined,
                 genderId: values.genderId ?? undefined,
                 legalFormId: values.legalFormId ?? undefined,
                 savingsProductId: values.savingsProductId ?? undefined,
@@ -47,10 +41,10 @@ const EditClientPage: FC = () => {
             };
             // Only include activationDate if a value was provided
             if (values.activationDate) {
-                payload.activationDate = toFineractDate(values.activationDate);
+                payload.activationDate = currentDate(values.activationDate);
             }
             if (values.submittedOnDate) {
-                payload.submittedOnDate = toFineractDate(values.submittedOnDate);
+                payload.submittedOnDate = currentDate(values.submittedOnDate);
             }
             await updateMutation.mutateAsync({
                 clientId: client.id,

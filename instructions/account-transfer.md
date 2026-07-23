@@ -124,7 +124,7 @@ Body: AccountTransferRequest
 fromAccountId:string, toOfficeId:string, toClientId:string,
 toAccountType:string, toAccountId:string,
 transferAmount:string, transferDescription:string,
-transferDate:string, dateFormat:'dd MMMM yyyy', locale:'en' }
+transferDate:string, dateFormat:'yyyy-MM-dd', locale:'en' }
 
 ALL ID fields are converted to STRING before send (not Number)
 
@@ -253,7 +253,7 @@ Applies to AccountTransferRequest AND StandingInstructionCreationRequest
 
 --- DATE FORMAT ---
 
-Both forms: 'dd MMMM yyyy' via formatDateToFineract()
+Both forms: 'yyyy-MM-dd' via formatDateToFineract()
 Standing Instruction adds: monthDayFormat: 'dd MMMM'
 
 ================================================================================ 7. I18N TRANSLATION KEY PREFIXES

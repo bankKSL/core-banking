@@ -91,7 +91,7 @@ repaymentsStartingFromDate?,
 interestRecognitionOnDisbursementDate?,
 allowFullTermForTranche?,
 transactionProcessingStrategyCode,
-dateFormat: 'dd MMMM yyyy', locale: 'en' }
+dateFormat: 'yyyy-MM-dd', locale: 'en' }
 
 --- BUSINESS LOGIC ---
 

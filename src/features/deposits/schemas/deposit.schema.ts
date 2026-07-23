@@ -33,7 +33,7 @@ export const depositTransactionSchema = z.object({
 
 export type DepositTransactionFormValues = z.infer<typeof depositTransactionSchema>;
 
-/** Schema for savings product creation — matches Fineract POST /savingsproducts */
+/** Schema for savings product creation — matches Finfact POST /savingsproducts */
 export const createSavingsProductSchema = z.object({
     name: z.string().min(1, "Name is required").max(100),
     shortName: z.string().min(1, "Short name is required").max(20).regex(/^\S+$/, "No spaces allowed"),
