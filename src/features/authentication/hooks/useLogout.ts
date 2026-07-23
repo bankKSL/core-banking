@@ -10,11 +10,11 @@ import { useAuthStore } from "@/store";
  * Callers are responsible for any navigation after logout.
  */
 export function useLogout() {
-    const queryClient = useQueryClient();
-    const logout = useAuthStore((s) => s.logout);
+  const queryClient = useQueryClient();
+  const logout = useAuthStore((s) => s.logout);
 
-    return useCallback(() => {
-        logout();
-        queryClient.clear();
-    }, [logout, queryClient]);
+  return useCallback(() => {
+    logout();
+    queryClient.clear();
+  }, [logout, queryClient]);
 }

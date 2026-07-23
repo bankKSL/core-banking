@@ -33,7 +33,7 @@ const FormulaBuilderPage: React.FC = () => {
         el.setSelectionRange(newPos, newPos);
       }, 0);
     },
-    [formula, setFormula]
+    [formula, setFormula],
   );
 
   const handleTextareaChange = useCallback(
@@ -41,22 +41,16 @@ const FormulaBuilderPage: React.FC = () => {
       setFormula(e.target.value);
       setCursorPos(e.target.selectionStart);
     },
-    [setFormula]
+    [setFormula],
   );
 
-  const handleTextareaClick = useCallback(
-    (e: React.MouseEvent<HTMLTextAreaElement>) => {
-      setCursorPos((e.target as HTMLTextAreaElement).selectionStart);
-    },
-    []
-  );
+  const handleTextareaClick = useCallback((e: React.MouseEvent<HTMLTextAreaElement>) => {
+    setCursorPos((e.target as HTMLTextAreaElement).selectionStart);
+  }, []);
 
-  const handleTextareaKeyUp = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      setCursorPos((e.target as HTMLTextAreaElement).selectionStart);
-    },
-    []
-  );
+  const handleTextareaKeyUp = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    setCursorPos((e.target as HTMLTextAreaElement).selectionStart);
+  }, []);
 
   // Syntax-colored preview
   const previewHtml = useMemo(() => {
@@ -72,11 +66,23 @@ const FormulaBuilderPage: React.FC = () => {
           const isFunc = functionList.some((f) => f.key === trimmed.toUpperCase());
           const isOp = operatorList.some((op) => op === trimmed);
           if (isVar)
-            return <span key={i} className="text-blue-600 dark:text-blue-400 font-semibold">{token}</span>;
+            return (
+              <span key={i} className="text-blue-600 dark:text-blue-400 font-semibold">
+                {token}
+              </span>
+            );
           if (isFunc)
-            return <span key={i} className="text-green-600 dark:text-green-400 font-semibold">{token}</span>;
+            return (
+              <span key={i} className="text-green-600 dark:text-green-400 font-semibold">
+                {token}
+              </span>
+            );
           if (isOp)
-            return <span key={i} className="text-red-500 dark:text-red-400">{token}</span>;
+            return (
+              <span key={i} className="text-red-500 dark:text-red-400">
+                {token}
+              </span>
+            );
           return <span key={i}>{token}</span>;
         })}
       </span>
@@ -104,9 +110,7 @@ const FormulaBuilderPage: React.FC = () => {
       ...functionList.map((f) => f.key),
     ]);
     const words = formula.match(/[a-zA-Z_]\w*/g) || [];
-    const unknownVars = words.filter(
-      (w) => !knownKeys.has(w) && isNaN(Number(w)) && w !== "true" && w !== "false"
-    );
+    const unknownVars = words.filter((w) => !knownKeys.has(w) && isNaN(Number(w)) && w !== "true" && w !== "false");
     if (unknownVars.length > 0) {
       issues.push(`Unknown identifiers: ${[...new Set(unknownVars)].join(", ")}`);
     }
@@ -126,7 +130,8 @@ const FormulaBuilderPage: React.FC = () => {
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Code2 className="h-4 w-4" />Available Variables
+              <Code2 className="h-4 w-4" />
+              Available Variables
             </CardTitle>
             <CardDescription>Click to insert at cursor position</CardDescription>
           </CardHeader>
@@ -141,7 +146,9 @@ const FormulaBuilderPage: React.FC = () => {
                   <code className="text-sm font-mono text-blue-600 dark:text-blue-400 font-semibold group-hover:text-[#D32F2F]">
                     {v.key}
                   </code>
-                  <Badge variant="info" size="sm">{v.label}</Badge>
+                  <Badge variant="info" size="sm">
+                    {v.label}
+                  </Badge>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{v.description}</p>
               </button>
@@ -153,7 +160,8 @@ const FormulaBuilderPage: React.FC = () => {
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Wand2 className="h-4 w-4" />Formula Expression
+              <Wand2 className="h-4 w-4" />
+              Formula Expression
             </CardTitle>
             <CardDescription>Write your formula or use the buttons below</CardDescription>
           </CardHeader>
@@ -172,7 +180,13 @@ const FormulaBuilderPage: React.FC = () => {
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Operators</p>
               <div className="flex flex-wrap gap-1.5">
                 {operatorList.map((op) => (
-                  <Button key={op} size="sm" variant="outline" onClick={() => insertAtCursor(` ${op} `)} className="font-mono h-7 px-2 text-xs">
+                  <Button
+                    key={op}
+                    size="sm"
+                    variant="outline"
+                    onClick={() => insertAtCursor(` ${op} `)}
+                    className="font-mono h-7 px-2 text-xs"
+                  >
                     {op}
                   </Button>
                 ))}
@@ -182,7 +196,13 @@ const FormulaBuilderPage: React.FC = () => {
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Functions</p>
               <div className="flex flex-wrap gap-1.5">
                 {functionList.map((fn) => (
-                  <Button key={fn.key} size="sm" variant="outline" onClick={() => insertAtCursor(`${fn.key}()`)} className="font-mono h-7 px-2 text-xs">
+                  <Button
+                    key={fn.key}
+                    size="sm"
+                    variant="outline"
+                    onClick={() => insertAtCursor(`${fn.key}()`)}
+                    className="font-mono h-7 px-2 text-xs"
+                  >
                     {fn.label}
                   </Button>
                 ))}
@@ -205,13 +225,15 @@ const FormulaBuilderPage: React.FC = () => {
             <CardTitle className="text-base">Validation</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`flex items-center gap-2 p-3 rounded-md border ${
-              !formula.trim()
-                ? "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
-                : validation.valid
-                  ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20"
-                  : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
-            }`}>
+            <div
+              className={`flex items-center gap-2 p-3 rounded-md border ${
+                !formula.trim()
+                  ? "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
+                  : validation.valid
+                    ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20"
+                    : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
+              }`}
+            >
               {!formula.trim() ? (
                 <span className="text-sm text-gray-500">—</span>
               ) : validation.valid ? (

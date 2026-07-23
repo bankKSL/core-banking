@@ -2,8 +2,8 @@ import api from "@/api/client";
 import type { FineractLoginResponse } from "../types/auth";
 
 export interface LoginCredentials {
-    username: string;
-    password: string;
+  username: string;
+  password: string;
 }
 
 /**
@@ -15,6 +15,6 @@ export interface LoginCredentials {
  * token for every subsequent request.
  */
 export async function login(credentials: LoginCredentials): Promise<FineractLoginResponse> {
-    const { data } = await api.post<FineractLoginResponse>("/authentication?tenantIdentifier=default", credentials);
-    return data;
+  const { data } = await api.post<FineractLoginResponse>("/authentication?tenantIdentifier=default", credentials);
+  return data;
 }

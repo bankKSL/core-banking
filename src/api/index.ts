@@ -84,7 +84,8 @@ export const loanApplicationApi = {
   list: () => getList<LoanApplication>(LOAN_APPS),
   getById: (id: string) => getById<LoanApplication>(LOAN_APPS, id),
   create: (payload: Partial<LoanApplication>) => create<Partial<LoanApplication>, LoanApplication>(LOAN_APPS, payload),
-  update: (id: string, payload: Partial<LoanApplication>) => update<Partial<LoanApplication>, LoanApplication>(LOAN_APPS, id, payload),
+  update: (id: string, payload: Partial<LoanApplication>) =>
+    update<Partial<LoanApplication>, LoanApplication>(LOAN_APPS, id, payload),
 };
 // ─── Loan Products ────────────────────────────────────────────
 const LOAN_PRODUCTS = "/loan-products";
@@ -111,8 +112,10 @@ const DEPOSIT_ACCOUNTS = "/deposit-accounts";
 export const depositAccountApi = {
   list: () => getList<DepositAccount>(DEPOSIT_ACCOUNTS),
   getById: (id: string) => getById<DepositAccount>(DEPOSIT_ACCOUNTS, id),
-  create: (payload: Partial<DepositAccount>) => create<Partial<DepositAccount>, DepositAccount>(DEPOSIT_ACCOUNTS, payload),
-  update: (id: string, payload: Partial<DepositAccount>) => update<Partial<DepositAccount>, DepositAccount>(DEPOSIT_ACCOUNTS, id, payload),
+  create: (payload: Partial<DepositAccount>) =>
+    create<Partial<DepositAccount>, DepositAccount>(DEPOSIT_ACCOUNTS, payload),
+  update: (id: string, payload: Partial<DepositAccount>) =>
+    update<Partial<DepositAccount>, DepositAccount>(DEPOSIT_ACCOUNTS, id, payload),
 };
 
 // ─── Deposit Transactions ─────────────────────────────────────
@@ -138,11 +141,13 @@ const EXCHANGE_RATES = "/exchange-rates";
 export const exchangeRateApi = {
   list: () => getList<ExchangeRate>(EXCHANGE_RATES),
   create: (payload: Partial<ExchangeRate>) => create<Partial<ExchangeRate>, ExchangeRate>(EXCHANGE_RATES, payload),
-  update: (id: string, payload: Partial<ExchangeRate>) => update<Partial<ExchangeRate>, ExchangeRate>(EXCHANGE_RATES, id, payload),
+  update: (id: string, payload: Partial<ExchangeRate>) =>
+    update<Partial<ExchangeRate>, ExchangeRate>(EXCHANGE_RATES, id, payload),
   delete: (id: string) => remove(EXCHANGE_RATES, id),
 };
 
 // ─── Health Check ─────────────────────────────────────────────
 export const healthApi = {
-  check: (): Promise<{ status: string }> => api.get("", { baseURL: "/fineract-provider/actuator/health" }).then((r) => r.data),
+  check: (): Promise<{ status: string }> =>
+    api.get("", { baseURL: "/fineract-provider/actuator/health" }).then((r) => r.data),
 };

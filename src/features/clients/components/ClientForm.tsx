@@ -5,18 +5,9 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  createClientSchema,
-  type CreateClientFormValues,
-} from "../schemas/client.schema";
+import { createClientSchema, type CreateClientFormValues } from "../schemas/client.schema";
 import type { ClientTemplate, Client } from "../types/client";
 
 /** Normalize a date value from Fineract (string or number[]) to yyyy-MM-dd string for form inputs */
@@ -42,14 +33,7 @@ interface ClientFormProps {
   mode: "create" | "edit";
 }
 
-const ClientForm: FC<ClientFormProps> = ({
-  template,
-  client,
-  onSubmit,
-  isSubmitting,
-  error,
-  mode,
-}) => {
+const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitting, error, mode }) => {
   const defaultDate = new Date().toISOString().split("T")[0];
 
   const {
@@ -73,9 +57,7 @@ const ClientForm: FC<ClientFormProps> = ({
       externalId: client?.externalId ?? "",
       mobileNo: client?.mobileNo ?? "",
       emailAddress: client?.emailAddress ?? "",
-      activationDate:
-        normalizeDateForForm(client?.activationDate) ||
-        (mode === "create" ? defaultDate : ""),
+      activationDate: normalizeDateForForm(client?.activationDate) || (mode === "create" ? defaultDate : ""),
       submittedOnDate: mode === "create" ? defaultDate : "",
       dateFormat: "yyyy-MM-dd",
       locale: "en",
@@ -93,10 +75,7 @@ const ClientForm: FC<ClientFormProps> = ({
       externalId: values.externalId || undefined,
       mobileNo: values.mobileNo || undefined,
       emailAddress: values.emailAddress || undefined,
-      activationDate:
-        mode === "edit" && !values.activationDate
-          ? undefined
-          : values.activationDate || undefined,
+      activationDate: mode === "edit" && !values.activationDate ? undefined : values.activationDate || undefined,
       staffId: values.staffId ?? undefined,
       genderId: values.genderId ?? undefined,
       legalFormId: values.legalFormId ?? undefined,
@@ -107,11 +86,7 @@ const ClientForm: FC<ClientFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onFormSubmit)}
-      noValidate
-      className="space-y-8"
-    >
+    <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="space-y-8">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {error}
@@ -132,17 +107,11 @@ const ClientForm: FC<ClientFormProps> = ({
               disabled={isSubmitting}
               className={errors.firstname ? "border-red-300" : ""}
             />
-            {errors.firstname && (
-              <p className="text-xs text-red-500">{errors.firstname.message}</p>
-            )}
+            {errors.firstname && <p className="text-xs text-red-500">{errors.firstname.message}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="middlename">Middle Name</Label>
-            <Input
-              id="middlename"
-              {...register("middlename")}
-              disabled={isSubmitting}
-            />
+            <Input id="middlename" {...register("middlename")} disabled={isSubmitting} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="lastname">Last Name *</Label>
@@ -152,9 +121,7 @@ const ClientForm: FC<ClientFormProps> = ({
               disabled={isSubmitting}
               className={errors.lastname ? "border-red-300" : ""}
             />
-            {errors.lastname && (
-              <p className="text-xs text-red-500">{errors.lastname.message}</p>
-            )}
+            {errors.lastname && <p className="text-xs text-red-500">{errors.lastname.message}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="fullname">Full Name</Label>
@@ -167,12 +134,7 @@ const ClientForm: FC<ClientFormProps> = ({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="dateOfBirth">Date of Birth</Label>
-            <Input
-              id="dateOfBirth"
-              type="date"
-              {...register("dateOfBirth")}
-              disabled={isSubmitting}
-            />
+            <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} disabled={isSubmitting} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Gender</Label>
@@ -209,9 +171,7 @@ const ClientForm: FC<ClientFormProps> = ({
               value={client?.officeId ? String(client.officeId) : undefined}
               onValueChange={(v) => setValue("officeId", Number(v))}
             >
-              <SelectTrigger
-                className={errors.officeId ? "border-red-300" : ""}
-              >
+              <SelectTrigger className={errors.officeId ? "border-red-300" : ""}>
                 <SelectValue placeholder="Select office" />
               </SelectTrigger>
               <SelectContent>
@@ -222,9 +182,7 @@ const ClientForm: FC<ClientFormProps> = ({
                 ))}
               </SelectContent>
             </Select>
-            {errors.officeId && (
-              <p className="text-xs text-red-500">{errors.officeId.message}</p>
-            )}
+            {errors.officeId && <p className="text-xs text-red-500">{errors.officeId.message}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Staff</Label>
@@ -249,52 +207,44 @@ const ClientForm: FC<ClientFormProps> = ({
       </Card>
 
       {/* Savings Product — Section 5: optional, omit if no products exist */}
-      {template?.savingsProductOptions &&
-        template.savingsProductOptions.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Savings Product (optional)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <Label>Default Savings Product</Label>
-                <Select
-                  disabled={isSubmitting}
-                  onValueChange={(v) =>
-                    setValue("savingsProductId", v === "" ? null : Number(v))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="None — skip to omit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None (skip)</SelectItem>
-                    {template.savingsProductOptions.map((p) => (
-                      <SelectItem key={p.id} value={String(p.id)}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-[11px] text-gray-400">
-                  Optional. Omit if you don't need a default savings product.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      {template?.savingsProductOptions &&
-        template.savingsProductOptions.length === 0 && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
-            No savings products available.{" "}
-            <a href="/deposits/products" className="underline font-medium">
-              Create one first
-            </a>{" "}
-            or skip this field — it's optional.
-          </div>
-        )}
+      {template?.savingsProductOptions && template.savingsProductOptions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Savings Product (optional)</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label>Default Savings Product</Label>
+              <Select
+                disabled={isSubmitting}
+                onValueChange={(v) => setValue("savingsProductId", v === "" ? null : Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="None — skip to omit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None (skip)</SelectItem>
+                  {template.savingsProductOptions.map((p) => (
+                    <SelectItem key={p.id} value={String(p.id)}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-gray-400">Optional. Omit if you don't need a default savings product.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {template?.savingsProductOptions && template.savingsProductOptions.length === 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+          No savings products available.{" "}
+          <a href="/deposits/products" className="underline font-medium">
+            Create one first
+          </a>{" "}
+          or skip this field — it's optional.
+        </div>
+      )}
 
       {/* Contact Information */}
       <Card>
@@ -304,12 +254,7 @@ const ClientForm: FC<ClientFormProps> = ({
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="mobileNo">Mobile Number</Label>
-            <Input
-              id="mobileNo"
-              {...register("mobileNo")}
-              disabled={isSubmitting}
-              placeholder="+1234567890"
-            />
+            <Input id="mobileNo" {...register("mobileNo")} disabled={isSubmitting} placeholder="+1234567890" />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="emailAddress">Email</Label>
@@ -323,11 +268,7 @@ const ClientForm: FC<ClientFormProps> = ({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="externalId">External ID</Label>
-            <Input
-              id="externalId"
-              {...register("externalId")}
-              disabled={isSubmitting}
-            />
+            <Input id="externalId" {...register("externalId")} disabled={isSubmitting} />
           </div>
         </CardContent>
       </Card>
@@ -341,33 +282,19 @@ const ClientForm: FC<ClientFormProps> = ({
           {mode === "create" && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="submittedOnDate">Submitted On</Label>
-              <Input
-                id="submittedOnDate"
-                type="date"
-                {...register("submittedOnDate")}
-                disabled={isSubmitting}
-              />
+              <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
             </div>
           )}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="activationDate">Activation Date</Label>
-            <Input
-              id="activationDate"
-              type="date"
-              {...register("activationDate")}
-              disabled={isSubmitting}
-            />
+            <Input id="activationDate" type="date" {...register("activationDate")} disabled={isSubmitting} />
           </div>
         </CardContent>
       </Card>
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-[#D32F2F] hover:bg-red-700"
-        >
+        <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
           {isSubmitting ? (
             <span className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -379,12 +306,7 @@ const ClientForm: FC<ClientFormProps> = ({
             "Save Changes"
           )}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={isSubmitting}
-          onClick={() => window.history.back()}
-        >
+        <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => window.history.back()}>
           Cancel
         </Button>
       </div>

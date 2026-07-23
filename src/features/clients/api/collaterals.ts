@@ -3,41 +3,41 @@ import client from "@/api/client";
 // ─── Types ─────────────────────────────────────────────────────────────
 
 export interface ClientCollateral {
-    id: number;
-    clientId: number;
-    collateralId: number;
-    name?: string;
-    quantity: number;
-    unitPrice?: number;
-    totalCollateral?: number;
-    total?: number;
-    type?: string;
-    description?: string;
+  id: number;
+  clientId: number;
+  collateralId: number;
+  name?: string;
+  quantity: number;
+  unitPrice?: number;
+  totalCollateral?: number;
+  total?: number;
+  type?: string;
+  description?: string;
 }
 
 export interface ClientCollateralRequest {
-    collateralId: number;
-    quantity: number;
-    locale?: string;
+  collateralId: number;
+  quantity: number;
+  locale?: string;
 }
 
 export interface ClientCollateralUpdateRequest {
-    quantity: number;
-    locale?: string;
+  quantity: number;
+  locale?: string;
 }
 
 export interface ClientCollateralTemplate {
-    collateralOptions: Array<{
-        id: number;
-        name: string;
-        description?: string;
-        position?: number;
-    }>;
+  collateralOptions: Array<{
+    id: number;
+    name: string;
+    description?: string;
+    position?: number;
+  }>;
 }
 
 export interface ClientCollateralCommandResponse {
-    clientId: number;
-    resourceId: number;
+  clientId: number;
+  resourceId: number;
 }
 
 // ─── API Functions ─────────────────────────────────────────────────────
@@ -46,26 +46,18 @@ export interface ClientCollateralCommandResponse {
  * GET /clients/{clientId}/collaterals
  * List all collaterals for a client.
  */
-export async function fetchClientCollaterals(
-    clientId: number | string,
-): Promise<ClientCollateral[]> {
-    const { data } = await client.get<ClientCollateral[]>(
-        `/clients/${clientId}/collaterals`,
-    );
-    return data;
+export async function fetchClientCollaterals(clientId: number | string): Promise<ClientCollateral[]> {
+  const { data } = await client.get<ClientCollateral[]>(`/clients/${clientId}/collaterals`);
+  return data;
 }
 
 /**
  * GET /clients/{clientId}/collaterals/template
  * Get the template for creating a collateral (loads collateral options).
  */
-export async function fetchClientCollateralTemplate(
-    clientId: number | string,
-): Promise<ClientCollateralTemplate> {
-    const { data } = await client.get<ClientCollateralTemplate>(
-        `/clients/${clientId}/collaterals/template`,
-    );
-    return data;
+export async function fetchClientCollateralTemplate(clientId: number | string): Promise<ClientCollateralTemplate> {
+  const { data } = await client.get<ClientCollateralTemplate>(`/clients/${clientId}/collaterals/template`);
+  return data;
 }
 
 /**
@@ -73,13 +65,11 @@ export async function fetchClientCollateralTemplate(
  * Get a single collateral by ID.
  */
 export async function fetchClientCollateral(
-    clientId: number | string,
-    collateralId: number | string,
+  clientId: number | string,
+  collateralId: number | string,
 ): Promise<ClientCollateral> {
-    const { data } = await client.get<ClientCollateral>(
-        `/clients/${clientId}/collaterals/${collateralId}`,
-    );
-    return data;
+  const { data } = await client.get<ClientCollateral>(`/clients/${clientId}/collaterals/${collateralId}`);
+  return data;
 }
 
 /**
@@ -87,14 +77,11 @@ export async function fetchClientCollateral(
  * Create a new collateral for a client.
  */
 export async function createClientCollateral(
-    clientId: number | string,
-    payload: ClientCollateralRequest,
+  clientId: number | string,
+  payload: ClientCollateralRequest,
 ): Promise<ClientCollateralCommandResponse> {
-    const { data } = await client.post<ClientCollateralCommandResponse>(
-        `/clients/${clientId}/collaterals`,
-        payload,
-    );
-    return data;
+  const { data } = await client.post<ClientCollateralCommandResponse>(`/clients/${clientId}/collaterals`, payload);
+  return data;
 }
 
 /**
@@ -102,15 +89,15 @@ export async function createClientCollateral(
  * Update an existing collateral (cannot change collateral type/product in edit mode).
  */
 export async function updateClientCollateral(
-    clientId: number | string,
-    collateralId: number | string,
-    payload: ClientCollateralUpdateRequest,
+  clientId: number | string,
+  collateralId: number | string,
+  payload: ClientCollateralUpdateRequest,
 ): Promise<ClientCollateralCommandResponse> {
-    const { data } = await client.put<ClientCollateralCommandResponse>(
-        `/clients/${clientId}/collaterals/${collateralId}`,
-        payload,
-    );
-    return data;
+  const { data } = await client.put<ClientCollateralCommandResponse>(
+    `/clients/${clientId}/collaterals/${collateralId}`,
+    payload,
+  );
+  return data;
 }
 
 /**
@@ -118,11 +105,11 @@ export async function updateClientCollateral(
  * Delete a collateral.
  */
 export async function deleteClientCollateral(
-    clientId: number | string,
-    collateralId: number | string,
+  clientId: number | string,
+  collateralId: number | string,
 ): Promise<ClientCollateralCommandResponse> {
-    const { data } = await client.delete<ClientCollateralCommandResponse>(
-        `/clients/${clientId}/collaterals/${collateralId}`,
-    );
-    return data;
+  const { data } = await client.delete<ClientCollateralCommandResponse>(
+    `/clients/${clientId}/collaterals/${collateralId}`,
+  );
+  return data;
 }

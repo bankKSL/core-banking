@@ -4,8 +4,8 @@ import type { LoginFormValues } from "../schemas/login.schema";
 
 /** Query keys for auth-related TanStack Query cache entries. */
 export const authKeys = {
-    all: ["auth"] as const,
-    currentUser: ["auth", "currentUser"] as const,
+  all: ["auth"] as const,
+  currentUser: ["auth", "currentUser"] as const,
 };
 
 /**
@@ -16,15 +16,15 @@ export const authKeys = {
  * On success any cached auth queries are invalidated.
  */
 export function useLogin() {
-    const queryClient = useQueryClient();
-    const login = useAuthStore((s) => s.login);
+  const queryClient = useQueryClient();
+  const login = useAuthStore((s) => s.login);
 
-    return useMutation({
-        mutationFn: ({ username, password }: LoginFormValues) => login(username, password),
-        onSuccess: (success) => {
-            if (success) {
-                queryClient.invalidateQueries({ queryKey: authKeys.all });
-            }
-        },
-    });
+  return useMutation({
+    mutationFn: ({ username, password }: LoginFormValues) => login(username, password),
+    onSuccess: (success) => {
+      if (success) {
+        queryClient.invalidateQueries({ queryKey: authKeys.all });
+      }
+    },
+  });
 }

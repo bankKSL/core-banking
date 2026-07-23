@@ -8,9 +8,9 @@ export interface ScoreGrade {
   letter: ScoreGradeLetter;
   label: string;
   description: string;
-  color: string;       // Tailwind CSS color classes for text
-  bgColor: string;     // Tailwind CSS background classes
-  barColor: string;    // CSS color value for gauge bar
+  color: string; // Tailwind CSS color classes for text
+  bgColor: string; // Tailwind CSS background classes
+  barColor: string; // CSS color value for gauge bar
   minScore: number;
   maxScore: number;
   creditAssessment: string;

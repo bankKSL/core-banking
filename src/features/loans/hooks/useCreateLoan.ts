@@ -4,11 +4,11 @@ import type { LoanCreateRequest } from "../types/loan";
 import { loanKeys } from "./useLoans";
 
 export function useCreateLoan() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: LoanCreateRequest) => createLoan(payload),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: loanKeys.all });
-        },
-    });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: LoanCreateRequest) => createLoan(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
 }

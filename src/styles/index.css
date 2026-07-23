@@ -3,13 +3,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #D32F2F;
+  --color-primary: #d32f2f;
   --color-primary-50: #ffebee;
   --color-primary-100: #ffcdd2;
   --color-primary-200: #ef9a9a;
   --color-primary-300: #e57373;
   --color-primary-400: #ef5350;
-  --color-primary-500: #D32F2F;
+  --color-primary-500: #d32f2f;
   --color-primary-600: #c62828;
   --color-primary-700: #b71c1c;
   --color-primary-800: #8b0000;
@@ -42,7 +42,11 @@
 
 body {
   margin: 0;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   background: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -53,10 +57,20 @@ body {
   min-height: 100vh;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #bdbdbd; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bdbdbd;
+}
 
 .sidebar-transition {
   transition: width 0.3s ease;

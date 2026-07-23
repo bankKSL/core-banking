@@ -4,18 +4,18 @@ import type { FixedDepositListParams } from "../types/deposit";
 import { depositKeys } from "./useSavingsAccounts";
 
 export function useRecurringDepositAccounts(params: FixedDepositListParams = {}) {
-    return useQuery({
-        queryKey: depositKeys.recurringList(params),
-        queryFn: () => fetchRecurringDepositAccounts(params),
-        staleTime: 30_000,
-    });
+  return useQuery({
+    queryKey: depositKeys.recurringList(params),
+    queryFn: () => fetchRecurringDepositAccounts(params),
+    staleTime: 30_000,
+  });
 }
 
 export function useRecurringDepositAccount(accountId: number | string | undefined) {
-    return useQuery({
-        queryKey: depositKeys.recurringDetail(accountId!),
-        queryFn: () => fetchRecurringDepositAccount(accountId!),
-        enabled: !!accountId,
-        staleTime: 60_000,
-    });
+  return useQuery({
+    queryKey: depositKeys.recurringDetail(accountId!),
+    queryFn: () => fetchRecurringDepositAccount(accountId!),
+    enabled: !!accountId,
+    staleTime: 60_000,
+  });
 }

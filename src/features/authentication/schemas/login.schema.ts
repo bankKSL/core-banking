@@ -7,8 +7,8 @@ import { z } from "zod";
  * for authentication, so no email format validation is applied.
  */
 export const loginSchema = z.object({
-    username: z.string().min(1, "Username is required"),
-    password: z.string().min(1, "Password is required"),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
