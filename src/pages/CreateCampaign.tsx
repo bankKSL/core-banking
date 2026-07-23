@@ -271,7 +271,7 @@ const CreateCampaign: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[140px]">
+              <div className="flex-1 min-w-35">
                 <label className="text-xs font-medium mb-1 block">Field</label>
                 <Select value={ruleField} onValueChange={setRuleField}>
                   <SelectTrigger>
@@ -286,7 +286,7 @@ const CreateCampaign: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 min-w-[100px]">
+              <div className="flex-1 min-w-25">
                 <label className="text-xs font-medium mb-1 block">Operator</label>
                 <Select value={ruleOperator} onValueChange={(v) => setRuleOperator(v as ComparisonOperator)}>
                   <SelectTrigger>
@@ -301,7 +301,7 @@ const CreateCampaign: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex-1 min-w-[140px]">
+              <div className="flex-1 min-w-35">
                 <label className="text-xs font-medium mb-1 block">Value</label>
                 <Input value={ruleValue} onChange={(e) => setRuleValue(e.target.value)} placeholder="Enter value" />
               </div>

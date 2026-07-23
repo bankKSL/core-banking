@@ -11,6 +11,7 @@ import SimulationPage from "./pages/SimulationPage";
 import ExecutionLogsPage from "./pages/ExecutionLogsPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import SettingsPage from "./pages/SettingsPage";
+import BatchOperationsPage from "./pages/BatchOperationsPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
 import { LoansListPage, LoanFormPage, LoanViewPage, LoanTransactionFormPage } from "@/features/loans";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
@@ -100,6 +101,7 @@ function App() {
                   <Route path="/execution-logs" element={<ExecutionLogsPage />} />
                   <Route path="/audit-logs" element={<AuditLogsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/admin/batch-operations" element={<BatchOperationsPage />} />
                   {/* Lending */}
                   <Route path="/lending/products" element={<LoanProductsPage />} />
                   {/* Loans (new module) */}

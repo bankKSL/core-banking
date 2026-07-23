@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   Calendar,
   ArrowRightLeft,
+  Terminal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -109,6 +110,14 @@ const sections: NavSectionConfig[] = [
       { label: "Simulation", path: "/simulation", icon: FlaskConical },
       { label: "Execution Logs", path: "/execution-logs", icon: FileText },
       { label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
+    ],
+  },
+  {
+    id: "administration",
+    title: "Administration",
+    defaultOpen: true,
+    items: [
+      { label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal },
     ],
   },
 ];
