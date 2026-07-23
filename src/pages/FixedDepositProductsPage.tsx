@@ -306,7 +306,7 @@ const FixedDepositProductsPage: React.FC = () => {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit" : "Create"} Fixed Deposit Product</DialogTitle>
             <DialogDescription>

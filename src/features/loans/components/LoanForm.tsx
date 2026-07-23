@@ -1,13 +1,13 @@
 import { type FC, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ClientSearch } from "@/components/shared/ClientSearch";
+import { ProductSearch } from "@/components/shared/ProductSearch";
 import { type CreateLoanFormValues } from "../schemas/loan.schema";
 import type { LoanProduct, LoanTemplate, Loan } from "../types/loan";
 import { currentDate } from "@/lib/utils";
@@ -65,24 +65,9 @@ const LoanForm: FC<LoanFormProps> = ({ template, products, loan, onSubmit, isSub
 
   const productId = watch("productId");
 
-  // ── Detect progressive schedule ──────────────────────────────────
-  const product = products.find((p) => p.id === productId);
-  const isProgressive = (() => {
-    if (!product) return false;
-    const lst = (product as any).loanScheduleType;
-    return lst?.code === "PROGRESSIVE" || lst === "PROGRESSIVE";
-  })();
-
-  const scheduleTypeLabel = (() => {
-    if (!product) return null;
-    const lst = (product as any).loanScheduleType;
-    const val = lst?.value ?? lst ?? "";
-    return String(val);
-  })();
-
   // ── Product select handler ───────────────────────────────────────
-  const handleProductSelect = (id: string) => {
-    const prod = products.find((p) => p.id === Number(id));
+  const handleProductSelect = (id: number) => {
+    const prod = products.find((p) => p.id === id);
     if (!prod) return;
     setValue("productId", prod.id);
     setValue("principal", prod.principal);
@@ -129,47 +114,13 @@ const LoanForm: FC<LoanFormProps> = ({ template, products, loan, onSubmit, isSub
 
           {/* Row 2 (full width) — Product select + create button */}
           <div className="col-span-2">
-            <Label>Loan Product *</Label>
-            <div className="flex items-start gap-2">
-              <div className="flex-1">
-                <Select
-                  value={productId ? String(productId) : ""}
-                  onValueChange={handleProductSelect}
-                  disabled={isSubmitting || mode === "edit"}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a product" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((p) => (
-                      <SelectItem key={p.id} value={String(p.id)}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.productId && <p className="mt-1 text-xs text-red-500">{errors.productId.message}</p>}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-0 shrink-0"
-                onClick={() => window.open("/lending/products", "_blank")}
-              >
-                <ExternalLink className="mr-1 h-3 w-3" />
-                Create
-              </Button>
-            </div>
-
-            {/* Row 2b (conditional) — Loan Schedule Type chip */}
-            {scheduleTypeLabel && (
-              <div className="mt-2">
-                <Badge variant={scheduleTypeLabel === "PROGRESSIVE" ? "info" : "default"} size="sm" rounded>
-                  {scheduleTypeLabel === "PROGRESSIVE" ? "Progressive" : "Cumulative"}
-                </Badge>
-              </div>
-            )}
+            <ProductSearch
+              products={products}
+              value={productId}
+              onChange={handleProductSelect}
+              disabled={isSubmitting || mode === "edit"}
+              error={errors.productId?.message}
+            />
           </div>
         </CardContent>
       </Card>

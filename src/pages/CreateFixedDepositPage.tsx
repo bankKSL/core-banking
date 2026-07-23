@@ -76,14 +76,14 @@ const CreateFixedDepositPage: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="max-w-2xl m-auto space-y-6 p-6">
+      <div className="max-w-4xl m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
     );
 
   return (
-    <div className="max-w-2xl m-auto space-y-6 p-6">
+    <div className="max-w-4xl m-auto space-y-6 p-6">
       <PageHeader
         title="New Fixed Deposit"
         description="Open a fixed deposit account (Section 10.2)"

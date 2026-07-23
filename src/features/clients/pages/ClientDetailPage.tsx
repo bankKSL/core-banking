@@ -272,7 +272,7 @@ const ClientDetailPage: FC = () => {
                         <div
                           key={loan.id}
                           className="rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                          onClick={() => navigate(`/lending/applications/${loan.id}`)}
+                          onClick={() => navigate(`/loans/view/${loan.id}`)}
                         >
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-mono text-xs font-semibold">{loan.accountNo}</span>

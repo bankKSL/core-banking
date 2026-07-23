@@ -356,7 +356,7 @@ const AuditLogsPage: FC = () => {
       </Card>
 
       <Dialog open={!!viewPayload} onOpenChange={() => setViewPayload(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh]">
+        <DialogContent className="sm:max-w-4xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle>Audit Payload Details</DialogTitle>
           </DialogHeader>
