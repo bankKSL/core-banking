@@ -19,16 +19,18 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions }) => 
         {
             key: "type",
             header: "Type",
-            accessorFn: (row) => (
-                <Badge variant="info" size="sm">
-                    {row.type?.value ?? row.type?.code ?? "—"}
+            accessorFn: (row: SavingsTransaction) => (
+                <Badge variant={row.transactionType.transactionTypeEnum === "WITHDRAWAL" ? "error" : "info"} size="sm">
+                    {row.transactionType.value ?? "—"}
                 </Badge>
             ),
         },
         {
             key: "amount",
             header: "Amount",
-            accessorFn: (row) => <span className={`text-sm font-mono ${row.amount < 0 ? "text-red-500" : "text-green-600"}`}>{formatCurrency(Math.abs(row.amount))}</span>,
+            accessorFn: (row) => (
+                <span className={`text-sm font-mono ${row.entryType === "DEBIT" ? "text-red-500" : "text-green-600"}`}>{formatCurrency(Math.abs(row.amount))}</span>
+            ),
         },
         {
             key: "reversed",

@@ -52,7 +52,6 @@ const SavingsTransactionFormPage: FC = () => {
     const handleSubmit = async () => {
         if (!id || !amount || parseFloat(amount) <= 0) return;
         setSubmitting(true);
-        setError(null);
         try {
             const payload = {
                 transactionDate: currentDate(transactionDate),
