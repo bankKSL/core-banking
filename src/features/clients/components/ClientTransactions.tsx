@@ -9,8 +9,8 @@ import type { ClientTransaction } from "../api/transactions";
 import { formatClientDate } from "../utils/client";
 import type { ColumnDef } from "@/components/shared/DataTable";
 
-const formatCurrency = (n?: number) =>
-  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n) : "—";
+const formatCurrency = (n?: number, currency = "USD") =>
+  n != null ? new Intl.NumberFormat("en-US", { style: "currency", currency: currency }).format(n) : "—";
 
 interface ClientTransactionsProps {
   clientId: number;
@@ -58,7 +58,7 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
       header: "Amount",
       accessorFn: (row) => (
         <span className={`text-sm font-mono ${row.amount < 0 ? "text-red-500" : "text-green-600"}`}>
-          {formatCurrency(Math.abs(row.amount))}
+          {formatCurrency(Math.abs(row.amount), row.currency?.code)}
         </span>
       ),
     },
