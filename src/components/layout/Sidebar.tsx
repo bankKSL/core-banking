@@ -248,9 +248,9 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
             {/* Logo area */}
             <div className={cn("flex h-16 shrink-0 items-center border-b border-gray-200 px-4 dark:border-gray-700", sidebarCollapsed ? "justify-center" : "justify-between")}>
                 {!sidebarCollapsed && (
-                    <div className="flex items-center gap-2.5 overflow-hidden whitespace-nowrap">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#D32F2F]">
-                            <LayoutDashboard className="h-4.5 w-4.5 text-white" />
+                    <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg">
+                            <img src="/insee.png" alt="" />
                         </div>
 
                         <div className="flex flex-col">
