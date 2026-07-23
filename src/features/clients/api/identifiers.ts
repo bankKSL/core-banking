@@ -3,40 +3,40 @@ import client from "@/api/client";
 // ─── Types ─────────────────────────────────────────────────────────────
 
 export interface ClientIdentifier {
+  id: number;
+  clientId: number;
+  documentType: {
     id: number;
-    clientId: number;
-    documentType: {
-        id: number;
-        name: string;
-        active?: boolean;
-    };
-    documentKey: string;
-    description?: string;
-    status?: string;
+    name: string;
     active?: boolean;
-    file?: string;
+  };
+  documentKey: string;
+  description?: string;
+  status?: string;
+  active?: boolean;
+  file?: string;
 }
 
 export interface ClientIdentifierRequest {
-    documentTypeId: number;
-    documentKey: string;
-    description?: string;
-    status?: string;
+  documentTypeId: number;
+  documentKey: string;
+  description?: string;
+  status?: string;
 }
 
 export interface ClientIdentifierTemplate {
-    allowedDocumentTypes: Array<{
-        id: number;
-        name: string;
-        position?: number;
-        active?: boolean;
-    }>;
+  allowedDocumentTypes: Array<{
+    id: number;
+    name: string;
+    position?: number;
+    active?: boolean;
+  }>;
 }
 
 export interface ClientIdentifierCommandResponse {
-    clientId: number;
-    resourceId: number;
-    officeId?: number;
+  clientId: number;
+  resourceId: number;
+  officeId?: number;
 }
 
 // ─── API Functions ─────────────────────────────────────────────────────
@@ -46,12 +46,12 @@ export interface ClientIdentifierCommandResponse {
  * List all identifiers for a client.
  */
 export async function fetchClientIdentifiers(
-    clientId: number | string,
+  clientId: number | string,
 ): Promise<ClientIdentifier[]> {
-    const { data } = await client.get<ClientIdentifier[]>(
-        `/clients/${clientId}/identifiers`,
-    );
-    return data;
+  const { data } = await client.get<ClientIdentifier[]>(
+    `/clients/${clientId}/identifiers`,
+  );
+  return data;
 }
 
 /**
@@ -59,12 +59,12 @@ export async function fetchClientIdentifiers(
  * Get the template for creating a client identifier (loads allowed document types).
  */
 export async function fetchClientIdentifierTemplate(
-    clientId: number | string,
+  clientId: number | string,
 ): Promise<ClientIdentifierTemplate> {
-    const { data } = await client.get<ClientIdentifierTemplate>(
-        `/clients/${clientId}/identifiers/template`,
-    );
-    return data;
+  const { data } = await client.get<ClientIdentifierTemplate>(
+    `/clients/${clientId}/identifiers/template`,
+  );
+  return data;
 }
 
 /**
@@ -72,13 +72,13 @@ export async function fetchClientIdentifierTemplate(
  * Get a single client identifier by ID.
  */
 export async function fetchClientIdentifier(
-    clientId: number | string,
-    identifierId: number | string,
+  clientId: number | string,
+  identifierId: number | string,
 ): Promise<ClientIdentifier> {
-    const { data } = await client.get<ClientIdentifier>(
-        `/clients/${clientId}/identifiers/${identifierId}`,
-    );
-    return data;
+  const { data } = await client.get<ClientIdentifier>(
+    `/clients/${clientId}/identifiers/${identifierId}`,
+  );
+  return data;
 }
 
 /**
@@ -86,14 +86,14 @@ export async function fetchClientIdentifier(
  * Create a new client identifier.
  */
 export async function createClientIdentifier(
-    clientId: number | string,
-    payload: ClientIdentifierRequest,
+  clientId: number | string,
+  payload: ClientIdentifierRequest,
 ): Promise<ClientIdentifierCommandResponse> {
-    const { data } = await client.post<ClientIdentifierCommandResponse>(
-        `/clients/${clientId}/identifiers`,
-        payload,
-    );
-    return data;
+  const { data } = await client.post<ClientIdentifierCommandResponse>(
+    `/clients/${clientId}/identifiers`,
+    payload,
+  );
+  return data;
 }
 
 /**
@@ -101,15 +101,15 @@ export async function createClientIdentifier(
  * Update an existing client identifier.
  */
 export async function updateClientIdentifier(
-    clientId: number | string,
-    identifierId: number | string,
-    payload: Partial<ClientIdentifierRequest>,
+  clientId: number | string,
+  identifierId: number | string,
+  payload: Partial<ClientIdentifierRequest>,
 ): Promise<ClientIdentifierCommandResponse> {
-    const { data } = await client.put<ClientIdentifierCommandResponse>(
-        `/clients/${clientId}/identifiers/${identifierId}`,
-        payload,
-    );
-    return data;
+  const { data } = await client.put<ClientIdentifierCommandResponse>(
+    `/clients/${clientId}/identifiers/${identifierId}`,
+    payload,
+  );
+  return data;
 }
 
 /**
@@ -117,11 +117,11 @@ export async function updateClientIdentifier(
  * Delete a client identifier.
  */
 export async function deleteClientIdentifier(
-    clientId: number | string,
-    identifierId: number | string,
+  clientId: number | string,
+  identifierId: number | string,
 ): Promise<ClientIdentifierCommandResponse> {
-    const { data } = await client.delete<ClientIdentifierCommandResponse>(
-        `/clients/${clientId}/identifiers/${identifierId}`,
-    );
-    return data;
+  const { data } = await client.delete<ClientIdentifierCommandResponse>(
+    `/clients/${clientId}/identifiers/${identifierId}`,
+  );
+  return data;
 }
