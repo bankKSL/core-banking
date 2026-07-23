@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  HashRouter as Router,
+  // BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import CampaignList from "./pages/CampaignList";
@@ -60,7 +66,8 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <BrowserRouter>
+    // <BrowserRouter>
+    <Router>
       <Routes>
         {/* Public: Login page */}
         <Route
@@ -151,7 +158,8 @@ function App() {
           }
         />
       </Routes>
-    </BrowserRouter>
+    </Router>
+    // </BrowserRouter>
   );
 }
 
