@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Wallet, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ClientSearch } from "@/components/shared/ClientSearch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createFixedDepositAccount, DEPOSIT_PERIOD_FREQUENCIES } from "@/features/deposits";
-import { useClients } from "@/features/clients";
 import { useFixedDepositProducts } from "@/features/deposits";
 import { currentDate } from "@/lib/utils";
 
@@ -56,16 +56,8 @@ const CreateFixedDepositPage: React.FC = () => {
 
   const clientId = watch("clientId");
 
-  const { data: clientsData, isLoading: clientsLoading } = useClients({ limit: 100 });
   const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
-  const clients = clientsData?.pageItems ?? [];
-  const isLoading = clientsLoading || productsLoading;
-
-  const sortedClients = [...clients].sort((a, b) => {
-    if (String(a.id) === clientId) return -1;
-    if (String(b.id) === clientId) return 1;
-    return 0;
-  });
+  const isLoading = productsLoading;
 
   const onSubmit = async (values: FixedDepositFormValues) => {
     await createFixedDepositAccount({
@@ -112,20 +104,11 @@ const CreateFixedDepositPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Client *</Label>
-              <Select value={clientId} onValueChange={(v) => setValue("clientId", v, { shouldValidate: true })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortedClients.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>
-                      {c.displayName ?? `Client #${c.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.clientId && <p className="text-sm text-red-500 mt-1">{errors.clientId.message}</p>}
+              <ClientSearch
+                value={clientId ? Number(clientId) : 0}
+                onChange={(v) => setValue("clientId", String(v || ""), { shouldValidate: true })}
+                error={errors.clientId?.message}
+              />
             </div>
             <div>
               <Label>Product *</Label>
