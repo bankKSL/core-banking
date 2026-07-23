@@ -67,6 +67,7 @@ export {
     fetchFixedDepositProducts,
     fetchFixedDepositProduct,
     createFixedDepositProduct,
+    updateFixedDepositProduct,
     fetchRecurringDepositAccounts,
     fetchRecurringDepositAccount,
     createRecurringDepositAccount,
@@ -90,7 +91,7 @@ export { useMakeDeposit, useMakeWithdrawal } from "./hooks/useDepositWithdraw";
 
 export { useFixedDepositAccounts, useFixedDepositAccount } from "./hooks/useFixedDeposits";
 
-export { useFixedDepositProducts, useFixedDepositProduct } from "./hooks/useFixedDepositProducts";
+export { useFixedDepositProducts, useFixedDepositProduct, useCreateFixedDepositProduct, useUpdateFixedDepositProduct } from "./hooks/useFixedDepositProducts";
 
 export { useRecurringDepositAccounts, useRecurringDepositAccount } from "./hooks/useRecurringDeposits";
 
@@ -112,7 +113,7 @@ export type { FixedDepositTransaction } from "./api/deposit";
 export { useSavingsCharges, useSavingsChargesTemplate, useCreateSavingsCharge, useWaiveSavingsCharge, useDeleteSavingsCharge, savingsChargeKeys } from "./hooks/useSavingsCharges";
 
 // Hooks — Savings Commands
-export { useRejectSavingsAccount, useWithdrawSavingsAccount, useUndoRejectSavingsAccount } from "./hooks/useSavingsCommands";
+export { useRejectSavingsAccount, useWithdrawSavingsAccount, useUndoRejectSavingsAccount, useApproveSavingsAccount, useActivateSavingsAccount, useCloseSavingsAccount } from "./hooks/useSavingsCommands";
 
 // Hooks — Savings Transactions
 export { savingsTransactionKeys } from "./hooks/useSavingsTransactions";

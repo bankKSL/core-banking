@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSavingsAccount, approveSavingsAccount, activateSavingsAccount, closeSavingsAccount } from "@/features/deposits";
+import { useSavingsAccount, useApproveSavingsAccount, useActivateSavingsAccount, useCloseSavingsAccount } from "@/features/deposits";
 import { currentDate } from "@/lib/utils";
 
 const COMMAND_LABELS: Record<string, string> = {
@@ -24,6 +24,9 @@ const AccountActionPage: FC = () => {
     const { accountType, accountId, command } = useParams<{ accountType: string; accountId: string; command: string }>();
     const navigate = useNavigate();
     const { data: account, isLoading } = useSavingsAccount(accountId ?? undefined);
+    const approveMutation = useApproveSavingsAccount();
+    const activateMutation = useActivateSavingsAccount();
+    const closeMutation = useCloseSavingsAccount();
     const [actionDate, setActionDate] = useState(new Date().toISOString().split("T")[0]);
     const [note, setNote] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -44,14 +47,14 @@ const AccountActionPage: FC = () => {
             else if (commandKey === "activate") payload.activatedOnDate = actionDate;
             else if (commandKey === "close") payload.closedOnDate = actionDate;
 
-            if (commandKey === "approve") await approveSavingsAccount(Number(accountId), payload as any);
-            else if (commandKey === "activate") await activateSavingsAccount(Number(accountId), payload as any);
-            else if (commandKey === "close") await closeSavingsAccount(Number(accountId), payload as any);
+            if (commandKey === "approve") await approveMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
+            else if (commandKey === "activate") await activateMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
+            else if (commandKey === "close") await closeMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
 
             const backRoute = accountType === "fixed" ? "/deposits/fixed" : "/deposits/saving-accounts";
             navigate(backRoute);
-        } catch (err) {
-            console.error(err);
+        } catch {
+            // Error handled globally by ApiErrorHandler → toast
         } finally {
             setSubmitting(false);
         }

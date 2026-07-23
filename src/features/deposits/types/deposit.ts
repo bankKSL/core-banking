@@ -258,6 +258,7 @@ export interface FixedDepositAccount {
     withHoldTax?: boolean;
     transferInterestToSavings?: boolean;
     savingsAccountId?: number;
+    nominalAnnualInterestRate?: number;
 }
 
 export interface FixedDepositListParams {

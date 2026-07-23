@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSavingsAccount, fetchDepositTemplate, fetchWithdrawTemplate, makeDeposit, makeWithdrawal } from "@/features/deposits";
+import { useSavingsAccount, useMakeDeposit, useMakeWithdrawal, fetchDepositTemplate, fetchWithdrawTemplate } from "@/features/deposits";
 import type { SavingsTransactionTemplate } from "@/features/deposits";
 import { currentDate } from "@/lib/utils";
 
@@ -17,6 +17,8 @@ const SavingsTransactionFormPage: FC = () => {
     const { id, command } = useParams<{ id: string; command: string }>();
     const navigate = useNavigate();
     const { data: account, isLoading: accountLoading } = useSavingsAccount(id ?? undefined);
+    const depositMutation = useMakeDeposit();
+    const withdrawMutation = useMakeWithdrawal();
     const [template, setTemplate] = useState<SavingsTransactionTemplate | null>(null);
     const [loadingTemplate, setLoadingTemplate] = useState(true);
     const [amount, setAmount] = useState("");
@@ -24,7 +26,6 @@ const SavingsTransactionFormPage: FC = () => {
     const [paymentTypeId, setPaymentTypeId] = useState("");
     const [note, setNote] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const isDeposit = command === "deposit";
     const title = isDeposit ? "Make Deposit" : "Make Withdrawal";
@@ -64,13 +65,13 @@ const SavingsTransactionFormPage: FC = () => {
 
             const tplId = Number(id);
             if (isDeposit) {
-                await makeDeposit(tplId, payload as any);
+                await depositMutation.mutateAsync({ accountId: tplId, payload: payload as any });
             } else {
-                await makeWithdrawal(tplId, payload as any);
+                await withdrawMutation.mutateAsync({ accountId: tplId, payload: payload as any });
             }
             navigate(`/deposits/saving-accounts/${id}`);
-        } catch (err: any) {
-            setError(err?.response?.data?.message ?? err?.message ?? "Transaction failed");
+        } catch {
+            // Error handled globally by ApiErrorHandler → toast
         } finally {
             setSubmitting(false);
         }
@@ -106,7 +107,6 @@ const SavingsTransactionFormPage: FC = () => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
                     <div className="flex flex-col gap-1.5">
                         <Label htmlFor="amount">Transaction Amount *</Label>
                         <Input id="amount" type="number" step="0.01" min="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />

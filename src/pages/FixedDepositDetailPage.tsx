@@ -92,6 +92,8 @@ const FixedDepositDetailPage: React.FC = () => {
     const isApproved = statusCode.includes("approved") && !statusCode.includes("active");
     const isActive = statusCode.includes("active");
 
+    console.log(fd);
+
     return (
         <div className="p-6 max-w-4xl m-auto space-y-6">
             <PageHeader
@@ -167,7 +169,7 @@ const FixedDepositDetailPage: React.FC = () => {
                                     label="Maturity Amount"
                                     value={formatCurrency(fd.maturityAmount ?? 0, fd.currency?.code)}
                                 />
-                                <InfoRow icon={<Percent className="h-4 w-4" />} label="Interest Rate" value={`${fd.interestRate ?? 0}%`} />
+                                <InfoRow icon={<Percent className="h-4 w-4" />} label="Interest Rate" value={`${fd.nominalAnnualInterestRate ?? 0}%`} />
                                 <InfoRow
                                     icon={<Clock className="h-4 w-4" />}
                                     label="Period"

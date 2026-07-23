@@ -32,9 +32,9 @@ import {
     useRejectSavingsAccount,
     useWithdrawSavingsAccount,
     useUndoRejectSavingsAccount,
-    approveSavingsAccount,
-    activateSavingsAccount,
-    closeSavingsAccount,
+    useApproveSavingsAccount,
+    useActivateSavingsAccount,
+    useCloseSavingsAccount,
     SAVINGS_STATUS_CONFIG,
 } from "@/features/deposits";
 import { useMakeDeposit, useMakeWithdrawal } from "@/features/deposits";
@@ -76,6 +76,9 @@ const DepositAccountDetailPage: React.FC = () => {
     const rejectMutation = useRejectSavingsAccount();
     const withdrawMutation = useWithdrawSavingsAccount();
     const undoRejectMutation = useUndoRejectSavingsAccount();
+    const approveMutation = useApproveSavingsAccount();
+    const activateMutation = useActivateSavingsAccount();
+    const closeMutation = useCloseSavingsAccount();
     const [activeTab, setActiveTab] = useState("general");
     const [txnDialog, setTxnDialog] = useState<"deposit" | "withdrawal" | null>(null);
     const [acting, setActing] = useState(false);
@@ -88,9 +91,9 @@ const DepositAccountDetailPage: React.FC = () => {
             setActing(true);
             const date = new Date().toISOString().split("T")[0];
             try {
-                if (cmd === "approve") await approveSavingsAccount(account.id, { approvedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" });
-                else if (cmd === "activate") await activateSavingsAccount(account.id, { activatedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" });
-                else if (cmd === "close") await closeSavingsAccount(account.id, { closedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" });
+                if (cmd === "approve") await approveMutation.mutateAsync({ accountId: account.id, payload: { approvedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" } });
+                else if (cmd === "activate") await activateMutation.mutateAsync({ accountId: account.id, payload: { activatedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" } });
+                else if (cmd === "close") await closeMutation.mutateAsync({ accountId: account.id, payload: { closedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" } });
                 else if (cmd === "reject") await rejectMutation.mutateAsync(account.id);
                 else if (cmd === "withdraw") await withdrawMutation.mutateAsync(account.id);
                 else if (cmd === "undoreject") await undoRejectMutation.mutateAsync(account.id);
@@ -99,7 +102,7 @@ const DepositAccountDetailPage: React.FC = () => {
                 setActing(false);
             }
         },
-        [account, rejectMutation, withdrawMutation, undoRejectMutation, closeSavingsAccount, refetch],
+        [account, approveMutation, activateMutation, closeMutation, rejectMutation, withdrawMutation, undoRejectMutation, refetch],
     );
 
     if (isLoading)

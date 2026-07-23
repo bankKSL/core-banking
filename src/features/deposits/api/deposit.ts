@@ -279,6 +279,11 @@ export async function createFixedDepositProduct(payload: FixedDepositProductCrea
     return data;
 }
 
+export async function updateFixedDepositProduct(productId: number, payload: Partial<FixedDepositProductCreateRequest>): Promise<{ resourceId: number }> {
+    const { data } = await client.put<{ resourceId: number }>(`/fixeddepositproducts/${productId}`, payload);
+    return data;
+}
+
 // ─── Savings Charges (Section 5) ──────────────────────────────────
 
 export interface SavingsCharge {
