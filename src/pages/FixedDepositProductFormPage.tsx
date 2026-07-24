@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +16,9 @@ import {
 } from "@/features/deposits";
 import type { FixedDepositProductCreateRequest } from "@/features/deposits";
 
+const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+const DEFAULT_LOCALE = "en";
+
 const CURRENCIES = ["LAK", "THB", "CNY", "USD"];
 
 const DEPOSIT_PERIOD_FREQUENCIES = [
@@ -33,24 +33,6 @@ const CHART_PERIOD_TYPES = [
   { id: 1, label: "Weeks" },
   { id: 2, label: "Months" },
   { id: 3, label: "Years" },
-];
-
-const INTEREST_OPTIONS = [
-  { id: 4, label: "Monthly" },
-  { id: 1, label: "Daily" },
-  { id: 5, label: "Quarterly" },
-  { id: 6, label: "Semi-Annual" },
-  { id: 7, label: "Annual" },
-];
-
-const CALCULATION_TYPE_OPTIONS = [
-  { id: 1, label: "Daily Balance" },
-  { id: 0, label: "Average Daily Balance" },
-];
-
-const DAYS_IN_YEAR_OPTIONS = [
-  { id: 360, label: "360 Days" },
-  { id: 365, label: "365 Days" },
 ];
 
 const ACCOUNTING_OPTIONS = [
@@ -76,13 +58,11 @@ const FixedDepositProductFormPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [slabs, setSlabs] = useState<
     Array<{
-      description: string;
       periodType: number;
       fromPeriod: number;
-      toPeriod: number;
       annualInterestRate: number;
     }>
-  >([{ description: "", periodType: 2, fromPeriod: 0, toPeriod: 0, annualInterestRate: 0 }]);
+  >([{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
 
   const [form, setForm] = useState({
     name: "",
@@ -93,19 +73,7 @@ const FixedDepositProductFormPage: React.FC = () => {
     depositAmount: 1000,
     minDepositTerm: 1,
     minDepositTermTypeId: 2,
-    maxDepositTerm: 0,
-    maxDepositTermTypeId: 2,
-    interestCompoundingPeriodType: 4,
-    interestPostingPeriodType: 4,
-    interestCalculationType: 1,
-    interestCalculationDaysInYearType: 360,
-    accountingRule: 2,
-    preClosurePenalApplicable: false,
-    preClosurePenalInterest: 0,
-    preClosurePenalInterestOnTypeId: 2,
-    withHoldTax: false,
-    locale: "en",
-    inMultiplesOf: 0,
+    accountingRule: 1,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -123,27 +91,13 @@ const FixedDepositProductFormPage: React.FC = () => {
       depositAmount: p.depositAmount ?? 1000,
       minDepositTerm: p.minDepositTerm ?? 1,
       minDepositTermTypeId: enumId(p.minDepositTermType, 2),
-      maxDepositTerm: p.maxDepositTerm ?? 0,
-      maxDepositTermTypeId: enumId(p.maxDepositTermType, 2),
-      interestCompoundingPeriodType: enumId(p.interestCompoundingPeriodType, 4),
-      interestPostingPeriodType: enumId(p.interestPostingPeriodType, 4),
-      interestCalculationType: enumId(p.interestCalculationType, 1),
-      interestCalculationDaysInYearType: enumId(p.interestCalculationDaysInYearType, 360),
-      accountingRule: enumId(p.accountingRule, 2),
-      preClosurePenalApplicable: !!p.preClosurePenalApplicable,
-      preClosurePenalInterest: p.preClosurePenalInterest ?? 0,
-      preClosurePenalInterestOnTypeId: enumId(p.preClosurePenalInterestOnType, 2),
-      withHoldTax: !!p.withHoldTax,
-      locale: "en",
-      inMultiplesOf: p.currency?.inMultiplesOf ?? 0,
+      accountingRule: enumId(p.accountingRule, 1),
     });
     if (p.activeChart?.chartSlabs?.length) {
       setSlabs(
         p.activeChart.chartSlabs.map((s: any) => ({
-          description: s.description ?? "",
           periodType: enumId(s.periodType, 2),
           fromPeriod: s.fromPeriod ?? 0,
-          toPeriod: s.toPeriod ?? 0,
           annualInterestRate: s.annualInterestRate ?? 0,
         })),
       );
@@ -157,10 +111,7 @@ const FixedDepositProductFormPage: React.FC = () => {
   };
 
   const addSlab = () => {
-    setSlabs((prev) => [
-      ...prev,
-      { description: "", periodType: 2, fromPeriod: 0, toPeriod: 0, annualInterestRate: 0 },
-    ]);
+    setSlabs((prev) => [...prev, { periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
   };
 
   const removeSlab = (i: number) => {
@@ -174,8 +125,8 @@ const FixedDepositProductFormPage: React.FC = () => {
     if (!form.currencyCode) e.currencyCode = "Currency is required";
     if (form.depositAmount <= 0) e.depositAmount = "Deposit amount must be > 0";
     if (form.minDepositTerm <= 0) e.minDepositTerm = "Min deposit term must be > 0";
+    if (!form.description) e.description = "Description is required";
     slabs.forEach((slab, i) => {
-      if (!slab.description.trim()) e[`slab_${i}_desc`] = "Description required";
       if (slab.annualInterestRate <= 0) e[`slab_${i}_rate`] = "Rate must be > 0";
     });
     setErrors(e);
@@ -192,41 +143,27 @@ const FixedDepositProductFormPage: React.FC = () => {
         description: form.description || undefined,
         currencyCode: form.currencyCode,
         digitsAfterDecimal: form.digitsAfterDecimal,
-        inMultiplesOf: form.inMultiplesOf,
-        locale: "en",
-        interestCompoundingPeriodType: form.interestCompoundingPeriodType,
-        interestPostingPeriodType: form.interestPostingPeriodType,
-        interestCalculationType: form.interestCalculationType,
-        interestCalculationDaysInYearType: form.interestCalculationDaysInYearType,
-        accountingRule: form.accountingRule,
         minDepositTerm: form.minDepositTerm,
         minDepositTermTypeId: form.minDepositTermTypeId,
         depositAmount: form.depositAmount,
-        maxDepositTerm: form.maxDepositTerm > 0 ? form.maxDepositTerm : undefined,
-        maxDepositTermTypeId: form.maxDepositTerm > 0 ? form.maxDepositTermTypeId : undefined,
-        preClosurePenalApplicable: form.preClosurePenalApplicable,
-        preClosurePenalInterest: form.preClosurePenalApplicable ? form.preClosurePenalInterest : undefined,
-        preClosurePenalInterestOnTypeId: form.preClosurePenalApplicable
-          ? form.preClosurePenalInterestOnTypeId
-          : undefined,
-        withHoldTax: form.withHoldTax,
-        charts:
-          slabs.length > 0 && slabs[0].description.trim()
-            ? [
-                {
-                  fromDate: new Date().toISOString().split("T")[0],
-                  locale: "en",
-                  dateFormat: "yyyy-MM-dd",
-                  chartSlabs: slabs.map((s) => ({
-                    description: s.description,
-                    periodType: s.periodType,
-                    fromPeriod: s.fromPeriod,
-                    toPeriod: s.toPeriod,
-                    annualInterestRate: s.annualInterestRate,
-                  })),
-                },
-              ]
-            : undefined,
+        accountingRule: form.accountingRule,
+        interestCompoundingPeriodType: 1,
+        interestPostingPeriodType: 4,
+        interestCalculationType: 1,
+        interestCalculationDaysInYearType: "365",
+        locale: DEFAULT_LOCALE,
+        charts: [
+          {
+            fromDate: new Date().toISOString().split("T")[0],
+            dateFormat: DEFAULT_DATE_FORMAT,
+            locale: DEFAULT_LOCALE,
+            chartSlabs: slabs.map((s) => ({
+              periodType: s.periodType,
+              fromPeriod: s.fromPeriod,
+              annualInterestRate: s.annualInterestRate,
+            })),
+          },
+        ],
       };
 
       if (isEdit) {
@@ -298,12 +235,13 @@ const FixedDepositProductFormPage: React.FC = () => {
             {errors.currencyCode && <p className="text-xs text-red-500">{errors.currencyCode}</p>}
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Description</Label>
+            <Label>Description *</Label>
             <Textarea
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
               rows={3}
               placeholder="Brief product description"
+              error={errors.description}
             />
           </div>
           <div className="space-y-1.5">
@@ -312,14 +250,6 @@ const FixedDepositProductFormPage: React.FC = () => {
               type="number"
               value={form.digitsAfterDecimal}
               onChange={(e) => updateForm("digitsAfterDecimal", Number(e.target.value))}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>In Multiples Of</Label>
-            <Input
-              type="number"
-              value={form.inMultiplesOf}
-              onChange={(e) => updateForm("inMultiplesOf", Number(e.target.value))}
             />
           </div>
         </CardContent>
@@ -368,114 +298,15 @@ const FixedDepositProductFormPage: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label>Max Deposit Term</Label>
-            <Input
-              type="number"
-              value={form.maxDepositTerm}
-              onChange={(e) => updateForm("maxDepositTerm", Number(e.target.value))}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Max Term Type</Label>
-            <Select
-              value={String(form.maxDepositTermTypeId)}
-              onValueChange={(v) => updateForm("maxDepositTermTypeId", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DEPOSIT_PERIOD_FREQUENCIES.map((f) => (
-                  <SelectItem key={f.id} value={String(f.id)}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Interest Settings</CardTitle>
+          <CardTitle className="text-base">Accounting Rule</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Compounding Period</Label>
-            <Select
-              value={String(form.interestCompoundingPeriodType)}
-              onValueChange={(v) => updateForm("interestCompoundingPeriodType", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {INTEREST_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Posting Period</Label>
-            <Select
-              value={String(form.interestPostingPeriodType)}
-              onValueChange={(v) => updateForm("interestPostingPeriodType", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {INTEREST_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Calculation Type</Label>
-            <Select
-              value={String(form.interestCalculationType)}
-              onValueChange={(v) => updateForm("interestCalculationType", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CALCULATION_TYPE_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Days In Year</Label>
-            <Select
-              value={String(form.interestCalculationDaysInYearType)}
-              onValueChange={(v) => updateForm("interestCalculationDaysInYearType", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DAYS_IN_YEAR_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Accounting Rule</Label>
             <Select value={String(form.accountingRule)} onValueChange={(v) => updateForm("accountingRule", Number(v))}>
               <SelectTrigger>
                 <SelectValue />
@@ -488,69 +319,6 @@ const FixedDepositProductFormPage: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Pre-closure Penalty</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="preClosurePenalApplicable"
-              className="h-4 w-4 rounded border-gray-300"
-              checked={form.preClosurePenalApplicable}
-              onChange={(e) => updateForm("preClosurePenalApplicable", e.target.checked)}
-            />
-            <Label htmlFor="preClosurePenalApplicable" className="text-sm font-normal cursor-pointer">
-              Apply pre-closure penalty
-            </Label>
-          </div>
-          {form.preClosurePenalApplicable && (
-            <div className="grid grid-cols-2 gap-4 ml-6">
-              <div className="space-y-1.5">
-                <Label>Penalty Interest (%)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.preClosurePenalInterest}
-                  onChange={(e) => updateForm("preClosurePenalInterest", Number(e.target.value))}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Penalty Period Type</Label>
-                <Select
-                  value={String(form.preClosurePenalInterestOnTypeId)}
-                  onValueChange={(v) => updateForm("preClosurePenalInterestOnTypeId", Number(v))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DEPOSIT_PERIOD_FREQUENCIES.map((f) => (
-                      <SelectItem key={f.id} value={String(f.id)}>
-                        {f.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="withHoldTax"
-              className="h-4 w-4 rounded border-gray-300"
-              checked={form.withHoldTax}
-              onChange={(e) => updateForm("withHoldTax", e.target.checked)}
-            />
-            <Label htmlFor="withHoldTax" className="text-sm font-normal cursor-pointer">
-              Enable tax withholding
-            </Label>
           </div>
         </CardContent>
       </Card>
@@ -576,15 +344,6 @@ const FixedDepositProductFormPage: React.FC = () => {
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2 space-y-1">
-                  <label className="text-xs font-medium">Description</label>
-                  <Input
-                    placeholder="e.g. from 0 to 90 days"
-                    value={slab.description}
-                    onChange={(e) => updateSlab(i, "description", e.target.value)}
-                  />
-                  {errors[`slab_${i}_desc`] && <p className="text-xs text-red-500">{errors[`slab_${i}_desc`]}</p>}
-                </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium">Period Type</label>
                   <Select value={String(slab.periodType)} onValueChange={(v) => updateSlab(i, "periodType", Number(v))}>
@@ -618,15 +377,6 @@ const FixedDepositProductFormPage: React.FC = () => {
                     placeholder="e.g. 0"
                     value={slab.fromPeriod ?? ""}
                     onChange={(e) => updateSlab(i, "fromPeriod", parseInt(e.target.value) || 0)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">To Period</label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 90"
-                    value={slab.toPeriod ?? ""}
-                    onChange={(e) => updateSlab(i, "toPeriod", parseInt(e.target.value) || 0)}
                   />
                 </div>
               </div>

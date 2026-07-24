@@ -146,7 +146,6 @@ const CreateCampaign: React.FC = () => {
 
   const handleSaveDraft = useCallback(async () => {
     const formValues = getValues();
-    console.log("Save draft", { ...formValues, selectedProducts, rules, formula });
   }, [getValues, selectedProducts, rules, formula]);
 
   const handlePublish = useCallback(async () => {
@@ -154,7 +153,6 @@ const CreateCampaign: React.FC = () => {
     if (!valid) return;
     if (selectedProducts.length === 0) return;
     const formValues = getValues();
-    console.log("Publish campaign", { ...formValues, selectedProducts, rules, formula });
   }, [validateStep1, selectedProducts, getValues, rules, formula]);
 
   const renderStepContent = () => {

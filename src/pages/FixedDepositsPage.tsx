@@ -60,7 +60,7 @@ const FixedDepositsPage: React.FC = () => {
       header: "Amount",
       cell: (r) => <span className="font-mono text-sm">{formatCurrency(r.depositAmount, r.currency.code)}</span>,
     },
-    { key: "interestRate", header: "Rate", cell: (r) => `${r.interestRate}%` },
+    { key: "interestRate", header: "Rate", cell: (r) => `${r.nominalAnnualInterestRate}%` },
     {
       key: "depositPeriod",
       header: "Period",

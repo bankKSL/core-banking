@@ -118,8 +118,6 @@ const FixedDepositDetailPage: React.FC = () => {
   const isApproved = statusCode.includes("approved") && !statusCode.includes("active");
   const isActive = statusCode.includes("active");
 
-  console.log(fd);
-
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
