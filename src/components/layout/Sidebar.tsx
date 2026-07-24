@@ -12,9 +12,7 @@ import {
   ShieldCheck,
   Settings,
   ChevronDown,
-  Landmark,
   Banknote,
-  CalendarClock,
   Briefcase,
   Wallet,
   PiggyBank,
@@ -94,7 +92,7 @@ const sections: NavSectionConfig[] = [
     defaultOpen: true,
     items: [
       { label: "Clients", path: "/clients", icon: Users },
-      { label: "Score Grade", path: "/score-grade", icon: Shield },
+      { label: "Score Grade", path: "/score-grades", icon: Shield },
     ],
   },
   {
@@ -116,9 +114,7 @@ const sections: NavSectionConfig[] = [
     id: "administration",
     title: "Administration",
     defaultOpen: true,
-    items: [
-      { label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal },
-    ],
+    items: [{ label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal }],
   },
 ];
 
@@ -242,7 +238,9 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
   const isActive = useCallback(
     (path: string) => {
       if (path === "/") return location.pathname === "/";
-      return location.pathname.startsWith(path);
+      // Exact match or next char is "/" to avoid prefix collisions
+      // e.g. /deposits/fixed should NOT match /deposits/fixed-products
+      return location.pathname === path || location.pathname.startsWith(path + "/");
     },
     [location.pathname],
   );

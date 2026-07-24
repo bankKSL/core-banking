@@ -1,54 +1,66 @@
-import React, { useState } from "react";
+import React, { type FC } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2, Terminal } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { postBatches, type BatchResponse } from "@/api/batch";
+import { postBatches, type BatchRequest, type BatchResponse } from "@/api/batch";
 
-const BatchOperationsPage: React.FC = () => {
-  const [batchInput, setBatchInput] = useState("");
-  const [enclosingTransaction, setEnclosingTransaction] = useState(false);
-  const [results, setResults] = useState<BatchResponse[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const batchSchema = z.object({
+  batchInput: z.string().min(1, "Batch request JSON is required"),
+  enclosingTransaction: z.boolean().default(false),
+});
 
-  const handleSubmit = async () => {
-    // Clear previous error and results
-    setError(null);
-    setResults([]);
+type BatchFormValues = z.infer<typeof batchSchema>;
 
-    // Parse JSON input
+const BatchOperationsPage: FC = () => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<BatchFormValues>({
+    resolver: zodResolver(batchSchema) as any,
+    defaultValues: {
+      batchInput: "",
+      enclosingTransaction: false,
+    },
+  });
+
+  const batchInput = watch("batchInput");
+  const enclosingTransaction = watch("enclosingTransaction");
+
+  const mutation = useMutation({
+    mutationFn: (values: BatchFormValues) => {
+      const parsed: unknown = JSON.parse(values.batchInput);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Input must be a JSON array.");
+      }
+      return postBatches(parsed as BatchRequest[], values.enclosingTransaction);
+    },
+  });
+
+  const results = mutation.data ?? [];
+  const error = mutation.error instanceof Error ? mutation.error.message : null;
+
+  const onSubmit = handleSubmit((values) => {
     let parsed: unknown;
     try {
-      parsed = JSON.parse(batchInput);
+      parsed = JSON.parse(values.batchInput);
     } catch {
-      setError("Invalid JSON. Please check the syntax and try again.");
-      return;
+      throw new Error("Invalid JSON. Please check the syntax and try again.");
     }
-
     if (!Array.isArray(parsed)) {
-      setError("Input must be a JSON array.");
-      return;
+      throw new Error("Input must be a JSON array.");
     }
-
-    setIsSubmitting(true);
-    try {
-      const response = await postBatches(parsed, enclosingTransaction);
-      // Normalize response to array (handled in API, but safeguard here too)
-      const normalized = Array.isArray(response) ? response : [response];
-      setResults(normalized);
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : typeof err === "object" && err !== null && "message" in err
-          ? String((err as { message: string }).message)
-          : "Request failed. Please try again.";
-      setError(message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    mutation.mutate(values);
+  });
 
   return (
     <div className="space-y-6">
@@ -62,46 +74,43 @@ const BatchOperationsPage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Input Textarea */}
-          <Textarea
-            label="Batch Request (JSON Array)"
-            placeholder={`[\n  {\n    "requestId": 1,\n    "relativeUrl": "/api/v2/clients/1",\n    "method": "GET"\n  }\n]`}
-            rows={10}
-            value={batchInput}
-            onChange={(e) => setBatchInput(e.target.value)}
-            className="font-mono text-sm"
-          />
+          <form onSubmit={onSubmit} className="space-y-4">
+            <Textarea
+              label="Batch Request (JSON Array)"
+              placeholder={`[\n  {\n    "requestId": 1,\n    "relativeUrl": "/api/v2/clients/1",\n    "method": "GET"\n  }\n]`}
+              rows={10}
+              {...register("batchInput")}
+              error={errors.batchInput?.message}
+              className="font-mono text-sm"
+            />
 
-          {/* Enclose in Transaction Checkbox */}
-          <Checkbox
-            id="enclose-transaction"
-            label="Enclose in Transaction"
-            checked={enclosingTransaction}
-            onCheckedChange={(checked) => setEnclosingTransaction(checked === true)}
-          />
+            <Checkbox
+              id="enclose-transaction"
+              label="Enclose in Transaction"
+              checked={enclosingTransaction}
+              onCheckedChange={(checked) => setValue("enclosingTransaction", checked === true)}
+            />
 
-          {/* Error Message */}
-          {error && (
-            <p className="text-sm text-red-500" role="alert">
-              {error}
-            </p>
-          )}
-
-          {/* Submit Button */}
-          <Button onClick={handleSubmit} disabled={isSubmitting || !batchInput.trim()}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              "Submit"
+            {error && (
+              <p className="text-sm text-red-500" role="alert">
+                {error}
+              </p>
             )}
-          </Button>
+
+            <Button type="submit" disabled={mutation.isPending || !batchInput.trim()}>
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
-      {/* Results */}
       {results.length > 0 && (
         <Card>
           <CardHeader>

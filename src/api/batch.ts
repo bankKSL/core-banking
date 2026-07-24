@@ -28,7 +28,7 @@ export interface BatchResponse {
  * @param enclose - Whether to enclose in a transaction
  */
 export async function postBatches(body: BatchRequest[], enclose: boolean): Promise<BatchResponse[]> {
-  const { data } = await client.post<BatchResponse[] | BatchResponse>("/api/v2/batches", body, {
+  const { data } = await client.post<BatchResponse[] | BatchResponse>("/batches", body, {
     params: { enclose },
   });
   // Normalize: wrap single response in array

@@ -164,7 +164,7 @@ const SavingsProductsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 max-w-5xl m-auto">
+      <div className="p-6 m-auto">
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <AlertTriangle className="h-5 w-5" />
           <span>Failed to load savings products: {error?.message || "Unknown error"}</span>
@@ -177,7 +177,7 @@ const SavingsProductsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl m-auto space-y-6">
+    <div className="p-6 m-auto space-y-6">
       <PageHeader
         title="Savings Products"
         description="Manage savings product definitions"
