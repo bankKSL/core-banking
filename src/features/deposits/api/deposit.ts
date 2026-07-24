@@ -19,6 +19,9 @@ import type {
   FixedDepositAccount,
   FixedDepositListParams,
   RecurringDepositAccount,
+  RecurringDepositListParams,
+  RecurringDepositProduct,
+  RecurringDepositProductCreateRequest,
   FixedDepositProduct,
   FixedDepositProductCreateRequest,
 } from "../types/deposit";
@@ -258,7 +261,6 @@ export async function createFixedDepositAccount(payload: Record<string, unknown>
   const { data } = await client.post<SavingsCommandResponse>("/fixeddepositaccounts", {
     locale: "en",
     dateFormat: "yyyy-MM-dd",
-    nominalAnnualInterestRate: 1,
     ...payload,
   });
   return data;
@@ -294,7 +296,209 @@ export async function fetchRecurringDepositAccount(accountId: number | string): 
 }
 
 export async function createRecurringDepositAccount(payload: Record<string, unknown>): Promise<SavingsCommandResponse> {
-  const { data } = await client.post<SavingsCommandResponse>("/recurringdepositaccounts", payload);
+  const { data } = await client.post<SavingsCommandResponse>("/recurringdepositaccounts", {
+    ...payload,
+    locale: "en",
+    dateFormat: "yyyy-MM-dd",
+  });
+  return data;
+}
+
+// ─── Recurring Deposit Accounts CRUD ─────────────────────────────
+
+export async function updateRecurringDepositAccount(
+  accountId: number,
+  payload: Record<string, unknown>,
+): Promise<SavingsCommandResponse> {
+  const { data } = await client.put<SavingsCommandResponse>(`/recurringdepositaccounts/${accountId}`, {
+    ...payload,
+    locale: "en",
+    dateFormat: "yyyy-MM-dd",
+  });
+  return data;
+}
+
+export async function deleteRecurringDepositAccount(accountId: number): Promise<SavingsCommandResponse> {
+  const { data } = await client.delete<SavingsCommandResponse>(`/recurringdepositaccounts/${accountId}`);
+  return data;
+}
+
+// ─── Recurring Deposit Account Template ──────────────────────────
+
+export async function fetchRecurringDepositAccountTemplate(params: {
+  clientId?: number;
+  groupId?: number;
+  productId?: number;
+}): Promise<Record<string, unknown>> {
+  const { data } = await client.get("/recurringdepositaccounts/template", { params });
+  return data;
+}
+
+// ─── Recurring Deposit Lifecycle Commands ────────────────────────
+
+export async function recurringDepositCommand(
+  accountId: number,
+  command: string,
+  data: Record<string, unknown> = {},
+): Promise<SavingsCommandResponse> {
+  const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
+  const converted: Record<string, unknown> = { locale: "en", dateFormat: "yyyy-MM-dd" };
+  for (const [k, v] of Object.entries(data)) {
+    converted[k] = dateFields.includes(k) ? currentDate(v as string | undefined) : v;
+  }
+  const { data: result } = await client.post<SavingsCommandResponse>(
+    `/recurringdepositaccounts/${accountId}`,
+    converted,
+    { params: { command } },
+  );
+  return result;
+}
+
+export async function approveRecurringDeposit(accountId: number, approvedOnDate?: string) {
+  return recurringDepositCommand(
+    accountId,
+    "approve",
+    approvedOnDate ? { approvedOnDate } : { approvedOnDate: new Date().toISOString().split("T")[0] },
+  );
+}
+
+export async function activateRecurringDeposit(accountId: number, activatedOnDate?: string) {
+  return recurringDepositCommand(
+    accountId,
+    "activate",
+    activatedOnDate ? { activatedOnDate } : { activatedOnDate: new Date().toISOString().split("T")[0] },
+  );
+}
+
+export async function closeRecurringDeposit(accountId: number, closedOnDate?: string) {
+  return recurringDepositCommand(
+    accountId,
+    "close",
+    closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] },
+  );
+}
+
+export async function prematureCloseRecurringDeposit(accountId: number, closedOnDate?: string) {
+  return recurringDepositCommand(
+    accountId,
+    "prematureClose",
+    closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] },
+  );
+}
+
+export async function rejectRecurringDeposit(accountId: number, rejectedOnDate?: string) {
+  return recurringDepositCommand(
+    accountId,
+    "reject",
+    rejectedOnDate ? { rejectedOnDate } : { rejectedOnDate: new Date().toISOString().split("T")[0] },
+  );
+}
+
+export async function withdrawRecurringDeposit(accountId: number, withdrawnOnDate?: string) {
+  return recurringDepositCommand(
+    accountId,
+    "withdraw",
+    withdrawnOnDate ? { withdrawnOnDate } : { withdrawnOnDate: new Date().toISOString().split("T")[0] },
+  );
+}
+
+export async function calculateInterestRecurringDeposit(accountId: number) {
+  return recurringDepositCommand(accountId, "calculateInterest");
+}
+
+export async function postInterestRecurringDeposit(accountId: number) {
+  return recurringDepositCommand(accountId, "postInterest");
+}
+
+export async function calculatePrematureAmountRecurringDeposit(accountId: number, closedOnDate?: string) {
+  return recurringDepositCommand(accountId, "calculatePrematureAmount", closedOnDate ? { closedOnDate } : {});
+}
+
+// ─── Recurring Deposit Products ─────────────────────────────────
+
+export async function fetchRecurringDepositProducts(): Promise<RecurringDepositProduct[]> {
+  const { data } = await client.get<RecurringDepositProduct[]>("/recurringdepositproducts");
+  return data;
+}
+
+export async function fetchRecurringDepositProduct(productId: number): Promise<RecurringDepositProduct> {
+  const { data } = await client.get<RecurringDepositProduct>(`/recurringdepositproducts/${productId}`);
+  return data;
+}
+
+export async function createRecurringDepositProduct(
+  payload: RecurringDepositProductCreateRequest,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>("/recurringdepositproducts", {
+    ...payload,
+  });
+  return data;
+}
+
+export async function updateRecurringDepositProduct(
+  productId: number,
+  payload: Partial<RecurringDepositProductCreateRequest>,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(`/recurringdepositproducts/${productId}`, payload);
+  return data;
+}
+
+export async function deleteRecurringDepositProduct(productId: number): Promise<{ resourceId: number }> {
+  const { data } = await client.delete<{ resourceId: number }>(`/recurringdepositproducts/${productId}`);
+  return data;
+}
+
+// ─── Recurring Deposit Transactions ──────────────────────────────
+
+export interface RecurringDepositTransaction {
+  id: number;
+  accountId: number;
+  officeId?: number;
+  type?: { id: number; code: string; value: string };
+  date?: string;
+  transactionDate?: string;
+  amount: number;
+  currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
+  reversed?: boolean;
+  runningBalance?: number;
+  paymentTypeId?: number;
+  paymentTypeName?: string;
+}
+
+/** GET /recurringdepositaccounts/{accountId}/transactions */
+export async function fetchRecurringDepositTransactions(
+  accountId: number | string,
+): Promise<{ totalFilteredRecords?: number; pageItems?: RecurringDepositTransaction[] }> {
+  const { data } = await client.get(`/recurringdepositaccounts/${accountId}/transactions`, {
+    params: { offset: 0, limit: 100 },
+  });
+  return data;
+}
+
+/** POST /recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=undo */
+export async function undoRecurringDepositTransaction(
+  accountId: number | string,
+  transactionId: number | string,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/recurringdepositaccounts/${accountId}/transactions/${transactionId}`,
+    {},
+    { params: { command: "undo" } },
+  );
+  return data;
+}
+
+/** POST /recurringdepositaccounts/{accountId}/transactions?command=deposit|withdrawal */
+export async function makeRecurringDepositTransaction(
+  accountId: number | string,
+  command: "deposit" | "withdrawal",
+  payload: SavingsTransactionRequest,
+): Promise<SavingsCommandResponse> {
+  const { data } = await client.post<SavingsCommandResponse>(
+    `/recurringdepositaccounts/${accountId}/transactions`,
+    { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
+    { params: { command } },
+  );
   return data;
 }
 

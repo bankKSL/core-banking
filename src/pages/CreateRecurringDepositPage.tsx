@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Wallet, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,27 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createFixedDepositAccount, DEPOSIT_PERIOD_FREQUENCIES } from "@/features/deposits";
-import { useFixedDepositProducts } from "@/features/deposits";
+import {
+  DEPOSIT_PERIOD_FREQUENCIES,
+  RECURRING_DEPOSIT_FREQUENCY_TYPES,
+  createRecurringDepositAccountSchema,
+  useRecurringDepositProducts,
+  useCreateRecurringDepositAccount,
+} from "@/features/deposits";
+import type { CreateRecurringDepositAccountFormValues } from "@/features/deposits";
 import { currentDate } from "@/lib/utils";
 
-const fixedDepositSchema = z.object({
-  clientId: z.string().min(1, "Client is required"),
-  productId: z.string().min(1, "Product is required"),
-  externalId: z.string().optional(),
-  depositAmount: z.string().min(1, "Deposit amount is required"),
-  depositPeriod: z.string().min(1, "Period is required"),
-  depositPeriodFrequencyId: z.string(),
-  submittedOnDate: z.string().min(1, "Date is required"),
-  nominalAnnualInterestRate: z.string().optional(),
-});
-
-type FixedDepositFormValues = z.infer<typeof fixedDepositSchema>;
-
-const CreateFixedDepositPage: React.FC = () => {
+const CreateRecurringDepositPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clientIdParam = searchParams.get("clientId");
+
+  const createMutation = useCreateRecurringDepositAccount();
 
   const {
     register,
@@ -40,8 +34,8 @@ const CreateFixedDepositPage: React.FC = () => {
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<FixedDepositFormValues>({
-    resolver: zodResolver(fixedDepositSchema) as any,
+  } = useForm<CreateRecurringDepositAccountFormValues>({
+    resolver: zodResolver(createRecurringDepositAccountSchema) as any,
     defaultValues: {
       clientId: clientIdParam || "",
       productId: "",
@@ -50,31 +44,33 @@ const CreateFixedDepositPage: React.FC = () => {
       depositPeriod: "12",
       depositPeriodFrequencyId: "2",
       submittedOnDate: new Date().toISOString().split("T")[0],
-      nominalAnnualInterestRate: "",
+      recurringFrequency: "1",
+      recurringFrequencyType: "2",
     },
   });
 
   const clientId = watch("clientId");
 
-  const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
-  const isLoading = productsLoading;
+  const { data: products = [], isLoading: productsLoading } = useRecurringDepositProducts();
 
-  const onSubmit = async (values: FixedDepositFormValues) => {
-    await createFixedDepositAccount({
+  const onSubmit = async (values: CreateRecurringDepositAccountFormValues) => {
+    await createMutation.mutateAsync({
       clientId: Number(values.clientId),
       productId: Number(values.productId),
       externalId: values.externalId || undefined,
       depositAmount: Number(values.depositAmount),
       depositPeriod: Number(values.depositPeriod),
       depositPeriodFrequencyId: Number(values.depositPeriodFrequencyId),
+      recurringFrequency: values.recurringFrequency ? Number(values.recurringFrequency) : undefined,
+      recurringFrequencyType: values.recurringFrequencyType ? Number(values.recurringFrequencyType) : undefined,
       submittedOnDate: currentDate(values.submittedOnDate),
       locale: "en",
       dateFormat: "yyyy-MM-dd",
     });
-    navigate("/deposits/fixed");
+    navigate("/deposits/recurring");
   };
 
-  if (isLoading)
+  if (productsLoading)
     return (
       <div className="max-w-4xl m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
@@ -85,10 +81,10 @@ const CreateFixedDepositPage: React.FC = () => {
   return (
     <div className="max-w-4xl m-auto space-y-6 p-6">
       <PageHeader
-        title="New Fixed Deposit"
-        description="Open a fixed deposit account (Section 10.2)"
+        title="New Recurring Deposit"
+        description="Open a recurring deposit account"
         actions={
-          <Button variant="outline" onClick={() => navigate("/deposits/fixed")}>
+          <Button variant="outline" onClick={() => navigate("/deposits/recurring")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Cancel
           </Button>
@@ -133,7 +129,7 @@ const CreateFixedDepositPage: React.FC = () => {
                 variant="link"
                 size="sm"
                 className="h-auto p-0 text-xs"
-                onClick={() => window.open("/deposits/fixed-products", "_blank")}
+                onClick={() => window.open("/deposits/recurring-products", "_blank")}
               >
                 <ExternalLink className="mr-1 h-3 w-3" />
                 Create New Product
@@ -143,7 +139,7 @@ const CreateFixedDepositPage: React.FC = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Deposit Details (Section 10.7)</CardTitle>
+            <CardTitle>Deposit Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
@@ -151,7 +147,7 @@ const CreateFixedDepositPage: React.FC = () => {
               <Input id="externalId" {...register("externalId")} placeholder="Optional external reference" />
             </div>
             <div>
-              <Label>Deposit Amount *</Label>
+              <Label>Recurring Deposit Amount *</Label>
               <Input type="number" {...register("depositAmount")} error={errors.depositAmount?.message} />
             </div>
             <div>
@@ -159,7 +155,7 @@ const CreateFixedDepositPage: React.FC = () => {
               <Input type="number" {...register("depositPeriod")} error={errors.depositPeriod?.message} />
             </div>
             <div>
-              <Label>Frequency (Section 10.7)</Label>
+              <Label>Period Frequency</Label>
               <Select
                 value={watch("depositPeriodFrequencyId")}
                 onValueChange={(v) => setValue("depositPeriodFrequencyId", v)}
@@ -182,14 +178,43 @@ const CreateFixedDepositPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recurring Frequency</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Deposit Every</Label>
+              <Input type="number" {...register("recurringFrequency")} placeholder="e.g. 1" />
+            </div>
+            <div>
+              <Label>Frequency Type</Label>
+              <Select
+                value={watch("recurringFrequencyType")}
+                onValueChange={(v) => setValue("recurringFrequencyType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
         <div className="flex justify-end gap-3">
-          <Button variant="outline" type="button" onClick={() => navigate("/deposits/fixed")}>
+          <Button variant="outline" type="button" onClick={() => navigate("/deposits/recurring")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             <Save className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Creating…" : "Create FD"}
+            {isSubmitting ? "Creating…" : "Create RD"}
           </Button>
         </div>
       </form>
@@ -197,4 +222,4 @@ const CreateFixedDepositPage: React.FC = () => {
   );
 };
 
-export default CreateFixedDepositPage;
+export default CreateRecurringDepositPage;

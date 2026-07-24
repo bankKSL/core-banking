@@ -29,6 +29,11 @@ import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
 import FixedDepositDetailPage from "./pages/FixedDepositDetailPage";
 import FixedDepositProductsPage from "./pages/FixedDepositProductsPage";
 import FixedDepositProductFormPage from "./pages/FixedDepositProductFormPage";
+import RecurringDepositsPage from "./pages/RecurringDepositsPage";
+import CreateRecurringDepositPage from "./pages/CreateRecurringDepositPage";
+import RecurringDepositDetailPage from "./pages/RecurringDepositDetailPage";
+import RecurringDepositProductsPage from "./pages/RecurringDepositProductsPage";
+import RecurringDepositProductFormPage from "./pages/RecurringDepositProductFormPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import ClientListPage from "@/features/clients/pages/ClientListPage";
 import CreateClientPage from "@/features/clients/pages/CreateClientPage";
@@ -146,6 +151,14 @@ function App() {
                   <Route path="/deposits/fixed/edit/:id" element={<CreateFixedDepositPage />} />
                   <Route path="/deposits/fixed-products/new" element={<FixedDepositProductFormPage />} />
                   <Route path="/deposits/fixed-products/edit/:id" element={<FixedDepositProductFormPage />} />
+                  {/* Recurring Deposits */}
+                  <Route path="/deposits/recurring" element={<RecurringDepositsPage />} />
+                  <Route path="/deposits/recurring/new" element={<CreateRecurringDepositPage />} />
+                  <Route path="/deposits/recurring/edit/:id" element={<CreateRecurringDepositPage />} />
+                  <Route path="/deposits/recurring/:id" element={<RecurringDepositDetailPage />} />
+                  <Route path="/deposits/recurring-products" element={<RecurringDepositProductsPage />} />
+                  <Route path="/deposits/recurring-products/new" element={<RecurringDepositProductFormPage />} />
+                  <Route path="/deposits/recurring-products/edit/:id" element={<RecurringDepositProductFormPage />} />
                   {/* Exchange Rates */}
                   <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                   {/* CRM */}

@@ -88,6 +88,7 @@ export function ClientSearch({
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query.length >= 2 && setOpen(true)}
             disabled={disabled}
+            onFocusCapture={() => setOpen((prev) => !prev)}
           />
         </div>
       )}

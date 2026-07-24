@@ -293,21 +293,143 @@ export interface RecurringDepositAccount {
   depositAmount: number;
   maturityAmount?: number;
   accountBalance: number;
+  totalDeposits?: number;
+  totalInterestEarned?: number;
   recurringDepositAmount: number;
   recurringDepositFrequency: number;
   recurringDepositFrequencyType: { id: number; code: string; value: string };
   depositPeriod: number;
   depositPeriodFrequencyType: { id: number; code: string; value: string };
   interestRate: number;
-  totalDeposits?: number;
+  nominalAnnualInterestRate?: number;
+  interestCompoundingPeriodType?: { id: number; code: string; value: string };
+  interestPostingPeriodType?: { id: number; code: string; value: string };
+  interestCalculationType?: { id: number; code: string; value: string };
+  interestCalculationDaysInYearType?: { id: number; code: string; value: string };
   expectedFirstDepositOnDate?: string;
   expectedMaturityDate?: string;
+  maturityDate?: string;
   timeline: {
     submittedOnDate?: string;
     approvedOnDate?: string;
     activatedOnDate?: string;
+    closedOnDate?: string;
   };
   prematureClosure?: boolean;
+  preClosurePenalApplicable?: boolean;
+  preClosurePenalInterest?: number;
+  preClosurePenalInterestOnType?: { id: number; code: string; value: string };
+  withHoldTax?: boolean;
+  taxGroupId?: number;
+  client?: { id: number; displayName: string };
+  group?: { id: number; name: string };
+  fieldOfficerId?: number;
+  savingsOfficerName?: string;
+}
+
+export interface RecurringDepositListParams {
+  offset?: number;
+  limit?: number;
+  orderBy?: string;
+  sortOrder?: "ASC" | "DESC";
+  clientId?: number;
+  status?: number;
+}
+
+// ─── Recurring Deposit Product ────────────────────────────────────
+
+export interface RecurringDepositProduct {
+  id: number;
+  name: string;
+  shortName?: string;
+  description?: string;
+  currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string; inMultiplesOf?: number };
+  depositAmount: number;
+  minDepositTerm: number;
+  maxDepositTerm?: number;
+  minDepositTermType: { id: number; code: string; description: string };
+  maxDepositTermType?: { id: number; code: string; description: string };
+  recurringDepositFrequency: number;
+  recurringDepositFrequencyType: { id: number; code: string; description: string };
+  preClosurePenalApplicable: boolean;
+  preClosurePenalInterest?: number;
+  preClosurePenalInterestOnType?: { id: number; code: string; description: string };
+  interestCompoundingPeriodType: { id: number; code: string; description: string };
+  interestPostingPeriodType: { id: number; code: string; description: string };
+  interestCalculationType: { id: number; code: string; description: string };
+  interestCalculationDaysInYearType: { id: number; code: string; description: string };
+  accountingRule: { id: number; code: string; description: string };
+  activeChart?: {
+    id: number;
+    fromDate: string;
+    endDate?: string;
+    chartSlabs: Array<{
+      id: number;
+      description: string;
+      periodType: { id: number; code: string; description: string };
+      fromPeriod: number;
+      toPeriod: number;
+      annualInterestRate: number;
+    }>;
+  };
+  withHoldTax?: boolean;
+  taxGroupId?: number;
+}
+
+export interface RecurringDepositProductCreateRequest {
+  name: string;
+  shortName: string;
+  description: string | undefined;
+  currencyCode: string;
+  digitsAfterDecimal: number;
+  inMultiplesOf?: number;
+  depositAmount: number;
+  minDepositTerm: number;
+  minDepositTermTypeId: number;
+  maxDepositTerm?: number;
+  maxDepositTermTypeId?: number;
+  recurringDepositFrequency: number;
+  recurringDepositFrequencyType: number;
+  preClosurePenalApplicable?: boolean;
+  preClosurePenalInterest?: number;
+  preClosurePenalInterestOnTypeId?: number;
+  interestCompoundingPeriodType: number;
+  interestPostingPeriodType: number;
+  interestCalculationType: number;
+  interestCalculationDaysInYearType: string;
+  accountingRule: number;
+  locale: string;
+  dateFormat?: string;
+  charts?: Array<{
+    fromDate?: string;
+    endDate?: string;
+    locale?: string;
+    dateFormat?: string;
+    chartSlabs: Array<{
+      periodType: number;
+      fromPeriod: number;
+      annualInterestRate: number;
+    }>;
+  }>;
+}
+
+// ─── Recurring Deposit Account Create ────────────────────────────
+
+export interface RecurringDepositAccountCreateRequest {
+  clientId?: number;
+  groupId?: number;
+  productId: number;
+  submittedOnDate: string;
+  depositAmount: number;
+  depositPeriod: number;
+  depositPeriodFrequencyId: number;
+  recurringFrequency?: number;
+  recurringFrequencyType?: number;
+  isCalendarInherited?: boolean;
+  externalId?: string;
+  fieldOfficerId?: number;
+  locale?: string;
+  dateFormat?: string;
 }
 
 // ─── Savings Product Create ──────────────────────────────────────

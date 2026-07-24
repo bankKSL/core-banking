@@ -66,8 +66,10 @@ const sections: NavSectionConfig[] = [
     items: [
       { label: "Savings Accounts", path: "/deposits/saving-accounts", icon: PiggyBank },
       { label: "Fixed Deposits", path: "/deposits/fixed", icon: Wallet },
+      { label: "Recurring Deposits", path: "/deposits/recurring", icon: Calendar },
       { label: "Savings Accounts Products", path: "/deposits/products", icon: LayoutGrid },
       { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
+      { label: "Recurring Deposit Products", path: "/deposits/recurring-products", icon: LayoutGrid },
     ],
   },
   {

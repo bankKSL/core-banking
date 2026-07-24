@@ -16,6 +16,10 @@ export type {
   FixedDepositAccount,
   FixedDepositListParams,
   RecurringDepositAccount,
+  RecurringDepositListParams,
+  RecurringDepositAccountCreateRequest,
+  RecurringDepositProduct,
+  RecurringDepositProductCreateRequest,
   SavingsProductCreateRequest,
   DepositAccountType,
   FixedDepositProduct,
@@ -30,6 +34,8 @@ export {
   DEPOSIT_TYPE_LABELS,
   DEPOSIT_PERIOD_FREQUENCIES,
   FIXED_DEPOSIT_STATUS_CONFIG,
+  RECURRING_DEPOSIT_STATUS_CONFIG,
+  RECURRING_DEPOSIT_FREQUENCY_TYPES,
   PRE_CLOSURE_PENALTY_TYPES,
   CHART_SLAB_PERIOD_TYPES,
   ACCOUNTING_RULES,
@@ -39,11 +45,15 @@ export {
   createSavingsAccountSchema,
   depositTransactionSchema,
   createSavingsProductSchema,
+  createRecurringDepositAccountSchema,
+  createRecurringDepositProductSchema,
 } from "./schemas/deposit.schema";
 export type {
   CreateSavingsAccountFormValues,
   DepositTransactionFormValues,
   CreateSavingsProductFormValues,
+  CreateRecurringDepositAccountFormValues,
+  CreateRecurringDepositProductFormValues,
 } from "./schemas/deposit.schema";
 
 export {
@@ -79,6 +89,24 @@ export {
   fetchRecurringDepositAccounts,
   fetchRecurringDepositAccount,
   createRecurringDepositAccount,
+  updateRecurringDepositAccount,
+  deleteRecurringDepositAccount,
+  fetchRecurringDepositAccountTemplate,
+  recurringDepositCommand,
+  approveRecurringDeposit,
+  activateRecurringDeposit,
+  closeRecurringDeposit,
+  prematureCloseRecurringDeposit,
+  rejectRecurringDeposit,
+  withdrawRecurringDeposit,
+  calculateInterestRecurringDeposit,
+  postInterestRecurringDeposit,
+  calculatePrematureAmountRecurringDeposit,
+  fetchRecurringDepositProducts,
+  fetchRecurringDepositProduct,
+  createRecurringDepositProduct,
+  updateRecurringDepositProduct,
+  deleteRecurringDepositProduct,
   fetchSavingsProducts,
   fetchSavingsProduct,
   createSavingsProduct,
@@ -107,6 +135,38 @@ export {
 } from "./hooks/useFixedDepositProducts";
 
 export { useRecurringDepositAccounts, useRecurringDepositAccount } from "./hooks/useRecurringDeposits";
+
+export {
+  useCreateRecurringDepositAccount,
+  useUpdateRecurringDepositAccount,
+  useDeleteRecurringDepositAccount,
+  useRecurringDepositCommand,
+} from "./hooks/useRecurringDeposits";
+
+export {
+  useRecurringDepositProducts,
+  useRecurringDepositProduct,
+  useCreateRecurringDepositProduct,
+  useUpdateRecurringDepositProduct,
+  useDeleteRecurringDepositProduct,
+} from "./hooks/useRecurringDepositProducts";
+
+export { useRecurringDepositTemplate } from "./hooks/useRecurringDepositTemplate";
+
+export {
+  useRecurringDepositTransactions,
+  useUndoRecurringDepositTransaction,
+  useMakeRecurringDepositTransaction,
+  rdTransactionKeys,
+} from "./hooks/useRecurringDepositTransactions";
+
+// API — Recurring Deposit Transactions
+export {
+  fetchRecurringDepositTransactions,
+  undoRecurringDepositTransaction,
+  makeRecurringDepositTransaction,
+} from "./api/deposit";
+export type { RecurringDepositTransaction } from "./api/deposit";
 
 // API — Savings Charges
 export {

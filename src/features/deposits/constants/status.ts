@@ -81,3 +81,25 @@ export const FIXED_DEPOSIT_STATUS_CONFIG: Record<
   "Fixed deposit account status - matured": { variant: "info", label: "Matured" },
   "Fixed deposit account status - premature closed": { variant: "warning", label: "Premature Closed" },
 };
+
+/** Section 7: Recurring deposit status display labels */
+export const RECURRING_DEPOSIT_STATUS_CONFIG: Record<
+  string,
+  { variant: "success" | "warning" | "error" | "info" | "default"; label: string }
+> = {
+  "Recurring deposit account status - submitted and pending approval": { variant: "info", label: "Pending" },
+  "Recurring deposit account status - approved": { variant: "success", label: "Approved" },
+  "Recurring deposit account status - active": { variant: "success", label: "Active" },
+  "Recurring deposit account status - closed": { variant: "default", label: "Closed" },
+  "Recurring deposit account status - rejected": { variant: "error", label: "Rejected" },
+  "Recurring deposit account status - withdrawn by applicant": { variant: "warning", label: "Withdrawn" },
+  "Recurring deposit account status - premature closed": { variant: "warning", label: "Premature Closed" },
+};
+
+/** Deposit frequency types for recurring deposits */
+export const RECURRING_DEPOSIT_FREQUENCY_TYPES = [
+  { id: 1, label: "Days" },
+  { id: 2, label: "Months" },
+  { id: 3, label: "Weeks" },
+  { id: 4, label: "Years" },
+];
