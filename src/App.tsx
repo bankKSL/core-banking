@@ -22,6 +22,7 @@ import LoanProductsPage from "./pages/LoanProductsPage";
 import LoanProductFormPage from "./pages/LoanProductFormPage";
 import LoanProductViewPage from "./pages/LoanProductViewPage";
 import { LoansListPage, LoanFormPage, LoanViewPage, LoanTransactionFormPage } from "@/features/loans";
+import { GroupListPage, GroupFormPage } from "@/features/groups";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
@@ -149,6 +150,10 @@ function App() {
                   <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                   {/* CRM */}
                   <Route path="/score-grades" element={<ScoreGradePage />} />
+                  {/* Groups */}
+                  <Route path="/groups" element={<GroupListPage />} />
+                  <Route path="/groups/create" element={<GroupFormPage />} />
+                  <Route path="/groups/edit/:id" element={<GroupFormPage />} />
                   {/* Clients */}
                   <Route path="/clients" element={<ClientListPage />} />
                   <Route path="/clients/new" element={<CreateClientPage />} />

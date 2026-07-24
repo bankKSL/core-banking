@@ -23,6 +23,7 @@ import {
   Calendar,
   ArrowRightLeft,
   Terminal,
+  UsersRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -92,6 +93,7 @@ const sections: NavSectionConfig[] = [
     defaultOpen: true,
     items: [
       { label: "Clients", path: "/clients", icon: Users },
+      { label: "Groups", path: "/groups", icon: UsersRound },
       { label: "Score Grade", path: "/score-grades", icon: Shield },
     ],
   },
