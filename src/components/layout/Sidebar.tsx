@@ -24,6 +24,11 @@ import {
   ArrowRightLeft,
   Terminal,
   UsersRound,
+  BookOpen,
+  Scale,
+  Link2,
+  Lock,
+  CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -70,6 +75,20 @@ const sections: NavSectionConfig[] = [
       { label: "Savings Accounts Products", path: "/deposits/products", icon: LayoutGrid },
       { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
       { label: "Recurring Deposit Products", path: "/deposits/recurring-products", icon: LayoutGrid },
+    ],
+  },
+  {
+    id: "accounting",
+    title: "Accounting",
+    defaultOpen: true,
+    items: [
+      { label: "Chart of Accounts", path: "/accounting/gl-accounts", icon: BookOpen },
+      { label: "Journal Entries", path: "/accounting/journal-entries", icon: FileText },
+      { label: "Accounting Rules", path: "/accounting/rules", icon: Scale },
+      { label: "Activity Mappings", path: "/accounting/financial-activity-mappings", icon: Link2 },
+      { label: "Closures", path: "/accounting/closures", icon: Lock },
+      { label: "Periodic Accrual", path: "/accounting/periodic-accrual", icon: CalendarClock },
+      { label: "Provisioning", path: "/accounting/provisioning-entries", icon: ShieldCheck },
     ],
   },
   {

@@ -34,6 +34,16 @@ import CreateRecurringDepositPage from "./pages/CreateRecurringDepositPage";
 import RecurringDepositDetailPage from "./pages/RecurringDepositDetailPage";
 import RecurringDepositProductsPage from "./pages/RecurringDepositProductsPage";
 import RecurringDepositProductFormPage from "./pages/RecurringDepositProductFormPage";
+import GLAccountsPage from "./pages/GLAccountsPage";
+import GLAccountFormPage from "./pages/GLAccountFormPage";
+import JournalEntriesPage from "./pages/JournalEntriesPage";
+import JournalEntryFormPage from "./pages/JournalEntryFormPage";
+import AccountingRulesPage from "./pages/AccountingRulesPage";
+import AccountingRuleFormPage from "./pages/AccountingRuleFormPage";
+import FinancialActivityMappingsPage from "./pages/FinancialActivityMappingsPage";
+import AccountingClosuresPage from "./pages/AccountingClosuresPage";
+import PeriodicAccrualPage from "./pages/PeriodicAccrualPage";
+import ProvisioningEntriesPage from "./pages/ProvisioningEntriesPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import ClientListPage from "@/features/clients/pages/ClientListPage";
 import CreateClientPage from "@/features/clients/pages/CreateClientPage";
@@ -159,6 +169,19 @@ function App() {
                   <Route path="/deposits/recurring-products" element={<RecurringDepositProductsPage />} />
                   <Route path="/deposits/recurring-products/new" element={<RecurringDepositProductFormPage />} />
                   <Route path="/deposits/recurring-products/edit/:id" element={<RecurringDepositProductFormPage />} />
+                  {/* Accounting */}
+                  <Route path="/accounting/gl-accounts" element={<GLAccountsPage />} />
+                  <Route path="/accounting/gl-accounts/new" element={<GLAccountFormPage />} />
+                  <Route path="/accounting/gl-accounts/edit/:id" element={<GLAccountFormPage />} />
+                  <Route path="/accounting/journal-entries" element={<JournalEntriesPage />} />
+                  <Route path="/accounting/journal-entries/new" element={<JournalEntryFormPage />} />
+                  <Route path="/accounting/rules" element={<AccountingRulesPage />} />
+                  <Route path="/accounting/rules/new" element={<AccountingRuleFormPage />} />
+                  <Route path="/accounting/rules/edit/:id" element={<AccountingRuleFormPage />} />
+                  <Route path="/accounting/financial-activity-mappings" element={<FinancialActivityMappingsPage />} />
+                  <Route path="/accounting/closures" element={<AccountingClosuresPage />} />
+                  <Route path="/accounting/periodic-accrual" element={<PeriodicAccrualPage />} />
+                  <Route path="/accounting/provisioning-entries" element={<ProvisioningEntriesPage />} />
                   {/* Exchange Rates */}
                   <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                   {/* CRM */}
