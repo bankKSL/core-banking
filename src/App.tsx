@@ -36,6 +36,7 @@ import EditClientPage from "@/features/clients/pages/EditClientPage";
 import ScoreGradePage from "./pages/ScoreGradePage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
 import SavingsProductsPage from "./pages/SavingsProductsPage";
+import SavingsProductFormPage from "./pages/SavingsProductFormPage";
 import AccountActionPage from "./pages/AccountActionPage";
 import SavingsTransactionFormPage from "./pages/SavingsTransactionFormPage";
 import LoginPage from "./pages/LoginPage";
@@ -125,8 +126,8 @@ function App() {
                   <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
-                  <Route path="/deposits/products/new" element={<SavingsProductsPage />} />
-                  <Route path="/deposits/products/edit/:id" element={<SavingsProductsPage />} />
+                  <Route path="/deposits/products/new" element={<SavingsProductFormPage />} />
+                  <Route path="/deposits/products/edit/:id" element={<SavingsProductFormPage />} />
                   <Route path="/deposits/saving-accounts" element={<DepositAccountsPage />} />
                   <Route path="/deposits/saving-accounts/new" element={<CreateDepositAccountPage />} />
                   <Route path="/deposits/saving-accounts/edit/:id" element={<CreateDepositAccountPage />} />

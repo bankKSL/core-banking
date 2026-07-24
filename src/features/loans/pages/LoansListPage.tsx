@@ -139,7 +139,7 @@ const LoansListPage: FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader
           title="Loans"
           description="Manage loan accounts in Finfact"
@@ -161,7 +161,7 @@ const LoansListPage: FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Loans"
         description="Manage loan accounts in Finfact"
