@@ -20,6 +20,7 @@ import SettingsPage from "./pages/SettingsPage";
 import BatchOperationsPage from "./pages/BatchOperationsPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
 import LoanProductFormPage from "./pages/LoanProductFormPage";
+import LoanProductViewPage from "./pages/LoanProductViewPage";
 import { LoansListPage, LoanFormPage, LoanViewPage, LoanTransactionFormPage } from "@/features/loans";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
@@ -115,6 +116,7 @@ function App() {
                   <Route path="/lending/products" element={<LoanProductsPage />} />
                   <Route path="/lending/products/new" element={<LoanProductFormPage />} />
                   <Route path="/lending/products/edit/:id" element={<LoanProductFormPage />} />
+                  <Route path="/lending/products/view/:id" element={<LoanProductViewPage />} />
                   {/* Loans (new module) */}
                   <Route path="/loans" element={<LoansListPage />} />
                   <Route path="/loans/create" element={<LoanFormPage />} />

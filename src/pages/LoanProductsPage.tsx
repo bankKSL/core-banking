@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -71,7 +71,7 @@ const LoanProductsPage: React.FC = () => {
       cell: (r) => (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <Button variant="ghost" size="sm" onClick={() => navigate(`/lending/products/view/${r.id}`)}>
-            <ExternalLink className="h-4 w-4" />
+            <Eye className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate(`/lending/products/edit/${r.id}`)}>
             <Pencil className="h-4 w-4" />
@@ -98,21 +98,22 @@ const LoanProductsPage: React.FC = () => {
       />
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-4 w-4 text-gray-400" />
-            All Products
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <Input
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="max-w-sm"
-            />
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>All Products</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="relative w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
+        </CardHeader>
+
+        <CardContent>
           {isLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
