@@ -1,4 +1,4 @@
-import { type FC, useState, useCallback } from "react";
+import { type FC, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import { ProductSearch } from "@/components/shared/ProductSearch";
 import { type CreateLoanFormValues } from "../schemas/loan.schema";
-import type { LoanProduct, LoanTemplate, Loan } from "../types/loan";
+import type { LoanProduct, Loan } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
 interface LoanFormProps {
-  template?: LoanTemplate;
   products: LoanProduct[];
   loan?: Loan;
   onSubmit: (values: CreateLoanFormValues) => Promise<void>;
@@ -21,22 +20,36 @@ interface LoanFormProps {
   error?: string | null;
   mode: "create" | "edit";
   clientId?: number;
+  /** Preview the repayment schedule before submitting (POST /loans?command=calculateLoanSchedule) */
+  onPreviewSchedule?: (values: FormFields) => void;
+  previewLoading?: boolean;
 }
 
 /** Type override for fields not in the Zod schema yet */
-type FormFields = CreateLoanFormValues & {
+export type FormFields = CreateLoanFormValues & {
   graceOnInterestPayment?: number;
   inArrearsTolerance?: number;
   repaymentsStartingFromDate?: string;
 };
 
 // ─── Loan Form Component ─────────────────────────────────────────
-const LoanForm: FC<LoanFormProps> = ({ template, products, loan, onSubmit, isSubmitting, error, mode, clientId }) => {
+const LoanForm: FC<LoanFormProps> = ({
+  products,
+  loan,
+  onSubmit,
+  isSubmitting,
+  error,
+  mode,
+  clientId,
+  onPreviewSchedule,
+  previewLoading,
+}) => {
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors },
   } = useForm<FormFields>({
     defaultValues: {
@@ -288,6 +301,23 @@ const LoanForm: FC<LoanFormProps> = ({ template, products, loan, onSubmit, isSub
             "Save Changes"
           )}
         </Button>
+        {onPreviewSchedule && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSubmitting || previewLoading}
+            onClick={() => onPreviewSchedule(getValues())}
+          >
+            {previewLoading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Calculating...
+              </span>
+            ) : (
+              "Preview Schedule"
+            )}
+          </Button>
+        )}
         <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => window.history.back()}>
           Cancel
         </Button>

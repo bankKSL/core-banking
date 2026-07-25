@@ -63,3 +63,64 @@ export const createLoanProductSchema = z.object({
 });
 
 export type CreateLoanProductFormValues = z.infer<typeof createLoanProductSchema>;
+
+// ─── Loan Charge ─────────────────────────────────────────────────
+
+export const createLoanChargeSchema = z.object({
+  chargeId: z.number({ message: "Charge is required" }).int().positive(),
+  amount: z.number({ message: "Amount is required" }).positive("Amount must be greater than 0"),
+  dueDate: z.string().optional(),
+});
+export type CreateLoanChargeFormValues = z.infer<typeof createLoanChargeSchema>;
+
+export const payLoanChargeSchema = z.object({
+  transactionDate: z.string({ message: "Transaction date is required" }).min(1, "Transaction date is required"),
+  amount: z.number().positive().optional(),
+});
+export type PayLoanChargeFormValues = z.infer<typeof payLoanChargeSchema>;
+
+// ─── Loan Collateral ─────────────────────────────────────────────
+
+export const createLoanCollateralSchema = z.object({
+  collateralTypeId: z.number({ message: "Collateral type is required" }).int().positive(),
+  value: z.number({ message: "Value is required" }).positive("Value must be greater than 0"),
+  description: z.string().max(500).optional(),
+});
+export type CreateLoanCollateralFormValues = z.infer<typeof createLoanCollateralSchema>;
+
+// ─── Loan Guarantor ──────────────────────────────────────────────
+
+export const createLoanGuarantorSchema = z.object({
+  clientId: z.number({ message: "Guarantor client is required" }).int().positive(),
+  amount: z.number({ message: "Amount is required" }).positive("Amount must be greater than 0"),
+});
+export type CreateLoanGuarantorFormValues = z.infer<typeof createLoanGuarantorSchema>;
+
+// ─── Loan Reschedule ─────────────────────────────────────────────
+
+export const createRescheduleRequestSchema = z.object({
+  loanId: z.number({ message: "Loan is required" }).int().positive(),
+  rescheduleFromDate: z.string({ message: "Reschedule from date is required" }).min(1),
+  rescheduleReasonId: z.number({ message: "Reason is required" }).int().positive(),
+  submittedOnDate: z.string({ message: "Submitted date is required" }).min(1),
+  adjustedDueDate: z.string().optional(),
+  graceOnPrincipal: z.number().int().min(0).optional(),
+  graceOnInterest: z.number().int().min(0).optional(),
+  newInterestRate: z.number().min(0).optional(),
+  extraTerms: z.number().int().min(0).optional(),
+});
+export type CreateRescheduleRequestFormValues = z.infer<typeof createRescheduleRequestSchema>;
+
+// ─── Loan Transaction ────────────────────────────────────────────
+
+export const createLoanTransactionSchema = z.object({
+  transactionDate: z.string({ message: "Transaction date is required" }).min(1),
+  transactionAmount: z.number().positive("Amount must be greater than 0").optional(),
+  paymentTypeId: z.number().int().positive().optional(),
+  note: z.string().max(500).optional(),
+  receiptNumber: z.string().max(100).optional(),
+  bankNumber: z.string().max(100).optional(),
+  checkNumber: z.string().max(100).optional(),
+  routingCode: z.string().max(100).optional(),
+});
+export type CreateLoanTransactionFormValues = z.infer<typeof createLoanTransactionSchema>;

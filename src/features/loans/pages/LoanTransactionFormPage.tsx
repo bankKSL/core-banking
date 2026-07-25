@@ -5,37 +5,20 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Button } from "@/components/ui/button";
 import { useLoan } from "../hooks/useLoan";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { makeTransaction, approveLoan, disburseLoan, undoDisbursal, fetchRepaymentTemplate } from "../api/loan";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { makeTransaction, approveLoan, disburseLoan, disburseLoanToSavings, undoDisbursal } from "../api/loan";
+import { useTransactionTemplate } from "../hooks/useTransactionTemplate";
 import { loanKeys } from "../hooks/useLoans";
+import { TRANSACTION_COMMAND_LABELS, TRANSACTION_NO_DATE_COMMANDS } from "../constants/transactions";
 import LoanTransactionForm, { type TransactionFormValues } from "../components/LoanTransactionForm";
-
-const TRANSACTION_LABELS: Record<string, string> = {
-  repayment: "Repayment",
-  disburse: "Disburse",
-  approve: "Approve",
-  reject: "Reject",
-  withdrawnByClient: "Withdraw by Client",
-  undoDisbursal: "Undo Disbursal",
-  waiveinterest: "Waive Interest",
-  prepayLoan: "Prepay Loan",
-  foreclosure: "Foreclosure",
-  close: "Close Loan",
-  writeoff: "Write Off",
-};
 
 const LoanTransactionFormPage: FC = () => {
   const { loanId, transactionType } = useParams<{ loanId: string; transactionType: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const { data: loan, isLoading: loanLoading } = useLoan(loanId);
-
-  const templateQuery = useQuery({
-    queryKey: loanKeys.repaymentTemplate(Number(loanId)),
-    queryFn: () => fetchRepaymentTemplate(Number(loanId)),
-    enabled: !!loanId,
-  });
+  const { data: loan } = useLoan(loanId);
+  const templateQuery = useTransactionTemplate(loanId ? Number(loanId) : undefined, transactionType);
 
   const mutation = useMutation({
     mutationFn: async (values: TransactionFormValues) => {
@@ -62,22 +45,29 @@ const LoanTransactionFormPage: FC = () => {
           locale: "en",
         });
       }
+      if (transactionType === "disburseToSavings") {
+        return disburseLoanToSavings(id, {
+          actualDisbursementDate: values.actualDisbursementDate ?? values.transactionDate,
+          note: values.note,
+          dateFormat: "yyyy-MM-dd",
+          locale: "en",
+        });
+      }
       if (transactionType === "undoDisbursal") {
         return undoDisbursal(id);
       }
 
       // Transaction sub-resource commands (POST /loans/{id}/transactions?command=...)
       const txPayload: Record<string, unknown> = {
-        transactionDate: values.transactionDate,
         note: values.note,
         dateFormat: "yyyy-MM-dd",
         locale: "en",
       };
 
-      if (
-        values.transactionAmount != null &&
-        !["writeoff", "foreclosure", "close", "waiveinterest"].includes(transactionType)
-      ) {
+      if (!TRANSACTION_NO_DATE_COMMANDS.has(transactionType)) {
+        txPayload.transactionDate = values.transactionDate;
+      }
+      if (values.transactionAmount != null) {
         txPayload.transactionAmount = values.transactionAmount;
       }
       if (values.paymentTypeId) txPayload.paymentTypeId = values.paymentTypeId;
@@ -90,12 +80,13 @@ const LoanTransactionFormPage: FC = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: loanKeys.detail(loanId!) });
+      qc.invalidateQueries({ queryKey: loanKeys.schedule(Number(loanId)) });
       qc.invalidateQueries({ queryKey: loanKeys.all });
       navigate(`/loans/view/${loanId}`);
     },
   });
 
-  const label = TRANSACTION_LABELS[transactionType ?? ""] ?? transactionType ?? "";
+  const label = TRANSACTION_COMMAND_LABELS[transactionType ?? ""] ?? transactionType ?? "";
 
   const handleSubmit = useCallback(
     async (values: TransactionFormValues) => {
@@ -103,6 +94,11 @@ const LoanTransactionFormPage: FC = () => {
     },
     [mutation],
   );
+
+  // Command templates may carry payment type options and/or a suggested amount
+  const templateData = templateQuery.data as
+    | { paymentTypeOptions?: Array<{ id: number; name: string }>; amount?: number; outstandingLoanBalance?: number }
+    | undefined;
 
   return (
     <div className="p-6 max-w-3xl m-auto">
@@ -129,8 +125,14 @@ const LoanTransactionFormPage: FC = () => {
       )}
       <LoanTransactionForm
         transactionType={transactionType ?? ""}
-        paymentTypeOptions={templateQuery.data?.paymentTypeOptions}
-        loanSummary={loan?.summary ? { outstandingLoanBalance: loan.summary.totalOutstanding } : undefined}
+        paymentTypeOptions={templateData?.paymentTypeOptions}
+        loanSummary={
+          loan?.summary
+            ? { outstandingLoanBalance: loan.summary.totalOutstanding }
+            : templateData?.amount != null
+              ? { amount: templateData.amount }
+              : undefined
+        }
         onSubmit={handleSubmit}
         isSubmitting={mutation.isPending}
         error={null}

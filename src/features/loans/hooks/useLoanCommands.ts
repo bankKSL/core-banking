@@ -1,5 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { approveLoan, disburseLoan, rejectLoan, closeLoan, undoApproval, undoDisbursal } from "../api/loan";
+import {
+  approveLoan,
+  disburseLoan,
+  disburseLoanToSavings,
+  rejectLoan,
+  closeLoan,
+  undoApproval,
+  undoDisbursal,
+  withdrawLoanApplication,
+  makeTransaction,
+} from "../api/loan";
 import type { LoanCommandRequest } from "../types/loan";
 import { loanKeys } from "./useLoans";
 
@@ -65,6 +75,44 @@ export function useUndoDisbursal() {
     mutationFn: (loanId: number) => undoDisbursal(loanId),
     onSuccess: (_, loanId) => {
       qc.invalidateQueries({ queryKey: loanKeys.detail(loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+export function useDisburseLoanToSavings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, payload }: { loanId: number; payload?: LoanCommandRequest }) =>
+      disburseLoanToSavings(loanId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+export function useWithdrawLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, payload }: { loanId: number; payload?: LoanCommandRequest }) =>
+      withdrawLoanApplication(loanId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+/** Generic transaction command hook (recoverypayment, charge-off, refunds, reAge, ...) */
+export function useLoanTransactionCommand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, command, payload }: { loanId: number; command: string; payload?: LoanCommandRequest }) =>
+      makeTransaction(loanId, (payload ?? {}) as Record<string, unknown>, command),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.schedule(vars.loanId) });
       qc.invalidateQueries({ queryKey: loanKeys.all });
     },
   });

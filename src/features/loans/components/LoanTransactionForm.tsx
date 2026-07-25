@@ -7,6 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  TRANSACTION_COMMAND_LABELS,
+  TRANSACTION_AMOUNT_COMMANDS,
+  TRANSACTION_PAYMENT_TYPE_COMMANDS,
+  TRANSACTION_PAYMENT_DETAILS_COMMANDS,
+  TRANSACTION_NO_DATE_COMMANDS,
+  TRANSACTION_DESTRUCTIVE_COMMANDS,
+} from "../constants/transactions";
 
 export type TransactionFormValues = {
   transactionDate?: string;
@@ -29,20 +37,6 @@ interface LoanTransactionFormProps {
   isSubmitting: boolean;
   error?: string | null;
 }
-
-const TRANSACTION_LABELS: Record<string, string> = {
-  repayment: "Repayment",
-  disburse: "Disburse",
-  approve: "Approve",
-  reject: "Reject",
-  withdrawnByClient: "Withdraw by Client",
-  undoDisbursal: "Undo Disbursal",
-  waiveinterest: "Waive Interest",
-  prepayLoan: "Prepay Loan",
-  foreclosure: "Foreclosure",
-  close: "Close Loan",
-  writeoff: "Write Off",
-};
 
 const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
   transactionType,
@@ -68,13 +62,12 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
     },
   });
 
-  const needsDate = !["undoDisbursal"].includes(transactionType);
-  const needsAmount = ["repayment", "disburse", "prepayLoan"].includes(transactionType);
-  const needsPaymentType = ["repayment", "disburse", "prepayLoan"].includes(transactionType);
-  const needsPaymentDetails = ["repayment", "prepayLoan"].includes(transactionType);
-  const destructiveActions = ["writeoff", "foreclosure", "close", "undoDisbursal"];
-  const isDestructive = destructiveActions.includes(transactionType);
-  const label = TRANSACTION_LABELS[transactionType] ?? transactionType;
+  const needsDate = !TRANSACTION_NO_DATE_COMMANDS.has(transactionType);
+  const needsAmount = TRANSACTION_AMOUNT_COMMANDS.has(transactionType);
+  const needsPaymentType = TRANSACTION_PAYMENT_TYPE_COMMANDS.has(transactionType);
+  const needsPaymentDetails = TRANSACTION_PAYMENT_DETAILS_COMMANDS.has(transactionType);
+  const isDestructive = TRANSACTION_DESTRUCTIVE_COMMANDS.has(transactionType);
+  const label = TRANSACTION_COMMAND_LABELS[transactionType] ?? transactionType;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
@@ -107,7 +100,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
               <Label htmlFor="transactionDate">
                 {transactionType === "approve"
                   ? "Approval Date"
-                  : transactionType === "disburse"
+                  : transactionType === "disburse" || transactionType === "disburseToSavings"
                     ? "Disbursement Date"
                     : "Transaction Date"}
               </Label>
@@ -117,7 +110,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
                 {...register(
                   transactionType === "approve"
                     ? "approvedOnDate"
-                    : transactionType === "disburse"
+                    : transactionType === "disburse" || transactionType === "disburseToSavings"
                       ? "actualDisbursementDate"
                       : "transactionDate",
                 )}

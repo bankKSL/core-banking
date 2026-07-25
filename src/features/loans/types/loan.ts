@@ -89,18 +89,25 @@ export interface Loan {
   accountNo?: string;
   externalId?: string;
   status: { id: number; code: string; value: string };
+  subStatus?: { id: number; code: string; value: string };
   loanProductId: number;
   loanProductName: string;
   loanProductDescription?: string;
   clientId: number;
   clientName?: string;
   clientOfficeId?: number;
+  group?: { id: number; name: string } | null;
+  loanType?: { id: number; code: string; value: string };
   loanOfficerId?: number;
   loanOfficerName?: string;
+  loanPurposeId?: number;
   loanPurposeName?: string;
+  fundId?: number;
+  fundName?: string;
   principal: number;
   approvedPrincipal?: number;
   proposedPrincipal?: number;
+  netDisbursalAmount?: number;
   termFrequency: number;
   termPeriodFrequencyType: { id: number; code: string; value: string };
   numberOfRepayments: number;
@@ -113,8 +120,15 @@ export interface Loan {
   amortizationType: { id: number; code: string; value: string };
   interestType: { id: number; code: string; value: string };
   interestCalculationPeriodType: { id: number; code: string; value: string };
+  allowPartialPeriodInterestCalculation?: boolean;
+  inArrearsTolerance?: number;
   transactionProcessingStrategyId?: number;
+  transactionProcessingStrategyCode?: string;
   transactionProcessingStrategyName?: string;
+  graceOnPrincipalPayment?: number;
+  graceOnInterestPayment?: number;
+  graceOnInterestCharged?: number;
+  graceOnArrearsAgeing?: number;
   totalChargesDueAtDisbursement?: number;
   totalOutstanding?: number;
   totalPrincipalPaid?: number;
@@ -127,16 +141,41 @@ export interface Loan {
   totalOverpaid?: number;
   summary?: LoanSummary;
   timeline: LoanTimeline;
-  repaymentSchedule?: LoanRepaymentPeriod[];
+  repaymentSchedule?: LoanRepaymentSchedule;
   transactions?: LoanTransaction[];
+  charges?: LoanCharge[];
+  collateral?: LoanCollateral[];
+  guarantors?: LoanGuarantor[];
+  delinquent?: LoanDelinquentData;
+  delinquencyRange?: { id: number; classification: string; minimumAgeDays: number; maximumAgeDays: number };
   inArrears?: boolean;
   isNPA?: boolean;
+  fraud?: boolean;
+  chargedOff?: boolean;
   overdueSinceDate?: string;
   emiAmount?: number;
   fixedEmiAmount?: number;
   maxOutstandingLoanBalance?: number;
   expectedDisbursementDate?: string;
   submittedOnDate?: string;
+}
+
+/** Repayment schedule block as returned with associations=repaymentSchedule|all */
+export interface LoanRepaymentSchedule {
+  currency?: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+  loanTermInDays?: number;
+  totalPrincipalDisbursed?: number;
+  totalPrincipalExpected?: number;
+  totalPrincipalPaid?: number;
+  totalInterestCharged?: number;
+  totalFeeChargesCharged?: number;
+  totalPenaltyChargesCharged?: number;
+  totalWaived?: number;
+  totalWrittenOff?: number;
+  totalRepaymentExpected?: number;
+  totalRepayment?: number;
+  totalOutstanding?: number;
+  periods?: LoanRepaymentPeriod[];
 }
 
 export interface LoanSummary {
@@ -186,43 +225,70 @@ export interface LoanTimeline {
 
 export interface LoanRepaymentPeriod {
   period: number;
-  fromDate: string;
-  dueDate: string;
+  fromDate: string | number[];
+  dueDate: string | number[];
+  obligationsMetOnDate?: string | number[] | null;
+  completed?: boolean;
+  complete?: boolean;
   principalOriginalDue: number;
   principalDue: number;
-  principalOutstanding: number;
+  principalOutstanding?: number;
+  principalLoanBalanceOutstanding?: number;
   principalPaid: number;
   principalWrittenOff?: number;
   interestOriginalDue: number;
   interestDue: number;
-  interestOutstanding: number;
+  interestOutstanding?: number;
   interestPaid: number;
+  interestWaived?: number;
   interestWrittenOff?: number;
   feeChargesDue: number;
-  feeChargesOutstanding: number;
+  feeChargesOutstanding?: number;
   feeChargesPaid: number;
+  feeChargesWaived?: number;
+  feeChargesWrittenOff?: number;
   penaltyChargesDue: number;
+  penaltyChargesPaid?: number;
+  penaltyChargesWaived?: number;
+  penaltyChargesWrittenOff?: number;
   totalOriginalDueForPeriod: number;
   totalDueForPeriod: number;
   totalOutstandingForPeriod: number;
   totalPaidForPeriod?: number;
+  totalPaidInAdvanceForPeriod?: number;
+  totalPaidLateForPeriod?: number;
+  totalWaivedForPeriod?: number;
+  totalWrittenOffForPeriod?: number;
+  totalActualCostOfLoanForPeriod?: number;
   daysInPeriod: number;
-  complete?: boolean;
-  obligationMetOnDate?: string;
+  repaid?: boolean;
+  late?: boolean;
 }
 
 export interface LoanTransaction {
   id: number;
   type: { id: number; code: string; value: string };
-  date: string;
+  date: string | number[];
   currency: { code: string; displaySymbol: string };
+  paymentDetailData?: {
+    paymentType?: { id: number; name: string };
+    accountNumber?: string;
+    checkNumber?: string;
+    routingCode?: string;
+    receiptNumber?: string;
+    bankNumber?: string;
+  } | null;
   amount: number;
+  netDisbursalAmount?: number | null;
   principalPortion?: number;
   interestPortion?: number;
   feeChargesPortion?: number;
   penaltyChargesPortion?: number;
+  overpaymentPortion?: number;
+  unrecognizedIncomePortion?: number;
+  externalId?: string;
   outstandingLoanBalance?: number;
-  submittedOnDate: string;
+  submittedOnDate: string | number[];
   manuallyReversed: boolean;
 }
 
@@ -240,7 +306,10 @@ export interface LoanListParams {
   sortOrder?: "ASC" | "DESC";
   officeId?: number;
   clientId?: number;
+  groupId?: number;
   accountNo?: string;
+  externalId?: string;
+  status?: string;
   loanStatus?: number;
 }
 
@@ -322,14 +391,18 @@ export interface LoanCommandRequest {
   dateFormat?: string;
   note?: string;
   approvedOnDate?: string;
+  approvedLoanAmount?: number;
   expectedDisbursementDate?: string;
   actualDisbursementDate?: string;
   transactionAmount?: number;
   paymentTypeId?: number;
   transactionDate?: string;
   rejectedOnDate?: string;
+  withdrawnOnDate?: string;
   closedOnDate?: string;
   writeoffReason?: string;
+  chargeOffReasonId?: number;
+  externalId?: string;
 }
 
 export interface LoanCommandResponse {
@@ -402,4 +475,207 @@ export interface LoanProductCreateRequest {
 export interface Fund {
   id: number;
   name: string;
+}
+
+// ─── Loan Charges ────────────────────────────────────────────────
+
+export interface LoanCharge {
+  id: number;
+  chargeId: number;
+  name: string;
+  chargeTimeType?: { id: number; code: string; value: string };
+  chargeCalculationType?: { id: number; code: string; value: string };
+  dueDate?: string | number[] | null;
+  currency?: { code: string; name?: string; decimalPlaces?: number; displaySymbol?: string };
+  percentage?: number;
+  amountPercentageAppliedTo?: number;
+  amount: number;
+  amountPaid?: number;
+  amountWaived?: number;
+  amountWrittenOff?: number;
+  amountOutstanding: number;
+  amountOrPercentage?: number;
+  penalty: boolean;
+  paid?: boolean;
+  waived?: boolean;
+  chargePayable?: boolean;
+}
+
+/** GET /loans/{loanId}/charges/template */
+export interface LoanChargeTemplate {
+  chargeOptions?: Array<{
+    id: number;
+    name: string;
+    active?: boolean;
+    penalty?: boolean;
+    currency?: { code: string; name?: string; decimalPlaces?: number; displaySymbol?: string };
+    amount?: number;
+    chargeTimeType?: { id: number; code: string; value: string };
+    chargeCalculationType?: { id: number; code: string; value: string };
+  }>;
+}
+
+export interface LoanChargeCreateRequest {
+  chargeId: number;
+  amount: number;
+  dueDate?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+
+export interface LoanChargeUpdateRequest {
+  amount?: number;
+  dueDate?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+
+export interface LoanChargeCommandRequest {
+  transactionDate?: string;
+  amount?: number;
+  note?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+
+// ─── Loan Collateral ─────────────────────────────────────────────
+
+export interface LoanCollateral {
+  id: number;
+  type?: { id: number; name: string; position?: number };
+  collateralTypeId?: number;
+  collateralTypeName?: string;
+  value: number;
+  description?: string;
+}
+
+/** GET /loans/template?templateType=collateral */
+export interface LoanCollateralTemplate {
+  loanCollateralOptions?: Array<{ id: number; name: string; position?: number }>;
+}
+
+export interface LoanCollateralCreateRequest {
+  collateralTypeId: number;
+  value: number;
+  description?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+
+// ─── Loan Guarantors ─────────────────────────────────────────────
+
+export interface LoanGuarantor {
+  id: number;
+  loanId?: number;
+  clientId?: number;
+  clientName?: string;
+  firstname?: string;
+  lastname?: string;
+  externalId?: string;
+  guarantorType?: { id: number; code: string; value: string };
+  guarantorTypeId?: number;
+  amount: number;
+  status?: boolean;
+}
+
+export interface LoanGuarantorCreateRequest {
+  clientId: number;
+  amount: number;
+  guarantorTypeId?: number;
+  dateFormat?: string;
+  locale?: string;
+}
+
+// ─── Loan Delinquency ────────────────────────────────────────────
+
+export interface LoanDelinquentData {
+  delinquentDays?: number;
+  delinquentAmount?: number;
+  lastRepaymentDate?: string | number[];
+  lastPaymentDate?: string | number[];
+}
+
+export interface LoanDelinquencyTag {
+  id: number;
+  tagId?: number;
+  classification?: string;
+  minimumAgeDays?: number;
+  maximumAgeDays?: number;
+  addedOnDate?: string | number[];
+  liftedOnDate?: string | number[] | null;
+}
+
+// ─── Loan Rescheduling ───────────────────────────────────────────
+
+export interface LoanRescheduleRequest {
+  id: number;
+  loanId: number;
+  clientId?: number;
+  clientName?: string;
+  loanAccountNo?: string;
+  status: { id: number; code: string; value: string };
+  rescheduleFromDate?: string | number[];
+  rescheduleFromInstallment?: number;
+  submittedOnDate?: string | number[];
+  approvedOnDate?: string | number[] | null;
+  rejectedOnDate?: string | number[] | null;
+  rescheduleReasonId?: number;
+  rescheduleReasonName?: string;
+  rescheduleReasonCodeValue?: { id: number; name: string };
+  adjustedDueDate?: string | number[] | null;
+  graceOnPrincipal?: number;
+  graceOnInterest?: number;
+  newInterestRate?: number;
+  extraTerms?: number;
+  recalculateInterest?: boolean;
+}
+
+/** GET /rescheduleloans/template */
+export interface RescheduleLoanTemplate {
+  rescheduleReasons?: Array<{ id: number; name: string; position?: number; description?: string }>;
+}
+
+export interface RescheduleLoanCreateRequest {
+  loanId: number;
+  rescheduleFromDate: string;
+  rescheduleReasonId: number;
+  submittedOnDate: string;
+  adjustedDueDate?: string;
+  graceOnPrincipal?: number;
+  graceOnInterest?: number;
+  newInterestRate?: number;
+  extraTerms?: number;
+  dateFormat?: string;
+  locale?: string;
+}
+
+export interface RescheduleLoanCommandRequest {
+  approvedOnDate?: string;
+  rejectedOnDate?: string;
+  dateFormat?: string;
+  locale?: string;
+}
+
+// ─── Schedule calculation (preview before submit) ────────────────
+
+export interface CalculateLoanScheduleRequest {
+  clientId?: number;
+  groupId?: number;
+  productId: number;
+  principal: number;
+  loanTermFrequency: number;
+  loanTermFrequencyType: number;
+  numberOfRepayments: number;
+  repaymentEvery: number;
+  repaymentFrequencyType: number;
+  interestRatePerPeriod: number;
+  interestRateFrequencyType?: number;
+  amortizationType: number;
+  interestType: number;
+  interestCalculationPeriodType: number;
+  expectedDisbursementDate: string;
+  transactionProcessingStrategyCode?: string;
+  loanType?: string;
+  dateFormat?: string;
+  locale?: string;
 }

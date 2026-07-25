@@ -1,5 +1,3 @@
-import type { LoanStatus } from "../types/loan";
-
 export const LOAN_STATUS_LABELS: Record<string, string> = {
   "Submitted and pending approval": "Pending",
   Approved: "Approved",

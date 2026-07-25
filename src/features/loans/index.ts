@@ -7,6 +7,7 @@ export type {
   LoanTimeline,
   LoanSummary,
   LoanRepaymentPeriod,
+  LoanRepaymentSchedule,
   LoanTransaction,
   LoanListResponse,
   LoanListParams,
@@ -23,6 +24,23 @@ export type {
   RepaymentFrequency,
   LoanTransactionType,
   Fund,
+  LoanCharge,
+  LoanChargeTemplate,
+  LoanChargeCreateRequest,
+  LoanChargeUpdateRequest,
+  LoanChargeCommandRequest,
+  LoanCollateral,
+  LoanCollateralTemplate,
+  LoanCollateralCreateRequest,
+  LoanGuarantor,
+  LoanGuarantorCreateRequest,
+  LoanDelinquentData,
+  LoanDelinquencyTag,
+  LoanRescheduleRequest,
+  RescheduleLoanTemplate,
+  RescheduleLoanCreateRequest,
+  RescheduleLoanCommandRequest,
+  CalculateLoanScheduleRequest,
 } from "./types/loan";
 
 export {
@@ -36,18 +54,51 @@ export {
   REPAYMENT_FREQ_LABELS,
 } from "./constants/status";
 
-export { createLoanSchema, createLoanProductSchema } from "./schemas/loan.schema";
-export type { CreateLoanFormValues, CreateLoanProductFormValues } from "./schemas/loan.schema";
+export {
+  LOAN_COMMANDS,
+  LOAN_TRANSACTION_COMMANDS,
+  TRANSACTION_COMMAND_LABELS,
+  TRANSACTION_AMOUNT_COMMANDS,
+  TRANSACTION_PAYMENT_TYPE_COMMANDS,
+  TRANSACTION_PAYMENT_DETAILS_COMMANDS,
+  TRANSACTION_NO_DATE_COMMANDS,
+  TRANSACTION_DESTRUCTIVE_COMMANDS,
+  RESCHEDULE_STATUS_CONFIG,
+  RESCHEDULE_STATUS_ID_MAP,
+} from "./constants/transactions";
+
+export {
+  createLoanSchema,
+  createLoanProductSchema,
+  createLoanChargeSchema,
+  payLoanChargeSchema,
+  createLoanCollateralSchema,
+  createLoanGuarantorSchema,
+  createRescheduleRequestSchema,
+  createLoanTransactionSchema,
+} from "./schemas/loan.schema";
+export type {
+  CreateLoanFormValues,
+  CreateLoanProductFormValues,
+  CreateLoanChargeFormValues,
+  PayLoanChargeFormValues,
+  CreateLoanCollateralFormValues,
+  CreateLoanGuarantorFormValues,
+  CreateRescheduleRequestFormValues,
+  CreateLoanTransactionFormValues,
+} from "./schemas/loan.schema";
 
 export {
   fetchLoans,
   fetchLoan,
+  fetchLoanByExternalId,
   fetchLoanTemplate,
   createLoan,
   updateLoan,
   deleteLoan,
   approveLoan,
   disburseLoan,
+  disburseLoanToSavings,
   rejectLoan,
   closeLoan,
   undoApproval,
@@ -68,11 +119,48 @@ export {
   rejectLoanApplication,
   withdrawLoanApplication,
   closeLoanAsRescheduled,
+  calculateLoanSchedule,
+  fetchDelinquencyTags,
 } from "./api/loan";
+
+export {
+  fetchLoanCharges,
+  fetchLoanCharge,
+  fetchLoanChargeTemplate,
+  addLoanCharge,
+  updateLoanCharge,
+  deleteLoanCharge,
+  loanChargeCommand,
+} from "./api/loanCharges";
+
+export {
+  fetchLoanCollateral,
+  fetchCollateralTemplate,
+  addLoanCollateral,
+  updateLoanCollateral,
+  deleteLoanCollateral,
+} from "./api/loanCollateral";
+
+export {
+  fetchLoanGuarantors,
+  addLoanGuarantor,
+  updateLoanGuarantor,
+  deleteLoanGuarantor,
+} from "./api/loanGuarantors";
+
+export {
+  fetchRescheduleTemplate,
+  fetchRescheduleRequests,
+  fetchRescheduleRequest,
+  createRescheduleRequest,
+  rescheduleRequestCommand,
+} from "./api/rescheduleLoans";
+
+export { toIsoDate, formatFineractDate, formatMoney } from "./utils/format";
 
 export { useLoans, loanKeys } from "./hooks/useLoans";
 
-export { useLoan as useLoanDetail } from "./hooks/useLoan";
+export { useLoan, useLoanByExternalId } from "./hooks/useLoan";
 
 export { useLoanProducts, useLoanProduct } from "./hooks/useLoanProducts";
 
@@ -80,24 +168,60 @@ export { useLoanTemplate } from "./hooks/useLoanTemplate";
 
 export { useCreateLoan } from "./hooks/useCreateLoan";
 
-export { useLoan } from "./hooks/useLoan";
+export { useDeleteLoan } from "./hooks/useDeleteLoan";
 
 export {
   useApproveLoan,
   useDisburseLoan,
+  useDisburseLoanToSavings,
   useRejectLoan,
+  useWithdrawLoan,
   useCloseLoan,
   useUndoApproval,
   useUndoDisbursal,
+  useLoanTransactionCommand,
 } from "./hooks/useLoanCommands";
 
 export { useUpdateLoan } from "./hooks/useUpdateLoan";
 
 export { useRepaymentSchedule } from "./hooks/useRepaymentSchedule";
 
-export { useCreateLoan as useCreateLoanMutation } from "./hooks/useCreateLoan";
+export { useTransactionTemplate } from "./hooks/useTransactionTemplate";
 
-export { useLoanTemplate as useLoanTemplateQuery } from "./hooks/useLoanTemplate";
+export { useDelinquencyTags } from "./hooks/useDelinquencyTags";
+
+export {
+  useLoanCharges,
+  useLoanChargeTemplate,
+  useAddLoanCharge,
+  useUpdateLoanCharge,
+  useDeleteLoanCharge,
+  useLoanChargeCommand,
+} from "./hooks/useLoanCharges";
+
+export {
+  useLoanCollateral,
+  useCollateralTemplate,
+  useAddLoanCollateral,
+  useUpdateLoanCollateral,
+  useDeleteLoanCollateral,
+} from "./hooks/useLoanCollateral";
+
+export {
+  useLoanGuarantors,
+  useAddLoanGuarantor,
+  useUpdateLoanGuarantor,
+  useDeleteLoanGuarantor,
+} from "./hooks/useLoanGuarantors";
+
+export {
+  rescheduleLoanKeys,
+  useRescheduleTemplate,
+  useRescheduleRequests,
+  useRescheduleRequest,
+  useCreateRescheduleRequest,
+  useRescheduleRequestCommand,
+} from "./hooks/useRescheduleLoans";
 
 export { useFunds } from "./hooks/useFunds";
 
@@ -106,6 +230,8 @@ export { default as LoansListPage } from "./pages/LoansListPage";
 export { default as LoanFormPage } from "./pages/LoanFormPage";
 export { default as LoanViewPage } from "./pages/LoanViewPage";
 export { default as LoanTransactionFormPage } from "./pages/LoanTransactionFormPage";
+export { default as RescheduleLoansPage } from "./pages/RescheduleLoansPage";
+export { default as RescheduleLoanFormPage } from "./pages/RescheduleLoanFormPage";
 
 // ─── Components ────────────────────────────────────────────
 export { default as LoanTable } from "./components/LoanTable";
@@ -115,5 +241,10 @@ export { default as LoanDetails } from "./components/LoanDetails";
 export { default as LoanCommands } from "./components/LoanCommands";
 export { default as LoanStatusBadge } from "./components/LoanStatusBadge";
 export { default as LoanTransactionsTable } from "./components/LoanTransactionsTable";
+export { default as LoanScheduleTable } from "./components/LoanScheduleTable";
+export { default as LoanChargesCard } from "./components/LoanChargesCard";
+export { default as LoanCollateralCard } from "./components/LoanCollateralCard";
+export { default as LoanGuarantorsCard } from "./components/LoanGuarantorsCard";
+export { default as LoanDelinquencyCard } from "./components/LoanDelinquencyCard";
 export { default as LoanTransactionForm } from "./components/LoanTransactionForm";
 export type { TransactionFormValues } from "./components/LoanTransactionForm";

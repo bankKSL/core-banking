@@ -1,8 +1,7 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Pencil, Building2, AlertTriangle } from "lucide-react";
+import { Search, Plus, Pencil, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";

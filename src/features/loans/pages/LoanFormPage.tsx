@@ -1,16 +1,21 @@
-import { type FC, useCallback, useMemo } from "react";
+import { type FC, useCallback, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useLoanProducts } from "../hooks/useLoanProducts";
 import { useCreateLoan } from "../hooks/useCreateLoan";
 import { useUpdateLoan } from "../hooks/useUpdateLoan";
 import { useLoan } from "../hooks/useLoan";
-import LoanForm from "../components/LoanForm";
+import LoanForm, { type FormFields } from "../components/LoanForm";
+import LoanScheduleTable from "../components/LoanScheduleTable";
+import { calculateLoanSchedule } from "../api/loan";
 import type { CreateLoanFormValues } from "../schemas/loan.schema";
+import type { LoanCreateRequest, LoanRepaymentSchedule } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
 const LoanFormPage: FC = () => {
@@ -24,6 +29,29 @@ const LoanFormPage: FC = () => {
   const { data: loan, isLoading: loanLoading } = useLoan(id);
   const createMutation = useCreateLoan();
   const updateMutation = useUpdateLoan();
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const previewMutation = useMutation({
+    mutationFn: (values: FormFields) =>
+      calculateLoanSchedule({
+        clientId: clientId ?? values.clientId,
+        productId: values.productId,
+        principal: values.principal,
+        loanTermFrequency: values.loanTermFrequency,
+        loanTermFrequencyType: values.loanTermFrequencyType,
+        numberOfRepayments: values.numberOfRepayments,
+        repaymentEvery: values.repaymentEvery,
+        repaymentFrequencyType: values.repaymentFrequencyType,
+        interestRatePerPeriod: values.interestRatePerPeriod,
+        amortizationType: values.amortizationType ?? 1,
+        interestType: values.interestType ?? 0,
+        interestCalculationPeriodType: values.interestCalculationPeriodType ?? 1,
+        expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
+        transactionProcessingStrategyCode: "mifos-standard-strategy",
+        loanType: "individual",
+      }),
+    onSuccess: () => setPreviewOpen(true),
+  });
 
   const isLoading = productsLoading || (isEditMode && loanLoading);
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -51,7 +79,7 @@ const LoanFormPage: FC = () => {
         await updateMutation.mutateAsync({ loanId: Number(id), payload });
         navigate(`/loans/view/${id}`);
       } else {
-        const result = await createMutation.mutateAsync(payload as any);
+        const result = await createMutation.mutateAsync(payload as unknown as LoanCreateRequest);
         navigate(`/loans/view/${result.resourceId ?? result.loanId}`);
       }
     },
@@ -59,6 +87,7 @@ const LoanFormPage: FC = () => {
   );
 
   const error = createMutation.error?.message ?? updateMutation.error?.message ?? null;
+  const previewSchedule: LoanRepaymentSchedule | undefined = previewMutation.data;
 
   if (isLoading) {
     return (
@@ -103,6 +132,15 @@ const LoanFormPage: FC = () => {
           />
         </div>
       )}
+      {previewMutation.isError && (
+        <div className="mb-4">
+          <ErrorState
+            title="Failed to calculate schedule"
+            message={previewMutation.error instanceof Error ? previewMutation.error.message : "Please check the form values."}
+            onRetry={() => previewMutation.reset()}
+          />
+        </div>
+      )}
       <LoanForm
         products={products}
         loan={loan}
@@ -111,7 +149,22 @@ const LoanFormPage: FC = () => {
         error={error}
         mode={isEditMode ? "edit" : "create"}
         clientId={clientId}
+        onPreviewSchedule={(values) => previewMutation.mutate(values)}
+        previewLoading={previewMutation.isPending}
       />
+
+      {/* Schedule preview dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>Repayment Schedule Preview</DialogTitle>
+            <DialogDescription>Projected installments based on the current form values.</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto">
+            <LoanScheduleTable periods={previewSchedule?.periods ?? []} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

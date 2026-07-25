@@ -13,10 +13,12 @@ import type {
   LoanTemplate,
   LoanCommandRequest,
   LoanCommandResponse,
-  RepaymentTransactionRequest,
   RepaymentTemplate,
   LoanProduct,
   LoanProductCreateRequest,
+  LoanRepaymentSchedule,
+  CalculateLoanScheduleRequest,
+  LoanDelinquencyTag,
 } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
@@ -52,9 +54,38 @@ export async function fetchLoans(params: LoanListParams = {}): Promise<LoanListR
   return data;
 }
 
-export async function fetchLoan(loanId: number | string): Promise<Loan> {
-  const { data } = await client.get<Loan>(`/loans/${loanId}`);
+export async function fetchLoan(loanId: number | string, associations = "all"): Promise<Loan> {
+  const { data } = await client.get<Loan>(`/loans/${loanId}`, {
+    params: { associations },
+  });
   return data;
+}
+
+export async function fetchLoanByExternalId(externalId: string): Promise<Loan> {
+  const { data } = await client.get<Loan>(`/loans/external-id/${externalId}`, {
+    params: { associations: "all" },
+  });
+  return data;
+}
+
+/** Calculate repayment schedule without submitting (preview) */
+export async function calculateLoanSchedule(payload: CalculateLoanScheduleRequest): Promise<LoanRepaymentSchedule> {
+  const { data } = await client.post<LoanRepaymentSchedule>(
+    "/loans",
+    {
+      ...payload,
+      expectedDisbursementDate: currentDate(payload.expectedDisbursementDate),
+      locale: "en",
+      dateFormat: "yyyy-MM-dd",
+    },
+    { params: { command: "calculateLoanSchedule" } },
+  );
+  return data;
+}
+
+export async function fetchDelinquencyTags(loanId: number | string): Promise<LoanDelinquencyTag[]> {
+  const { data } = await client.get<LoanDelinquencyTag[]>(`/loans/${loanId}/delinquencytags`);
+  return Array.isArray(data) ? data : [];
 }
 
 export async function fetchLoanTemplate(clientId?: number, productId?: number): Promise<LoanTemplate> {
@@ -102,6 +133,16 @@ export async function disburseLoan(loanId: number, payload: LoanCommandRequest =
   return data;
 }
 
+export async function disburseLoanToSavings(
+  loanId: number,
+  payload: LoanCommandRequest = {},
+): Promise<LoanCommandResponse> {
+  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+    params: { command: "disburseToSavings" },
+  });
+  return data;
+}
+
 export async function rejectLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
   const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
     params: { command: "reject" },
@@ -109,11 +150,9 @@ export async function rejectLoan(loanId: number, payload: LoanCommandRequest = {
   return data;
 }
 
+/** Close (obligations met) — transaction-level command per spec §3.3 */
 export async function closeLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
-  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
-    params: { command: "close" },
-  });
-  return data;
+  return makeTransaction(loanId, payload as Record<string, unknown>, "close");
 }
 
 export async function undoApproval(loanId: number): Promise<LoanCommandResponse> {
@@ -121,7 +160,7 @@ export async function undoApproval(loanId: number): Promise<LoanCommandResponse>
     `/loans/${loanId}`,
     {},
     {
-      params: { command: "undoApproval" },
+      params: { command: "undoapproval" },
     },
   );
   return data;
@@ -132,7 +171,7 @@ export async function undoDisbursal(loanId: number): Promise<LoanCommandResponse
     `/loans/${loanId}`,
     {},
     {
-      params: { command: "undoDisbursal" },
+      params: { command: "undodisbursal" },
     },
   );
   return data;
@@ -149,8 +188,8 @@ export async function fetchRepaymentTemplate(loanId: number): Promise<RepaymentT
 
 // ─── Loan Transaction Template ──────────────────────────────
 
-export async function fetchTransactionTemplate(loanId: number, command?: string): Promise<any> {
-  const { data } = await client.get<any>(`/loans/${loanId}/transactions/template`, {
+export async function fetchTransactionTemplate(loanId: number, command?: string): Promise<Record<string, unknown>> {
+  const { data } = await client.get<Record<string, unknown>>(`/loans/${loanId}/transactions/template`, {
     params: command ? { command } : undefined,
   });
   return data;
@@ -193,10 +232,7 @@ export async function rejectLoanApplication(
   loanId: number,
   payload: LoanCommandRequest = {},
 ): Promise<LoanCommandResponse> {
-  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
-    params: { command: "reject" },
-  });
-  return data;
+  return rejectLoan(loanId, payload);
 }
 
 export async function withdrawLoanApplication(
@@ -204,19 +240,17 @@ export async function withdrawLoanApplication(
   payload: LoanCommandRequest = {},
 ): Promise<LoanCommandResponse> {
   const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
-    params: { command: "withdrawnByClient" },
+    params: { command: "withdrawnByApplicant" },
   });
   return data;
 }
 
+/** Close as rescheduled — transaction-level command per spec §3.3 */
 export async function closeLoanAsRescheduled(
   loanId: number,
   payload: LoanCommandRequest = {},
 ): Promise<LoanCommandResponse> {
-  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
-    params: { command: "closeAsRescheduled" },
-  });
-  return data;
+  return makeTransaction(loanId, payload as Record<string, unknown>, "close-rescheduled");
 }
 
 // ─── Loan Repayment Schedule ──────────────────────────────────────

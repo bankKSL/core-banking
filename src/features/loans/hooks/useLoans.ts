@@ -7,11 +7,19 @@ export const loanKeys = {
   all: ["loans"] as const,
   list: (params: LoanListParams) => ["loans", "list", params] as const,
   detail: (id: number | string) => ["loans", "detail", id] as const,
+  byExternalId: (externalId: string) => ["loans", "externalId", externalId] as const,
   template: ["loans", "template"] as const,
   products: ["loans", "products"] as const,
   product: (id: number) => ["loans", "product", id] as const,
   schedule: (id: number) => ["loans", "schedule", id] as const,
   repaymentTemplate: (id: number) => ["loans", "repaymentTemplate", id] as const,
+  transactionTemplate: (id: number, command?: string) => ["loans", "transactionTemplate", id, command] as const,
+  charges: (id: number) => ["loans", "charges", id] as const,
+  chargesTemplate: (id: number) => ["loans", "chargesTemplate", id] as const,
+  collateral: (id: number) => ["loans", "collateral", id] as const,
+  collateralTemplate: ["loans", "collateralTemplate"] as const,
+  guarantors: (id: number) => ["loans", "guarantors", id] as const,
+  delinquencyTags: (id: number) => ["loans", "delinquencyTags", id] as const,
 };
 
 export function useLoans(params: LoanListParams = {}) {

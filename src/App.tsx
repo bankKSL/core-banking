@@ -21,7 +21,14 @@ import BatchOperationsPage from "./pages/BatchOperationsPage";
 import LoanProductsPage from "./pages/LoanProductsPage";
 import LoanProductFormPage from "./pages/LoanProductFormPage";
 import LoanProductViewPage from "./pages/LoanProductViewPage";
-import { LoansListPage, LoanFormPage, LoanViewPage, LoanTransactionFormPage } from "@/features/loans";
+import {
+  LoansListPage,
+  LoanFormPage,
+  LoanViewPage,
+  LoanTransactionFormPage,
+  RescheduleLoansPage,
+  RescheduleLoanFormPage,
+} from "@/features/loans";
 import { GroupListPage, GroupFormPage } from "@/features/groups";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
@@ -139,6 +146,8 @@ function App() {
                   <Route path="/loans/create" element={<LoanFormPage />} />
                   <Route path="/loans/edit/:id" element={<LoanFormPage />} />
                   <Route path="/loans/view/:id" element={<LoanViewPage />} />
+                  <Route path="/loans/rescheduling" element={<RescheduleLoansPage />} />
+                  <Route path="/loans/rescheduling/new" element={<RescheduleLoanFormPage />} />
                   <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
