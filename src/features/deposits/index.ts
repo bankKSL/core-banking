@@ -103,6 +103,7 @@ export {
   calculateInterestRecurringDeposit,
   postInterestRecurringDeposit,
   calculatePrematureAmountRecurringDeposit,
+  updateDepositAmountRecurringDeposit,
   fetchRecurringDepositProducts,
   fetchRecurringDepositProduct,
   createRecurringDepositProduct,

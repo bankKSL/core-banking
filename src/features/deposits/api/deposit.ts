@@ -406,6 +406,13 @@ export async function postInterestRecurringDeposit(accountId: number) {
   return recurringDepositCommand(accountId, "postInterest");
 }
 
+export async function updateDepositAmountRecurringDeposit(
+  accountId: number,
+  payload: { mandatoryRecommendedDepositAmount: number; effectiveDate?: string; locale?: string; dateFormat?: string },
+) {
+  return recurringDepositCommand(accountId, "updateDepositAmount", payload);
+}
+
 export async function calculatePrematureAmountRecurringDeposit(accountId: number, closedOnDate?: string) {
   return recurringDepositCommand(accountId, "calculatePrematureAmount", closedOnDate ? { closedOnDate } : {});
 }
