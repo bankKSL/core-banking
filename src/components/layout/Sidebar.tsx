@@ -29,6 +29,8 @@ import {
   Link2,
   Lock,
   CalendarClock,
+  UserCog,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -138,7 +140,12 @@ const sections: NavSectionConfig[] = [
     id: "administration",
     title: "Administration",
     defaultOpen: true,
-    items: [{ label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal }],
+    items: [
+      { label: "Users", path: "/admin/users", icon: UserCog },
+      { label: "Roles", path: "/admin/roles", icon: ShieldCheck },
+      { label: "Permissions", path: "/admin/permissions", icon: KeyRound },
+      { label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal },
+    ],
   },
 ];
 

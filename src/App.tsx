@@ -72,6 +72,13 @@ import TransferFormPage from "./pages/TransferFormPage";
 import StandingInstructionsPage from "./pages/StandingInstructionsPage";
 import StandingInstructionFormPage from "./pages/StandingInstructionFormPage";
 import StandingInstructionHistoryPage from "./pages/StandingInstructionHistoryPage";
+import UserListPage from "@/features/admin/pages/UserListPage";
+import UserFormPage from "@/features/admin/pages/UserFormPage";
+import UserDetailPage from "@/features/admin/pages/UserDetailPage";
+import RoleListPage from "@/features/admin/pages/RoleListPage";
+import RoleFormPage from "@/features/admin/pages/RoleFormPage";
+import RoleDetailPage from "@/features/admin/pages/RoleDetailPage";
+import PermissionsPage from "@/features/admin/pages/PermissionsPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -136,6 +143,16 @@ function App() {
                   <Route path="/audit-logs" element={<AuditLogsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/admin/batch-operations" element={<BatchOperationsPage />} />
+                  {/* Admin — Users & Roles */}
+                  <Route path="/admin/users" element={<UserListPage />} />
+                  <Route path="/admin/users/new" element={<UserFormPage />} />
+                  <Route path="/admin/users/edit/:id" element={<UserFormPage />} />
+                  <Route path="/admin/users/:id" element={<UserDetailPage />} />
+                  <Route path="/admin/roles" element={<RoleListPage />} />
+                  <Route path="/admin/roles/new" element={<RoleFormPage />} />
+                  <Route path="/admin/roles/edit/:id" element={<RoleFormPage />} />
+                  <Route path="/admin/roles/:id" element={<RoleDetailPage />} />
+                  <Route path="/admin/permissions" element={<PermissionsPage />} />
                   {/* Lending */}
                   <Route path="/lending/products" element={<LoanProductsPage />} />
                   <Route path="/lending/products/new" element={<LoanProductFormPage />} />
