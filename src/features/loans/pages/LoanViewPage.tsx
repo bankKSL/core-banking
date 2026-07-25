@@ -64,7 +64,7 @@ const LoanViewPage: FC = () => {
   const guarantors = loan.guarantors ?? [];
 
   return (
-    <div className="p-6 max-w-6xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={`Loan ${loan.accountNo ?? `#${loan.id}`}`}
         description={`${loan.loanProductName} — ${loan.clientName ?? `Client #${loan.clientId}`}`}

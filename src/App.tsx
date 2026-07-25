@@ -82,6 +82,7 @@ import RoleListPage from "@/features/admin/pages/RoleListPage";
 import RoleFormPage from "@/features/admin/pages/RoleFormPage";
 import RoleDetailPage from "@/features/admin/pages/RoleDetailPage";
 import PermissionsPage from "@/features/admin/pages/PermissionsPage";
+import { CollateralProductListPage, CollateralProductFormPage } from "@/features/collateral-products";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -161,6 +162,10 @@ function App() {
                   <Route path="/tellers/new" element={<TellerFormPage />} />
                   <Route path="/tellers/edit/:id" element={<TellerFormPage />} />
                   <Route path="/tellers/:id" element={<TellerDetailPage />} />
+                  {/* Collateral Products */}
+                  <Route path="/collateral-products" element={<CollateralProductListPage />} />
+                  <Route path="/collateral-products/new" element={<CollateralProductFormPage />} />
+                  <Route path="/collateral-products/edit/:id" element={<CollateralProductFormPage />} />
                   {/* Lending */}
                   <Route path="/lending/products" element={<LoanProductsPage />} />
                   <Route path="/lending/products/new" element={<LoanProductFormPage />} />

@@ -26,6 +26,7 @@ import {
   UsersRound,
   BookOpen,
   Scale,
+  Gem,
   Link2,
   Lock,
   CalendarClock,
@@ -64,6 +65,7 @@ const sections: NavSectionConfig[] = [
       items: [
         { label: "Loans", path: "/loans", icon: Banknote },
         { label: "Loan Products", path: "/lending/products", icon: Briefcase },
+        { label: "Collateral Products", path: "/collateral-products", icon: Gem },
         { label: "Reschedule Requests", path: "/loans/rescheduling", icon: CalendarClock },
       ],
   },
