@@ -4,7 +4,7 @@ import {
   undoFixedDepositTransaction,
   makeFixedDepositTransaction,
 } from "../api/deposit";
-import type { SavingsTransactionRequest } from "../api/deposit";
+import type { SavingsTransactionRequest } from "../types/deposit";
 import { depositKeys } from "./useSavingsAccounts";
 
 export const fdTransactionKeys = {

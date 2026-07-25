@@ -169,7 +169,7 @@ export interface ClientTemplate {
 
 /** Activation request */
 export interface ClientActivateRequest {
-  activationDate: string;
+  activationDate?: string;
   dateFormat?: string;
   locale?: string;
 }

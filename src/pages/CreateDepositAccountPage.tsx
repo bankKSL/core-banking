@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,22 +9,77 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ClientSearch } from "@/components/shared/ClientSearch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOffices } from "@/hooks/useOffices";
+import { useClients } from "@/features/clients";
 import {
   useCreateSavingsAccount,
   useUpdateSavingsAccount,
   useSavingsAccount,
   useSavingsProducts,
+  useSavingsTemplate,
 } from "@/features/deposits";
 
+const INTEREST_COMPOUNDING_OPTIONS = [
+  { id: 1, label: "Daily" },
+  { id: 4, label: "Monthly" },
+  { id: 5, label: "Quarterly" },
+  { id: 6, label: "Semi-Annual" },
+  { id: 7, label: "Annual" },
+];
+
+const INTEREST_POSTING_OPTIONS = [
+  { id: 1, label: "Monthly" },
+  { id: 4, label: "Quarterly" },
+  { id: 5, label: "Semi-Annual" },
+  { id: 6, label: "Annual" },
+  { id: 8, label: "Daily" },
+  { id: 9, label: "Weekly" },
+  { id: 11, label: "At Maturity" },
+];
+
+const INTEREST_CALCULATION_OPTIONS = [
+  { id: 1, label: "Daily Balance" },
+  { id: 2, label: "Average Daily Balance" },
+];
+
+const DAYS_IN_YEAR_OPTIONS = [
+  { id: 360, label: "360" },
+  { id: 365, label: "365" },
+];
+
+const LOCKIN_PERIOD_TYPE_OPTIONS = [
+  { id: 0, label: "Days" },
+  { id: 1, label: "Weeks" },
+  { id: 2, label: "Months" },
+  { id: 3, label: "Years" },
+];
+
 const savingsAccountSchema = z.object({
+  officeId: z.string().min(1, "Office is required"),
   clientId: z.number().min(1, "Client is required"),
   productId: z.number().min(1, "Product is required"),
   externalId: z.string().optional(),
   submittedOnDate: z.string().min(1, "Date is required"),
-  nominalAnnualInterestRate: z.number().min(0).optional(),
+  nominalAnnualInterestRate: z.string().optional(),
+  interestCompoundingPeriodType: z.string().optional(),
+  interestPostingPeriodType: z.string().optional(),
+  interestCalculationType: z.string().optional(),
+  interestCalculationDaysInYearType: z.string().optional(),
+  minRequiredOpeningBalance: z.string().optional(),
+  lockinPeriodFrequency: z.string().optional(),
+  lockinPeriodFrequencyType: z.string().optional(),
+  withdrawalFeeForTransfers: z.boolean().optional(),
+  allowOverdraft: z.boolean().optional(),
+  overdraftLimit: z.string().optional(),
+  enforceMinRequiredBalance: z.boolean().optional(),
+  minRequiredBalance: z.string().optional(),
+  lienAllowed: z.boolean().optional(),
+  maxAllowedLienLimit: z.string().optional(),
+  withHoldTax: z.boolean().optional(),
+  fieldOfficerId: z.string().optional(),
   dateFormat: z.string(),
   locale: z.string(),
 });
@@ -51,53 +106,102 @@ const CreateDepositAccountPage: React.FC = () => {
     formState: { errors },
   } = useForm<SavingsAccountFormValues>({
     defaultValues: {
+      officeId: "",
       clientId: clientIdParam ? Number(clientIdParam) : 0,
       productId: 0,
       externalId: "",
       submittedOnDate: new Date().toISOString().split("T")[0],
-      nominalAnnualInterestRate: 0,
+      nominalAnnualInterestRate: "",
+      interestCompoundingPeriodType: "",
+      interestPostingPeriodType: "",
+      interestCalculationType: "",
+      interestCalculationDaysInYearType: "",
+      minRequiredOpeningBalance: "",
+      lockinPeriodFrequency: "",
+      lockinPeriodFrequencyType: "",
+      withdrawalFeeForTransfers: false,
+      allowOverdraft: false,
+      overdraftLimit: "",
+      enforceMinRequiredBalance: false,
+      minRequiredBalance: "",
+      lienAllowed: false,
+      maxAllowedLienLimit: "",
+      withHoldTax: false,
+      fieldOfficerId: "",
       dateFormat: "yyyy-MM-dd",
       locale: "en",
     },
   });
 
+  const officeId = watch("officeId");
   const clientId = watch("clientId");
   const productId = watch("productId");
+  const allowOverdraft = watch("allowOverdraft");
+  const enforceMinRequiredBalance = watch("enforceMinRequiredBalance");
+  const lienAllowed = watch("lienAllowed");
+  const withdrawalFeeForTransfers = watch("withdrawalFeeForTransfers");
+  const lockinPeriodFrequency = watch("lockinPeriodFrequency");
 
-  // Populate form from existing account data (edit mode)
+  const { data: offices = [], isLoading: officesLoading } = useOffices();
+  const clientsQuery = useMemo(() => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}), [officeId]);
+  const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
+  const { data: products = [], isLoading: productsLoading } = useSavingsProducts();
+  const { data: template, isLoading: templateLoading } = useSavingsTemplate(
+    clientId || undefined,
+    productId || undefined,
+  );
+
   useEffect(() => {
     if (existingAccount) {
       const a = existingAccount as any;
       const dob = Array.isArray(a.timeline?.submittedOnDate)
         ? new Date(a.timeline.submittedOnDate[0], a.timeline.submittedOnDate[1] - 1, a.timeline.submittedOnDate[2])
-            .toISOString()
-            .split("T")[0]
+            .toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
       reset({
+        officeId: "",
         clientId: a.clientId,
         productId: a.savingsProductId ?? a.productId,
         externalId: a.externalId ?? "",
         submittedOnDate: dob,
-        nominalAnnualInterestRate: a.nominalAnnualInterestRate ?? 0,
+        nominalAnnualInterestRate: String(a.nominalAnnualInterestRate ?? ""),
         dateFormat: "yyyy-MM-dd",
         locale: "en",
       });
     }
   }, [existingAccount, reset]);
 
-  const { data: products = [], isLoading: productsLoading } = useSavingsProducts();
-  const isLoading = (isEditMode && accountLoading) || productsLoading;
+  const isLoading = officesLoading || clientsLoading || productsLoading || (isEditMode && accountLoading) || templateLoading;
+  const clients = clientsData?.pageItems ?? [];
 
   const onSubmit = async (values: SavingsAccountFormValues) => {
-    const payload = {
-      clientId: values.productId ? values.clientId : values.clientId, // always needed
+    const payload: Record<string, unknown> = {
+      clientId: values.productId ? values.clientId : values.clientId,
       productId: values.productId,
-      externalId: values.externalId || undefined,
       submittedOnDate: values.submittedOnDate,
-      nominalAnnualInterestRate: values.nominalAnnualInterestRate,
-      dateFormat: values.dateFormat,
-      locale: values.locale,
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+      externalId: values.externalId || undefined,
     };
+
+    if (values.nominalAnnualInterestRate) payload.nominalAnnualInterestRate = Number(values.nominalAnnualInterestRate);
+    if (values.interestCompoundingPeriodType) payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
+    if (values.interestPostingPeriodType) payload.interestPostingPeriodType = Number(values.interestPostingPeriodType);
+    if (values.interestCalculationType) payload.interestCalculationType = Number(values.interestCalculationType);
+    if (values.interestCalculationDaysInYearType) payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
+    if (values.minRequiredOpeningBalance) payload.minRequiredOpeningBalance = Number(values.minRequiredOpeningBalance);
+    if (values.lockinPeriodFrequency) payload.lockinPeriodFrequency = Number(values.lockinPeriodFrequency);
+    if (values.lockinPeriodFrequencyType) payload.lockinPeriodFrequencyType = Number(values.lockinPeriodFrequencyType);
+    if (values.fieldOfficerId) payload.fieldOfficerId = Number(values.fieldOfficerId);
+
+    payload.withdrawalFeeForTransfers = !!values.withdrawalFeeForTransfers;
+    payload.allowOverdraft = !!values.allowOverdraft;
+    if (values.allowOverdraft && values.overdraftLimit) payload.overdraftLimit = Number(values.overdraftLimit);
+    payload.enforceMinRequiredBalance = !!values.enforceMinRequiredBalance;
+    if (values.enforceMinRequiredBalance && values.minRequiredBalance) payload.minRequiredBalance = Number(values.minRequiredBalance);
+    payload.lienAllowed = !!values.lienAllowed;
+    if (values.lienAllowed && values.maxAllowedLienLimit) payload.maxAllowedLienLimit = Number(values.maxAllowedLienLimit);
+    payload.withHoldTax = !!values.withHoldTax;
 
     if (isEditMode) {
       await updateAccount.mutateAsync({ accountId: Number(id), payload: payload as any });
@@ -107,13 +211,14 @@ const CreateDepositAccountPage: React.FC = () => {
     navigate(`/deposits/saving-accounts${id ? `/${id}` : ""}`);
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="max-w-4xl m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
     );
+  }
 
   return (
     <div className="max-w-4xl m-auto space-y-6 p-6">
@@ -121,34 +226,71 @@ const CreateDepositAccountPage: React.FC = () => {
         title={isEditMode ? "Edit Savings Account" : "New Savings Account"}
         description={isEditMode ? `Editing account #${id}` : "Open a new savings account"}
         actions={
-          <Button
-            variant="outline"
-            onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}
-          >
+          <Button variant="outline" onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
           </Button>
         }
       />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+        {/* Office & Client */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <PiggyBank className="h-5 w-5" />
-              Client &amp; Product
+              Office & Client
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <ClientSearch
-                value={clientId}
-                onChange={(v) => setValue("clientId", v, { shouldValidate: true })}
+            <div>
+              <Label>Office *</Label>
+              <Select
+                value={officeId}
+                onValueChange={(v) => {
+                  setValue("officeId", v, { shouldValidate: true });
+                  setValue("clientId", 0);
+                }}
                 disabled={isEditMode}
-                error={errors.clientId?.message}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select office" />
+                </SelectTrigger>
+                <SelectContent>
+                  {offices.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>{o.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="col-span-2">
-              <Label htmlFor="productId">Savings Product *</Label>
+            <div>
+              <Label>Client *</Label>
+              <Select
+                value={clientId ? String(clientId) : ""}
+                onValueChange={(v) => setValue("clientId", Number(v), { shouldValidate: true })}
+                disabled={isEditMode || !officeId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={!officeId ? "Select office first" : "Select client"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.clientId && <p className="mt-1 text-xs text-red-500">{errors.clientId.message}</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Product */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Savings Product</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <Label>Savings Product *</Label>
               <Select
                 value={productId ? String(productId) : ""}
                 onValueChange={(v) => setValue("productId", Number(v), { shouldValidate: true })}
@@ -158,20 +300,12 @@ const CreateDepositAccountPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {products.map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name}
-                    </SelectItem>
+                    <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.productId && <p className="mt-1 text-xs text-red-500">{errors.productId.message}</p>}
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                className="h-auto p-0 text-xs mt-1"
-                onClick={() => window.open("/deposits/products", "_blank")}
-              >
+              <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs mt-1" onClick={() => window.open("/deposits/products", "_blank")}>
                 <ExternalLink className="mr-1 h-3 w-3" />
                 Create New Product
               </Button>
@@ -179,6 +313,7 @@ const CreateDepositAccountPage: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Account Details */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Account Details</CardTitle>
@@ -189,35 +324,178 @@ const CreateDepositAccountPage: React.FC = () => {
               <Input id="externalId" {...register("externalId")} placeholder="Optional external reference" />
             </div>
             <div>
-              <Label htmlFor="nominalAnnualInterestRate">Interest Rate (% annual) *</Label>
-              <Input
-                id="nominalAnnualInterestRate"
-                type="number"
-                step="0.01"
-                {...register("nominalAnnualInterestRate", { valueAsNumber: true })}
-                placeholder="0"
-              />
-            </div>
-            <div>
               <Label htmlFor="submittedOnDate">Submitted On Date *</Label>
               <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} />
               {errors.submittedOnDate && <p className="mt-1 text-xs text-red-500">{errors.submittedOnDate.message}</p>}
             </div>
+            <div>
+              <Label htmlFor="fieldOfficerId">Field Officer ID</Label>
+              <Input id="fieldOfficerId" type="number" {...register("fieldOfficerId")} placeholder="Optional" />
+            </div>
           </CardContent>
         </Card>
 
+        {/* Interest Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Interest Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="nominalAnnualInterestRate">Interest Rate (% annual)</Label>
+              <Input
+                id="nominalAnnualInterestRate"
+                type="number" step="0.01"
+                {...register("nominalAnnualInterestRate")}
+                placeholder={template?.nominalAnnualInterestRate != null ? String(template.nominalAnnualInterestRate) : "From product"}
+              />
+            </div>
+            <div>
+              <Label>Compounding Period</Label>
+              <Select value={watch("interestCompoundingPeriodType")} onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={template?.interestCompoundingPeriodType?.value ?? "Select"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Posting Period</Label>
+              <Select value={watch("interestPostingPeriodType")} onValueChange={(v) => setValue("interestPostingPeriodType", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={template?.interestPostingPeriodType?.value ?? "Select"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_POSTING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Calculation Type</Label>
+              <Select value={watch("interestCalculationType")} onValueChange={(v) => setValue("interestCalculationType", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={template?.interestCalculationType?.value ?? "Select"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_CALCULATION_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Days in Year</Label>
+              <Select value={watch("interestCalculationDaysInYearType")} onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={template?.interestCalculationDaysInYearType?.value ?? "Select"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DAYS_IN_YEAR_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Balance & Lock-in */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Balance & Lock-in</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="minRequiredOpeningBalance">Min Opening Balance</Label>
+              <Input id="minRequiredOpeningBalance" type="number" {...register("minRequiredOpeningBalance")} />
+            </div>
+            <div>
+              <Label htmlFor="lockinPeriodFrequency">Lock-in Period</Label>
+              <div className="flex gap-2">
+                <Input id="lockinPeriodFrequency" type="number" {...register("lockinPeriodFrequency")} placeholder="Period" className="flex-1" />
+                <Select value={watch("lockinPeriodFrequencyType")} onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
+                      <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <Switch id="withdrawalFeeForTransfers" onCheckedChange={(v) => setValue("withdrawalFeeForTransfers", v)} defaultChecked={template?.withdrawalFeeForTransfers ?? false} />
+              <Label htmlFor="withdrawalFeeForTransfers">Withdrawal Fee for Transfers</Label>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <Switch id="enforceMinRequiredBalance" onCheckedChange={(v) => setValue("enforceMinRequiredBalance", v)} />
+              <Label htmlFor="enforceMinRequiredBalance">Enforce Min Balance</Label>
+            </div>
+            {enforceMinRequiredBalance && (
+              <div>
+                <Label htmlFor="minRequiredBalance">Min Required Balance</Label>
+                <Input id="minRequiredBalance" type="number" {...register("minRequiredBalance")} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Overdraft */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Overdraft</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 pt-2">
+              <Switch id="allowOverdraft" onCheckedChange={(v) => setValue("allowOverdraft", v)} />
+              <Label htmlFor="allowOverdraft">Allow Overdraft</Label>
+            </div>
+            {allowOverdraft && (
+              <div>
+                <Label htmlFor="overdraftLimit">Overdraft Limit</Label>
+                <Input id="overdraftLimit" type="number" {...register("overdraftLimit")} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Lien & Tax */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Lien & Tax</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 pt-2">
+              <Switch id="lienAllowed" onCheckedChange={(v) => setValue("lienAllowed", v)} />
+              <Label htmlFor="lienAllowed">Allow Lien</Label>
+            </div>
+            {lienAllowed && (
+              <div>
+                <Label htmlFor="maxAllowedLienLimit">Max Lien Limit</Label>
+                <Input id="maxAllowedLienLimit" type="number" {...register("maxAllowedLienLimit")} />
+              </div>
+            )}
+            <div className="flex items-center gap-3 pt-2">
+              <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
+              <Label htmlFor="withHoldTax">Withhold Tax</Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
         <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}
-          >
+          <Button variant="outline" onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={createAccount.isPending || updateAccount.isPending}
-            className="bg-[#D32F2F] hover:bg-red-700"
-          >
+          <Button type="submit" disabled={createAccount.isPending || updateAccount.isPending} className="bg-[#D32F2F] hover:bg-red-700">
             {(createAccount.isPending || updateAccount.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" /> {isEditMode ? "Save Changes" : "Open Account"}
           </Button>

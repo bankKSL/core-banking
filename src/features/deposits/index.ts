@@ -82,6 +82,7 @@ export {
   undoApprovalFixedDeposit,
   undoActivationFixedDeposit,
   calculatePrematureAmount,
+  fixedDepositCommand,
   fetchFixedDepositProducts,
   fetchFixedDepositProduct,
   createFixedDepositProduct,
@@ -174,6 +175,7 @@ export {
   fetchSavingsChargesTemplate,
   createSavingsCharge,
   waiveSavingsCharge,
+  paySavingsCharge,
   deleteSavingsCharge,
 } from "./api/deposit";
 export type {
@@ -184,7 +186,23 @@ export type {
 } from "./api/deposit";
 
 // API — Savings Commands
-export { rejectSavingsAccount, withdrawSavingsAccount, undoRejectSavingsAccount } from "./api/deposit";
+export {
+  rejectSavingsAccount,
+  withdrawSavingsAccount,
+  undoRejectSavingsAccount,
+  calculateInterestSavings,
+  postInterestSavings,
+  blockSavingsAccount,
+  unblockSavingsAccount,
+  blockCreditSavingsAccount,
+  unblockCreditSavingsAccount,
+  blockDebitSavingsAccount,
+  unblockDebitSavingsAccount,
+  holdAmountSavings,
+  releaseAmountSavings,
+  fetchOnHoldTransactions,
+} from "./api/deposit";
+export type { OnHoldTransaction } from "./api/deposit";
 
 // API — Savings Transactions
 export { fetchSavingsTransactions } from "./api/deposit";
@@ -220,6 +238,7 @@ export {
   useSavingsCharges,
   useSavingsChargesTemplate,
   useCreateSavingsCharge,
+  usePaySavingsCharge,
   useWaiveSavingsCharge,
   useDeleteSavingsCharge,
   savingsChargeKeys,

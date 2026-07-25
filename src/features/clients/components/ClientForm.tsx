@@ -1,4 +1,5 @@
-import { type FC, useWatch, useForm } from "react-hook-form";
+import { useWatch, useForm } from "react-hook-form";
+import type { FC } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";

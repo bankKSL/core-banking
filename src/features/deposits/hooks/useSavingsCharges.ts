@@ -4,6 +4,7 @@ import {
   fetchSavingsChargesTemplate,
   createSavingsCharge,
   waiveSavingsCharge,
+  paySavingsCharge,
   deleteSavingsCharge,
 } from "../api/deposit";
 import type { PostSavingsChargeRequest } from "../api/deposit";
@@ -35,6 +36,17 @@ export function useCreateSavingsCharge() {
   return useMutation({
     mutationFn: ({ accountId, payload }: { accountId: number | string; payload: PostSavingsChargeRequest }) =>
       createSavingsCharge(accountId, payload),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: savingsChargeKeys.all(variables.accountId) });
+    },
+  });
+}
+
+export function usePaySavingsCharge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ accountId, chargeId }: { accountId: number | string; chargeId: number | string }) =>
+      paySavingsCharge(accountId, chargeId),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: savingsChargeKeys.all(variables.accountId) });
     },

@@ -211,21 +211,11 @@ export async function activateFixedDeposit(accountId: number, activatedOnDate?: 
   );
 }
 
-export async function closeFixedDeposit(
-  accountId: number,
-  payload?: Record<string, unknown>,
-) {
-  return fixedDepositCommand(
-    accountId,
-    "close",
-    payload ?? { closedOnDate: new Date().toISOString().split("T")[0] },
-  );
+export async function closeFixedDeposit(accountId: number, payload?: Record<string, unknown>) {
+  return fixedDepositCommand(accountId, "close", payload ?? { closedOnDate: new Date().toISOString().split("T")[0] });
 }
 
-export async function prematureCloseFixedDeposit(
-  accountId: number,
-  payload?: Record<string, unknown>,
-) {
+export async function prematureCloseFixedDeposit(accountId: number, payload?: Record<string, unknown>) {
   return fixedDepositCommand(
     accountId,
     "prematureClose",
@@ -577,9 +567,20 @@ export interface FixedDepositAccountTemplate {
   withHoldTax?: boolean;
   transferInterestToSavings?: boolean;
   savingsAccountId?: number;
-  charges?: Array<{ chargeId: number; name: string; amount: number; chargeTimeType?: { id: number; code: string; value: string }; chargeCalculationType?: { id: number; code: string; value: string } }>;
+  charges?: Array<{
+    chargeId: number;
+    name: string;
+    amount: number;
+    chargeTimeType?: { id: number; code: string; value: string };
+    chargeCalculationType?: { id: number; code: string; value: string };
+  }>;
   productOptions?: Array<{ id: number; name: string }>;
-  chargeOptions?: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number; code: string; value: string } }>;
+  chargeOptions?: Array<{
+    id: number;
+    name: string;
+    amount: number;
+    chargeTimeType?: { id: number; code: string; value: string };
+  }>;
   fieldOfficerOptions?: Array<{ id: number; displayName: string }>;
 }
 
@@ -700,10 +701,9 @@ export interface FixedDepositClosureTemplate {
 export async function fetchFixedDepositClosureTemplate(
   accountId: number | string,
 ): Promise<FixedDepositClosureTemplate> {
-  const { data } = await client.get<FixedDepositClosureTemplate>(
-    `/fixeddepositaccounts/${accountId}/template`,
-    { params: { command: "close" } },
-  );
+  const { data } = await client.get<FixedDepositClosureTemplate>(`/fixeddepositaccounts/${accountId}/template`, {
+    params: { command: "close" },
+  });
   return data;
 }
 
@@ -827,6 +827,144 @@ export async function deleteSavingsCharge(
 }
 
 // ─── Savings Commands (Section 4) ────────────────────────────────
+
+/** POST /savingsaccounts/{savingsAccountId}/charges/{chargeId}?command=paycharge */
+export async function paySavingsCharge(
+  savingsAccountId: number | string,
+  chargeId: number | string,
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}/charges/${chargeId}`,
+    {},
+    { params: { command: "paycharge" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=calculateInterest */
+export async function calculateInterestSavings(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    {},
+    { params: { command: "calculateInterest" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=postInterest */
+export async function postInterestSavings(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    {},
+    { params: { command: "postInterest" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=block */
+export async function blockSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "block" } });
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=unblock */
+export async function unblockSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "unblock" } });
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=blockCredit */
+export async function blockCreditSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    {},
+    { params: { command: "blockCredit" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=unblockCredit */
+export async function unblockCreditSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    {},
+    { params: { command: "unblockCredit" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=blockDebit */
+export async function blockDebitSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "blockDebit" } });
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsAccountId}?command=unblockDebit */
+export async function unblockDebitSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    {},
+    { params: { command: "unblockDebit" } },
+  );
+  return data;
+}
+
+// ─── Savings On-Hold Transactions ─────────────────────────────
+
+export interface OnHoldTransaction {
+  id: number;
+  transactionId: number;
+  accountId: number;
+  amount: number;
+  reasonForBlock?: string;
+  transactionDate?: string;
+  createdDate?: string;
+}
+
+export interface OnHoldTransactionResponse {
+  totalFilteredRecords: number;
+  pageItems: OnHoldTransaction[];
+}
+
+/** POST /savingsaccounts/{savingsId}/transactions?command=holdAmount */
+export async function holdAmountSavings(
+  savingsAccountId: number | string,
+  payload: {
+    transactionDate: string;
+    transactionAmount: number;
+    reasonForBlock: string;
+    locale?: string;
+    dateFormat?: string;
+  },
+): Promise<{ savingsId: number; resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}/transactions`,
+    { ...payload, locale: payload.locale ?? "en", dateFormat: payload.dateFormat ?? "yyyy-MM-dd" },
+    { params: { command: "holdAmount" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{savingsId}/transactions/{transactionId}?command=releaseAmount */
+export async function releaseAmountSavings(
+  savingsAccountId: number | string,
+  transactionId: number | string,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}/transactions/${transactionId}`,
+    {},
+    { params: { command: "releaseAmount" } },
+  );
+  return data;
+}
+
+/** GET /savingsaccounts/{savingsId}/onholdtransactions */
+export async function fetchOnHoldTransactions(
+  savingsAccountId: number | string,
+): Promise<OnHoldTransactionResponse> {
+  const { data } = await client.get<OnHoldTransactionResponse>(`/savingsaccounts/${savingsAccountId}/onholdtransactions`);
+  return data;
+}
 
 /** POST /savingsaccounts/{savingsAccountId}?command=reject */
 export async function rejectSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {

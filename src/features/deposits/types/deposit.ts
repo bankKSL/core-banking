@@ -159,18 +159,22 @@ export interface SavingsAccountTemplate {
   clientOptions?: Array<{ id: number; displayName: string }>;
   groupId?: number;
   productId?: number;
-  currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
-  nominalAnnualInterestRate: number;
-  minRequiredOpeningBalance: number;
-  lockinPeriodFrequency: number;
-  lockinPeriodFrequencyType: { id: number; code: string; value: string };
-  withdrawalFeeForTransfers: boolean;
-  allowOverdraft: boolean;
-  overdraftLimit: number;
-  enforceMinRequiredBalance: boolean;
-  minRequiredBalance: number;
+  currency?: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+  nominalAnnualInterestRate?: number;
+  minRequiredOpeningBalance?: number;
+  lockinPeriodFrequency?: number;
+  lockinPeriodFrequencyType?: { id: number; code: string; value: string };
+  withdrawalFeeForTransfers?: boolean;
+  allowOverdraft?: boolean;
+  overdraftLimit?: number;
+  enforceMinRequiredBalance?: boolean;
+  minRequiredBalance?: number;
   fieldOfficerOptions?: Array<{ id: number; displayName: string }>;
   chargeOptions?: unknown[];
+  interestCompoundingPeriodType?: { id: number; code: string; value: string };
+  interestPostingPeriodType?: { id: number; code: string; value: string };
+  interestCalculationType?: { id: number; code: string; value: string };
+  interestCalculationDaysInYearType?: { id: number; code: string; value: string };
 }
 
 // ─── Savings Create/Command ──────────────────────────────────────

@@ -1,5 +1,5 @@
 import { type FC, useState, useCallback } from "react";
-import { Plus, Ban, Trash2, Receipt, Loader2 } from "lucide-react";
+import { Plus, Ban, Trash2, Receipt, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import {
   useSavingsCharges,
   useSavingsChargesTemplate,
   useCreateSavingsCharge,
+  usePaySavingsCharge,
   useWaiveSavingsCharge,
   useDeleteSavingsCharge,
 } from "../hooks/useSavingsCharges";
@@ -40,9 +41,11 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
   const { data: chargesData, isLoading } = useSavingsCharges(accountId);
   const { data: template } = useSavingsChargesTemplate(accountId);
   const createMutation = useCreateSavingsCharge();
+  const payMutation = usePaySavingsCharge();
   const waiveMutation = useWaiveSavingsCharge();
   const deleteMutation = useDeleteSavingsCharge();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [payId, setPayId] = useState<number | null>(null);
   const [waiveId, setWaiveId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -79,6 +82,12 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
     },
     [accountId, createMutation],
   );
+
+  const handlePay = useCallback(async () => {
+    if (!payId) return;
+    await payMutation.mutateAsync({ accountId, chargeId: payId });
+    setPayId(null);
+  }, [accountId, payId, payMutation]);
 
   const handleWaive = useCallback(async () => {
     if (!waiveId) return;
@@ -134,6 +143,19 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
       header: "Actions",
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
+          {!row.isPaid && !row.isWaived && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPayId(row.id);
+              }}
+              title="Pay"
+            >
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            </Button>
+          )}
           {!row.isPaid && !row.isWaived && row.waiverable && (
             <Button
               variant="ghost"
@@ -227,6 +249,16 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
         </DialogContent>
       </Dialog>
 
+      <ConfirmDialog
+        open={!!payId}
+        onOpenChange={() => setPayId(null)}
+        title="Pay Charge"
+        description="Pay this charge from the account balance?"
+        onConfirm={handlePay}
+        variant="default"
+        confirmLabel="Pay"
+        loading={payMutation.isPending}
+      />
       <ConfirmDialog
         open={!!waiveId}
         onOpenChange={() => setWaiveId(null)}
