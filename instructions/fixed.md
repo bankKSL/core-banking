@@ -1,359 +1,439 @@
-FIXED DEPOSITS MODULE - COMPLETE API CALLS & BUSINESS LOGIC
-===========================================================
+# Fixed Deposit — React Implementation Guide
 
-This document captures every API call and business logic rule across the
-/products/fixed-deposits pages of fineract-backoffice-ui.
+Source: Apache Fineract Portfolio Fixed Deposit Feature  
+Trace Date: 2026-07-25  
+Java Base: `org.apache.fineract.portfolio.savings`
 
-================================================================================
+---
 
-1. FIXED DEPOSIT ACCOUNTS LIST (FixedDepositAccountsListComponent)
-   \================================================================================
+## 1. Overview
 
-FILE: fixed-deposits/fixed-deposits-list.component.ts
+Fixed Deposit Accounts (`deposit_type_enum = 200`) are term deposit accounts. Clients deposit a fixed amount for a fixed term (period + frequency) and earn interest at a rate determined by an interest rate chart. Pre-closure is allowed with a penalty. At maturity, funds can be withdrawn, transferred to savings, or reinvested.
 
---- API CALL: List Fixed Deposit Accounts ---
+### Key Files
 
-Service: FixedDepositAccountService.getFixeddepositaccounts()
-Endpoint: GET /api/v2/fixeddepositaccounts
-Parameters (all optional): - paged: boolean - offset: number - limit: number - orderBy: string - sortOrder: string
+| Layer      | Key Classes                                                                                                                                         |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Controller | `FixedDepositAccountsApiResource`, `FixedDepositAccountTransactionsApiResource`                                                                     |
+| Service    | `DepositAccountReadPlatformServiceImpl`, `DepositAccountWritePlatformServiceJpaRepositoryImpl`, `FixedDepositAccountInterestCalculationServiceImpl` |
+| Assembler  | `DepositAccountAssembler`                                                                                                                           |
+| Validator  | `DepositAccountDataValidator`, `DepositAccountTransactionDataValidator`                                                                             |
+| Entity     | `FixedDepositAccount`, `DepositAccountTermAndPreClosure`, `DepositAccountInterestRateChart`                                                         |
+| Repository | `FixedDepositAccountRepository`                                                                                                                     |
 
-Response Type: Array<GetFixedDepositAccountsResponse>
+### Sub-resource APIs
 
-GetFixedDepositAccountsResponse:
-{ accountNo?: number, clientId?, clientName?, currency?,
-depositAmount?, depositPeriod?, depositPeriodFrequency?,
-id?, interestCalculationDaysInYearType?, interestCalculationType?,
-interestCompoundingPeriodType?, interestPostingPeriodType?,
-maturityAmount?, maturityDate?, maxDepositTerm?, minDepositTerm?,
-preClosurePenalApplicable?, savingsProductId?, savingsProductName?,
-status?: GetFixedDepositAccountsStatus, summary?, timeline? }
+| Resource               | Base Path                                                       |
+| ---------------------- | --------------------------------------------------------------- |
+| Fixed Deposit Accounts | `/v1/fixeddepositaccounts`                                      |
+| FD Transactions        | `/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions` |
+| FD Products            | `/v1/fixeddepositproducts`                                      |
 
-GetFixedDepositAccountsStatus:
-{ active?, approved?, closed?, code?, description?, id?,
-prematureClosed?, rejected?, submittedAndPendingApproval?,
-transferInProgress?, transferOnHold?, withdrawnByApplicant? }
+---
 
---- BUSINESS LOGIC ---
+## 2. Lifecycle
 
-Loads ALL accounts on init (client-side logic: localLogic=true)
-No reactive RxJS pipeline - simple subscribe pattern
+```
+                     ┌──────────────────────────────────┐
+                     │  SUBMITTED_AND_PENDING_APPROVAL   │  (100)
+                     └──────────────┬───────────────────┘
+                                    │
+              ┌─────────────────────┼─────────────────────┐
+              │                     │                     │
+              ▼                     ▼                     ▼
+      ┌───────────────┐    ┌───────────────┐    ┌──────────────────┐
+      │   APPROVED    │    │   REJECTED    │    │  WITHDRAWN_BY    │
+      │    (200)      │    │    (500)      │    │   APPLICANT      │
+      └───────┬───────┘    └───────────────┘    │    (400)         │
+              │                                 └──────────────────┘
+              ▼
+      ┌───────────────┐
+      │   ACTIVE      │
+      │    (300)      │
+      └───────┬───────┘
+              │
+      ┌───────┴───────┐
+      │               │
+      ▼               ▼
+  ┌──────────┐  ┌──────────────┐
+  │  CLOSED  │  │  PREMATURE   │
+  │  (600)   │  │  CLOSED      │
+  └──────────┘  └──────────────┘
+```
 
-Data flow:
-loadAccounts() -> getFixeddepositaccounts().subscribe()
-On success: accounts = data || []
-On error: console.error
+At maturity, the account can also auto-rollover based on `maturityInstructionId`:
 
---- COLUMNS ---
+- `100` — WITHDRAW_DEPOSIT
+- `200` — TRANSFER_TO_SAVINGS
+- `300` — REINVEST_PRINCIPAL_AND_INTEREST
+- `400` — REINVEST_PRINCIPAL_ONLY
 
-Columns: ColumnDef[] = [
-{ key: 'accountNo', label: 'COMMON.ACCOUNT_NO', sortable: true },
-{ key: 'clientName', label: 'COMMON.NAME', sortable: true },
-{ key: 'depositAmount', label: 'COMMON.AMOUNT', sortable: true },
-{ key: 'maturityAmount',label: 'COMMON.MATURITY_AMOUNT', sortable: true },
-{ key: 'status', label: 'COMMON.STATUS', sortable: true },
-{ key: 'actions', label: 'COMMON.ACTIONS', sortable: false },
-]
+---
 
-Custom renderings: - depositAmount/maturityAmount: CurrencyPipe with account.currency?.code - status: <app-status-badge [status]="account.status"> - actions: Approve (if pending approval) + Edit button
+## 3. API Inventory
 
---- ACTIONS COLUMN ---
+### Fixed Deposit Accounts
 
-Approve (shown when status.value === 'Submitted and pending approval'):
--> router.navigate(['/products/fixed/{account.id}/action/approve'])
+| Method | URL                                                     | Description                        | Permission                 |
+| ------ | ------------------------------------------------------- | ---------------------------------- | -------------------------- |
+| GET    | `/v1/fixeddepositaccounts/template`                     | Retrieve FD template/form defaults | `fixeddepositaccount` READ |
+| GET    | `/v1/fixeddepositaccounts`                              | List FD applications/accounts      | `fixeddepositaccount` READ |
+| POST   | `/v1/fixeddepositaccounts`                              | Submit new FD application          | Command-level              |
+| GET    | `/v1/fixeddepositaccounts/{accountId}`                  | Retrieve FD account detail         | `fixeddepositaccount` READ |
+| GET    | `/v1/fixeddepositaccounts/calculate-fd-interest`        | Calculate FD interest              | —                          |
+| PUT    | `/v1/fixeddepositaccounts/{accountId}`                  | Modify FD application              | Command-level              |
+| POST   | `/v1/fixeddepositaccounts/{accountId}`                  | State commands (`?command=`)       | Command-level              |
+| DELETE | `/v1/fixeddepositaccounts/{accountId}`                  | Delete FD application              | Command-level              |
+| GET    | `/v1/fixeddepositaccounts/{accountId}/template`         | Account closure template           | `fixeddepositaccount` READ |
+| GET    | `/v1/fixeddepositaccounts/downloadtemplate`             | Download bulk template             | —                          |
+| POST   | `/v1/fixeddepositaccounts/uploadtemplate`               | Upload bulk import                 | —                          |
+| GET    | `/v1/fixeddepositaccounts/transaction/downloadtemplate` | Download transaction template      | —                          |
+| POST   | `/v1/fixeddepositaccounts/transaction/uploadtemplate`   | Upload transaction bulk            | —                          |
 
-Edit:
--> router.navigate(['/products/fixed-deposits/edit', account.id])
+### Commands (POST `?command=`)
 
---- NAVIGATION ---
+| Command                    | Description                                   | Valid States |
+| -------------------------- | --------------------------------------------- | ------------ |
+| `reject`                   | Reject application                            | SUBMITTED    |
+| `withdrawnByApplicant`     | Withdraw application                          | SUBMITTED    |
+| `approve`                  | Approve application                           | SUBMITTED    |
+| `undoapproval`             | Undo approval                                 | APPROVED     |
+| `activate`                 | Activate account                              | APPROVED     |
+| `calculateInterest`        | Calculate interest                            | ACTIVE       |
+| `postInterest`             | Post calculated interest                      | ACTIVE       |
+| `close`                    | Close at maturity                             | ACTIVE       |
+| `prematureClose`           | Pre-mature closure                            | ACTIVE       |
+| `calculatePrematureAmount` | Calculate pre-mature amount (no state change) | ACTIVE       |
 
-onCreateAccount(): router.navigate(['/products/fixed-deposits/create'])
-onEditAccount(account): /products/fixed-deposits/edit/:id
-onApprove(account): /products/fixed/:id/action/approve (uses singular 'fixed')
-================================================================================
+### Transactions
 
-2. FIXED DEPOSIT ACCOUNT FORM (FixedDepositFormComponent)
-   \================================================================================
+| Method | URL                                                                             | Description                             |
+| ------ | ------------------------------------------------------------------------------- | --------------------------------------- |
+| GET    | `/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions/template`        | Transaction template                    |
+| GET    | `/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions`                 | List transactions                       |
+| GET    | `/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions/{transactionId}` | Get transaction                         |
+| POST   | `/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions`                 | Create (`?command=deposit\|withdrawal`) |
+| POST   | `/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions/{transactionId}` | Adjust transaction                      |
 
-FILE: fixed-deposits/fixed-deposit-form.component.ts (~460 lines)
+---
 
---- MODE DETECTION ---
+## 4. Create Workflow (Highest Priority)
 
-isEditMode = route has :id param (via paramMap subscription)
-If edit: accountId = +params.get('id')
+### Pre-requisite Lookups
 
---- API CALL: Get Client ID from Query Params ---
+```
+Load Offices
+  ↓  GET /offices
+Select Office
+  ↓
+Load Clients
+  ↓  GET /clients?officeId={officeId}
+Select Client
+  ↓
+Load Fixed Deposit Products
+  ↓  GET /fixeddepositproducts
+Select Product
+  ↓
+Load Product Template (pre-fills defaults + interest rate chart)
+  ↓  GET /fixeddepositaccounts/template?clientId={clientId}&productId={productId}
+Submit Create Fixed Deposit Application
+  ↓  POST /fixeddepositaccounts
+```
 
-Route.queryParams.subscribe:
-If query param 'clientId' is present -> account.clientId = +clientId
-Used when navigating from Client View "Create Fixed Deposit" button
+### Create Request Fields
 
---- API CALL: Load Products (Template) ---
+| Field                               | Type    | Required     | Validation                                       | Source                      |
+| ----------------------------------- | ------- | ------------ | ------------------------------------------------ | --------------------------- |
+| `clientId`                          | Long    | Conditional* | > 0                                              | `GET /clients`              |
+| `groupId`                           | Long    | Conditional* | > 0                                              | `GET /groups`               |
+| `productId`                         | Long    | **Yes**      | > 0                                              | `GET /fixeddepositproducts` |
+| `submittedOnDate`                   | Date    | **Yes**      | Not null; not future; >= client/group activation | User                        |
+| `accountNo`                         | String  | No           | Max 20 chars; auto-gen if blank                  | User/auto                   |
+| `externalId`                        | String  | No           | Max 100 chars                                    | User                        |
+| `fieldOfficerId`                    | Long    | No           | > 0                                              | `GET /staff`                |
+| `depositAmount`                     | Decimal | **Yes**      | > 0                                              | User                        |
+| `depositPeriod`                     | Integer | **Yes**      | > 0                                              | User                        |
+| `depositPeriodFrequencyId`          | Integer | **Yes**      | 0 (Days), 1 (Weeks), 2 (Months), 3 (Years)       | Enum                        |
+| `nominalAnnualInterestRate`         | Decimal | No           | >= 0; falls back to product                      | Product/chart               |
+| `interestCompoundingPeriodType`     | Integer | No           | 1,4,5,6,7                                        | Product default             |
+| `interestPostingPeriodType`         | Integer | No           | 1,4,5,6,7,8,9,10,11                              | Product default             |
+| `interestCalculationType`           | Integer | No           | 1 (DAILY_BALANCE), 2 (AVG_DAILY_BALANCE)         | Product default             |
+| `interestCalculationDaysInYearType` | Integer | No           | 360, 365                                         | Product default             |
+| `lockinPeriodFrequency`             | Integer | No           | >= 0                                             | Product default             |
+| `lockinPeriodFrequencyType`         | Integer | No           | 0-3                                              | Product default             |
+| `preClosurePenalApplicable`         | Boolean | No           | If true, requires penal interest + type          | Product default             |
+| `preClosurePenalInterest`           | Decimal | Conditional  | >= 0; required if penalApplicable=true           | Product default             |
+| `preClosurePenalInterestOnTypeId`   | Integer | Conditional  | 1 (WHOLE_TERM), 2 (TILL_PREMATURE_WITHDRAWAL)    | Product default             |
+| `minDepositTerm`                    | Integer | No           | > 0                                              | Product default             |
+| `maxDepositTerm`                    | Integer | No           | > 0                                              | Product default             |
+| `minDepositTermTypeId`              | Integer | No           | 0-3                                              | Product default             |
+| `maxDepositTermTypeId`              | Integer | No           | 0-3                                              | Product default             |
+| `inMultiplesOfDepositTerm`          | Integer | No           | > 0                                              | Product default             |
+| `inMultiplesOfDepositTermTypeId`    | Integer | Conditional  | 0-3; required if inMultiplesOfDepositTerm set    | Product default             |
+| `transferInterestToSavings`         | Boolean | No           | If true, `linkedAccount` becomes required        | User                        |
+| `linkedAccount`                     | Long    | Conditional  | > 0; must be active and same client              | `GET /savingsaccounts`      |
+| `maturityInstructionId`             | Integer | No           | 100/200/300/400 (see lifecycle)                  | User                        |
+| `transferToSavingsId`               | Long    | Conditional  | > 0; required if maturityInstructionId=200       | `GET /savingsaccounts`      |
+| `withHoldTax`                       | Boolean | No           | Product must have tax group if true              | Product default             |
+| `expectedFirstDepositOnDate`        | Date    | No           | Valid date                                       | User                        |
+| `charges`                           | Array   | No           | Each: `chargeId` > 0, `amount` > 0               | `GET /charges`              |
+| `locale`                            | String  | **Yes**      | e.g. "en"                                        | User                        |
+| `dateFormat`                        | String  | **Yes**      | e.g. "dd MMMM yyyy"                              | User                        |
 
-Service: FixedDepositAccountService.getFixeddepositaccountsTemplate()
-Endpoint: GET /api/v2/fixeddepositaccounts/template
-Response: GetFixedDepositAccountsTemplateResponse
-{ clientId?, clientName?, productOptions?: Set<GetFixedDepositAccountsProductOptions> }
+*Either `clientId` or `groupId` is required (or both for JLG).
 
-GetFixedDepositAccountsProductOptions:
-{ id?: number, name?: string }
-NOTE: productOptions is a Set, must use Array.from()
-Populates: productOptions dropdown
+---
 
---- API CALL: Load Product Defaults (on product select change) ---
+## 5. Lookup APIs
 
-Service: FixedDepositAccountService.getFixeddepositaccountsTemplate()
-(same template endpoint)
-When user selects a product, extract from template response: - depositAmount - depositPeriod - depositPeriodFrequencyId (from depositPeriodFrequency.id) - nominalAnnualInterestRate
-Values extracted via Record<string, unknown> cast
+| UI Field             | Endpoint                              | Display                                                         | Value               | Required         |
+| -------------------- | ------------------------------------- | --------------------------------------------------------------- | ------------------- | ---------------- |
+| Office               | `GET /offices`                        | `name`                                                          | `id`                | Yes              |
+| Client               | `GET /clients?officeId={id}`          | `displayName`                                                   | `id`                | Conditional      |
+| Group                | `GET /groups?officeId={id}`           | `name`                                                          | `id`                | Conditional      |
+| FD Product           | `GET /fixeddepositproducts`           | `name`                                                          | `id`                | Yes              |
+| Field Officer        | `GET /staff?officeId={id}`            | `displayName`                                                   | `id`                | No               |
+| Deposit Period Freq  | —                                     | Days/Weeks/Months/Years                                         | 0/1/2/3             | Yes              |
+| Interest Compounding | —                                     | Enum map                                                        | 1,4,5,6,7           | No               |
+| Interest Posting     | —                                     | Enum map                                                        | 1,4,5,6,7,8,9,10,11 | No               |
+| Interest Calculation | —                                     | Enum map                                                        | 1,2                 | No               |
+| Days In Year         | —                                     | Enum map                                                        | 360, 365            | No               |
+| Lock-in Period Type  | —                                     | Enum map                                                        | 0,1,2,3             | No               |
+| Pre-closure Penal On | —                                     | WHOLE_TERM(1), TILL_PREMATURE(2)                                | 1,2                 | Conditional      |
+| Maturity Instruction | —                                     | WITHDRAW(100), TRANSFER(200), REINVEST_PI(300), REINVEST_P(400) | 100-400             | No               |
+| Linked Savings Acct  | `GET /clients/{id}/accounts`          | `accountNo`                                                     | `id`                | Conditional      |
+| Charge               | `GET /charges?chargeResourceType=...` | `name`                                                          | `id`                | No               |
+| Payment Type         | `GET /paymenttypes`                   | `name`                                                          | `id`                | For transactions |
+| Interest Rate Chart  | Included in template response         | Slabs table                                                     | —                   | —                |
 
---- API CALL: Load Account Data (Edit mode) ---
+---
 
-Service: FixedDepositAccountService.getFixeddepositaccountsAccountId()
-Endpoint: GET /api/v2/fixeddepositaccounts/{accountId}
-Response: GetFixedDepositAccountsAccountIdResponse
-Populates: - clientId, savingsProductId, depositAmount, depositPeriod - depositPeriodFrequency?.id - nominalAnnualInterestRate (from Record cast) - submittedOnDate from timeline.submittedOnDate (number[] -> Date)
+## 6. API Call Order (Create)
 
---- FORM FIELDS ---
+1. `GET /offices` — load offices
+2. `GET /clients?officeId={officeId}` — load clients
+3. `GET /fixeddepositproducts` — load FD products
+4. `GET /fixeddepositaccounts/template?clientId={clientId}&productId={productId}` — load template (includes interest rate chart slabs)
+5. `POST /fixeddepositaccounts` — submit application
+6. `POST /{accountId}?command=approve` — approve
+7. `POST /{accountId}?command=activate` — activate
+8. `POST /{accountId}/transactions?command=deposit` — initial deposit (if needed)
+9. At maturity: `POST /{accountId}?command=close` or `POST /{accountId}?command=prematureClose`
 
-Client Search (ClientSearchComponent, required)
-Fixed Deposit Product (select from productOptions, required)
-External ID (text, optional)
-Submitted On Date (datepicker, required)
-Deposit Amount (number, required)
-Deposit Period (number, required)
-Deposit Period Frequency (select: Days/Months/Years, required)
-Interest Rate (read-only, inherited from product)
+---
 
---- API CALL: Create Fixed Deposit Account ---
+## 7. Request Payload Analysis
 
-Service: FixedDepositAccountService.postFixeddepositaccounts()
-Endpoint: POST /api/v2/fixeddepositaccounts
-Body: PostFixedDepositAccountsRequest (via Record<string,unknown>)
+### Create Fixed Deposit (`POST /v1/fixeddepositaccounts`)
+
+```json
 {
-clientId, productId, submittedOnDate, depositAmount,
-depositPeriod, depositPeriodFrequencyId,
-locale: 'en', dateFormat: 'yyyy-MM-dd'
+  "clientId": 1,
+  "productId": 1,
+  "submittedOnDate": "01 January 2026",
+  "depositAmount": 100000,
+  "depositPeriod": 12,
+  "depositPeriodFrequencyId": 2,
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "nominalAnnualInterestRate": 6.5,
+  "interestCompoundingPeriodType": 4,
+  "interestPostingPeriodType": 4,
+  "interestCalculationType": 1,
+  "interestCalculationDaysInYearType": 365,
+  "maturityInstructionId": 100,
+  "preClosurePenalApplicable": true,
+  "preClosurePenalInterest": 1.0,
+  "preClosurePenalInterestOnTypeId": 1,
+  "charges": []
 }
+```
 
-MANDATORY fields: clientId, productId, submittedOnDate,
-depositAmount, depositPeriod, depositPeriodFrequencyId
+### Calculate FD Interest (`GET /v1/fixeddepositaccounts/calculate-fd-interest`)
 
---- API CALL: Update Fixed Deposit Account ---
+Query params:
 
-Service: FixedDepositAccountService.putFixeddepositaccountsAccountId()
-Endpoint: PUT /api/v2/fixeddepositaccounts/{accountId}
-Body: PutFixedDepositAccountsAccountIdRequest & Record<string,unknown>
+```
+?principalAmount=100000
+&annualInterestRate=6.5
+&tenureInMonths=12
+&interestCompoundingPeriodInMonths=1
+&interestPostingPeriodInMonths=1
+```
+
+### Approve (`POST /{accountId}?command=approve`)
+
+```json
 {
-depositAmount, depositPeriod?, depositPeriodFrequencyId?,
-nominalAnnualInterestRate?, locale: 'en', dateFormat: 'yyyy-MM-dd'
+  "approvedOnDate": "01 January 2026",
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy"
 }
+```
 
-NOTE: Update payload ONLY includes deposit fields (different from create)
+### Pre-mature Close (`POST /{accountId}?command=prematureClose`)
 
---- NAVIGATION ---
+```json
+{
+  "closedOnDate": "30 June 2026",
+  "onAccountClosureId": 200,
+  "toSavingsAccountId": 5,
+  "note": "Pre-mature closure due to emergency",
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy"
+}
+```
 
-On create/update success: router.navigate(['/products/fixed-deposits'])
-On cancel: router.navigate(['/products/fixed-deposits'])
+### Close at Maturity (`POST /{accountId}?command=close`)
 
-onCreateClient(): router.navigate(['/clients/create'])
-onCreateProduct(): router.navigate(['/products/fixed/create'])
+```json
+{
+  "closedOnDate": "01 January 2027",
+  "onAccountClosureId": 100,
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy"
+}
+```
 
-================================================================================ 3. FIXED/TERM DEPOSIT ACCOUNT VIEW (DepositAccountViewComponent)
-================================================================================
+---
 
-FILE: deposit-account-view.component.ts (~352 lines)
-NOTE: SHARED component for BOTH fixed-deposits and recurring-deposits
+## 8. Validation Rules
 
---- MODE DETECTION ---
+### Account Validation (`DepositAccountDataValidator`)
 
-isRD = router.url.includes('recurring')
-If isRD: uses RecurringDepositAccountService
-If !isRD: uses FixedDepositAccountService
+| Field                             | Required     | Validation                                               |
+| --------------------------------- | ------------ | -------------------------------------------------------- |
+| `clientId` / `groupId`            | At least one | Must be > 0; client must be active; group must be active |
+| `productId`                       | **Yes**      | Must exist and be active                                 |
+| `submittedOnDate`                 | **Yes**      | Not null; not future; >= client/group activation         |
+| `depositAmount`                   | **Yes**      | Must be > 0                                              |
+| `depositPeriod`                   | **Yes**      | Must be > 0                                              |
+| `depositPeriodFrequencyId`        | **Yes**      | Must be 0-3                                              |
+| `transferInterestToSavings`       | No           | If true, `linkedAccount` is required                     |
+| `linkedAccount`                   | Conditional  | Must be > 0; must be active and belong to same client    |
+| `maturityInstructionId`           | No           | Must be 100, 200, 300, or 400                            |
+| `transferToSavingsId`             | Conditional  | Required if maturityInstructionId = 200                  |
+| `preClosurePenalApplicable`       | No           | If true, requires penal interest + type                  |
+| `preClosurePenalInterest`         | Conditional  | >= 0; required if penalApplicable                        |
+| `preClosurePenalInterestOnTypeId` | Conditional  | 1 or 2; required if penalApplicable                      |
+| `charges`                         | No           | Each chargeId > 0, amount > 0                            |
+| `accountNo`                       | No           | Max 20 chars                                             |
+| `externalId`                      | No           | Max 100 chars                                            |
 
---- API CALL: Get Single Deposit Account ---
+### Domain Rule Validation (`FixedDepositAccount.validateDomainRules`)
 
-Dynamic method dispatch:
-service = isRD ? rdService : fdService (as Record<string, unknown>)
-method = isRD ? 'retrieveOne18' : 'retrieveOne14'
-service[method](accountId).subscribe(...)
+| Rule                           | Logic                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------- |
+| Min term <= Max term           | `minDepositTerm <= maxDepositTerm`                                                           |
+| Deposit period >= min term     | `depositPeriod >= minDepositTerm`                                                            |
+| Deposit period <= max term     | `depositPeriod <= maxDepositTerm`                                                            |
+| Deposit period in-multiples-of | If configured, `depositPeriod % inMultiplesOfDepositTerm == 0`                               |
+| Interest rate chart valid      | Chart date range must contain submitted/activation date                                      |
+| Interest rate > 0              | From chart slab matching deposit amount and period; or nominalAnnualInterestRate if no chart |
+| Interest posting period valid  | Must be consistent with compounding period                                                   |
 
-Response: Record<string, unknown>
-Key properties: productName, accountNo, clientName, status, currency,
-accountBalance, timeline.activatedOnDate, transactions
+---
 
---- HEADER ACTIONS ---
+## 9. Business Flow
 
-Actions dropdown (mat-menu):
-Deposit -> ONLY for RD -> /products/recurring-deposits/{id}/transactions/deposit
-Withdraw -> FD: /products/fixed-deposits/{id}/transactions/withdrawal
-RD: /products/recurring-deposits/{id}/transactions/withdrawal
+```
+Controller (FixedDepositAccountsApiResource)
+  ↓
+PortfolioCommandSourceWritePlatformService.logCommandSource()
+  ↓
+CommandHandler (e.g., FixedDepositAccountApplicationSubmittalCommandHandler)
+  ↓
+Service (DepositAccountWritePlatformServiceJpaRepositoryImpl)
+  ↓
+Assembler (DepositAccountAssembler.assembleFrom)
+  ↓  (depositAccountType = FIXED_DEPOSIT)
+  ├─ Load FixedDepositProduct from repository
+  ├─ Load Client/Group, validate active
+  ├─ Assemble DepositAccountTermAndPreClosure (deposit amount, period, penalties)
+  ├─ Assemble DepositAccountInterestRateChart from product chart or provided chartId
+  ├─ Construct FixedDepositAccount entity
+  ├─ validateDomainRules()
+  └─ validateNewApplicationState()
+  ↓
+Repository (FixedDepositAccountRepository.save)
+  ↓
+Database
+```
 
---- DETAILS SECTION ---
+### Key Tables
 
-Fields: Account No, Product Name, Client Name, Currency Symbol,
-Account Balance, Activation Date, Status
+| Table                                         | Purpose                                   |
+| --------------------------------------------- | ----------------------------------------- |
+| `m_savings_account`                           | Core account (deposit_type_enum = 200)    |
+| `m_deposit_account_term_and_preclosure`       | Term, pre-closure settings                |
+| `m_deposit_account_interest_rate_chart`       | Interest rate chart for this account      |
+| `m_deposit_account_interest_rate_chart_slabs` | Chart slab entries (amount ranges, rates) |
+| `m_deposit_account_interest_incentives`       | Interest rate incentives                  |
+| `m_deposit_preclosure_detail`                 | Pre-closure penalty config                |
+| `m_deposit_term_detail`                       | Min/max term config                       |
+| `m_savings_account_transaction`               | Transactions                              |
 
---- TRANSACTIONS TABLE (mat-table, inline) ---
+---
 
-Columns: Date, Type, Amount (color-coded: credit=green, debit=red),
-Running Balance
-Read-only (no create/undo/delete)
+## 10. Related Operations
 
---- DATATABLES TAB ---
+| Operation                   | Endpoint                                      | Description                 |
+| --------------------------- | --------------------------------------------- | --------------------------- |
+| Calculate Interest          | `POST /{id}?command=calculateInterest`        | Preview interest            |
+| Post Interest               | `POST /{id}?command=postInterest`             | Post interest to balance    |
+| Close                       | `POST /{id}?command=close`                    | Maturity closure            |
+| Pre-mature Close            | `POST /{id}?command=prematureClose`           | Early closure with penalty  |
+| Calculate Pre-mature Amount | `POST /{id}?command=calculatePrematureAmount` | Preview pre-mature payout   |
+| Deposit (transaction)       | `POST /{id}/transactions?command=deposit`     | Add deposit                 |
+| Withdrawal (transaction)    | `POST /{id}/transactions?command=withdrawal`  | Remove funds                |
+| Adjust Transaction          | `POST /{id}/transactions/{txId}`              | Modify existing transaction |
+| Add Charge                  | `POST /{id}/charges`                          | Apply charge                |
+| Download/Upload Template    | Bulk import                                   | Mass creation               |
 
-Uses EntityDatatablesComponent with apptableName and entityId
+---
 
---- NAVIGATION ---
+## 11. Hidden Dependencies
 
-onBack(): isRD -> /products/recurring-deposits
-!isRD -> /products/fixed-deposits
+| Dependency                                 | Impact                                                                             |
+| ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| **Interest rate chart must be configured** | FD product must have at least one active interest rate chart with slabs            |
+| **Chart date range**                       | Chart must be active on the submitted/activation date                              |
+| **Chart slabs + amount**                   | Deposit amount must fall within a slab range to determine applicable interest rate |
+| **Min/max deposit term**                   | Product defines term bounds; API request must respect them                         |
+| **Linked savings account**                 | Must be active and belong to the same client as the FD                             |
+| **Pre-closure penalty**                    | If enabled, interest rate and type are mandatory                                   |
+| **Maturity instruction**                   | If 200 (transfer to savings), `transferToSavingsId` is mandatory                   |
+| **Reinvest on pre-mature close**           | REINVEST options (300/400) NOT allowed for pre-mature close                        |
+| **Tax group**                              | Required if `withHoldTax=true`                                                     |
+| **Deposit period frequency id**            | Uses `SavingsPeriodFrequencyType` enum: 0=DAYS, 1=WEEKS, 2=MONTHS, 3=YEARS         |
+| **No GSIM**                                | Fixed deposits do NOT support GSIM                                                 |
+| **No overdraft**                           | Fixed deposits hardcode overdraft to false/zero                                    |
+| **No external ID endpoints**               | Unlike savings, FD has no `/external-id/` variants                                 |
 
-================================================================================ 4. FIXED DEPOSIT TRANSACTIONS LIST (FixedDepositTransactionsListComponent)
-================================================================================
+---
 
-FILE: fixed-deposit-transactions/fixed-deposit-transactions-list.component.ts
+## 12. Implementation Checklist
 
-Route param: accountId (via snapshot)
-
---- API CALL: List Transactions ---
-
-Service: FixedDepositAccountTransactionsService.getFixeddepositaccountsFixedDepositAccountIdTransactions()
-Endpoint: GET /api/v2/fixeddepositaccounts/{fixedDepositAccountId}/transactions
-Response: GetFixedDepositAccountsAccountIdTransactionsResponse[]
-{ accountId?, accountNo?, amount?, date?, id?, reversed?,
-runningBalance?, transactionType? }
-
-NOTE: Read-only list - no create/delete/undo actions
-
---- COLUMNS ---
-
-Columns: ColumnDef[] = [
-{ key: 'date', label: 'FIXED_DEPOSIT_TRANSACTIONS.DATE', sortable: true },
-{ key: 'amount', label: 'FIXED_DEPOSIT_TRANSACTIONS.AMOUNT', sortable: true },
-{ key: 'transactionType', label: 'FIXED_DEPOSIT_TRANSACTIONS.TYPE', sortable: false },
-]
-
-Custom renderings: - date: row.date (direct string) - amount: row.amount (direct number) - transactionType: row.transactionType?.code
-Uses localLogic: true
-
-================================================================================ 5. FIXED DEPOSIT PRODUCTS LIST (FixedDepositProductsListComponent)
-================================================================================
-
-FILE: fixed-deposits/fixed-deposit-products-list.component.ts
-NOTE: Route is /products/fixed (not fixed-deposits)
-
---- API CALL: List Products ---
-
-Service: FixedDepositProductService.getFixeddepositproducts()
-Endpoint: GET /api/v2/fixeddepositproducts
-Response: GetFixedDepositProductsResponse[]
-{ id?, name?, shortName?, currency?, nominalAnnualInterestRate? }
-
---- COLUMNS ---
-
-Columns: ColumnDef[] = [
-{ key: 'name', label: 'COMMON.NAME', sortable: true },
-{ key: 'shortName', label: 'PRODUCTS.SHORT_NAME', sortable: true },
-{ key: 'currency.code', label: 'PRODUCTS.CURRENCY', sortable: true },
-{ key: 'nominalAnnualInterestRate', label: 'PRODUCTS.NOMINAL_ANNUAL_INTEREST_RATE', sortable: true },
-{ key: 'actions', label: 'COMMON.ACTIONS', sortable: false },
-]
-
-Custom renderings: - nominalAnnualInterestRate: number pipe + '%' suffix - actions: Edit button
-
---- NAVIGATION ---
-
-onCreate(): router.navigate(['/products/fixed/create'])
-onEdit(p): router.navigate(['/products/fixed/edit', p.id])
-
-================================================================================ 6. FIXED DEPOSIT PRODUCT FORM (FixedDepositProductFormComponent)
-================================================================================
-
-FILE: fixed-deposits/fixed-deposit-product-form.component.ts (~303 lines)
-NOTE: Route is /products/fixed
-
---- MODE DETECTION ---
-
-isEditMode = route has :id param
-If edit: productId = +id
-
---- DEFAULTS ---
-
-DEFAULT_CURRENCY = 'USD'
-DEFAULT_LOCALE = 'en'
-DEFAULT_DATE_FORMAT = 'yyyy-MM-dd'
-
-Initial defaults:
-{ currencyCode: 'USD', digitsAfterDecimal: 2, inMultiplesOf: 0,
-interestCompoundingPeriodType: 4, // Monthly
-interestPostingPeriodType: 4, // Monthly
-interestCalculationType: 1, // Daily
-interestCalculationDaysInYearType: 365,
-accountingRule: 1, // NONE
-minDepositTerm: 1,
-minDepositTermTypeId: 2, // Months
-depositAmount: 1000 }
-
---- API CALL: Load Product Data (Edit mode) ---
-
-Service: FixedDepositProductService.getFixeddepositproductsProductId()
-Endpoint: GET /api/v2/fixeddepositproducts/{productId}
-Response: GetFixedDepositProductsProductIdResponse
-Populates: name, shortName, description, currencyCode, digitsAfterDecimal,
-minDepositTerm, minDepositTermTypeId, accountingRule
-
---- FORM FIELDS ---
-
-Name (required, text), Short Name (required, text, maxlength 4)
-Description (textarea), Currency Code (select: USD)
-Digits After Decimal (number)
-Minimum Deposit Term (number, default 1)
-Minimum Deposit Term Type (select: Days/Months/Years)
-
---- BUSINESS LOGIC: Charts (mandatory) ---
-
-On submit, default chart added:
-charts: [{
-fromDate: today (YYYY-MM-DD), dateFormat: 'yyyy-MM-dd', locale: 'en',
-chartSlabs: [{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }] }]
-
---- API CALL: Create ---
-
-Service: FixedDepositProductService.postFixeddepositproducts()
-Endpoint: POST /api/v2/fixeddepositproducts
-Body: name, shortName, description, currencyCode, digitsAfterDecimal,
-inMultiplesOf, interestCompoundingPeriodType, interestPostingPeriodType,
-interestCalculationType, interestCalculationDaysInYearType,
-accountingRule, minDepositTerm, minDepositTermTypeId,
-depositAmount, charts, locale
-
---- API CALL: Update ---
-
-Service: FixedDepositProductService.putFixeddepositproductsProductId()
-Endpoint: PUT /api/v2/fixeddepositproducts/{productId}
-Body: Same fields as create including charts
-
---- NAVIGATION ---
-
-On success: router.navigate(['/products/fixed'])
-On cancel: router.navigate(['/products/fixed'])
-
-================================================================================ 7. DATE FORMATTING
-================================================================================
-
-Account forms use: 'yyyy-MM-dd' (via formatDateToFineract utility)
-Product forms use: 'yyyy-MM-dd' (hardcoded inline)
-
-================================================================================ 8. I18N TRANSLATION KEY PREFIXES
-================================================================================
-
-FIXED_DEPOSITS.* - Account labels
-FIXED_DEPOSIT_TRANSACTIONS.* - Transaction labels
-PRODUCTS.* - Product labels
-COMMON.* - Shared labels
-HELP.* - Help text
-nav.fixedDepositProducts - Product list title
-
-================================================================================
-END OF DOCUMENT
-================================================================================
+- [ ] Office selector → `GET /offices`
+- [ ] Client selector → `GET /clients?officeId={id}`
+- [ ] FD product selector → `GET /fixeddepositproducts`
+- [ ] Template loader → `GET /fixeddepositaccounts/template?clientId={id}&productId={id}`
+- [ ] Create form with: deposit amount, period, frequency, maturity instruction, pre-closure settings
+- [ ] Submit → `POST /v1/fixeddepositaccounts`
+- [ ] Approve → `POST /{id}?command=approve` with `approvedOnDate`
+- [ ] Activate → `POST /{id}?command=activate` with `activatedOnDate`
+- [ ] Interest preview → `POST /{id}?command=calculateInterest`
+- [ ] Interest posting → `POST /{id}?command=postInterest`
+- [ ] Close at maturity → `POST /{id}?command=close`
+- [ ] Pre-mature close → `POST /{id}?command=prematureClose`
+- [ ] Pre-mature amount preview → `POST /{id}?command=calculatePrematureAmount`
+- [ ] Transaction deposit → `POST /{id}/transactions?command=deposit`
+- [ ] Transaction withdrawal → `POST /{id}/transactions?command=withdrawal`
+- [ ] Transaction adjust → `POST /{id}/transactions/{txId}`
+- [ ] Account list → `GET /fixeddepositaccounts`
+- [ ] Account detail → `GET /fixeddepositaccounts/{id}` with associations
+- [ ] Transaction list → `GET /{id}/transactions`
+- [ ] Closure template → `GET /{id}/template?command=close`
+- [ ] Interest calculator → `GET /calculate-fd-interest`
+- [ ] Charge CRUD → charges endpoints
+- [ ] Bulk import → download/upload template

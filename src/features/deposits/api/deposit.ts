@@ -211,19 +211,25 @@ export async function activateFixedDeposit(accountId: number, activatedOnDate?: 
   );
 }
 
-export async function closeFixedDeposit(accountId: number, closedOnDate?: string) {
+export async function closeFixedDeposit(
+  accountId: number,
+  payload?: Record<string, unknown>,
+) {
   return fixedDepositCommand(
     accountId,
     "close",
-    closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] },
+    payload ?? { closedOnDate: new Date().toISOString().split("T")[0] },
   );
 }
 
-export async function prematureCloseFixedDeposit(accountId: number, closedOnDate?: string) {
+export async function prematureCloseFixedDeposit(
+  accountId: number,
+  payload?: Record<string, unknown>,
+) {
   return fixedDepositCommand(
     accountId,
     "prematureClose",
-    closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] },
+    payload ?? { closedOnDate: new Date().toISOString().split("T")[0] },
   );
 }
 
@@ -538,6 +544,165 @@ export async function undoFixedDepositTransaction(
     `/fixeddepositaccounts/${accountId}/transactions/${transactionId}`,
     {},
     { params: { command: "undo" } },
+  );
+  return data;
+}
+
+// ─── Fixed Deposit Template ─────────────────────────────────
+// Section 4 — GET /fixeddepositaccounts/template?clientId={id}&productId={id}
+
+export interface FixedDepositAccountTemplate {
+  clientId?: number;
+  clientName?: string;
+  productId?: number;
+  productName?: string;
+  currency?: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+  nominalAnnualInterestRate?: number;
+  interestCompoundingPeriodType?: { id: number; code: string; value: string };
+  interestPostingPeriodType?: { id: number; code: string; value: string };
+  interestCalculationType?: { id: number; code: string; value: string };
+  interestCalculationDaysInYearType?: { id: number; code: string; value: string };
+  minDepositTerm?: number;
+  maxDepositTerm?: number;
+  minDepositTermType?: { id: number; code: string; value: string };
+  maxDepositTermType?: { id: number; code: string; value: string };
+  inMultiplesOfDepositTerm?: number;
+  inMultiplesOfDepositTermType?: { id: number; code: string; value: string };
+  depositAmount?: number;
+  preClosurePenalApplicable?: boolean;
+  preClosurePenalInterest?: number;
+  preClosurePenalInterestOnType?: { id: number; code: string; value: string };
+  lockinPeriodFrequency?: number;
+  lockinPeriodFrequencyType?: { id: number; code: string; value: string };
+  withHoldTax?: boolean;
+  transferInterestToSavings?: boolean;
+  savingsAccountId?: number;
+  charges?: Array<{ chargeId: number; name: string; amount: number; chargeTimeType?: { id: number; code: string; value: string }; chargeCalculationType?: { id: number; code: string; value: string } }>;
+  productOptions?: Array<{ id: number; name: string }>;
+  chargeOptions?: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number; code: string; value: string } }>;
+  fieldOfficerOptions?: Array<{ id: number; displayName: string }>;
+}
+
+export async function fetchFixedDepositAccountTemplate(
+  clientId?: number,
+  productId?: number,
+): Promise<FixedDepositAccountTemplate> {
+  const params: Record<string, string> = {};
+  if (clientId) params.clientId = String(clientId);
+  if (productId) params.productId = String(productId);
+  const { data } = await client.get<FixedDepositAccountTemplate>("/fixeddepositaccounts/template", { params });
+  return data;
+}
+
+// ─── Fixed Deposit Transaction Deposit/Withdrawal ────────────
+
+export async function makeFixedDepositTransaction(
+  accountId: number | string,
+  command: "deposit" | "withdrawal",
+  payload: SavingsTransactionRequest,
+): Promise<SavingsCommandResponse> {
+  const { data } = await client.post<SavingsCommandResponse>(
+    `/fixeddepositaccounts/${accountId}/transactions`,
+    { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
+    { params: { command } },
+  );
+  return data;
+}
+
+// ─── Fixed Deposit Charges ──────────────────────────────────
+
+export interface FixedDepositCharge {
+  id: number;
+  chargeId: number;
+  name?: string;
+  amount: number;
+  amountPaid?: number;
+  amountOutstanding?: number;
+  amountWaived?: number;
+  dueDate?: string;
+  isActive?: boolean;
+  isPaid?: boolean;
+  isWaived?: boolean;
+  waiverable?: boolean;
+  penalty?: boolean;
+  chargeTimeType?: { id: number; code: string; value: string };
+  chargeCalculationType?: { id: number; code: string; value: string };
+  currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
+}
+
+export async function fetchFixedDepositCharges(
+  accountId: number | string,
+): Promise<{ totalFilteredRecords?: number; pageItems?: FixedDepositCharge[] }> {
+  const { data } = await client.get(`/fixeddepositaccounts/${accountId}/charges`);
+  return data;
+}
+
+export async function createFixedDepositCharge(
+  accountId: number | string,
+  payload: PostSavingsChargeRequest,
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.post(`/fixeddepositaccounts/${accountId}/charges`, payload);
+  return data;
+}
+
+export async function waiveFixedDepositCharge(
+  accountId: number | string,
+  chargeId: number | string,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/fixeddepositaccounts/${accountId}/charges/${chargeId}`,
+    {},
+    { params: { command: "waive" } },
+  );
+  return data;
+}
+
+export async function deleteFixedDepositCharge(
+  accountId: number | string,
+  chargeId: number | string,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.delete(`/fixeddepositaccounts/${accountId}/charges/${chargeId}`);
+  return data;
+}
+
+// ─── FD Interest Calculator ─────────────────────────────────
+// GET /fixeddepositaccounts/calculate-fd-interest
+
+export interface CalculateFDInterestQuery {
+  principalAmount: number;
+  annualInterestRate: number;
+  tenureInMonths: number;
+  interestCompoundingPeriodInMonths: number;
+  interestPostingPeriodInMonths: number;
+}
+
+export interface CalculateFDInterestResponse {
+  totalInterest: number;
+  maturityAmount: number;
+}
+
+export async function calculateFixedDepositInterest(
+  params: CalculateFDInterestQuery,
+): Promise<CalculateFDInterestResponse> {
+  const { data } = await client.get<CalculateFDInterestResponse>("/fixeddepositaccounts/calculate-fd-interest", {
+    params,
+  });
+  return data;
+}
+
+// ─── FD Closure Template ───────────────────────────────────
+
+export interface FixedDepositClosureTemplate {
+  onAccountClosureOptions?: Array<{ id: number; value: string }>;
+  savingsAccounts?: Array<{ id: number; accountNo: string }>;
+}
+
+export async function fetchFixedDepositClosureTemplate(
+  accountId: number | string,
+): Promise<FixedDepositClosureTemplate> {
+  const { data } = await client.get<FixedDepositClosureTemplate>(
+    `/fixeddepositaccounts/${accountId}/template`,
+    { params: { command: "close" } },
   );
   return data;
 }

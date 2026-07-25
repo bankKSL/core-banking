@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchFixedDepositTransactions, undoFixedDepositTransaction } from "../api/deposit";
+import {
+  fetchFixedDepositTransactions,
+  undoFixedDepositTransaction,
+  makeFixedDepositTransaction,
+} from "../api/deposit";
+import type { SavingsTransactionRequest } from "../api/deposit";
 import { depositKeys } from "./useSavingsAccounts";
 
 export const fdTransactionKeys = {
@@ -19,6 +24,24 @@ export function useUndoFixedDepositTransaction() {
   return useMutation({
     mutationFn: ({ accountId, transactionId }: { accountId: number | string; transactionId: number | string }) =>
       undoFixedDepositTransaction(accountId, transactionId),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: fdTransactionKeys.all(variables.accountId) });
+    },
+  });
+}
+
+export function useMakeFixedDepositTransaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      accountId,
+      command,
+      payload,
+    }: {
+      accountId: number | string;
+      command: "deposit" | "withdrawal";
+      payload: SavingsTransactionRequest;
+    }) => makeFixedDepositTransaction(accountId, command, payload),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: fdTransactionKeys.all(variables.accountId) });
     },

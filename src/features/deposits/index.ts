@@ -190,8 +190,30 @@ export { rejectSavingsAccount, withdrawSavingsAccount, undoRejectSavingsAccount 
 export { fetchSavingsTransactions } from "./api/deposit";
 
 // API — Fixed Deposit Transactions
-export { fetchFixedDepositTransactions, undoFixedDepositTransaction } from "./api/deposit";
+export {
+  fetchFixedDepositTransactions,
+  undoFixedDepositTransaction,
+  makeFixedDepositTransaction,
+} from "./api/deposit";
 export type { FixedDepositTransaction } from "./api/deposit";
+
+// API — Fixed Deposit
+export {
+  fetchFixedDepositAccountTemplate,
+  fetchFixedDepositClosureTemplate,
+  calculateFixedDepositInterest,
+  fetchFixedDepositCharges,
+  createFixedDepositCharge,
+  waiveFixedDepositCharge,
+  deleteFixedDepositCharge,
+} from "./api/deposit";
+export type {
+  FixedDepositAccountTemplate,
+  FixedDepositClosureTemplate,
+  CalculateFDInterestQuery,
+  CalculateFDInterestResponse,
+  FixedDepositCharge,
+} from "./api/deposit";
 
 // Hooks — Savings Charges
 export {
@@ -220,5 +242,6 @@ export { savingsTransactionKeys } from "./hooks/useSavingsTransactions";
 export {
   useFixedDepositTransactions,
   useUndoFixedDepositTransaction,
+  useMakeFixedDepositTransaction,
   fdTransactionKeys,
 } from "./hooks/useFixedDepositTransactions";
