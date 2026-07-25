@@ -12,6 +12,17 @@ import type {
   ClientUpdateRequest,
   ClientTemplate,
   ClientActivateRequest,
+  ClientRejectRequest,
+  ClientWithdrawRequest,
+  ClientCloseRequest,
+  ClientReactivateRequest,
+  ClientReopenedRequest,
+  ClientAssignStaffRequest,
+  ClientUpdateSavingsAccountRequest,
+  ClientProposeTransferRequest,
+  ClientAcceptTransferRequest,
+  ClientTransferActionRequest,
+  ClientCommandResponse,
 } from "../types/client";
 
 // ─── List Clients ─────────────────────────────────────────────
@@ -171,6 +182,119 @@ export async function undoRejectClient(clientId: number | string): Promise<{ cli
 export async function undoWithdrawClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
   const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
     params: { command: "undowithdraw" },
+  });
+  return data;
+}
+
+// ─── Staff / Savings Account commands ────────────────────────
+
+/**
+ * POST /clients/{clientId}?command=assignStaff
+ * Assigns a loan officer (staff) to this client.
+ */
+export async function assignStaff(
+  clientId: number | string,
+  payload: ClientAssignStaffRequest,
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "assignStaff" },
+  });
+  return data;
+}
+
+/**
+ * POST /clients/{clientId}?command=unassignStaff
+ * Removes the currently assigned staff from this client.
+ */
+export async function unassignStaff(clientId: number | string, payload: { staffId: number }): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "unassignStaff" },
+  });
+  return data;
+}
+
+/**
+ * POST /clients/{clientId}?command=updateSavingsAccount
+ * Changes the client’s default savings account.
+ */
+export async function updateSavingsAccount(
+  clientId: number | string,
+  payload: ClientUpdateSavingsAccountRequest,
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "updateSavingsAccount" },
+  });
+  return data;
+}
+
+// ─── Client Transfer commands ─────────────────────────────────
+
+/**
+ * POST /clients/{clientId}?command=proposeTransfer
+ * Initiates a transfer of this client to another office.
+ */
+export async function proposeClientTransfer(
+  clientId: number | string,
+  payload: ClientProposeTransferRequest,
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "proposeTransfer" },
+  });
+  return data;
+}
+
+/**
+ * POST /clients/{clientId}?command=acceptTransfer
+ * Accepts a pending transfer (origin office approves).
+ */
+export async function acceptClientTransfer(
+  clientId: number | string,
+  payload: ClientAcceptTransferRequest = {},
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "acceptTransfer" },
+  });
+  return data;
+}
+
+/**
+ * POST /clients/{clientId}?command=rejectTransfer
+ * Rejects a pending transfer.
+ */
+export async function rejectClientTransfer(
+  clientId: number | string,
+  payload: ClientTransferActionRequest = {},
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "rejectTransfer" },
+  });
+  return data;
+}
+
+/**
+ * POST /clients/{clientId}?command=withdrawTransfer
+ * Withdraws a pending transfer (requesting office cancels).
+ */
+export async function withdrawClientTransfer(
+  clientId: number | string,
+  payload: ClientTransferActionRequest = {},
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "withdrawTransfer" },
+  });
+  return data;
+}
+
+/**
+ * POST /clients/{clientId}?command=proposeAndAcceptTransfer
+ * Combines propose + accept into a single request.
+ */
+export async function proposeAndAcceptClientTransfer(
+  clientId: number | string,
+  payload: ClientProposeTransferRequest,
+): Promise<ClientCommandResponse> {
+  const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
+    params: { command: "proposeAndAcceptTransfer" },
   });
   return data;
 }

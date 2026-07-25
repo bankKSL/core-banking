@@ -21,6 +21,7 @@ const ClientListPage: FC = () => {
   const officeId = searchParams.get("officeId") ?? "all";
   const staffId = searchParams.get("staffId") ?? "all";
   const status = searchParams.get("status") ?? "all";
+  const legalForm = searchParams.get("legalForm") ?? "all";
   const sortBy = searchParams.get("sortBy") ?? "displayName";
   const sortOrder = (searchParams.get("sortOrder") ?? "ASC") as "ASC" | "DESC";
 
@@ -54,6 +55,7 @@ const ClientListPage: FC = () => {
     if (officeId !== "all") params.officeId = Number(officeId);
     if (staffId !== "all") params.staffId = Number(staffId);
     if (status !== "all") params.status = Number(status);
+    if (legalForm !== "all") params.legalForm = Number(legalForm);
     return params;
   }, [page, search, officeId, staffId, status, sortBy, sortOrder]);
 
@@ -114,6 +116,8 @@ const ClientListPage: FC = () => {
           onStaffChange={(v) => updateParam("staffId", v)}
           status={status}
           onStatusChange={(v) => updateParam("status", v)}
+          legalForm={legalForm}
+          onLegalFormChange={(v) => updateParam("legalForm", v)}
           onRefresh={() => refetch()}
           isRefreshing={isRefetching}
           template={template}

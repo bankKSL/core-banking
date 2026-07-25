@@ -47,6 +47,7 @@ export {
   fetchClientChargesTemplate,
   createClientCharge,
   waiveClientCharge,
+  payClientCharge,
   deleteClientCharge,
 } from "./charges";
 export type {

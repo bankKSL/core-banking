@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClient } from "../hooks/useClient";
+import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useActivateClient } from "../hooks/useActivateClient";
 import { useDeleteClient } from "../hooks/useDeleteClient";
 import { useClientAccounts } from "../hooks/useClientAccounts";
@@ -53,6 +54,7 @@ const ClientDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: client, isLoading, isError, refetch } = useClient(id);
+  const { data: template } = useClientTemplate();
   const { data: accounts, isLoading: accountsLoading } = useClientAccounts(id);
   const activateMutation = useActivateClient();
   const deleteMutation = useDeleteClient();
@@ -121,6 +123,8 @@ const ClientDetailPage: FC = () => {
               clientId={client.id}
               status={status}
               displayName={displayName}
+              template={template}
+              currentStaffId={client.staffId}
               onSuccess={() => refetch()}
             />
             {isPending && (

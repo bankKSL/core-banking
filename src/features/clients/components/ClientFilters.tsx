@@ -15,6 +15,8 @@ interface ClientFiltersProps {
   onStaffChange: (value: string) => void;
   status: string;
   onStatusChange: (value: string) => void;
+  legalForm: string;
+  onLegalFormChange: (value: string) => void;
   onRefresh: () => void;
   isRefreshing: boolean;
   template?: ClientTemplate;
@@ -30,6 +32,8 @@ const ClientFilters: FC<ClientFiltersProps> = ({
   onStaffChange,
   status,
   onStatusChange,
+  legalForm,
+  onLegalFormChange,
   onRefresh,
   isRefreshing,
   template,
@@ -90,6 +94,18 @@ const ClientFilters: FC<ClientFiltersProps> = ({
               {CLIENT_STATUS_LABELS[code] ?? code}
             </SelectItem>
           ))}
+        </SelectContent>
+      </Select>
+
+      {/* Legal Form filter */}
+      <Select value={legalForm} onValueChange={onLegalFormChange} disabled={isLoading}>
+        <SelectTrigger className="h-10 w-[140px]">
+          <SelectValue placeholder="All Forms" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Forms</SelectItem>
+          <SelectItem value="1">Person</SelectItem>
+          <SelectItem value="2">Entity</SelectItem>
         </SelectContent>
       </Select>
 

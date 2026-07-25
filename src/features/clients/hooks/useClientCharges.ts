@@ -4,6 +4,7 @@ import {
   fetchClientChargesTemplate,
   createClientCharge,
   waiveClientCharge,
+  payClientCharge,
   deleteClientCharge,
 } from "../api/charges";
 import type { PostClientChargeRequest } from "../api/charges";
@@ -35,6 +36,17 @@ export function useCreateClientCharge() {
   return useMutation({
     mutationFn: ({ clientId, payload }: { clientId: number | string; payload: PostClientChargeRequest }) =>
       createClientCharge(clientId, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: clientChargeKeys.all(variables.clientId) });
+    },
+  });
+}
+
+export function usePayClientCharge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ clientId, chargeId }: { clientId: number | string; chargeId: number | string }) =>
+      payClientCharge(clientId, chargeId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: clientChargeKeys.all(variables.clientId) });
     },

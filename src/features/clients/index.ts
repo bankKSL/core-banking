@@ -25,8 +25,27 @@ export {
 } from "./constants/status";
 
 // Schemas
-export { createClientSchema, editClientSchema } from "./schemas/client.schema";
-export type { CreateClientFormValues, EditClientFormValues } from "./schemas/client.schema";
+export {
+  createClientSchema,
+  editClientSchema,
+  activateClientSchema,
+  closeClientSchema,
+  rejectClientSchema,
+  withdrawClientSchema,
+  reactivateClientSchema,
+  reopenedDateSchema,
+} from "./schemas/client.schema";
+export type {
+  CreateClientFormValues,
+  EditClientFormValues,
+  ActivateClientFormValues,
+  CloseClientFormValues,
+  RejectClientFormValues,
+  WithdrawClientFormValues,
+  ReactivateClientFormValues,
+  UndoRejectClientFormValues,
+  UndoWithdrawClientFormValues,
+} from "./schemas/client.schema";
 
 // Utils
 export {
@@ -188,6 +207,7 @@ export {
 export {
   useClientCharges,
   useCreateClientCharge,
+  usePayClientCharge,
   useWaiveClientCharge,
   useDeleteClientCharge,
   clientChargeKeys,

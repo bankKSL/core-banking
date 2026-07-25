@@ -38,7 +38,7 @@ const createClientSchemaBase = z.object({
   mobileNo: z
     .string()
     .max(50)
-    .regex(/^[+\d\s\-().]*$/, "Mobile number contains invalid characters")
+    .regex(/^\+?[0-9]{7,15}$/, "Mobile number must be 7-15 digits, optional leading +")
     .optional()
     .or(z.literal("")),
   emailAddress: z.string().email("Please enter a valid email address").max(100).optional().or(z.literal("")),
@@ -47,6 +47,24 @@ const createClientSchemaBase = z.object({
   activationDate: z.string().optional().or(z.literal("")),
   submittedOnDate: z.string().optional().or(z.literal("")),
   active: z.boolean().optional(),
+
+  // ── Account ───────────────────────────────────────────────
+  accountNo: z.string().max(20).optional().or(z.literal("")),
+  isStaff: z.boolean().optional(),
+  clientTypeId: z.number().int().optional().nullable(),
+  clientClassificationId: z.number().int().optional().nullable(),
+
+  // ── Entity details (Legal Form = Entity) ──────────────────
+  clientNonPersonDetails: z
+    .object({
+      constitutionId: z.number().int().optional().nullable(),
+      incorpNumber: z.string().max(50).optional().or(z.literal("")),
+      mainBusinessLineId: z.number().int().optional().nullable(),
+      remarks: z.string().max(150).optional().or(z.literal("")),
+      incorpValidityTillDate: z.string().optional().or(z.literal("")),
+    })
+    .optional()
+    .nullable(),
 
   // ── Fineract metadata ─────────────────────────────────────
   dateFormat: z.string(),
@@ -85,6 +103,15 @@ export const createClientSchema = createClientSchemaBase.superRefine((data, ctx)
       });
     }
   }
+
+  // activationDate required when active=true
+  if (data.active === true && (!data.activationDate || data.activationDate.trim() === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Activation date is required when the client is active",
+      path: ["activationDate"],
+    });
+  }
 });
 
 export type CreateClientFormValues = z.infer<typeof createClientSchema>;
@@ -97,3 +124,63 @@ export type CreateClientFormValues = z.infer<typeof createClientSchema>;
 export const editClientSchema = createClientSchemaBase.partial();
 
 export type EditClientFormValues = z.infer<typeof editClientSchema>;
+
+// ─── State-Transition Schemas ────────────────────────────────
+// Per client.md §10 — see instructions/client.md.
+
+export const activateClientSchema = z.object({
+  activationDate: z.string({ required_error: "activationDate is required" }).min(1, "activationDate is required"),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+export type ActivateClientFormValues = z.infer<typeof activateClientSchema>;
+
+export const closeClientSchema = z.object({
+  closureDate: z.string({ required_error: "closureDate is required" }).min(1, "closureDate is required"),
+  closureReasonId: z
+    .number({ required_error: "closureReasonId is required" })
+    .int()
+    .positive("closureReasonId is required"),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+export type CloseClientFormValues = z.infer<typeof closeClientSchema>;
+
+export const rejectClientSchema = z.object({
+  rejectionDate: z.string({ required_error: "rejectionDate is required" }).min(1, "rejectionDate is required"),
+  rejectionReasonId: z
+    .number({ required_error: "rejectionReasonId is required" })
+    .int()
+    .positive("rejectionReasonId is required"),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+export type RejectClientFormValues = z.infer<typeof rejectClientSchema>;
+
+export const withdrawClientSchema = z.object({
+  withdrawalDate: z.string({ required_error: "withdrawalDate is required" }).min(1, "withdrawalDate is required"),
+  withdrawalReasonId: z
+    .number({ required_error: "withdrawalReasonId is required" })
+    .int()
+    .positive("withdrawalReasonId is required"),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+export type WithdrawClientFormValues = z.infer<typeof withdrawClientSchema>;
+
+export const reactivateClientSchema = z.object({
+  reactivationDate: z
+    .string({ required_error: "reactivationDate is required" })
+    .min(1, "reactivationDate is required"),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+export type ReactivateClientFormValues = z.infer<typeof reactivateClientSchema>;
+
+export const reopenedDateSchema = z.object({
+  reopenedDate: z.string({ required_error: "reopenedDate is required" }).min(1, "reopenedDate is required"),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+export type UndoRejectClientFormValues = z.infer<typeof reopenedDateSchema>;
+export type UndoWithdrawClientFormValues = z.infer<typeof reopenedDateSchema>;

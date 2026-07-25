@@ -1,739 +1,960 @@
-CLIENTS MODULE - COMPLETE API CALLS & BUSINESS LOGIC
-=====================================================
+# Client — React Implementation Guide
+
+Source: Apache Fineract Portfolio Client Feature  
+Trace Date: 2026-07-25  
+Java Base: `org.apache.fineract.portfolio.client`
+
+---
+
+## 1. Overview
+
+The Client feature manages people (Person, `legalFormId=1`) and businesses (Entity, `legalFormId=2`) that interact with the MFI. A client can be created as Pending (inactive) or Active (with activation date). Once created, clients progress through a lifecycle: Pending → Active → Closed (or Rejected / Withdrawn from Pending). Clients can have charges, identifiers (ID documents), family members, addresses, collateral, and a default savings account.
+
+### Sub-resource APIs
+
+| Resource              | Base Path                              |
+| --------------------- | -------------------------------------- |
+| Client Charges        | `/v1/clients/{clientId}/charges`       |
+| Client Identifiers    | `/v1/clients/{clientId}/identifiers`   |
+| Client Transactions   | `/v1/clients/{clientId}/transactions`  |
+| Client Family Members | `/v1/clients/{clientId}/familymembers` |
+| Client Address        | `/v1/client/{clientId}/addresses`      |
+| Client Collateral     | `/v1/clients/{clientId}/collaterals`   |
+| Client Accounts       | `/v1/clients/{clientId}/accounts`      |
+
+---
+
+## 2. Lifecycle
+
+```
+                    ┌──────────────┐
+                    │   PENDING    │  (status_enum = 100)
+                    └──────┬───────┘
+                           │
+            ┌──────────────┼──────────────┐
+            │              │              │
+            ▼              ▼              ▼
+      ┌──────────┐   ┌──────────┐   ┌───────────┐
+      │  ACTIVE  │   │ REJECTED │   │ WITHDRAWN │
+      │  (300)   │   │  (700)   │   │  (800)    │
+      └────┬─────┘   └──────────┘   └───────────┘
+           │              │              │
+           │              │ undoReject   │ undoWithdraw
+           │              ▼              ▼
+           │         ┌──────────┐   ┌──────────┐
+           │         │ PENDING  │   │ PENDING  │
+           │         └──────────┘   └──────────┘
+           ▼
+      ┌──────────┐
+      │  CLOSED  │
+      │  (600)   │
+      └──────────┘
+           │
+           ▼ reactivate
+      ┌──────────┐
+      │  ACTIVE  │
+      └──────────┘
+```
+
+State transition commands (POST `/v1/clients/{clientId}?command=`):
+
+- `activate` — PENDING → ACTIVE (requires `activationDate`)
+- `close` — ACTIVE → CLOSED (requires `closureDate`, `closureReasonId`)
+- `reject` — PENDING → REJECTED (requires `rejectionDate`, `rejectionReasonId`)
+- `withdraw` — PENDING → WITHDRAWN (requires `withdrawalDate`, `withdrawalReasonId`)
+- `reactivate` — CLOSED → ACTIVE (requires `reactivationDate`)
+- `undoRejection` — REJECTED → PENDING (requires `reopenedDate`)
+- `undoWithdrawal` — WITHDRAWN → PENDING (requires `reopenedDate`)
+- `assignStaff` — assigns a loan officer
+- `unassignStaff` — removes staff assignment
+- `updateSavingsAccount` — changes default savings account
+- `proposeTransfer` / `acceptTransfer` / `rejectTransfer` / `withdrawTransfer` / `proposeAndAcceptTransfer` — office transfer
+
+---
+
+## 3. API Inventory
+
+### 3.1 CRUD
+
+#### List Clients
+
+```
+GET /v1/clients?offset=0&limit=20&orderBy=displayName&sortOrder=ASC
+```
+
+Query params:
+
+| Param            | Type          | Description                                                    |
+| ---------------- | ------------- | -------------------------------------------------------------- |
+| `offset`         | Integer       | Pagination offset                                              |
+| `limit`          | Integer       | Pagination limit                                               |
+| `orderBy`        | String        | Sort column (e.g. `displayName`, `officeName`, `status_enum`)  |
+| `sortOrder`      | `ASC`\|`DESC` | Sort direction                                                 |
+| `officeId`       | Long          | Filter by office                                               |
+| `externalId`     | String        | Filter by external ID (LIKE)                                   |
+| `displayName`    | String        | Filter by display name (LIKE)                                  |
+| `firstName`      | String        | Filter by first name (LIKE)                                    |
+| `lastName`       | String        | Filter by last name (LIKE)                                     |
+| `status`         | String        | Filter: `Pending`, `Active`, `Closed`, `Rejected`, `Withdrawn` |
+| `legalForm`      | Integer       | `1`=Person, `2`=Entity                                         |
+| `staffId`        | Long          | Filter by assigned staff                                       |
+| `orphansOnly`    | Boolean       | Only clients not in any group                                  |
+| `underHierarchy` | String        | Office hierarchy filter                                        |
+| `fields`         | String        | Comma-separated response field filter                          |
 
-This document captures every API call and business logic rule across the
-/clients pages of fineract-backoffice-ui (Angular standalone components).
+Response: `Page<ClientData>` with totalFilteredRecords.
 
-I am migrating Apache Finfact Angular to my existing React application.
+#### Get Client Detail
 
-My stack:
+```
+GET /v1/clients/{clientId}?template=true
+```
 
-- React 19
-- TypeScript
-- Vite
-- TanStack Router
-- TanStack Query
-- React Hook Form
-- Zod
-- Zustand
-- TailwindCSS
-- shadcn/ui
-- Axios
-- React Table (TanStack Table)
+Optional `?template=true` returns dropdown options alongside the client data.  
+Returns `ClientData`.
 
-I DO NOT want Angular code.
+#### Get by External ID
 
-================================================================================
+```
+GET /v1/clients/external-id/{externalId}
+```
 
-1. CLIENTS LIST (ClientsListComponent)
-   \================================================================================
+#### Create Client
 
-FILE: clients-list.component.ts
+```
+POST /v1/clients
+```
 
---- API CALL: Get Paginated Clients ---
+Content-Type: `application/json`
 
-Service: ClientService.getClients()
-Endpoint: GET /api/v2/clients
-Parameters: (all optional) - officeId: number | undefined - externalId: string | undefined - displayName: string | undefined (search term wrapped in %...%) - firstName: string | undefined - lastName: string | undefined - status: string | undefined ("active" | "pending" | "closed") - phone: string | undefined - offset: number | undefined (pageIndex * pageSize) - limit: number | undefined (pageSize) - orderBy: string | undefined (column key) - sortOrder: string | undefined ("ASC" | "DESC") - staffInSelectedOfficeOnly: boolean | undefined (always false) - loanOfficerId: number | undefined (always 1)
+#### Update Client
 
-Response Type: GetClientsResponse
-{ pageItems?: Array<GetClientsPageItemsResponse>, totalFilteredRecords?: number }
+```
+PUT /v1/clients/{clientId}
+```
 
-GetClientsPageItemsResponse:
-{ accountNo?, active?, displayName?, emailAddress?, fullname?, id?, officeId?, officeName?, status?: GetClientStatus }
+#### Delete Client
 
-GetClientStatus:
-{ code?: string, description?: string, id?: number }
+```
+DELETE /v1/clients/{clientId}
+```
 
---- BUSINESS LOGIC: Reactive Data Loading ---
+Deletion is only allowed when client status = PENDING. This is a hard delete.
 
-Uses RxJS merge() of 4 event streams: 1. searchSubject - user typing in search bar 2. sortSubject - column header click 3. pageSubject - paginator page change 4. filterSubject - status dropdown change
+#### Apply Command (State Transition)
 
-Pipeline:
-merge(streams).pipe(
-startWith({}), // triggers initial load
-switchMap(() => {
-offset = currentPage.pageIndex * currentPage.pageSize
-limit = currentPage.pageSize
-orderBy = currentSort.active || undefined
-sortOrder = currentSort.direction?.toUpperCase() || undefined
-displayName = currentFilter ? `%${currentFilter}%` : undefined
-status = activeFilters.status
-return clientService.getClients(_,_,displayName,_,_,status,_,offset,limit,orderBy,sortOrder,false,1)
-.pipe(catchError(() => of(null)))
-}),
-map(response => {
-if (!response) return []
-totalRecords = response.totalFilteredRecords || 0
-return response.pageItems || []
-})
-).subscribe(data => clients = data)
+```
+POST /v1/clients/{clientId}?command={command}
+```
 
-Every search/sort/page/filter resets pageIndex to 0 (except page change).
-Error silently returns empty array via catchError.
-Search uses SQL LIKE pattern: %query%.
+### 3.2 Client Accounts
 
---- COLUMNS ---
+```
+GET /v1/clients/{clientId}/accounts
+```
 
-Columns: ColumnDef[] = [
-{ key: 'accountNo', label: 'CLIENTS.ACCOUNT_NO', sortable: true },
-{ key: 'fullname', label: 'COMMON.NAME', sortable: true },
-{ key: 'status', label: 'COMMON.STATUS', sortable: true },
-{ key: 'officeName',label: 'COMMON.OFFICE', sortable: true },
-{ key: 'actions', label: 'COMMON.ACTIONS', sortable: false },
-]
+Returns: `{ loanAccounts: [], savingsAccounts: [], shareAccounts: [] }`
 
-Custom renderings: - "fullname": clickable <a> link -> /clients/view/:id - "status": <app-status-badge [status]="client.status"> - "actions": Edit (/clients/edit/:id) + View (/clients/view/:id) buttons
+### 3.3 Client Charges
 
---- STATUS FILTER ---
+```
+GET  /v1/clients/{clientId}/charges?chargeStatus=all
+POST /v1/clients/{clientId}/charges
+POST /v1/clients/{clientId}/charges/{chargeId}?command=waive
+POST /v1/clients/{clientId}/charges/{chargeId}?command=paycharge
+DELETE /v1/clients/{clientId}/charges/{chargeId}
+```
 
-Options: All | Active | Pending | Closed
-Stored in: activeFilters.status (string | undefined)
-On change: resets pageIndex to 0, triggers filterSubject.next()
+### 3.4 Client Identifiers
 
---- PERMISSION ---
+```
+GET    /v1/clients/{clientId}/identifiers
+POST   /v1/clients/{clientId}/identifiers
+PUT    /v1/clients/{clientId}/identifiers/{identifierId}
+DELETE /v1/clients/{clientId}/identifiers/{identifierId}
+```
+
+### 3.5 Client Family Members
+
+```
+GET    /v1/clients/{clientId}/familymembers
+POST   /v1/clients/{clientId}/familymembers
+PUT    /v1/clients/{clientId}/familymembers/{familyMemberId}
+DELETE /v1/clients/{clientId}/familymembers/{familyMemberId}
+```
+
+### 3.6 Client Address
+
+```
+GET    /v1/client/{clientId}/addresses
+POST   /v1/client/{clientId}/addresses
+PUT    /v1/client/{clientId}/addresses
+```
+
+### 3.7 Client Collateral
+
+```
+POST   /v1/clients/{clientId}/collaterals
+PUT    /v1/clients/{clientId}/collaterals/{collateralId}
+DELETE /v1/clients/{clientId}/collaterals/{collateralId}
+```
+
+---
+
+## 4. Create Page Dependency Analysis
+
+Every field on the Client Create form, what it depends on, and where the data comes from.
+
+### 4.1 Template Data
+
+```
+GET /v1/clients/template?officeId={officeId}&staffInSelectedOfficeOnly=true/false
+```
+
+This single endpoint returns ALL dropdown options needed for the create form.
+
+### 4.2 Field Dependency Table
+
+| Field                         | Data Source                                                | When Loaded             | Required    | Notes                                                                                       |
+| ----------------------------- | ---------------------------------------------------------- | ----------------------- | ----------- | ------------------------------------------------------------------------------------------- |
+| **Office**                    | `GET /v1/clients/template` → `officeOptions`               | Page load               | **Yes**     | First field to select; filters staff                                                        |
+| **Legal Form**                | `GET /v1/clients/template` → `clientLegalFormOptions`      | Page load               | **Yes**     | `1`=Person, `2`=Entity; changes name fields                                                 |
+| **First Name**                | User input                                                 | After Legal Form=Person | Conditional | Required if fullname not provided                                                           |
+| **Middle Name**               | User input                                                 | After Legal Form=Person | No          |                                                                                             |
+| **Last Name**                 | User input                                                 | After Legal Form=Person | Conditional | Required if fullname not provided                                                           |
+| **Full Name**                 | User input                                                 | After Legal Form=Entity | Conditional | Required if firstname/lastname not provided                                                 |
+| **External ID**               | User input                                                 | Always                  | No          | Max 100 chars                                                                               |
+| **Mobile No**                 | User input                                                 | Always                  | No          | Regex: `^\+?[0-9]{7,15}$`, max 50                                                           |
+| **Email Address**             | User input                                                 | Always                  | No          |                                                                                             |
+| **Date of Birth**             | User input                                                 | Always                  | No          | Must be before today and before submittedOnDate                                             |
+| **Gender**                    | `GET /v1/clients/template` → `genderOptions`               | Page load               | No          | From code "Gender"                                                                          |
+| **Client Type**               | `GET /v1/clients/template` → `clientTypeOptions`           | Page load               | No          | From code "ClientType"                                                                      |
+| **Client Classification**     | `GET /v1/clients/template` → `clientClassificationOptions` | Page load               | No          | From code "ClientClassification"                                                            |
+| **Staff (Loan Officer)**      | `GET /v1/clients/template` → `staffOptions`                | After Office selected   | No          | Filtered by office                                                                          |
+| **Active?**                   | Toggle                                                     | Always                  | **Yes**     | Must be true or false                                                                       |
+| **Activation Date**           | User input                                                 | If active=true          | Conditional | Required when active=true                                                                   |
+| **Submitted On Date**         | User input                                                 | Always                  | No          | Defaults to today on backend                                                                |
+| **Savings Product**           | `GET /v1/clients/template` → `savingProductOptions`        | Page load               | No          | Default savings product                                                                     |
+| **Group**                     | User input (groupId)                                       | Always                  | No          |                                                                                             |
+| **Is Staff?**                 | Toggle                                                     | Always                  | No          | Whether client is also an employee                                                          |
+| **Account No**                | User input                                                 | Always                  | No          | Max 20 chars; auto-generated if omitted                                                     |
+| **Address**                   | `GET /v1/clients/template` → `address`                     | If address enabled      | Conditional | Required if `isAddressEnabled=true`                                                         |
+| **Family Members**            | Template includes `familyMemberOptions`                    | Page load               | No          | Relationships, marital status, gender options                                               |
+| **Client Non-Person Details** | User input                                                 | If Legal Form=Entity    | No          | `constitutionId`, `incorpNumber`, `mainBusinessLineId`, `remarks`, `incorpValidityTillDate` |
+
+### 4.3 Code Value Mappings
+
+| Code Name (Backend)    | API Field                                | Endpoint                                              |
+| ---------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| `Gender`               | `genderOptions`                          | `GET /codes/codevalues?codeName=Gender`               |
+| `ClientType`           | `clientTypeOptions`                      | `GET /codes/codevalues?codeName=ClientType`           |
+| `ClientClassification` | `clientClassificationOptions`            | `GET /codes/codevalues?codeName=ClientClassification` |
+| `Constitution`         | `clientNonPersonConstitutionOptions`     | `GET /codes/codevalues?codeName=Constitution`         |
+| `Main Business Line`   | `clientNonPersonMainBusinessLineOptions` | `GET /codes/codevalues?codeName=Main Business Line`   |
+| `ClientClosureReason`  | `narrations` (when command=close)        | `GET /codes/codevalues?codeName=ClientClosureReason`  |
+| `ClientRejectReason`   | `narrations` (when command=reject)       | `GET /codes/codevalues?codeName=ClientRejectReason`   |
+| `ClientWithdrawReason` | `narrations` (when command=withdraw)     | `GET /codes/codevalues?codeName=ClientWithdrawReason` |
+
+---
+
+## 5. Lookup API Table
+
+| UI Component                 | Endpoint                                                              | Label Field                   | Value Field   | Required |
+| ---------------------------- | --------------------------------------------------------------------- | ----------------------------- | ------------- | -------- |
+| Office Select                | `GET /v1/offices?orderBy=name`                                        | `name`                        | `id`          | Yes      |
+| Staff Select                 | `GET /v1/staff?officeId={officeId}&loanOfficersOnly=false`            | `displayName`                 | `id`          | No       |
+| Gender Select                | `GET /v1/clients/template` → `genderOptions`                          | `name`                        | `id`          | No       |
+| Client Type Select           | `GET /v1/clients/template` → `clientTypeOptions`                      | `name`                        | `id`          | No       |
+| Client Classification Select | `GET /v1/clients/template` → `clientClassificationOptions`            | `name`                        | `id`          | No       |
+| Savings Product Select       | `GET /v1/savingsproducts?orderBy=name`                                | `name`                        | `id`          | No       |
+| Legal Form Select            | `GET /v1/clients/template` → `clientLegalFormOptions`                 | `value` (label like "Person") | `id` (1 or 2) | Yes      |
+| Constitution Select          | `GET /v1/clients/template` → `clientNonPersonConstitutionOptions`     | `name`                        | `id`          | No       |
+| Main Business Line Select    | `GET /v1/clients/template` → `clientNonPersonMainBusinessLineOptions` | `name`                        | `id`          | No       |
+| Client Lookup (for groups)   | `GET /v1/clients?status=Active&fields=id,displayName,officeName`      | `displayName`                 | `id`          | No       |
+
+---
+
+## 6. Dependency Graph
+
+```
+Page Load
+    │
+    ▼
+GET /v1/clients/template
+    │
+    ├── officeOptions       → Office dropdown (loads immediately)
+    ├── staffOptions        → Staff dropdown (wait for officeId)
+    ├── genderOptions       → Gender dropdown
+    ├── clientTypeOptions   → Client Type dropdown
+    ├── clientClassificationOptions → Classification dropdown
+    ├── clientNonPersonConstitutionOptions → Constitution (Entity only)
+    ├── clientNonPersonMainBusinessLineOptions → Business Line (Entity only)
+    ├── clientLegalFormOptions → Person/Entity radio
+    ├── savingProductOptions → Savings Product dropdown
+    ├── familyMemberOptions → Family member template
+    └── address             → Address fields (if address enabled)
+            │
+            ▼
+User selects Office
+    │
+    ▼
+Re-fetch staff: GET /v1/staff?officeId={officeId}&loanOfficersOnly=false
+    │
+    ▼
+User selects Legal Form
+    │
+    ├── Person  → show firstname/middlename/lastname, gender, DOB
+    └── Entity  → show fullname, constitution, incorpNumber, business line
+            │
+            ▼
+User sets Active = true
+    │
+    ▼
+Show activationDate (required when active=true)
+    │
+    ▼
+User submits → POST /v1/clients
+```
 
-"Create Client" button requires: 'CREATE_CLIENT' (*appHasPermission)
+---
 
---- NAVIGATION ---
-
-onCreateClient(): router.navigate(['/clients/create'])
-onEditClient(client): router.navigate(['/clients/edit', client.id])
-onViewClient(client): router.navigate(['/clients/view', client.id])
-
-================================================================================ 2. CLIENT VIEW / 360-PROFILE (ClientViewComponent)
-================================================================================
-
-FILE: client-view.component.ts (~955 lines)
-
---- API CALL: Get Single Client ---
-
-Service: ClientService.getClientsClientId()
-Endpoint: GET /api/v2/clients/{clientId}
-Response: GetClientsClientIdResponse (large composite object)
-
-Key properties: - id, accountNo, displayName, firstname, lastname, middlename, fullname - externalId, mobileNo, emailAddress - officeId, officeName, status: GetClientStatus - activatedOnDate, submittedOnDate, activationDate: number[] - timeline: ClientTimelineData - savingsProductList, savingsAccounts: Array<GetClientsSavingsAccounts> - loanAccounts: Array<GetClientsLoanAccounts> - legalForm: { id, code, value } - dateOfBirth, clientType, clientClassification, staff, groups - isStaff, isChildGroup - closureReason/Date, rejectionReason/Date, withdrawalReason/Date, reactivationDate
-
-GetClientsLoanAccounts:
-{ accountNo, productName, loanType, loanCycle, disbursedAmount,
-principalAmount, outstandingBalance, totalOverpaid, inArrears, status }
-
-GetClientsSavingsAccounts:
-{ accountNo, productName, accountBalance, status }
-
---- LOADING LOGIC ---
-
-ngOnInit(): reads route 'id', calls loadClientData()
-loadClientData(): calls clientService.getClientsClientId(this.clientId)
--> sets client signal, computes summaries, loads datatables
-
---- STATUS ID MAPPING ---
-
-100 -> Pending (can: activate, reject, withdraw, delete)
-300 -> Active (can: close)
-400 -> Withdrawn
-500 -> Rejected (can: undoReject)
-600 -> Closed (can: reactivate)
-
---- DASHBOARD SUMMARY STATS ---
-
-computed from client(): - activeLoanCount: loans where status.id === 300 - totalActiveLoanAmount: sum of principalAmount for active loans - savingsCount: savingsAccounts?.length || 0 - totalSavingsBalance: sum of accountBalance for savings
-
---- ACTIONS DROPDOWN (mat-menu) ---
-
-Status 100 (Pending): Activate->'ACTIVATE_CLIENT', Reject->'REJECT_CLIENT',
-Withdraw->'WITHDRAW_CLIENT', Delete->'DELETE_CLIENT'
-Status 300 (Active): Close->'CLOSE_CLIENT'
-Status 600 (Closed): Reactivate->'REACTIVATE_CLIENT'
-Status 500 (Rejected): Undo Reject->'UNDOREJECT_CLIENT'
-Status 400 (Withdrawn):Undo Withdraw->'UNDOWITHDRAW_CLIENT'
-
---- API CALL: Execute Client Action ---
-
-Service: ClientService.postClientsClientId()
-Endpoint: POST /api/v2/clients/{clientId}?command={command}
-
-Payloads:
-activate: { activationDate, dateFormat, locale }
-reject: { rejectionDate, dateFormat, locale, rejectionReasonId? }
-withdraw: { withdrawalDate, dateFormat, locale, withdrawalReasonId? }
-close: { closureDate, dateFormat, locale, closureReasonId? }
-reactivate: { reactivationDate, dateFormat, locale }
-undoReject: { reopenedDate, dateFormat, locale }
-undoWithdraw:{ reopenedDate, dateFormat, locale }
-(dateFormat='yyyy-MM-dd', locale='en')
-
---- API CALL: Delete Client ---
-
-Service: ClientService.deleteClientsClientId()
-Endpoint: DELETE /api/v2/clients/{clientId}
-Uses window.confirm(), on success: router.navigate(['/clients'])
-
---- BUSINESS LOGIC: Action Dialog ---
-
-Opens MatDialog (ClientActionDialogComponent)
-data: { title, command, clientId }
-Returns: { actionDate: Date, reasonId?: number, note?: string }
-Post-action: for activate/reactivate/undoReject/undoWithdraw,
-if result.note -> NotesService.postResourceTypeResourceIdNotes()
-
---- LOAN ACCOUNTS TABLE ---
-
-Columns: accountNo (->/products/loan/:id), productName,
-loanType.value, loanCycle, disbursedAmount, principalAmount,
-outstandingBalance, totalOverpaid, inArrears, status, actions
-
---- SAVINGS ACCOUNTS TABLE ---
-
-Columns: accountNo, productName, accountBalance, status, actions
-Actions: Transaction, Action (type resolved via resolveAccountActionType)
-
---- CREATE PRODUCT NAVIGATION ---
-
-onCreateLoan(): /loans/create?clientId={clientId}
-onCreateSavings(): /products/savings-accounts/create?clientId={clientId}
-onCreateFixed(): /products/fixed-deposits/create?clientId={clientId}
-onCreateRecurring(): /products/recurring-deposits/create?clientId={clientId}
-
---- TAB SYSTEM ---
-
-Tab 1: ClientIdentifiersListComponent (@Input clientId)
-Tab 2: ClientAddressesListComponent (@Input clientId)
-Tab 3: ClientFamilyMembersListComponent (@Input clientId)
-Tab 4: ClientNotesListComponent (@Input clientId)
-Tab 5: ClientDocumentsListComponent (@Input clientId)
-Tab 6: ClientChargesListComponent (route param clientId)
-Tab 7: ClientCollateralListComponent (route param clientId)
-Tab 8: ClientTransactionsListComponent (route param clientId)
-Tab 9: EntityDatatablesComponent (entityType='clients', @Input entityId)
-
-================================================================================ 3. CLIENT CREATE/EDIT FORM (ClientFormComponent)
-================================================================================
-
-FILE: clients-list.component.ts
-
---- API CALL: Get Paginated Clients ---
-
-Service: ClientService.getClients()
-Endpoint: GET /api/v2/clients
-Parameters: (all optional) - officeId: number | undefined - externalId: string | undefined - displayName: string | undefined (search term wrapped in %...%) - firstName: string | undefined - lastName: string | undefined - status: string | undefined ("active" | "pending" | "closed") - phone: string | undefined - offset: number | undefined (pageIndex * pageSize) - limit: number | undefined (pageSize) - orderBy: string | undefined (column key) - sortOrder: string | undefined ("ASC" | "DESC") - staffInSelectedOfficeOnly: boolean | undefined (always false) - loanOfficerId: number | undefined (always 1)
-
-Response Type: GetClientsResponse
-{ pageItems?: Array<GetClientsPageItemsResponse>, totalFilteredRecords?: number }
-
-GetClientsPageItemsResponse:
-{ accountNo?, active?, displayName?, emailAddress?, fullname?, id?, officeId?, officeName?, status?: GetClientStatus }
-
-GetClientStatus:
-{ code?: string, description?: string, id?: number }
-
---- BUSINESS LOGIC: Reactive Data Loading ---
-
-Uses RxJS merge() of 4 event streams: 1. searchSubject — user typing in search bar 2. sortSubject — column header click 3. pageSubject — paginator page change 4. filterSubject — status dropdown change
-
-Pipeline:
-merge(streams).pipe(
-startWith({}), // triggers initial load
-switchMap(() => {
-offset = currentPage.pageIndex * currentPage.pageSize
-limit = currentPage.pageSize
-orderBy = currentSort.active || undefined
-sortOrder = currentSort.direction?.toUpperCase() || undefined
-displayName = currentFilter ? `%${currentFilter}%` : undefined
-status = activeFilters.status
-return clientService.getClients(_,_,displayName,_,_,status,_,offset,limit,orderBy,sortOrder,false,1)
-.pipe(catchError(() => of(null)))
-}),
-map(response => {
-if (!response) return []
-totalRecords = response.totalFilteredRecords || 0
-return response.pageItems || []
-})
-).subscribe(data => clients = data)
-
-Every search/sort/page/filter resets pageIndex to 0 (except page change).
-Error silently returns empty array via catchError.
-Search uses SQL LIKE pattern: %query%.
-
---- COLUMNS ---
-
-Columns: ColumnDef[] = [
-{ key: 'accountNo', label: 'CLIENTS.ACCOUNT_NO', sortable: true },
-{ key: 'fullname', label: 'COMMON.NAME', sortable: true },
-{ key: 'status', label: 'COMMON.STATUS', sortable: true },
-{ key: 'officeName',label: 'COMMON.OFFICE', sortable: true },
-{ key: 'actions', label: 'COMMON.ACTIONS', sortable: false },
-]
-
-Custom renderings: - "fullname": clickable <a> link -> /clients/view/:id - "status": <app-status-badge [status]="client.status"> - "actions": Edit (/clients/edit/:id) + View (/clients/view/:id) buttons
-
---- STATUS FILTER ---
-
-Options: All | Active | Pending | Closed
-Stored in: activeFilters.status (string | undefined)
-On change: resets pageIndex to 0, triggers filterSubject.next()
-
---- PERMISSION ---
-
-"Create Client" button requires: 'CREATE_CLIENT' (*appHasPermission)
-
---- NAVIGATION ---
-
-onCreateClient(): router.navigate(['/clients/create'])
-onEditClient(client): router.navigate(['/clients/edit', client.id])
-onViewClient(client): router.navigate(['/clients/view', client.id])
-
-================================================================================ 4. CLIENT SEARCH V2 (ClientSearchV2Component)
-================================================================================
-
-FILE: client-search-v2.component.ts
-
---- API CALL: Search Clients ---
-
-Service: ClientSearchV2Service.postClientsSearch()
-Endpoint: POST /api/v2/clients/search
-Body: { request: { text: string }, page: number, size: number }
-Response: PageClientSearchData { content?: ClientSearchData[], totalElements? }
-
---- PAGINATION ---
-
-Default pageSize: 10, options: [10, 25, 50]
-search(page): calls API, sets results signal
-onPage(event): updates pageSize/pageNumber, calls search(event.pageIndex)
-
---- NAVIGATION ---
-
-viewClient(id): router.navigate(['/clients/view', id])
-
-================================================================================ 5. CLIENT ACTION DIALOG (ClientActionDialogComponent)
-================================================================================
-
-FILE: client-action-dialog.component.ts
-
---- API CALL: Load Business Date ---
-
-Service: BusinessDateManagementService.getBusinessdate()
-Endpoint: GET /api/v2/businessdate
-Finds entry with type === 'BUSINESS_DATE', converts number[] to Date
-Sets actionDate = maxDate = business date
-
---- API CALL: Load Reason Code Values ---
-
-Step 1: CodesService.getCodesNameCodeName(codeName)
-GET /api/v2/codes/{codeName}
-Step 2: CodeValuesService.getCodesCodeIdCodevalues(codeId)
-GET /api/v2/codes/{codeId}/codevalues
-
-Code names: 'ClientRejectReason', 'ClientWithdrawReason', 'ClientClosureReason'
-
---- COMMAND CONFIG ---
-
-activate: { date: activationDateLabel }
-reject: { date, reason, codeName: 'ClientRejectReason' }
-withdraw: { date, reason, codeName: 'ClientWithdrawReason' }
-close: { date, reason, codeName: 'ClientClosureReason' }
-reactivate: { date: activationDateLabel }
-undoReject: { date: activationDateLabel }
-undoWithdraw:{date: activationDateLabel }
-
---- DIALOG RETURN ---
-
-{ actionDate: Date, reasonId?: number, note: string }
-
-================================================================================ 6. CLIENT IDENTIFIERS (Tab & Form)
-================================================================================
-
---- LIST (ClientIdentifiersListComponent) ---
-
-@Input clientId (required)
-
-API CALL:
-Service: ClientIdentifierService.getClientsClientIdIdentifiers()
-Endpoint: GET /api/v2/clients/{clientId}/identifiers
-Response: ClientIdentifierData[]
-
-Columns: documentType.name, documentKey, description, status, actions
-
-API CALL: Delete
-Service: ClientIdentifierService.deleteClientsClientIdIdentifiersIdentifierId()
-Endpoint: DELETE /api/v2/clients/{clientId}/identifiers/{identifierId}
-Uses window.confirm()
-
---- FORM (ClientIdentifierFormComponent) ---
-
-Mode: edit if route has :id param
-
-API CALL: Load Template
-Service: ClientIdentifierService.getClientsClientIdIdentifiersTemplate()
-Endpoint: GET /api/v2/clients/{clientId}/identifiers/template
-Loads: allowedDocumentTypes
-
-API CALL: Load Identifier Data (edit)
-Service: ClientIdentifierService.getClientsClientIdIdentifiersIdentifierId()
-Endpoint: GET /api/v2/clients/{clientId}/identifiers/{identifierId}
-
-API CALL: Create
-Service: ClientIdentifierService.postClientsClientIdIdentifiers()
-Endpoint: POST /api/v2/clients/{clientId}/identifiers
-Body: ClientIdentifierRequest
-
-API CALL: Update
-Service: ClientIdentifierService.putClientsClientIdIdentifiersIdentifierId()
-Endpoint: PUT /api/v2/clients/{clientId}/identifiers/{identifierId}
-Body: ClientIdentifierRequest
-
-Fields: Document Type (select), Document Key, Status (Active/Inactive), Description
-On success: navigate to /clients/view/{clientId}
-
---- STATUS ID MAPPING ---
-
-100 → Pending (can: activate, reject, withdraw, delete)
-300 → Active (can: close)
-400 → Withdrawn
-500 → Rejected (can: undoReject)
-600 → Closed (can: reactivate)
-================================================================================
-
-7. CLIENT ADDRESSES (Tab & Form)
-   \================================================================================
-
---- LIST (ClientAddressesListComponent) ---
-
-@Input clientId (required)
-
-API CALL:
-Service: ClientsAddressService.getClientClientidAddresses()
-Endpoint: GET /api/v2/clients/{clientId}/addresses
-Response: AddressData[]
-
-Columns: addressType, address (line1+line2+line3), city, stateName,
-countryName, isActive (icon), actions
-
---- FORM (ClientAddressFormComponent) ---
-
-Mode: edit if route has :id param
-
-API CALL: Load Template
-Service: ClientsAddressService.getClientAddressesTemplate()
-Endpoint: GET /api/v2/clients/addresses/template
-Loads: addressTypeIdOptions, stateProvinceIdOptions, countryIdOptions
-
-API CALL: Load Address Data (edit)
-Service: ClientsAddressService.getClientClientidAddresses()
-Finds address where addressId matches route :id
-
-API CALL: Create
-Service: ClientsAddressService.postClientClientidAddresses()
-Endpoint: POST /api/v2/clients/{clientId}/addresses?type={addressTypeId}
-Body: ClientAddressRequest
-
-API CALL: Update
-Service: ClientsAddressService.putClientClientidAddresses()
-Endpoint: PUT /api/v2/clients/{clientId}/addresses
-Body: ClientAddressRequest
-
-Fields: Address Type, Address Line 1/2/3, City, Town/Village, County/District,
-State/Province, Country, Postal Code, Latitude, Longitude, Is Active
-On success: navigate to /clients/view/{clientId}
-
-================================================================================ 8. CLIENT FAMILY MEMBERS (Tab & Form)
-================================================================================
-
---- LIST (ClientFamilyMembersListComponent) ---
-
-@Input clientId (required)
-
-API CALL:
-Service: ClientFamilyMemberService.getClientsClientIdFamilymembers()
-Endpoint: GET /api/v2/clients/{clientId}/familymembers
-Response: ClientFamilyMembersData[]
-
-Columns: fullname (firstName+middleName+lastName), relationship, gender,
-profession, mobileNumber, actions
-
-API CALL: Delete
-Service: ClientFamilyMemberService.deleteClientsClientIdFamilymembersFamilyMemberId()
-Endpoint: DELETE /api/v2/familymembers/{familyMemberId}?clientId={clientId}
-Uses window.confirm()
-
---- FORM (ClientFamilyMemberFormComponent) ---
-
-Mode: edit if route has :id param
-
-API CALL: Load Template
-Service: ClientFamilyMemberService.getClientsClientIdFamilymembersTemplate()
-Endpoint: GET /api/v2/clients/{clientId}/familymembers/template
-Loads: relationshipIdOptions, genderIdOptions, maritalStatusIdOptions, professionIdOptions
-
-API CALL: Load Member Data (edit)
-Service: ClientFamilyMemberService.getClientsClientIdFamilymembersFamilyMemberId()
-Endpoint: GET /api/v2/familymembers/{familyMemberId}?clientId={clientId}
-dateOfBirth converted from number[] to Date
-
-API CALL: Create
-Service: ClientFamilyMemberService.postClientsClientIdFamilymembers()
-Endpoint: POST /api/v2/clients/{clientId}/familymembers
-Body: ClientFamilyMemberRequest
-
-API CALL: Update
-Service: ClientFamilyMemberService.putClientsClientIdFamilymembersFamilyMemberId()
-Endpoint: PUT /api/v2/familymembers/{familyMemberId}?clientId={clientId}
-Body: ClientFamilyMemberRequest
-
-Fields: First Name (req), Middle Name, Last Name (req), Relationship, Gender,
-Marital Status, Profession (selects), Date of Birth, Qualification,
-Mobile Number, Age, Is Dependent (checkbox)
-On success: navigate to /clients/view/{clientId}
-
-================================================================================ 9. CLIENT NOTES (Tab & Form)
-================================================================================
-
---- LIST (ClientNotesListComponent) ---
-
-@Input clientId (required)
-
-API CALL:
-Service: NotesService.getResourceTypeResourceIdNotes()
-Endpoint: GET /api/v2/{resourceType}/{resourceId}/notes
-Parameters: resourceType='clients', resourceId=clientId
-Response: NoteData[]
-
-Columns: note, createdByUsername, createdOn (DatePipe 'medium'), actions
-
-API CALL: Delete
-Service: NotesService.deleteResourceTypeResourceIdNotesNoteId()
-Endpoint: DELETE /api/v2/{resourceType}/{resourceId}/notes/{noteId}
-Uses window.confirm()
-
---- FORM (ClientNoteFormComponent) ---
-
-Mode: edit if route has :id param
-
-API CALL: Load Note Data (edit)
-Service: NotesService.getResourceTypeResourceIdNotesNoteId()
-Endpoint: GET /api/v2/{resourceType}/{resourceId}/notes/{noteId}
-
-API CALL: Create
-Service: NotesService.postResourceTypeResourceIdNotes()
-Endpoint: POST /api/v2/{resourceType}/{resourceId}/notes
-Body: NoteCreateRequest { note: string }
-
-API CALL: Update
-Service: NotesService.putResourceTypeResourceIdNotesNoteId()
-Endpoint: PUT /api/v2/{resourceType}/{resourceId}/notes/{noteId}
-Body: NoteCreateRequest
-
-Fields: Note (textarea, required)
-On success: navigate to /clients/view/{clientId}
-
-================================================================================ 10. CLIENT DOCUMENTS (Tab & Form)
-================================================================================
-
---- LIST (ClientDocumentsListComponent) ---
-
-@Input clientId (required)
-
-API CALL:
-Service: DocumentsService.getEntityTypeEntityIdDocuments()
-Endpoint: GET /api/v2/{entityType}/{entityId}/documents
-Parameters: entityType='clients', entityId=clientId
-Response: DocumentData[]
-
-Columns: name, fileName, type, actions
-
-API CALL: Download Document
-Service: DocumentsService.getEntityTypeEntityIdDocumentsDocumentIdAttachment()
-Endpoint: GET /api/v2/{entityType}/{entityId}/documents/{documentId}/attachment
-Response: Blob
-Logic: creates object URL, triggers download, revokes URL
-
-API CALL: Delete
-Service: DocumentsService.deleteEntityTypeEntityIdDocumentsDocumentId()
-Endpoint: DELETE /api/v2/{entityType}/{entityId}/documents/{documentId}
-Uses window.confirm()
-
---- FORM (ClientDocumentFormComponent) ---
-
-Mode: edit if route has :id param
-
-API CALL: Load Document Data (edit)
-Service: DocumentsService.getEntityTypeEntityIdDocumentsDocumentId()
-Endpoint: GET /api/v2/{entityType}/{entityId}/documents/{documentId}
-Reads: name, description
-
-API CALL: Create (with file upload)
-Service: DocumentsService.postEntityTypeEntityIdDocuments()
-Endpoint: POST /api/v2/{entityType}/{entityId}/documents
-Parameters: contentLength (File.size), description, file (File), name
-
-API CALL: Update
-Service: DocumentsService.putEntityTypeEntityIdDocumentsDocumentId()
-Endpoint: PUT /api/v2/{entityType}/{entityId}/documents/{documentId}
-Parameters: contentLength=undefined, description, file=undefined, name
-
-Fields: Name (req), Description (textarea), File (req for create, hidden for edit)
-On success: navigate to /clients/view/{clientId}
-
-================================================================================ 11. CLIENT CHARGES (Tab & Form)
-================================================================================
-
---- LIST (ClientChargesListComponent) ---
-
-Route param: clientId (via snapshot)
-
-API CALL:
-Service: ClientChargesService.getClientsClientIdCharges()
-Endpoint: GET /api/v2/clients/{clientId}/charges
-Response: { pageItems?: Array<GetClientsChargesPageItems> }
-
-Columns: name, amount, dueDate (formatted), amountPaid (default 0),
-amountOutstanding (default 0), actions
-
-API CALL: Delete
-Service: ClientChargesService.deleteClientsClientIdChargesChargeId()
-Endpoint: DELETE /api/v2/clients/{clientId}/charges/{chargeId}
-Uses window.confirm()
-
---- FORM (ClientChargeFormComponent) ---
-
-Route param: clientId
-
-API CALL: Load Template
-Service: ClientChargesService.getClientsClientIdChargesTemplate()
-Endpoint: GET /api/v2/clients/{clientId}/charges/template
-Response: { chargeOptions?: ChargeData[] } (cast from unknown)
-
-API CALL: Create
-Service: ClientChargesService.postClientsClientIdCharges()
-Endpoint: POST /api/v2/clients/{clientId}/charges
-Body: PostClientsClientIdChargesRequest
-{ chargeId, amount, dueDate, dateFormat, locale }
-
-Fields: Charge (select from template), Amount, Due Date (date input)
-On success: navigate to /clients/{clientId}/charges
-
-================================================================================ 12. CLIENT COLLATERAL (Tab & Form)
-================================================================================
-
---- LIST (ClientCollateralListComponent) ---
-
-Route param: clientId
-
-API CALL:
-Service: ClientCollateralManagementService.getClientsClientIdCollaterals()
-Endpoint: GET /api/v2/clients/{clientId}/collaterals
-Response: ClientCollateralManagementData[] { id, name, quantity, unitPrice, totalCollateral }
-
-Columns: name, quantity, unitPrice, totalCollateral, actions
-
-API CALL: Delete
-Service: ClientCollateralManagementService.deleteClientsClientIdCollateralsCollateralId()
-Endpoint: DELETE /api/v2/clients/{clientId}/collaterals/{collateralId}
-Uses window.confirm()
-
---- FORM (ClientCollateralFormComponent) ---
-
-Route param: clientId, optional :id for edit mode
-
-API CALL: Load Template
-Service: ClientCollateralManagementService.getClientsClientIdCollateralsTemplate()
-Endpoint: GET /api/v2/clients/{clientId}/collaterals/template
-Response: LoanCollateralTemplateData[] { collateralId, name }
-
-API CALL: Load Collateral Data (edit)
-Service: ClientCollateralManagementService.getClientsClientIdCollateralsClientCollateralId()
-Endpoint: GET /api/v2/clients/{clientId}/collaterals/{collateralId}
-Reads: id (as collateralId), quantity
-
-API CALL: Create
-Service: ClientCollateralManagementService.postClientsClientIdCollaterals()
-Endpoint: POST /api/v2/clients/{clientId}/collaterals
-Body: { collateralId, quantity, locale }
-
-API CALL: Update
-Service: ClientCollateralManagementService.putClientsClientIdCollateralsCollateralId()
-Endpoint: PUT /api/v2/clients/{clientId}/collaterals/{collateralId}
-Body: { quantity, locale }
-
-Rules: Product select DISABLED in edit mode (cannot change collateral type)
-Fields: Product (select, disabled in edit), Quantity (number, required)
-On success: navigate to /clients/{clientId}/collaterals
-
-================================================================================ 13. CLIENT TRANSACTIONS (Tab)
-================================================================================
-
-FILE: transactions/client-transactions-list.component.ts
-
-Route param: clientId
-
-API CALL: List
-Service: ClientTransactionService.getClientsClientIdTransactions()
-Endpoint: GET /api/v2/clients/{clientId}/transactions
-Response: { pageItems?: Array<GetClientsPageItems> }
-
-Columns: id, date (formatted), amount, type.value, actions
-
-API CALL: Undo Transaction
-Service: ClientTransactionService.postClientsClientIdTransactionsTransactionId()
-Endpoint: POST /api/v2/clients/{clientId}/transactions/{transactionId}?command=undo
-Uses window.confirm()
-Undo button disabled when row.reversed === true
-
-================================================================================ 14. SHARED UTILITIES
-================================================================================
-
---- DATE FORMATTING (core/utils/date-formatter.ts) ---
-
-formatDateToFineract(date: Date|string|null|undefined): string
-Converts to 'yyyy-MM-dd' format (e.g. "21 July 2026")
-
-formatArrayDate(value: unknown): string
-Converts number[] date [year, month, day] from Fineract API to string
-
-Constants:
-FINERACT_DATE_FORMAT = 'yyyy-MM-dd'
-FINERACT_LOCALE = 'en'
-
-Usage: All create/update payloads include { dateFormat, locale }
-
---- ACCOUNT TYPE RESOLVER (core/utils/account-type-resolver.ts) ---
-
-resolveAccountActionType(account: Record<string, unknown>): string
-Determines product type from account data for routing
-Used in client-view for savings account action links
-
-================================================================================ 15. PERMISSION DIRECTIVE
-================================================================================
-
-FILE: shared/directives/has-permission.directive.ts
-
-Structural directive: *appHasPermission
-Accepts: string (single) or string[] (AND logic)
-
-Permissions used in clients module:
-'CREATE_CLIENT', 'UPDATE_CLIENT', 'DELETE_CLIENT'
-'ACTIVATE_CLIENT', 'CLOSE_CLIENT', 'REJECT_CLIENT',
-'WITHDRAW_CLIENT', 'REACTIVATE_CLIENT',
-'UNDOREJECT_CLIENT', 'UNDOWITHDRAW_CLIENT'
-'CREATE_CLIENTIDENTIFIER', 'UPDATE_CLIENTIDENTIFIER', 'DELETE_CLIENTIDENTIFIER'
-'CREATE_ADDRESS', 'UPDATE_ADDRESS'
-'CREATE_CLIENTFAMILYMEMBER', 'UPDATE_CLIENTFAMILYMEMBER', 'DELETE_CLIENTFAMILYMEMBER'
-'CREATE_NOTE', 'UPDATE_NOTE', 'DELETE_NOTE'
-'CREATE_DOCUMENT', 'READ_DOCUMENT', 'DELETE_DOCUMENT'
-
-================================================================================ 16. I18N TRANSLATION KEY PREFIXES
-================================================================================
-
-CLIENTS.* - Client-specific labels
-COMMON.* - Shared labels (Name, Status, Actions, Edit, Delete)
-MODULES.* - Module titles (CLIENTS_CONTRACTS)
-HELP.* - Help text tooltips
-ACTIONS.* - Action labels (ACTIVATE_CLIENT, REJECT_CLIENT, etc.)
-CLIENT_CHARGES.* - Charges labels
-CLIENT_COLLATERAL.* - Collateral labels
-CLIENT_TRANSACTIONS._- Transaction labels
-CLIENT_SEARCH_V2._ - Search v2 labels
-
-================================================================================
-END OF DOCUMENT
-================================================================================
+## 7. Form Layout
+
+### Section 1: Legal Form (Radio)
+
+- Legal Form (Person / Entity) — **Required**
+- This changes the entire name section
+
+### Section 2: Basic Information
+
+- **Office** — dropdown, **Required**, triggers staff reload
+- **Staff (Loan Officer)** — dropdown, filtered by office, Optional
+- **Account No** — text, auto-generated if empty, max 20 chars
+- **External ID** — text, max 100 chars
+- **Client Type** — dropdown, Optional
+- **Client Classification** — dropdown, Optional
+
+### Section 3: Name (changes based on Legal Form)
+
+**Person (legalFormId=1):**
+
+- First Name — **Required** (max 50)
+- Middle Name — Optional (max 50)
+- Last Name — **Required** (max 50)
+
+**Entity (legalFormId=2):**
+
+- Full Name — **Required** (max 160)
+
+> Mutual exclusivity enforced: you cannot send both fullname AND firstname/middlename/lastname.
+
+### Section 4: Contact
+
+- Mobile No — text, Optional, regex: `^\+?[0-9]{7,15}$`, max 50
+- Email Address — text, Optional
+- Date of Birth — date picker, Optional, must be before today
+
+### Section 5: Demographics
+
+- Gender — dropdown (from "Gender" code), Optional
+- Is Staff? — toggle, Optional (default false)
+
+### Section 6: Activation
+
+- **Active** — toggle, **Required** (must be true or false)
+- Activation Date — date picker, **Required** if active=true
+- Submitted On Date — date picker, Optional (defaults to today)
+
+### Section 7: Entity Details (only when Legal Form = Entity)
+
+- Constitution — dropdown (from "Constitution" code)
+- Incorporation Number — text, max 50
+- Main Business Line — dropdown (from "Main Business Line" code)
+- Remarks — text, max 150
+- Incorporation Validity Till Date — date picker
+
+### Section 8: Financial
+
+- Savings Product — dropdown, Optional (default product for savings account)
+
+### Section 9: Group
+
+- Group ID — hidden/numeric, Optional
+
+### Section 10: Address (if `isAddressEnabled=true`)
+
+Address is a JSON array. The template provides `address` structure via `GET /v1/clients/template`.
+
+### Section 11: Family Members (expandable section)
+
+The template provides `familyMemberOptions` with relationship, marital status, gender options.
+
+---
+
+## 8. API Call Sequence
+
+```
+1. GET /v1/clients/template
+     → Load all dropdowns: offices, staff, genders, types, classifications, savings products, legal forms, constitutions, business lines, family member template, address template
+
+2. User selects Office
+   ↓
+   GET /v1/staff?officeId={selectedOfficeId}&loanOfficersOnly=false
+     → Refresh staff dropdown
+
+3. User fills form, selects Legal Form, enters names, toggles Active, etc.
+
+4. Validation (client-side via Zod — see Section 9)
+
+5. POST /v1/clients
+     Body: {
+       officeId: number,
+       legalFormId: 1 | 2,
+       firstname?: string,
+       middlename?: string,
+       lastname?: string,
+       fullname?: string,
+       active: boolean,
+       activationDate?: string (yyyy-MM-dd),
+       submittedOnDate?: string,
+       externalId?: string,
+       mobileNo?: string,
+       emailAddress?: string,
+       dateOfBirth?: string,
+       genderId?: number,
+       clientTypeId?: number,
+       clientClassificationId?: number,
+       staffId?: number,
+       savingsProductId?: number,
+       groupId?: number,
+       accountNo?: string,
+       isStaff?: boolean,
+       clientNonPersonDetails?: { ... },  // if Entity
+       address?: [ ... ],                 // if address enabled
+       familyMembers?: [ ... ],
+       dateFormat: "yyyy-MM-dd",
+       locale: "en"
+     }
+
+6. Response: { clientId: number, resourceId: number, officeId: number, ... }
+```
+
+---
+
+## 9. TypeScript Interfaces
+
+```typescript
+// === Core Enums ===
+
+enum ClientStatus {
+  Invalid = 0,
+  Pending = 100,
+  Active = 300,
+  TransferInProgress = 303,
+  TransferOnHold = 304,
+  Closed = 600,
+  Rejected = 700,
+  Withdrawn = 800,
+}
+
+enum LegalForm {
+  Person = 1,
+  Entity = 2,
+}
+
+// === Supporting Types ===
+
+interface EnumOptionData {
+  id: number;
+  code: string;
+  value: string;
+}
+
+interface CodeValueData {
+  id: number;
+  name: string;
+  position?: number;
+  active?: boolean;
+  mandatory?: boolean;
+}
+
+interface ClientTimelineData {
+  submittedOnDate: string | null;
+  submittedByUsername: string | null;
+  submittedByFirstname: string | null;
+  submittedByLastname: string | null;
+  activatedOnDate: string | null;
+  activatedByUsername: string | null;
+  activatedByFirstname: string | null;
+  activatedByLastname: string | null;
+  closedOnDate: string | null;
+  closedByUsername: string | null;
+  closedByFirstname: string | null;
+  closedByLastname: string | null;
+}
+
+interface OfficeData {
+  id: number;
+  name: string;
+  nameDecorated: string;
+  externalId?: string;
+  openingDate?: string;
+  hierarchy?: string;
+  parentId?: number;
+  parentName?: string;
+}
+
+interface StaffData {
+  id: number;
+  firstname: string;
+  lastname: string;
+  displayName: string;
+  officeId: number;
+  officeName: string;
+  isLoanOfficer: boolean;
+  externalId?: string;
+  joiningDate?: string;
+}
+
+interface SavingsProductData {
+  id: number;
+  name: string;
+  shortName?: string;
+  currency?: CurrencyData;
+}
+
+interface CurrencyData {
+  code: string;
+  name: string;
+  decimalPlaces: number;
+  displaySymbol: string;
+  nameCode: string;
+  displayLabel: string;
+}
+
+interface GroupGeneralData {
+  id: number;
+  name: string;
+  officeId: number;
+  officeName: string;
+  hierarchy?: string;
+  status?: EnumOptionData;
+  active?: boolean;
+  activationDate?: string;
+  staffId?: number;
+  staffName?: string;
+  clientCount?: number;
+}
+
+interface ClientCollateralManagementData {
+  id: number;
+  name: string;
+  quantity: number;
+  pctToBase: number;
+  basePrice: number;
+  total: number;
+  totalCollateral: number;
+}
+
+interface ClientNonPersonData {
+  constitutionId?: number;
+  constitution?: CodeValueData;
+  incorpNumber?: string;
+  mainBusinessLineId?: number;
+  mainBusinessLine?: CodeValueData;
+  remarks?: string;
+  incorpValidityTillDate?: string;
+}
+
+interface AddressData {
+  addressId?: number;
+  addressType?: string;
+  addressTypeId?: number;
+  addressLine1?: string;
+  addressLine2?: string;
+  addressLine3?: string;
+  townVillage?: string;
+  city?: string;
+  country?: string;
+  stateProvinceId?: number;
+  stateProvince?: string;
+  countyDistrict?: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  isActive?: boolean;
+}
+
+interface ClientFamilyMembersData {
+  id?: number;
+  clientId?: number;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  qualification?: string;
+  age?: number;
+  isDependent?: boolean;
+  relationshipId?: number;
+  relationship?: CodeValueData;
+  maritalStatusId?: number;
+  maritalStatus?: CodeValueData;
+  genderId?: number;
+  gender?: CodeValueData;
+  professionId?: number;
+  profession?: CodeValueData;
+  dateOfBirth?: string;
+}
+
+interface DatatableData {
+  applicationTableName: string;
+  registeredTableName: string;
+  entitySubType?: string;
+  multiRow: boolean;
+  columns: DatatableColumnData[];
+}
+
+interface DatatableColumnData {
+  name: string;
+  type: string;
+  length?: number;
+  mandatory: boolean;
+  code?: string;
+  columnValues?: CodeValueData[];
+}
+
+// === Main Client DTO ===
+
+interface ClientData {
+  id: number;
+  accountNo: string | null;
+  externalId: string | null;
+  status: EnumOptionData;
+  subStatus: CodeValueData | null;
+  active: boolean | null;
+  activationDate: string | null;
+  firstname: string | null;
+  middlename: string | null;
+  lastname: string | null;
+  fullname: string | null;
+  displayName: string | null;
+  mobileNo: string | null;
+  emailAddress: string | null;
+  dateOfBirth: string | null;
+  gender: CodeValueData | null;
+  clientType: CodeValueData | null;
+  clientClassification: CodeValueData | null;
+  isStaff: boolean;
+  officeId: number;
+  officeName: string | null;
+  transferToOfficeId: number | null;
+  transferToOfficeName: string | null;
+  imageId: number | null;
+  imagePresent: boolean | null;
+  staffId: number | null;
+  staffName: string | null;
+  timeline: ClientTimelineData | null;
+  savingsProductId: number | null;
+  savingsProductName: string | null;
+  savingsAccountId: number | null;
+  legalForm: EnumOptionData | null;
+  clientCollateralManagements: ClientCollateralManagementData[] | null;
+  groups: GroupGeneralData[] | null;
+  clientNonPersonDetails: ClientNonPersonData | null;
+  address: AddressData[] | null;
+  isAddressEnabled: boolean | null;
+  datatables: DatatableData[] | null;
+
+  // Template-only fields (returned by GET /clients/template)
+  officeOptions: OfficeData[] | null;
+  staffOptions: StaffData[] | null;
+  genderOptions: CodeValueData[] | null;
+  clientTypeOptions: CodeValueData[] | null;
+  clientClassificationOptions: CodeValueData[] | null;
+  clientNonPersonConstitutionOptions: CodeValueData[] | null;
+  clientNonPersonMainBusinessLineOptions: CodeValueData[] | null;
+  clientLegalFormOptions: EnumOptionData[] | null;
+  savingProductOptions: SavingsProductData[] | null;
+  savingAccountOptions: SavingsProductData[] | null;
+  familyMemberOptions: ClientFamilyMembersData | null;
+  narrations: CodeValueData[] | null;
+}
+
+// === Create Request (POST /v1/clients) ===
+
+interface CreateClientRequest {
+  officeId: number;
+  legalFormId: 1 | 2;
+
+  // Name (Person)
+  firstname?: string;
+  middlename?: string;
+  lastname?: string;
+
+  // Name (Entity)
+  fullname?: string;
+
+  // Activation
+  active: boolean;
+  activationDate?: string; // yyyy-MM-dd, required if active=true
+  submittedOnDate?: string;
+
+  // Optional fields
+  externalId?: string;
+  mobileNo?: string;
+  emailAddress?: string;
+  dateOfBirth?: string;
+  genderId?: number;
+  clientTypeId?: number;
+  clientClassificationId?: number;
+  staffId?: number;
+  savingsProductId?: number;
+  groupId?: number;
+  accountNo?: string;
+  isStaff?: boolean;
+
+  // Entity details
+  clientNonPersonDetails?: {
+    constitutionId?: number;
+    incorpNumber?: string;
+    mainBusinessLineId?: number;
+    remarks?: string;
+    incorpValidityTillDate?: string;
+  };
+
+  // Address (if address enabled)
+  address?: AddressData[];
+
+  // Family members
+  familyMembers?: ClientFamilyMembersData[];
+
+  // Required format
+  dateFormat: string; // e.g. "yyyy-MM-dd"
+  locale: string; // e.g. "en"
+}
+
+// === Update Request (PUT /v1/clients/{clientId}) ===
+
+type UpdateClientRequest = Partial<
+  CreateClientRequest & {
+    displayname?: string;
+  }
+>;
+
+// === State Transition Commands ===
+
+interface ActivateClientRequest {
+  activationDate: string;
+  dateFormat: string;
+  locale: string;
+}
+
+interface CloseClientRequest {
+  closureDate: string;
+  closureReasonId: number;
+  dateFormat: string;
+  locale: string;
+}
+
+interface RejectClientRequest {
+  rejectionDate: string;
+  rejectionReasonId: number;
+  dateFormat: string;
+  locale: string;
+}
+
+interface WithdrawClientRequest {
+  withdrawalDate: string;
+  withdrawalReasonId: number;
+  dateFormat: string;
+  locale: string;
+}
+
+interface ReactivateClientRequest {
+  reactivationDate: string;
+  dateFormat: string;
+  locale: string;
+}
+
+interface UndoRejectClientRequest {
+  reopenedDate: string;
+  dateFormat: string;
+  locale: string;
+}
+
+interface AssignStaffRequest {
+  staffId: number;
+}
+
+interface UpdateSavingsAccountRequest {
+  savingsAccountId: number;
+}
+
+// === Paginated Response ===
+
+interface Page<T> {
+  totalFilteredRecords: number;
+  pageItems: T[];
+}
+```
+
+---
+
+## 10. Validation (Zod Schema)
+
+Extracted from `ClientDataValidator.java`:
+
+```typescript
+import { z } from "zod";
+
+const mobileRegex = /^\+?[0-9]{7,15}$/;
+
+export const createClientSchema = z
+  .object({
+    officeId: z.number({ required_error: "officeId is required" }).int().positive(),
+    legalFormId: z
+      .number({ required_error: "legalFormId is required" })
+      .int()
+      .min(1, "Must be 1 (Person) or 2 (Entity)")
+      .max(2),
+
+    // Name — Person case
+    firstname: z.string().max(50).optional(),
+    middlename: z.string().max(50).optional(),
+    lastname: z.string().max(50).optional(),
+
+    // Name — Entity case
+    fullname: z.string().max(160).optional(),
+
+    active: z.boolean({ required_error: "active is required (true or false)" }),
+    activationDate: z.string().optional(),
+
+    externalId: z.string().max(100).optional(),
+    mobileNo: z.string().regex(mobileRegex, "Invalid mobile number format").max(50).optional(),
+    emailAddress: z.string().email().optional(),
+    dateOfBirth: z.string().optional(),
+
+    genderId: z.number().int().positive().optional(),
+    clientTypeId: z.number().int().positive().optional(),
+    clientClassificationId: z.number().int().positive().optional(),
+
+    staffId: z.number().int().positive().optional(),
+    savingsProductId: z.number().int().positive().optional(),
+    groupId: z.number().int().positive().optional(),
+    accountNo: z.string().max(20).optional(),
+    isStaff: z.boolean().optional(),
+    submittedOnDate: z.string().optional(),
+
+    clientNonPersonDetails: z
+      .object({
+        constitutionId: z.number().int().positive().optional(),
+        incorpNumber: z.string().max(50).optional(),
+        mainBusinessLineId: z.number().int().positive().optional(),
+        remarks: z.string().max(150).optional(),
+        incorpValidityTillDate: z.string().optional(),
+      })
+      .optional(),
+
+    address: z.array(z.any()).optional(),
+    familyMembers: z.array(z.any()).optional(),
+
+    dateFormat: z.string().optional(),
+    locale: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Mutual exclusion: cannot send both fullname AND firstname/lastname
+    const hasIndividualName = !!data.firstname || !!data.middlename || !!data.lastname;
+    const hasFullname = !!data.fullname;
+
+    if (hasFullname && hasIndividualName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Cannot provide both fullname and firstname/middlename/lastname",
+        path: ["fullname"],
+      });
+    }
+
+    // If Person (legalFormId=1), require firstname + lastname
+    if (data.legalFormId === 1 && !hasIndividualName && !hasFullname) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "firstname and lastname are required for Person legal form",
+        path: ["firstname"],
+      });
+    }
+
+    // If Entity (legalFormId=2), require fullname
+    if (data.legalFormId === 2 && !hasFullname) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "fullname is required for Entity legal form",
+        path: ["fullname"],
+      });
+    }
+
+    // If active=true, activationDate is required
+    if (data.active === true && !data.activationDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "activationDate is required when active=true",
+        path: ["activationDate"],
+      });
+    }
+  });
+
+export const activateClientSchema = z.object({
+  activationDate: z.string({ required_error: "activationDate is required" }),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+
+export const closeClientSchema = z.object({
+  closureDate: z.string({ required_error: "closureDate is required" }),
+  closureReasonId: z.number({ required_error: "closureReasonId is required" }).int().positive(),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+
+export const rejectClientSchema = z.object({
+  rejectionDate: z.string({ required_error: "rejectionDate is required" }),
+  rejectionReasonId: z.number({ required_error: "rejectionReasonId is required" }).int().positive(),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+
+export const withdrawClientSchema = z.object({
+  withdrawalDate: z.string({ required_error: "withdrawalDate is required" }),
+  withdrawalReasonId: z.number({ required_error: "withdrawalReasonId is required" }).int().positive(),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional(),
+});
+```
+
+---
+
+## 14. Implementation Checklist
+
+- [ ] Client List (paginated, filterable by office/status/name/staff/legalForm)
+- [ ] Client Detail (with template=true to get dropdowns)
+- [ ] Client Create (with full dependency management)
+- [ ] Client Edit (PUT)
+- [ ] Client Delete (only when Pending)
+- [ ] Client Activate (POST with command=activate)
+- [ ] Client Close (POST with command=close)
+- [ ] Client Reject (POST with command=reject)
+- [ ] Client Withdraw (POST with command=withdraw)
+- [ ] Client Reactivate (POST with command=reactivate)
+- [ ] Client Undo Rejection (POST with command=undoRejection)
+- [ ] Client Undo Withdrawal (POST with command=undoWithdrawal)
+- [ ] Client Assign/Unassign Staff
+- [ ] Client Update Default Savings Account
+- [ ] Client Charges (list, add, pay, waive, delete)
+- [ ] Client Identifiers (list, create, update, delete)
+- [ ] Client Family Members (list, create, update, delete)
+- [ ] Client Address (add, update)
+- [ ] Client Collateral (create, update, delete)
+- [ ] Client Accounts Overview (GET /clients/{id}/accounts)
+- [ ] Client Transactions (list, undo)
+- [ ] Client Transfer (propose, accept, reject, withdraw)
+- [ ] Template-based form initialization
+- [ ] Client-side Zod validation (mirroring backend rules)
+- [ ] Error handling for 400/403/404/409 responses

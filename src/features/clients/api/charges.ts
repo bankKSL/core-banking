@@ -116,6 +116,22 @@ export async function waiveClientCharge(
 }
 
 /**
+ * POST /clients/{clientId}/charges/{chargeId}?command=paycharge
+ * Pay a charge for a client.
+ */
+export async function payClientCharge(
+  clientId: number | string,
+  chargeId: number | string,
+): Promise<ClientChargeCommandResponse> {
+  const { data } = await client.post<ClientChargeCommandResponse>(
+    `/clients/${clientId}/charges/${chargeId}`,
+    {},
+    { params: { command: "paycharge" } },
+  );
+  return data;
+}
+
+/**
  * DELETE /clients/{clientId}/charges/{chargeId}
  * Delete a charge from a client.
  */

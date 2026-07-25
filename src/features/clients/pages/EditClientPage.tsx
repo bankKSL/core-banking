@@ -10,7 +10,6 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useUpdateClient } from "../hooks/useUpdateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
-import { currentDate } from "@/lib/utils";
 
 const EditClientPage: FC = () => {
   const navigate = useNavigate();
@@ -22,33 +21,9 @@ const EditClientPage: FC = () => {
   const handleSubmit = useCallback(
     async (values: CreateClientFormValues) => {
       if (!client) return;
-      // Fineract PUT /clients/{id} only accepts specific fields.
-      // Fields like officeId, staffId, groupId, active are NOT supported on update.
-      const payload: Record<string, unknown> = {
-        firstname: values.firstname || undefined,
-        middlename: values.middlename || undefined,
-        lastname: values.lastname || undefined,
-        fullname: values.fullname || undefined,
-        externalId: values.externalId || undefined,
-        mobileNo: values.mobileNo || undefined,
-        emailAddress: values.emailAddress || undefined,
-        dateOfBirth: values.dateOfBirth ? currentDate(values.dateOfBirth) : undefined,
-        genderId: values.genderId ?? undefined,
-        legalFormId: values.legalFormId ?? undefined,
-        savingsProductId: values.savingsProductId ?? undefined,
-        dateFormat: "yyyy-MM-dd",
-        locale: "en",
-      };
-      // Only include activationDate if a value was provided
-      if (values.activationDate) {
-        payload.activationDate = currentDate(values.activationDate);
-      }
-      if (values.submittedOnDate) {
-        payload.submittedOnDate = currentDate(values.submittedOnDate);
-      }
       await updateMutation.mutateAsync({
         clientId: client.id,
-        payload: payload as any,
+        payload: values as any,
       });
       navigate(`/clients/${client.id}`);
     },
