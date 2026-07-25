@@ -28,7 +28,12 @@ const RoleFormPage: FC = () => {
   const createMutation = useCreateRole();
   const updateMutation = useUpdateRole();
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<RoleFormValues>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<RoleFormValues>({
     resolver: zodResolver(roleSchema),
     defaultValues: { name: "", description: "" },
   });
@@ -48,19 +53,30 @@ const RoleFormPage: FC = () => {
   };
 
   if (isEdit && isLoading) {
-    return <div className="p-6 max-w-lg m-auto"><Skeleton className="h-10 w-48 mb-6" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
+    return (
+      <div className="p-6 max-w-lg m-auto">
+        <Skeleton className="h-10 w-48 mb-6" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 max-w-lg m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Role" : "Create Role"}
         description={isEdit ? `Editing role #${id}` : "Define a new application role"}
-        actions={<Button variant="outline" onClick={() => navigate("/admin/roles")}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>}
+        actions={
+          <Button variant="outline" onClick={() => navigate("/admin/roles")}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
+        }
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
-          <CardHeader><CardTitle className="text-base">Role Details</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Role Details</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="name">Role Name *</Label>
@@ -69,16 +85,25 @@ const RoleFormPage: FC = () => {
             </div>
             <div>
               <Label htmlFor="description">Description *</Label>
-              <Textarea id="description" {...register("description")} placeholder="Describe this role's purpose" rows={3} />
+              <Textarea
+                id="description"
+                {...register("description")}
+                placeholder="Describe this role's purpose"
+                rows={3}
+              />
               {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
             </div>
           </CardContent>
         </Card>
         <div className="flex justify-end gap-3">
-          <Button variant="outline" type="button" onClick={() => navigate("/admin/roles")}><ArrowLeft className="mr-2 h-4 w-4" />Cancel</Button>
+          <Button variant="outline" type="button" onClick={() => navigate("/admin/roles")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Cancel
+          </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <Save className="mr-2 h-4 w-4" />{isEdit ? "Save Changes" : "Create Role"}
+            <Save className="mr-2 h-4 w-4" />
+            {isEdit ? "Save Changes" : "Create Role"}
           </Button>
         </div>
       </form>

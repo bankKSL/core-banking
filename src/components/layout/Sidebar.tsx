@@ -144,6 +144,7 @@ const sections: NavSectionConfig[] = [
       { label: "Users", path: "/admin/users", icon: UserCog },
       { label: "Roles", path: "/admin/roles", icon: ShieldCheck },
       { label: "Permissions", path: "/admin/permissions", icon: KeyRound },
+      { label: "Tellers", path: "/tellers", icon: Banknote },
       { label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal },
     ],
   },

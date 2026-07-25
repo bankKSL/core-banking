@@ -81,12 +81,13 @@ function DataTable<T>({
     [sortKey, sortDirection],
   );
 
+  const items = Array.isArray(data) ? data : [];
   const sortedData = React.useMemo(() => {
-    if (!sortKey || !sortDirection) return data;
+    if (!sortKey || !sortDirection) return items;
     const col = columns.find((c) => c.key === sortKey);
-    if (!col) return data;
+    if (!col) return items;
 
-    return [...data].sort((a: any, b: any) => {
+    return [...items].sort((a: any, b: any) => {
       const aVal = col.accessorFn ? col.accessorFn(a) : a[sortKey];
       const bVal = col.accessorFn ? col.accessorFn(b) : b[sortKey];
 
@@ -105,18 +106,18 @@ function DataTable<T>({
 
       return sortDirection === "desc" ? -comparison : comparison;
     });
-  }, [data, sortKey, sortDirection, columns]);
+  }, [items, sortKey, sortDirection, columns]);
 
   const handleSelectAll = useCallback(
     (checked: boolean) => {
       if (!onSelectionChange) return;
       if (checked) {
-        onSelectionChange(data.map((row) => idAccessor(row)));
+        onSelectionChange(items.map((row) => idAccessor(row)));
       } else {
         onSelectionChange([]);
       }
     },
-    [data, idAccessor, onSelectionChange],
+    [items, idAccessor, onSelectionChange],
   );
 
   const handleSelectRow = useCallback(
@@ -131,8 +132,8 @@ function DataTable<T>({
     [selectedIds, onSelectionChange],
   );
 
-  const allSelected = data.length > 0 && data.every((row) => selectedIds.includes(idAccessor(row)));
-  const someSelected = data.some((row) => selectedIds.includes(idAccessor(row))) && !allSelected;
+  const allSelected = items.length > 0 && items.every((row) => selectedIds.includes(idAccessor(row)));
+  const someSelected = items.some((row) => selectedIds?.includes(idAccessor(row))) && !allSelected;
 
   const renderSortIcon = (key: string) => {
     if (sortKey !== key) {
@@ -193,7 +194,7 @@ function DataTable<T>({
   }
 
   // Empty state
-  if (data.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         <div className="flex flex-col items-center justify-center py-16 px-4">

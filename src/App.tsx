@@ -73,6 +73,9 @@ import StandingInstructionsPage from "./pages/StandingInstructionsPage";
 import StandingInstructionFormPage from "./pages/StandingInstructionFormPage";
 import StandingInstructionHistoryPage from "./pages/StandingInstructionHistoryPage";
 import UserListPage from "@/features/admin/pages/UserListPage";
+import TellerListPage from "@/features/tellers/pages/TellerListPage";
+import TellerFormPage from "@/features/tellers/pages/TellerFormPage";
+import TellerDetailPage from "@/features/tellers/pages/TellerDetailPage";
 import UserFormPage from "@/features/admin/pages/UserFormPage";
 import UserDetailPage from "@/features/admin/pages/UserDetailPage";
 import RoleListPage from "@/features/admin/pages/RoleListPage";
@@ -153,6 +156,11 @@ function App() {
                   <Route path="/admin/roles/edit/:id" element={<RoleFormPage />} />
                   <Route path="/admin/roles/:id" element={<RoleDetailPage />} />
                   <Route path="/admin/permissions" element={<PermissionsPage />} />
+                  {/* Teller Management */}
+                  <Route path="/tellers" element={<TellerListPage />} />
+                  <Route path="/tellers/new" element={<TellerFormPage />} />
+                  <Route path="/tellers/edit/:id" element={<TellerFormPage />} />
+                  <Route path="/tellers/:id" element={<TellerDetailPage />} />
                   {/* Lending */}
                   <Route path="/lending/products" element={<LoanProductsPage />} />
                   <Route path="/lending/products/new" element={<LoanProductFormPage />} />
