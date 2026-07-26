@@ -117,6 +117,10 @@ import {
   EmailCampaignFormPage,
   CampaignDetailPage,
 } from "@/features/campaigns";
+import OfficeListPage from "@/features/offices/pages/OfficeListPage";
+import OfficeFormPage from "@/features/offices/pages/OfficeFormPage";
+import OfficeTransactionListPage from "@/features/offices/pages/OfficeTransactionListPage";
+import OfficeTransactionFormPage from "@/features/offices/pages/OfficeTransactionFormPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -268,6 +272,12 @@ function App() {
                   <Route path="/clients/new" element={<CreateClientPage />} />
                   <Route path="/clients/:id" element={<ClientDetailPage />} />
                   <Route path="/clients/:id/edit" element={<EditClientPage />} />
+                  {/* Organization */}
+                  <Route path="/offices" element={<OfficeListPage />} />
+                  <Route path="/offices/new" element={<OfficeFormPage />} />
+                  <Route path="/offices/edit/:id" element={<OfficeFormPage />} />
+                  <Route path="/offices/transactions" element={<OfficeTransactionListPage />} />
+                  <Route path="/offices/transactions/new" element={<OfficeTransactionFormPage />} />
                   {/* Transfers */}
                   <Route path="/transfers/history" element={<TransferListPage />} />
                   <Route path="/transfers/new" element={<TransferFormPage />} />

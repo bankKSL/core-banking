@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Banknote,
   Briefcase,
+  Building2,
   Wallet,
   PiggyBank,
   Globe,
@@ -130,6 +131,15 @@ const sections: NavSectionConfig[] = [
       { label: "Clients", path: "/clients", icon: Users },
       { label: "Groups", path: "/groups", icon: UsersRound },
       { label: "Score Grade", path: "/score-grades", icon: Shield },
+    ],
+  },
+  {
+    id: "organization",
+    title: "Organization",
+    defaultOpen: true,
+    items: [
+      { label: "Branches (Offices)", path: "/offices", icon: Building2 },
+      { label: "Office Transactions", path: "/offices/transactions", icon: ArrowRightLeft },
     ],
   },
   {
