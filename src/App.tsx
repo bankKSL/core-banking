@@ -69,9 +69,10 @@ import ApiErrorHandler from "./components/shared/ApiErrorHandler";
 import DepositAccountDetailPage from "./pages/DepositAccountDetailPage";
 import TransferListPage from "./pages/TransferListPage";
 import TransferFormPage from "./pages/TransferFormPage";
-import StandingInstructionsPage from "./pages/StandingInstructionsPage";
-import StandingInstructionFormPage from "./pages/StandingInstructionFormPage";
-import StandingInstructionHistoryPage from "./pages/StandingInstructionHistoryPage";
+import StandingInstructionListPage from "@/features/standing-instructions/pages/StandingInstructionListPage";
+import StandingInstructionFormPage from "@/features/standing-instructions/pages/StandingInstructionFormPage";
+import StandingInstructionViewPage from "@/features/standing-instructions/pages/StandingInstructionViewPage";
+import StandingInstructionHistoryPage from "@/features/standing-instructions/pages/StandingInstructionHistoryPage";
 import UserListPage from "@/features/admin/pages/UserListPage";
 import TellerListPage from "@/features/tellers/pages/TellerListPage";
 import TellerFormPage from "@/features/tellers/pages/TellerFormPage";
@@ -270,8 +271,9 @@ function App() {
                   {/* Transfers */}
                   <Route path="/transfers/history" element={<TransferListPage />} />
                   <Route path="/transfers/new" element={<TransferFormPage />} />
-                  <Route path="/transfers/standing-instructions" element={<StandingInstructionsPage />} />
+                  <Route path="/transfers/standing-instructions" element={<StandingInstructionListPage />} />
                   <Route path="/transfers/standing-instructions/new" element={<StandingInstructionFormPage />} />
+                  <Route path="/transfers/standing-instructions/:id" element={<StandingInstructionViewPage />} />
                   <Route path="/transfers/standing-instructions/edit/:id" element={<StandingInstructionFormPage />} />
                   <Route path="/transfers/standing-instructions/history" element={<StandingInstructionHistoryPage />} />
                   {/* External Asset Owners (Investor Base) */}

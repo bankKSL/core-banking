@@ -11,8 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSmsCampaigns, useDeleteSmsCampaign, useEmailCampaigns, useDeleteEmailCampaign } from "../hooks/useCampaigns";
-import { STATUS_LABELS, TRIGGER_TYPE_LABELS, CAMPAIGN_TYPE_LABELS, type SmsCampaign, type EmailCampaign } from "../types/campaign";
+import {
+  useSmsCampaigns,
+  useDeleteSmsCampaign,
+  useEmailCampaigns,
+  useDeleteEmailCampaign,
+} from "../hooks/useCampaigns";
+import {
+  STATUS_LABELS,
+  TRIGGER_TYPE_LABELS,
+  CAMPAIGN_TYPE_LABELS,
+  type SmsCampaign,
+  type EmailCampaign,
+} from "../types/campaign";
 
 const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
   const { data: campaigns = [], isLoading } = useSmsCampaigns();
@@ -23,11 +34,7 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return campaigns;
-    return campaigns.filter(
-      (c) =>
-        c.campaignName.toLowerCase().includes(q) ||
-        c.reportName?.toLowerCase().includes(q),
-    );
+    return campaigns.filter((c) => c.campaignName.toLowerCase().includes(q) || c.reportName?.toLowerCase().includes(q));
   }, [campaigns, search]);
 
   const columns: ColumnDef<SmsCampaign>[] = [
@@ -44,7 +51,7 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
     {
       key: "triggerType",
       header: "Trigger",
-      cell: (r) => <Badge variant="outline">{TRIGGER_TYPE_LABELS[r.triggerType] ?? r.triggerType}</Badge>,
+      cell: (r) => <Badge>{TRIGGER_TYPE_LABELS[r.triggerType] ?? r.triggerType}</Badge>,
     },
     {
       key: "campaignType",
@@ -54,9 +61,7 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
     {
       key: "message",
       header: "Message",
-      cell: (r) => (
-        <span className="text-xs max-w-[200px] truncate block">{r.message}</span>
-      ),
+      cell: (r) => <span className="text-xs max-w-50 truncate block">{r.message}</span>,
     },
     {
       key: "actions",
@@ -148,9 +153,7 @@ const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) =>
     {
       key: "emailSubject",
       header: "Subject",
-      cell: (r) => (
-        <span className="text-xs max-w-[200px] truncate block">{r.emailSubject}</span>
-      ),
+      cell: (r) => <span className="text-xs max-w-50 truncate block">{r.emailSubject}</span>,
     },
     {
       key: "actions",
@@ -227,9 +230,7 @@ const CampaignListPage: FC = () => {
         description="Manage SMS and email marketing campaigns"
         actions={
           <Button
-            onClick={() =>
-              navigate(tab === "sms" ? "/campaigns/sms/new" : "/campaigns/email/new")
-            }
+            onClick={() => navigate(tab === "sms" ? "/campaigns/sms/new" : "/campaigns/email/new")}
             className="bg-[#D32F2F] hover:bg-red-700"
           >
             <Plus className="mr-2 h-4 w-4" /> Create Campaign
