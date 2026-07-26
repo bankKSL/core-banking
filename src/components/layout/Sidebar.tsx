@@ -36,6 +36,7 @@ import {
   UserPlus,
   Eye,
   Search,
+  ListOrdered,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -127,6 +128,17 @@ const sections: NavSectionConfig[] = [
       { label: "Clients", path: "/clients", icon: Users },
       { label: "Groups", path: "/groups", icon: UsersRound },
       { label: "Score Grade", path: "/score-grades", icon: Shield },
+    ],
+  },
+  {
+    id: "cob",
+    title: "Close of Business",
+    defaultOpen: true,
+    items: [
+      { label: "Dashboard", path: "/cob/dashboard", icon: Activity },
+      { label: "Business Steps", path: "/cob/steps", icon: ListOrdered },
+      { label: "Catch-Up", path: "/cob/catch-up", icon: Play },
+      { label: "Locked Loans", path: "/cob/locked-loans", icon: Lock },
     ],
   },
   {

@@ -12,7 +12,6 @@ export type {
   PartyLookupResponse,
   RegisterIdentifierRequest,
   RegisterIdentifierResponse,
-  HealthResponse,
   AccountDetailResponse,
   AccountTransaction,
   KYCData,

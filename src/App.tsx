@@ -97,6 +97,12 @@ import {
   InteropTransferPage,
   InteropAccountDetailPage,
 } from "@/features/interop";
+import {
+  COBDashboard,
+  BusinessStepConfigPage,
+  CatchUpPage,
+  LockedLoansPage,
+} from "@/features/cob";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -270,6 +276,11 @@ function App() {
                   <Route path="/interop/party/register" element={<PartyRegisterPage />} />
                   <Route path="/interop/transfers" element={<InteropTransferPage />} />
                   <Route path="/interop/account" element={<InteropAccountDetailPage />} />
+                  {/* Close of Business (COB) */}
+                  <Route path="/cob/dashboard" element={<COBDashboard />} />
+                  <Route path="/cob/steps" element={<BusinessStepConfigPage />} />
+                  <Route path="/cob/catch-up" element={<CatchUpPage />} />
+                  <Route path="/cob/locked-loans" element={<LockedLoansPage />} />
                 </Routes>
               </AppLayout>
             </RequireAuth>
