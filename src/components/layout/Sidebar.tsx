@@ -132,6 +132,14 @@ const sections: NavSectionConfig[] = [
     ],
   },
   {
+    id: "marketing",
+    title: "Marketing",
+    defaultOpen: true,
+    items: [
+      { label: "Campaigns", path: "/campaigns", icon: Megaphone },
+    ],
+  },
+  {
     id: "configuration",
     title: "Configuration",
     defaultOpen: true,

@@ -110,6 +110,12 @@ import {
   PasswordPolicyPage,
   BusinessDatePage,
 } from "@/features/configuration";
+import {
+  CampaignListPage,
+  CampaignFormPage,
+  EmailCampaignFormPage,
+  CampaignDetailPage,
+} from "@/features/campaigns";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -294,6 +300,12 @@ function App() {
                   <Route path="/configuration/external-services" element={<ExternalServicesPage />} />
                   <Route path="/configuration/password-policy" element={<PasswordPolicyPage />} />
                   <Route path="/configuration/business-date" element={<BusinessDatePage />} />
+                  {/* Campaigns (SMS / Email) */}
+                  <Route path="/campaigns" element={<CampaignListPage />} />
+                  <Route path="/campaigns/sms/new" element={<CampaignFormPage />} />
+                  <Route path="/campaigns/email/new" element={<EmailCampaignFormPage />} />
+                  <Route path="/campaigns/sms/:id" element={<CampaignDetailPage />} />
+                  <Route path="/campaigns/email/:id" element={<CampaignDetailPage />} />
                 </Routes>
               </AppLayout>
             </RequireAuth>
