@@ -32,6 +32,10 @@ import {
   CalendarClock,
   UserCog,
   KeyRound,
+  Activity,
+  UserPlus,
+  Eye,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -123,6 +127,18 @@ const sections: NavSectionConfig[] = [
       { label: "Clients", path: "/clients", icon: Users },
       { label: "Groups", path: "/groups", icon: UsersRound },
       { label: "Score Grade", path: "/score-grades", icon: Shield },
+    ],
+  },
+  {
+    id: "interop",
+    title: "Interoperation",
+    defaultOpen: true,
+    items: [
+      { label: "Dashboard", path: "/interop/dashboard", icon: Activity },
+      { label: "Lookup Party", path: "/interop/party/search", icon: Search },
+      { label: "Register Identifier", path: "/interop/party/register", icon: UserPlus },
+      { label: "Transfers", path: "/interop/transfers", icon: ArrowRightLeft },
+      { label: "Account Details", path: "/interop/account", icon: Eye },
     ],
   },
   {

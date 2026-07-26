@@ -90,6 +90,13 @@ import {
   TransferFormPage as InvestorTransferFormPage,
   LoanProductAttributesPage,
 } from "@/features/external-asset-owners";
+import {
+  InteropDashboard,
+  PartySearchPage,
+  PartyRegisterPage,
+  InteropTransferPage,
+  InteropAccountDetailPage,
+} from "@/features/interop";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -257,6 +264,12 @@ function App() {
                     path="/external-asset-owners/loan-product/:loanProductId/attributes"
                     element={<LoanProductAttributesPage />}
                   />
+                  {/* Interoperation (Mojaloop) */}
+                  <Route path="/interop/dashboard" element={<InteropDashboard />} />
+                  <Route path="/interop/party/search" element={<PartySearchPage />} />
+                  <Route path="/interop/party/register" element={<PartyRegisterPage />} />
+                  <Route path="/interop/transfers" element={<InteropTransferPage />} />
+                  <Route path="/interop/account" element={<InteropAccountDetailPage />} />
                 </Routes>
               </AppLayout>
             </RequireAuth>

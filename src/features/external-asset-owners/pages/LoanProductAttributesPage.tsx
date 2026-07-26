@@ -9,19 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   createLoanProductAttributeSchema,
   type CreateLoanProductAttributeFormValues,
@@ -32,6 +21,7 @@ import {
   useUpdateLoanProductAttribute,
 } from "../hooks/useExternalAssetOwners";
 import type { LoanProductAttribute } from "../types/externalAssetOwner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const SETTLEMENT_OPTIONS = [
   { value: "DEFAULT_SETTLEMENT", label: "Default Settlement" },
@@ -122,10 +112,7 @@ const LoanProductAttributesPage: FC = () => {
   if (!parsedId) {
     return (
       <div className="p-6 max-w-4xl m-auto">
-        <PageHeader
-          title="Loan Product Attributes"
-          description="Configure investor attributes for a loan product"
-        />
+        <PageHeader title="Loan Product Attributes" description="Configure investor attributes for a loan product" />
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
             Please provide a loan product ID in the URL.
@@ -142,61 +129,43 @@ const LoanProductAttributesPage: FC = () => {
         description={`Configure investor settings for loan product #${parsedId}`}
         actions={
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/lending/products")}
-            >
+            <Button variant="outline" onClick={() => navigate("/lending/products")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Products
             </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button
-                  onClick={openCreate}
-                  className="bg-[#D32F2F] hover:bg-red-700"
-                >
+                <Button onClick={openCreate} className="bg-[#D32F2F] hover:bg-red-700">
                   <Plus className="mr-2 h-4 w-4" /> Add Attribute
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>
-                    {editingAttribute ? "Edit Attribute" : "Create Attribute"}
-                  </DialogTitle>
+                  <DialogTitle>{editingAttribute ? "Edit Attribute" : "Create Attribute"}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                   <div>
                     <Label htmlFor="attributeKey">Attribute Key *</Label>
                     <Select
                       value={watch("attributeKey")}
-                      onValueChange={(v) =>
-                        setValue("attributeKey", v, { shouldValidate: true })
-                      }
+                      onValueChange={(v) => setValue("attributeKey", v, { shouldValidate: true })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select key" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="settlementModel">Settlement Model</SelectItem>
-                        <SelectItem value="outstandingInterestStrategy">
-                          Outstanding Interest Strategy
-                        </SelectItem>
+                        <SelectItem value="outstandingInterestStrategy">Outstanding Interest Strategy</SelectItem>
                       </SelectContent>
                     </Select>
-                    {errors.attributeKey && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.attributeKey.message}
-                      </p>
-                    )}
+                    {errors.attributeKey && <p className="text-xs text-red-500 mt-1">{errors.attributeKey.message}</p>}
                   </div>
                   <div>
                     <Label htmlFor="attributeValue">Attribute Value *</Label>
                     {watch("attributeKey") === "settlementModel" ? (
                       <Select
                         value={watch("attributeValue")}
-                        onValueChange={(v) =>
-                          setValue("attributeValue", v, { shouldValidate: true })
-                        }
+                        onValueChange={(v) => setValue("attributeValue", v, { shouldValidate: true })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select value" />
@@ -212,9 +181,7 @@ const LoanProductAttributesPage: FC = () => {
                     ) : watch("attributeKey") === "outstandingInterestStrategy" ? (
                       <Select
                         value={watch("attributeValue")}
-                        onValueChange={(v) =>
-                          setValue("attributeValue", v, { shouldValidate: true })
-                        }
+                        onValueChange={(v) => setValue("attributeValue", v, { shouldValidate: true })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select value" />
@@ -228,34 +195,18 @@ const LoanProductAttributesPage: FC = () => {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Input
-                        id="attributeValue"
-                        {...register("attributeValue")}
-                        placeholder="Enter value"
-                      />
+                      <Input id="attributeValue" {...register("attributeValue")} placeholder="Enter value" />
                     )}
                     {errors.attributeValue && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.attributeValue.message}
-                      </p>
+                      <p className="text-xs text-red-500 mt-1">{errors.attributeValue.message}</p>
                     )}
                   </div>
                   <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() => setDialogOpen(false)}
-                    >
+                    <Button variant="outline" type="button" onClick={() => setDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="bg-[#D32F2F] hover:bg-red-700"
-                    >
-                      {isSubmitting && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
+                    <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
+                      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       <Save className="mr-2 h-4 w-4" />
                       {editingAttribute ? "Save Changes" : "Create"}
                     </Button>

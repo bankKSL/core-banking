@@ -31,9 +31,7 @@ const TransferListPage: FC = () => {
   if (loanIdFilter) params.loanId = Number(loanIdFilter);
   if (transferExternalIdFilter) params.transferExternalId = transferExternalIdFilter;
 
-  const { data: transfers = [], isLoading } = useTransfers(
-    Object.keys(params).length > 0 ? params : undefined,
-  );
+  const { data: transfers = [], isLoading } = useTransfers(Object.keys(params).length > 0 ? params : undefined);
 
   const columns: ColumnDef<ExternalAssetOwnerTransfer>[] = [
     { key: "id", header: "ID", cell: (r) => <span className="font-medium">{r.id}</span> },
@@ -45,20 +43,17 @@ const TransferListPage: FC = () => {
     {
       key: "ownerExternalId",
       header: "Owner",
-      cell: (r) => (
-        <span className="font-mono text-sm">{r.ownerExternalId ?? "—"}</span>
-      ),
+      cell: (r) => <span className="font-mono text-sm">{r.ownerExternalId ?? "—"}</span>,
     },
     {
       key: "loanId",
       header: "Loan ID",
-      cell: (r) => <Badge variant="outline">{r.loanId}</Badge>,
+      cell: (r) => <Badge>{r.loanId}</Badge>,
     },
     {
       key: "settlementDate",
       header: "Settlement Date",
-      cell: (r) =>
-        r.settlementDate ? new Date(r.settlementDate).toLocaleDateString() : "—",
+      cell: (r) => (r.settlementDate ? new Date(r.settlementDate).toLocaleDateString() : "—"),
     },
     {
       key: "purchasePriceRatio",
@@ -68,12 +63,7 @@ const TransferListPage: FC = () => {
     {
       key: "externalId",
       header: "Transfer External ID",
-      cell: (r) =>
-        r.externalId ? (
-          <span className="font-mono text-xs">{r.externalId}</span>
-        ) : (
-          "—"
-        ),
+      cell: (r) => (r.externalId ? <span className="font-mono text-xs">{r.externalId}</span> : "—"),
     },
   ];
 
