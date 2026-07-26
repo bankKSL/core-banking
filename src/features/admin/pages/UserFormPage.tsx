@@ -128,7 +128,7 @@ const UserFormPage: FC = () => {
 
   if ((isEdit && userLoading) || templateLoading) {
     return (
-      <div className="p-6 max-w-2xl m-auto">
+      <div className="p-6 max-w-4xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -136,7 +136,7 @@ const UserFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-2xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit User" : "Create User"}
         description={isEdit ? `Editing user #${id}` : "Register a new application user"}

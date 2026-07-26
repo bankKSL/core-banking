@@ -1,13 +1,11 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useHistory } from "../hooks/useStandingInstructions";
 import { parseFineractDate } from "../api/standing-instructions";
@@ -114,17 +112,12 @@ const StandingInstructionHistoryPage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
-              ))}
-            </div>
-          ) : items.length === 0 ? (
-            <EmptyState title="No execution history found." />
-          ) : (
-            <DataTable columns={columns} data={items} />
-          )}
+          <DataTable
+            columns={columns}
+            data={items}
+            loading={isLoading}
+            emptyState={{ message: "No execution history found." }}
+          />
         </CardContent>
       </Card>
     </div>

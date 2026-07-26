@@ -4,9 +4,7 @@ import { Plus, Repeat } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { EmptyState } from "@/components/shared/EmptyState";
 import { useStandingInstructions } from "../hooks/useStandingInstructions";
 import { StandingInstructionTable } from "../components/StandingInstructionTable";
 import { StandingInstructionFilters } from "../components/StandingInstructionFilters";
@@ -91,17 +89,7 @@ const StandingInstructionListPage: React.FC = () => {
             isRefreshing={isRefetching}
           />
 
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
-              ))}
-            </div>
-          ) : instructions.length === 0 ? (
-            <EmptyState title="No standing instructions found." />
-          ) : (
-            <StandingInstructionTable data={instructions} onRowClick={handleRowClick} />
-          )}
+          <StandingInstructionTable data={instructions} onRowClick={handleRowClick} loading={isLoading} />
         </CardContent>
       </Card>
     </div>
