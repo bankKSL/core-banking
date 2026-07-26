@@ -103,6 +103,13 @@ import {
   CatchUpPage,
   LockedLoansPage,
 } from "@/features/cob";
+import {
+  ConfigurationDashboard,
+  GlobalConfigPage,
+  ExternalServicesPage,
+  PasswordPolicyPage,
+  BusinessDatePage,
+} from "@/features/configuration";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -281,6 +288,12 @@ function App() {
                   <Route path="/cob/steps" element={<BusinessStepConfigPage />} />
                   <Route path="/cob/catch-up" element={<CatchUpPage />} />
                   <Route path="/cob/locked-loans" element={<LockedLoansPage />} />
+                  {/* Configuration & Admin */}
+                  <Route path="/configuration" element={<ConfigurationDashboard />} />
+                  <Route path="/configuration/global" element={<GlobalConfigPage />} />
+                  <Route path="/configuration/external-services" element={<ExternalServicesPage />} />
+                  <Route path="/configuration/password-policy" element={<PasswordPolicyPage />} />
+                  <Route path="/configuration/business-date" element={<BusinessDatePage />} />
                 </Routes>
               </AppLayout>
             </RequireAuth>

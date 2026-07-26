@@ -37,6 +37,7 @@ import {
   Eye,
   Search,
   ListOrdered,
+  ToggleLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -128,6 +129,18 @@ const sections: NavSectionConfig[] = [
       { label: "Clients", path: "/clients", icon: Users },
       { label: "Groups", path: "/groups", icon: UsersRound },
       { label: "Score Grade", path: "/score-grades", icon: Shield },
+    ],
+  },
+  {
+    id: "configuration",
+    title: "Configuration",
+    defaultOpen: true,
+    items: [
+      { label: "Dashboard", path: "/configuration", icon: Settings },
+      { label: "Global Config", path: "/configuration/global", icon: ToggleLeft },
+      { label: "External Services", path: "/configuration/external-services", icon: Globe },
+      { label: "Password Policy", path: "/configuration/password-policy", icon: ShieldCheck },
+      { label: "Business Date", path: "/configuration/business-date", icon: Calendar },
     ],
   },
   {
