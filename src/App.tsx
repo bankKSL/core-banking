@@ -83,6 +83,13 @@ import RoleFormPage from "@/features/admin/pages/RoleFormPage";
 import RoleDetailPage from "@/features/admin/pages/RoleDetailPage";
 import PermissionsPage from "@/features/admin/pages/PermissionsPage";
 import { CollateralProductListPage, CollateralProductFormPage } from "@/features/collateral-products";
+import {
+  ExternalAssetOwnerListPage,
+  ExternalAssetOwnerFormPage,
+  TransferListPage as InvestorTransferListPage,
+  TransferFormPage as InvestorTransferFormPage,
+  LoanProductAttributesPage,
+} from "@/features/external-asset-owners";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -176,8 +183,8 @@ function App() {
                   <Route path="/loans/create" element={<LoanFormPage />} />
                   <Route path="/loans/edit/:id" element={<LoanFormPage />} />
                   <Route path="/loans/view/:id" element={<LoanViewPage />} />
-                  <Route path="/loans/rescheduling" element={<RescheduleLoansPage />} />
-                  <Route path="/loans/rescheduling/new" element={<RescheduleLoanFormPage />} />
+                  <Route path="/rescheduling" element={<RescheduleLoansPage />} />
+                  <Route path="/rescheduling/new" element={<RescheduleLoanFormPage />} />
                   <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
@@ -241,6 +248,15 @@ function App() {
                   <Route path="/transfers/standing-instructions/new" element={<StandingInstructionFormPage />} />
                   <Route path="/transfers/standing-instructions/edit/:id" element={<StandingInstructionFormPage />} />
                   <Route path="/transfers/standing-instructions/history" element={<StandingInstructionHistoryPage />} />
+                  {/* External Asset Owners (Investor Base) */}
+                  <Route path="/external-asset-owners/owners" element={<ExternalAssetOwnerListPage />} />
+                  <Route path="/external-asset-owners/new" element={<ExternalAssetOwnerFormPage />} />
+                  <Route path="/external-asset-owners/transfers" element={<InvestorTransferListPage />} />
+                  <Route path="/external-asset-owners/transfers/new" element={<InvestorTransferFormPage />} />
+                  <Route
+                    path="/external-asset-owners/loan-product/:loanProductId/attributes"
+                    element={<LoanProductAttributesPage />}
+                  />
                 </Routes>
               </AppLayout>
             </RequireAuth>

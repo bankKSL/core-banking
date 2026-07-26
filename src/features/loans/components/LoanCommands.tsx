@@ -371,7 +371,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                   Close (Rescheduled)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate(`/loans/rescheduling/new?loanId=${loan.id}`)}>
+                <DropdownMenuItem onClick={() => navigate(`/rescheduling/new?loanId=${loan.id}`)}>
                   <CalendarClock className="mr-2 h-4 w-4" />
                   Reschedule Loan
                 </DropdownMenuItem>
@@ -411,9 +411,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="commandDate">
-                {dateCommand === "approve" ? "Approval Date" : "Disbursement Date"}
-              </Label>
+              <Label htmlFor="commandDate">{dateCommand === "approve" ? "Approval Date" : "Disbursement Date"}</Label>
               <Input id="commandDate" type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
             </div>
             {dateCommand === "approve" && (

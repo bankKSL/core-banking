@@ -60,7 +60,7 @@ const RescheduleLoanFormPage: FC = () => {
         newInterestRate: values.newInterestRate,
         extraTerms: values.extraTerms,
       });
-      navigate("/loans/rescheduling");
+      navigate("/rescheduling");
     },
     [createMutation, navigate],
   );
@@ -71,7 +71,7 @@ const RescheduleLoanFormPage: FC = () => {
         title="New Reschedule Request"
         description="Request a repayment schedule adjustment for a loan"
         actions={
-          <Button variant="outline" onClick={() => navigate("/loans/rescheduling")}>
+          <Button variant="outline" onClick={() => navigate("/rescheduling")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Requests
           </Button>
@@ -81,7 +81,9 @@ const RescheduleLoanFormPage: FC = () => {
       {createMutation.isError && (
         <ErrorState
           title="Failed to create request"
-          message={createMutation.error instanceof Error ? createMutation.error.message : "An unexpected error occurred."}
+          message={
+            createMutation.error instanceof Error ? createMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => createMutation.reset()}
         />
       )}
@@ -124,15 +126,8 @@ const RescheduleLoanFormPage: FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="rescheduleFromDate">Reschedule From Date *</Label>
-              <Input
-                id="rescheduleFromDate"
-                type="date"
-                {...register("rescheduleFromDate")}
-                disabled={isSubmitting}
-              />
-              {errors.rescheduleFromDate && (
-                <p className="text-xs text-red-500">{errors.rescheduleFromDate.message}</p>
-              )}
+              <Input id="rescheduleFromDate" type="date" {...register("rescheduleFromDate")} disabled={isSubmitting} />
+              {errors.rescheduleFromDate && <p className="text-xs text-red-500">{errors.rescheduleFromDate.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="submittedOnDate">Submitted On Date *</Label>

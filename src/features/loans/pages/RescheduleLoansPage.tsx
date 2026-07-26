@@ -71,7 +71,9 @@ const RescheduleLoansPage: FC = () => {
     {
       key: "reason",
       header: "Reason",
-      cell: (r) => <span className="text-sm">{r.rescheduleReasonName ?? r.rescheduleReasonCodeValue?.name ?? "—"}</span>,
+      cell: (r) => (
+        <span className="text-sm">{r.rescheduleReasonName ?? r.rescheduleReasonCodeValue?.name ?? "—"}</span>
+      ),
     },
     {
       key: "fromDate",
@@ -149,7 +151,7 @@ const RescheduleLoansPage: FC = () => {
         title="Reschedule Requests"
         description="Review and manage loan rescheduling requests"
         actions={
-          <Button onClick={() => navigate("/loans/rescheduling/new")} className="bg-[#D32F2F] hover:bg-red-700">
+          <Button onClick={() => navigate("/rescheduling/new")} className="bg-[#D32F2F] hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" /> New Request
           </Button>
         }
