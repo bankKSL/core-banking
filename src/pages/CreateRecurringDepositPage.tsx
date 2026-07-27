@@ -154,13 +154,20 @@ const CreateRecurringDepositPage: React.FC = () => {
   const preClosurePenalApplicable = watch("preClosurePenalApplicable");
 
   const { data: offices = [], isLoading: officesLoading } = useOffices();
-  const clientsQuery = useMemo(() => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}), [officeId]);
+  const clientsQuery = useMemo(
+    () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
+    [officeId],
+  );
   const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
   const { data: products = [], isLoading: productsLoading } = useRecurringDepositProducts();
 
   const { data: template, isLoading: templateLoading } = useQuery({
     queryKey: ["recurringdepositaccounts", "template", clientId, productId],
-    queryFn: () => fetchRecurringDepositAccountTemplate({ clientId: clientId ? Number(clientId) : undefined, productId: productId ? Number(productId) : undefined }),
+    queryFn: () =>
+      fetchRecurringDepositAccountTemplate({
+        clientId: clientId ? Number(clientId) : undefined,
+        productId: productId ? Number(productId) : undefined,
+      }),
     enabled: !!clientId && !!productId,
     staleTime: 60_000,
   });
@@ -191,10 +198,12 @@ const CreateRecurringDepositPage: React.FC = () => {
     }
     if (values.expectedFirstDepositOnDate) payload.expectedFirstDepositOnDate = values.expectedFirstDepositOnDate;
     if (values.nominalAnnualInterestRate) payload.nominalAnnualInterestRate = Number(values.nominalAnnualInterestRate);
-    if (values.interestCompoundingPeriodType) payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
+    if (values.interestCompoundingPeriodType)
+      payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
     if (values.interestPostingPeriodType) payload.interestPostingPeriodType = Number(values.interestPostingPeriodType);
     if (values.interestCalculationType) payload.interestCalculationType = Number(values.interestCalculationType);
-    if (values.interestCalculationDaysInYearType) payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
+    if (values.interestCalculationDaysInYearType)
+      payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
     if (values.lockinPeriodFrequency) payload.lockinPeriodFrequency = Number(values.lockinPeriodFrequency);
     if (values.lockinPeriodFrequencyType) payload.lockinPeriodFrequencyType = Number(values.lockinPeriodFrequencyType);
     if (values.fieldOfficerId) payload.fieldOfficerId = Number(values.fieldOfficerId);
@@ -202,7 +211,8 @@ const CreateRecurringDepositPage: React.FC = () => {
     if (values.preClosurePenalApplicable) {
       payload.preClosurePenalApplicable = true;
       if (values.preClosurePenalInterest) payload.preClosurePenalInterest = Number(values.preClosurePenalInterest);
-      if (values.preClosurePenalInterestOnTypeId) payload.preClosurePenalInterestOnTypeId = Number(values.preClosurePenalInterestOnTypeId);
+      if (values.preClosurePenalInterestOnTypeId)
+        payload.preClosurePenalInterestOnTypeId = Number(values.preClosurePenalInterestOnTypeId);
     }
     if (values.withHoldTax) payload.withHoldTax = true;
 
@@ -223,7 +233,10 @@ const CreateRecurringDepositPage: React.FC = () => {
     setValue("mandatoryRecommendedDepositAmount", String(existingAccount.recurringDepositAmount ?? ""));
     setValue("depositPeriod", String(existingAccount.depositPeriod ?? ""));
     setValue("depositPeriodFrequencyId", String(existingAccount.depositPeriodFrequencyType?.id ?? "2"));
-    setValue("submittedOnDate", existingAccount.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0]);
+    setValue(
+      "submittedOnDate",
+      existingAccount.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0],
+    );
     setValue("nominalAnnualInterestRate", String(existingAccount.nominalAnnualInterestRate ?? ""));
     setValue("interestCompoundingPeriodType", String(existingAccount.interestCompoundingPeriodType?.id ?? ""));
     setValue("interestPostingPeriodType", String(existingAccount.interestPostingPeriodType?.id ?? ""));
@@ -268,23 +281,41 @@ const CreateRecurringDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
               <Label>Office *</Label>
-              <Select value={officeId} onValueChange={(v) => { setValue("officeId", v, { shouldValidate: true }); setValue("clientId", ""); }}>
+              <Select
+                value={officeId}
+                onValueChange={(v) => {
+                  setValue("officeId", v, { shouldValidate: true });
+                  setValue("clientId", "");
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select office" />
                 </SelectTrigger>
                 <SelectContent>
-                  {offices.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.name}</SelectItem>))}
+                  {offices.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Client *</Label>
-              <Select value={clientId} onValueChange={(v) => setValue("clientId", v, { shouldValidate: true })} disabled={!officeId}>
+              <Select
+                value={clientId}
+                onValueChange={(v) => setValue("clientId", v, { shouldValidate: true })}
+                disabled={!officeId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={!officeId ? "Select office first" : "Select client"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((c) => (<SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>))}
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.displayName ?? `#${c.id}`}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {errors.clientId && <p className="text-sm text-red-500 mt-1">{errors.clientId.message}</p>}
@@ -305,11 +336,21 @@ const CreateRecurringDepositPage: React.FC = () => {
                   <SelectValue placeholder="Select product" />
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map((p) => (<SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>))}
+                  {products.map((p) => (
+                    <SelectItem key={p.id} value={String(p.id)}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {errors.productId && <p className="text-sm text-red-500 mt-1">{errors.productId.message}</p>}
-              <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => window.open("/deposits/recurring-products", "_blank")}>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-xs"
+                onClick={() => window.open("/deposits/recurring-products", "_blank")}
+              >
                 <ExternalLink className="mr-1 h-3 w-3" />
                 Create New Product
               </Button>
@@ -330,7 +371,9 @@ const CreateRecurringDepositPage: React.FC = () => {
             <div>
               <Label>Recurring Deposit Amount *</Label>
               <Input type="number" {...register("mandatoryRecommendedDepositAmount")} />
-              {errors.mandatoryRecommendedDepositAmount && <p className="text-sm text-red-500 mt-1">{errors.mandatoryRecommendedDepositAmount.message}</p>}
+              {errors.mandatoryRecommendedDepositAmount && (
+                <p className="text-sm text-red-500 mt-1">{errors.mandatoryRecommendedDepositAmount.message}</p>
+              )}
             </div>
             <div>
               <Label>Period Length *</Label>
@@ -339,10 +382,19 @@ const CreateRecurringDepositPage: React.FC = () => {
             </div>
             <div>
               <Label>Period Frequency</Label>
-              <Select value={watch("depositPeriodFrequencyId")} onValueChange={(v) => setValue("depositPeriodFrequencyId", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={watch("depositPeriodFrequencyId")}
+                onValueChange={(v) => setValue("depositPeriodFrequencyId", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {DEPOSIT_PERIOD_FREQUENCIES.map((f) => (<SelectItem key={f.id} value={String(f.id)}>{f.label}</SelectItem>))}
+                  {DEPOSIT_PERIOD_FREQUENCIES.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -376,17 +428,30 @@ const CreateRecurringDepositPage: React.FC = () => {
                 </div>
                 <div>
                   <Label>Frequency Type</Label>
-                  <Select value={watch("recurringFrequencyType")} onValueChange={(v) => setValue("recurringFrequencyType", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={watch("recurringFrequencyType")}
+                    onValueChange={(v) => setValue("recurringFrequencyType", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (<SelectItem key={f.id} value={String(f.id)}>{f.label}</SelectItem>))}
+                      {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
+                        <SelectItem key={f.id} value={String(f.id)}>
+                          {f.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </>
             )}
             <div className="flex items-center gap-3 pt-2">
-              <Switch id="isMandatoryDeposit" onCheckedChange={(v) => setValue("isMandatoryDeposit", v)} defaultChecked />
+              <Switch
+                id="isMandatoryDeposit"
+                onCheckedChange={(v) => setValue("isMandatoryDeposit", v)}
+                defaultChecked
+              />
               <Label htmlFor="isMandatoryDeposit">Mandatory Deposit</Label>
             </div>
             <div className="flex items-center gap-3 pt-2">
@@ -394,7 +459,10 @@ const CreateRecurringDepositPage: React.FC = () => {
               <Label htmlFor="allowWithdrawal">Allow Withdrawal</Label>
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <Switch id="adjustAdvanceTowardsFuturePayments" onCheckedChange={(v) => setValue("adjustAdvanceTowardsFuturePayments", v)} />
+              <Switch
+                id="adjustAdvanceTowardsFuturePayments"
+                onCheckedChange={(v) => setValue("adjustAdvanceTowardsFuturePayments", v)}
+              />
               <Label htmlFor="adjustAdvanceTowardsFuturePayments">Advance Payment Adjustment</Label>
             </div>
             <div>
@@ -412,43 +480,113 @@ const CreateRecurringDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
               <Label>Interest Rate (% annual)</Label>
-              <Input type="number" step="0.01" {...register("nominalAnnualInterestRate")} placeholder={(template as any)?.nominalAnnualInterestRate != null ? String((template as any).nominalAnnualInterestRate) : ""} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("nominalAnnualInterestRate")}
+                placeholder={
+                  (template as any)?.nominalAnnualInterestRate != null
+                    ? String((template as any).nominalAnnualInterestRate)
+                    : ""
+                }
+              />
             </div>
             <div>
               <Label>Compounding Period</Label>
-              <Select value={watch("interestCompoundingPeriodType")} onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{INTEREST_COMPOUNDING_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
+              <Select
+                value={watch("interestCompoundingPeriodType")}
+                onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Posting Period</Label>
-              <Select value={watch("interestPostingPeriodType")} onValueChange={(v) => setValue("interestPostingPeriodType", v)}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{INTEREST_POSTING_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
+              <Select
+                value={watch("interestPostingPeriodType")}
+                onValueChange={(v) => setValue("interestPostingPeriodType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_POSTING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Calculation Type</Label>
-              <Select value={watch("interestCalculationType")} onValueChange={(v) => setValue("interestCalculationType", v)}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{INTEREST_CALCULATION_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
+              <Select
+                value={watch("interestCalculationType")}
+                onValueChange={(v) => setValue("interestCalculationType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_CALCULATION_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Days in Year</Label>
-              <Select value={watch("interestCalculationDaysInYearType")} onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{DAYS_IN_YEAR_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
+              <Select
+                value={watch("interestCalculationDaysInYearType")}
+                onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DAYS_IN_YEAR_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div>
               <Label htmlFor="lockinPeriodFrequency">Lock-in Period</Label>
               <div className="flex gap-2">
-                <Input id="lockinPeriodFrequency" type="number" {...register("lockinPeriodFrequency")} placeholder="Period" className="flex-1" />
-                <Select value={watch("lockinPeriodFrequencyType")} onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}>
-                  <SelectTrigger className="w-28"><SelectValue placeholder="Type" /></SelectTrigger>
-                  <SelectContent>{LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
+                <Input
+                  id="lockinPeriodFrequency"
+                  type="number"
+                  {...register("lockinPeriodFrequency")}
+                  placeholder="Period"
+                  className="flex-1"
+                />
+                <Select
+                  value={watch("lockinPeriodFrequencyType")}
+                  onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}
+                >
+                  <SelectTrigger className="w-28">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
             </div>
@@ -462,7 +600,10 @@ const CreateRecurringDepositPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
-              <Switch id="preClosurePenalApplicable" onCheckedChange={(v) => setValue("preClosurePenalApplicable", v)} />
+              <Switch
+                id="preClosurePenalApplicable"
+                onCheckedChange={(v) => setValue("preClosurePenalApplicable", v)}
+              />
               <Label htmlFor="preClosurePenalApplicable">Apply Pre-closure Penalty</Label>
             </div>
             {preClosurePenalApplicable && (
@@ -473,9 +614,20 @@ const CreateRecurringDepositPage: React.FC = () => {
                 </div>
                 <div>
                   <Label>Penalty Applied On</Label>
-                  <Select value={watch("preClosurePenalInterestOnTypeId")} onValueChange={(v) => setValue("preClosurePenalInterestOnTypeId", v)}>
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>{PRE_CLOSURE_PENALTY_ON_OPTIONS.map((o) => (<SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>))}</SelectContent>
+                  <Select
+                    value={watch("preClosurePenalInterestOnTypeId")}
+                    onValueChange={(v) => setValue("preClosurePenalInterestOnTypeId", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRE_CLOSURE_PENALTY_ON_OPTIONS.map((o) => (
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </>

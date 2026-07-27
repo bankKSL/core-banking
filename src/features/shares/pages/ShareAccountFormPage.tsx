@@ -249,10 +249,7 @@ const ShareAccountFormPage: FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Savings Account</Label>
-                <Select
-                  value={watch("savingsAccountId")}
-                  onValueChange={(v) => setValue("savingsAccountId", v)}
-                >
+                <Select value={watch("savingsAccountId")} onValueChange={(v) => setValue("savingsAccountId", v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select savings account" />
                   </SelectTrigger>
@@ -326,9 +323,7 @@ const ShareAccountFormPage: FC = () => {
             <CardTitle className="text-base">Charges</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.length === 0 && (
-              <p className="text-sm text-gray-500">No charges applied.</p>
-            )}
+            {fields.length === 0 && <p className="text-sm text-gray-500">No charges applied.</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-4">
                 <div className="flex-1">
@@ -363,12 +358,7 @@ const ShareAccountFormPage: FC = () => {
                 </Button>
               </div>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append({ chargeId: "", amount: "" })}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => append({ chargeId: "", amount: "" })}>
               <Plus className="mr-2 h-4 w-4" /> Add Charge
             </Button>
           </CardContent>

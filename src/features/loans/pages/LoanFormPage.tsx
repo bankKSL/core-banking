@@ -136,7 +136,9 @@ const LoanFormPage: FC = () => {
         <div className="mb-4">
           <ErrorState
             title="Failed to calculate schedule"
-            message={previewMutation.error instanceof Error ? previewMutation.error.message : "Please check the form values."}
+            message={
+              previewMutation.error instanceof Error ? previewMutation.error.message : "Please check the form values."
+            }
             onRetry={() => previewMutation.reset()}
           />
         </div>

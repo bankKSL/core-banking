@@ -18,6 +18,8 @@ import {
   ArrowLeftRight,
   MapPinIcon,
   Plus,
+  Calendar,
+  CalendarClock,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -141,6 +143,14 @@ const ClientDetailPage: FC = () => {
             <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/edit`)}>
               <Pencil className="mr-1 h-4 w-4" />
               Edit
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/calendars`)}>
+              <Calendar className="mr-1 h-4 w-4" />
+              Calendars
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/meetings`)}>
+              <CalendarClock className="mr-1 h-4 w-4" />
+              Meetings
             </Button>
             {isPending && (
               <Button

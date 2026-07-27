@@ -25,7 +25,13 @@ function enumVal(v: any, fallback = ""): string {
   return String(v);
 }
 
-const COMPOUNDING_LABELS: Record<number, string> = { 1: "Daily", 4: "Monthly", 5: "Quarterly", 6: "Semi-Annual", 7: "Annual" };
+const COMPOUNDING_LABELS: Record<number, string> = {
+  1: "Daily",
+  4: "Monthly",
+  5: "Quarterly",
+  6: "Semi-Annual",
+  7: "Annual",
+};
 const POSTING_LABELS: Record<number, string> = { 1: "Monthly", 4: "Quarterly", 5: "Semi-Annual", 7: "Annual" };
 const CALCULATION_LABELS: Record<number, string> = { 1: "Daily Balance", 2: "Average Daily Balance" };
 const DAYS_IN_YEAR_LABELS: Record<number, string> = { 360: "360 Days", 364: "364 Days", 365: "365 Days", 1: "Actual" };
@@ -120,7 +126,10 @@ const FixedDepositProductDetailPage: React.FC = () => {
             <Button variant="outline" onClick={() => navigate("/deposits/fixed-products")}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-            <Button onClick={() => navigate(`/deposits/fixed-products/edit/${id}`)} className="bg-[#D32F2F] hover:bg-red-700">
+            <Button
+              onClick={() => navigate(`/deposits/fixed-products/edit/${id}`)}
+              className="bg-[#D32F2F] hover:bg-red-700"
+            >
               <Pencil className="mr-2 h-4 w-4" /> Edit
             </Button>
           </div>
@@ -163,7 +172,9 @@ const FixedDepositProductDetailPage: React.FC = () => {
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
               label="Compounding Period"
-              value={COMPOUNDING_LABELS[p.interestCompoundingPeriodType?.id] ?? enumVal(p.interestCompoundingPeriodType, "—")}
+              value={
+                COMPOUNDING_LABELS[p.interestCompoundingPeriodType?.id] ?? enumVal(p.interestCompoundingPeriodType, "—")
+              }
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
@@ -178,7 +189,10 @@ const FixedDepositProductDetailPage: React.FC = () => {
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
               label="Days in Year"
-              value={DAYS_IN_YEAR_LABELS[p.interestCalculationDaysInYearType?.id] ?? enumVal(p.interestCalculationDaysInYearType, "—")}
+              value={
+                DAYS_IN_YEAR_LABELS[p.interestCalculationDaysInYearType?.id] ??
+                enumVal(p.interestCalculationDaysInYearType, "—")
+              }
             />
           </CardContent>
         </Card>
@@ -199,11 +213,7 @@ const FixedDepositProductDetailPage: React.FC = () => {
             <InfoRow
               icon={<Clock className="h-4 w-4" />}
               label="Max Deposit Term"
-              value={
-                p.maxDepositTerm != null
-                  ? `${p.maxDepositTerm} ${p.maxDepositTermType?.description ?? ""}`
-                  : "—"
-              }
+              value={p.maxDepositTerm != null ? `${p.maxDepositTerm} ${p.maxDepositTermType?.description ?? ""}` : "—"}
             />
           </CardContent>
         </Card>
@@ -246,7 +256,11 @@ const FixedDepositProductDetailPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Withhold Tax" value={p.withHoldTax ? "Yes" : "No"} />
+            <InfoRow
+              icon={<FileText className="h-4 w-4" />}
+              label="Withhold Tax"
+              value={p.withHoldTax ? "Yes" : "No"}
+            />
             <InfoRow
               icon={<FileText className="h-4 w-4" />}
               label="Accounting Rule"

@@ -70,7 +70,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
   const label = TRANSACTION_COMMAND_LABELS[transactionType] ?? transactionType;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {error}

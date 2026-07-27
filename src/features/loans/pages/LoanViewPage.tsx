@@ -1,6 +1,6 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, Calendar } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -89,6 +89,10 @@ const LoanViewPage: FC = () => {
             </Badge>
             <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isRefetching}>
               <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+            </Button>
+            <Button variant="outline" onClick={() => navigate(`/loans/${loan.id}/calendars`)}>
+              <Calendar className="mr-2 h-4 w-4" />
+              Calendars
             </Button>
             <Button variant="outline" onClick={() => navigate("/loans")}>
               <ArrowLeft className="mr-2 h-4 w-4" />

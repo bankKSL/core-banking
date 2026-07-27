@@ -271,12 +271,20 @@ const RecurringDepositDetailPage: React.FC = () => {
                   <Calculator className="mr-1 h-4 w-4" />
                   Calc Interest
                 </Button>
-                <Button variant="outline" size="sm" onClick={async () => {
-                  if (!rd) return;
-                  const result = await calculatePrematureAmountRecurringDeposit(rd.id, new Date().toISOString().split("T")[0]);
-                  setPrematureResult(result as unknown as Record<string, unknown>);
-                  setPrematureDialogOpen(true);
-                }} disabled={acting}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    if (!rd) return;
+                    const result = await calculatePrematureAmountRecurringDeposit(
+                      rd.id,
+                      new Date().toISOString().split("T")[0],
+                    );
+                    setPrematureResult(result as unknown as Record<string, unknown>);
+                    setPrematureDialogOpen(true);
+                  }}
+                  disabled={acting}
+                >
                   <Calculator className="mr-1 h-4 w-4" />
                   Premature Calc
                 </Button>
@@ -327,7 +335,12 @@ const RecurringDepositDetailPage: React.FC = () => {
                 </Button>
               </>
             )}
-            <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/recurring/edit/${rd.id}`)} className="text-blue-600">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/deposits/recurring/edit/${rd.id}`)}
+              className="text-blue-600"
+            >
               <Pencil className="mr-1 h-4 w-4" />
               Edit
             </Button>
@@ -494,7 +507,8 @@ const RecurringDepositDetailPage: React.FC = () => {
                 const freqType = rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? "month";
                 const freq = rd.recurringDepositFrequency ?? 1;
                 const installments = period > 0 && freq > 0 ? Math.floor(period / freq) : 0;
-                if (installments === 0) return <p className="px-6 py-8 text-center text-sm text-gray-400">No installment data available.</p>;
+                if (installments === 0)
+                  return <p className="px-6 py-8 text-center text-sm text-gray-400">No installment data available.</p>;
                 return (
                   <Table>
                     <TableHeader>
@@ -547,18 +561,32 @@ const RecurringDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="py-6 text-center">
             <p className="text-3xl font-bold text-emerald-600">
-              {prematureResult?.changes ? formatCurrency(Number((prematureResult.changes as Record<string, unknown>)?.maturityAmount ?? (prematureResult.changes as Record<string, unknown>)?.transactionAmount ?? 0), rd?.currency?.code) : "—"}
+              {prematureResult?.changes
+                ? formatCurrency(
+                    Number(
+                      (prematureResult.changes as Record<string, unknown>)?.maturityAmount ??
+                        (prematureResult.changes as Record<string, unknown>)?.transactionAmount ??
+                        0,
+                    ),
+                    rd?.currency?.code,
+                  )
+                : "—"}
             </p>
             <p className="text-sm text-gray-500 mt-2">Estimated premature maturity amount</p>
             {prematureResult?.changes ? (
               <div className="mt-4 text-left text-sm space-y-1">
                 {Object.entries(prematureResult.changes as Record<string, unknown>).map(([k, v]) => (
-                  <p key={k} className="text-gray-500"><span className="font-medium capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {String(v ?? "")}</p>
+                  <p key={k} className="text-gray-500">
+                    <span className="font-medium capitalize">{k.replace(/([A-Z])/g, " $1").trim()}:</span>{" "}
+                    {String(v ?? "")}
+                  </p>
                 ))}
               </div>
             ) : null}
           </div>
-          <Button variant="outline" onClick={() => setPrematureDialogOpen(false)}>Close</Button>
+          <Button variant="outline" onClick={() => setPrematureDialogOpen(false)}>
+            Close
+          </Button>
         </DialogContent>
       </Dialog>
 

@@ -242,7 +242,12 @@ const InterestRateChartFormPage: React.FC = () => {
           </div>
           <div className="space-y-1.5">
             <Label>From Date *</Label>
-            <Input type="date" value={form.fromDate} onChange={(e) => updateForm("fromDate", e.target.value)} error={errors.fromDate} />
+            <Input
+              type="date"
+              value={form.fromDate}
+              onChange={(e) => updateForm("fromDate", e.target.value)}
+              error={errors.fromDate}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>End Date</Label>
@@ -310,10 +315,7 @@ const InterestRateChartFormPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <Label>Period Type</Label>
-              <Select
-                value={slabForm.periodType}
-                onValueChange={(v) => setSlabForm((f) => ({ ...f, periodType: v }))}
-              >
+              <Select value={slabForm.periodType} onValueChange={(v) => setSlabForm((f) => ({ ...f, periodType: v }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -358,9 +360,13 @@ const InterestRateChartFormPage: React.FC = () => {
             </Button>
             <Button onClick={handleSaveSlab} disabled={savingSlab} className="bg-[#D32F2F] hover:bg-red-700">
               {savingSlab ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                </>
               ) : (
-                <><Save className="mr-2 h-4 w-4" /> {editingSlab ? "Update" : "Add"}</>
+                <>
+                  <Save className="mr-2 h-4 w-4" /> {editingSlab ? "Update" : "Add"}
+                </>
               )}
             </Button>
           </DialogFooter>

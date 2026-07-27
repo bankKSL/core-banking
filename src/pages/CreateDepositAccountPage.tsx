@@ -143,7 +143,10 @@ const CreateDepositAccountPage: React.FC = () => {
   const lockinPeriodFrequency = watch("lockinPeriodFrequency");
 
   const { data: offices = [], isLoading: officesLoading } = useOffices();
-  const clientsQuery = useMemo(() => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}), [officeId]);
+  const clientsQuery = useMemo(
+    () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
+    [officeId],
+  );
   const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
   const { data: products = [], isLoading: productsLoading } = useSavingsProducts();
   const { data: template, isLoading: templateLoading } = useSavingsTemplate(
@@ -156,7 +159,8 @@ const CreateDepositAccountPage: React.FC = () => {
       const a = existingAccount as any;
       const dob = Array.isArray(a.timeline?.submittedOnDate)
         ? new Date(a.timeline.submittedOnDate[0], a.timeline.submittedOnDate[1] - 1, a.timeline.submittedOnDate[2])
-            .toISOString().split("T")[0]
+            .toISOString()
+            .split("T")[0]
         : new Date().toISOString().split("T")[0];
       reset({
         officeId: "",
@@ -171,7 +175,8 @@ const CreateDepositAccountPage: React.FC = () => {
     }
   }, [existingAccount, reset]);
 
-  const isLoading = officesLoading || clientsLoading || productsLoading || (isEditMode && accountLoading) || templateLoading;
+  const isLoading =
+    officesLoading || clientsLoading || productsLoading || (isEditMode && accountLoading) || templateLoading;
   const clients = clientsData?.pageItems ?? [];
 
   const onSubmit = async (values: SavingsAccountFormValues) => {
@@ -185,10 +190,12 @@ const CreateDepositAccountPage: React.FC = () => {
     };
 
     if (values.nominalAnnualInterestRate) payload.nominalAnnualInterestRate = Number(values.nominalAnnualInterestRate);
-    if (values.interestCompoundingPeriodType) payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
+    if (values.interestCompoundingPeriodType)
+      payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
     if (values.interestPostingPeriodType) payload.interestPostingPeriodType = Number(values.interestPostingPeriodType);
     if (values.interestCalculationType) payload.interestCalculationType = Number(values.interestCalculationType);
-    if (values.interestCalculationDaysInYearType) payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
+    if (values.interestCalculationDaysInYearType)
+      payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
     if (values.minRequiredOpeningBalance) payload.minRequiredOpeningBalance = Number(values.minRequiredOpeningBalance);
     if (values.lockinPeriodFrequency) payload.lockinPeriodFrequency = Number(values.lockinPeriodFrequency);
     if (values.lockinPeriodFrequencyType) payload.lockinPeriodFrequencyType = Number(values.lockinPeriodFrequencyType);
@@ -198,9 +205,11 @@ const CreateDepositAccountPage: React.FC = () => {
     payload.allowOverdraft = !!values.allowOverdraft;
     if (values.allowOverdraft && values.overdraftLimit) payload.overdraftLimit = Number(values.overdraftLimit);
     payload.enforceMinRequiredBalance = !!values.enforceMinRequiredBalance;
-    if (values.enforceMinRequiredBalance && values.minRequiredBalance) payload.minRequiredBalance = Number(values.minRequiredBalance);
+    if (values.enforceMinRequiredBalance && values.minRequiredBalance)
+      payload.minRequiredBalance = Number(values.minRequiredBalance);
     payload.lienAllowed = !!values.lienAllowed;
-    if (values.lienAllowed && values.maxAllowedLienLimit) payload.maxAllowedLienLimit = Number(values.maxAllowedLienLimit);
+    if (values.lienAllowed && values.maxAllowedLienLimit)
+      payload.maxAllowedLienLimit = Number(values.maxAllowedLienLimit);
     payload.withHoldTax = !!values.withHoldTax;
 
     if (isEditMode) {
@@ -213,7 +222,7 @@ const CreateDepositAccountPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6 p-6">
+      <div className=" m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -221,12 +230,15 @@ const CreateDepositAccountPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6 p-6">
+    <div className=" m-auto space-y-6 p-6">
       <PageHeader
         title={isEditMode ? "Edit Savings Account" : "New Savings Account"}
         description={isEditMode ? `Editing account #${id}` : "Open a new savings account"}
         actions={
-          <Button variant="outline" onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}>
+          <Button
+            variant="outline"
+            onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
           </Button>
         }
@@ -257,7 +269,9 @@ const CreateDepositAccountPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.name}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -274,7 +288,9 @@ const CreateDepositAccountPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.displayName ?? `#${c.id}`}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -300,12 +316,20 @@ const CreateDepositAccountPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {products.map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                    <SelectItem key={p.id} value={String(p.id)}>
+                      {p.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.productId && <p className="mt-1 text-xs text-red-500">{errors.productId.message}</p>}
-              <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs mt-1" onClick={() => window.open("/deposits/products", "_blank")}>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-xs mt-1"
+                onClick={() => window.open("/deposits/products", "_blank")}
+              >
                 <ExternalLink className="mr-1 h-3 w-3" />
                 Create New Product
               </Button>
@@ -345,59 +369,84 @@ const CreateDepositAccountPage: React.FC = () => {
               <Label htmlFor="nominalAnnualInterestRate">Interest Rate (% annual)</Label>
               <Input
                 id="nominalAnnualInterestRate"
-                type="number" step="0.01"
+                type="number"
+                step="0.01"
                 {...register("nominalAnnualInterestRate")}
-                placeholder={template?.nominalAnnualInterestRate != null ? String(template.nominalAnnualInterestRate) : "From product"}
+                placeholder={
+                  template?.nominalAnnualInterestRate != null
+                    ? String(template.nominalAnnualInterestRate)
+                    : "From product"
+                }
               />
             </div>
             <div>
               <Label>Compounding Period</Label>
-              <Select value={watch("interestCompoundingPeriodType")} onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}>
+              <Select
+                value={watch("interestCompoundingPeriodType")}
+                onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={template?.interestCompoundingPeriodType?.value ?? "Select"} />
                 </SelectTrigger>
                 <SelectContent>
                   {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Posting Period</Label>
-              <Select value={watch("interestPostingPeriodType")} onValueChange={(v) => setValue("interestPostingPeriodType", v)}>
+              <Select
+                value={watch("interestPostingPeriodType")}
+                onValueChange={(v) => setValue("interestPostingPeriodType", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={template?.interestPostingPeriodType?.value ?? "Select"} />
                 </SelectTrigger>
                 <SelectContent>
                   {INTEREST_POSTING_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Calculation Type</Label>
-              <Select value={watch("interestCalculationType")} onValueChange={(v) => setValue("interestCalculationType", v)}>
+              <Select
+                value={watch("interestCalculationType")}
+                onValueChange={(v) => setValue("interestCalculationType", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={template?.interestCalculationType?.value ?? "Select"} />
                 </SelectTrigger>
                 <SelectContent>
                   {INTEREST_CALCULATION_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Days in Year</Label>
-              <Select value={watch("interestCalculationDaysInYearType")} onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}>
+              <Select
+                value={watch("interestCalculationDaysInYearType")}
+                onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={template?.interestCalculationDaysInYearType?.value ?? "Select"} />
                 </SelectTrigger>
                 <SelectContent>
                   {DAYS_IN_YEAR_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -418,25 +467,43 @@ const CreateDepositAccountPage: React.FC = () => {
             <div>
               <Label htmlFor="lockinPeriodFrequency">Lock-in Period</Label>
               <div className="flex gap-2">
-                <Input id="lockinPeriodFrequency" type="number" {...register("lockinPeriodFrequency")} placeholder="Period" className="flex-1" />
-                <Select value={watch("lockinPeriodFrequencyType")} onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}>
+                <Input
+                  id="lockinPeriodFrequency"
+                  type="number"
+                  {...register("lockinPeriodFrequency")}
+                  placeholder="Period"
+                  className="flex-1"
+                />
+                <Select
+                  value={watch("lockinPeriodFrequencyType")}
+                  onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}
+                >
                   <SelectTrigger className="w-28">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
                     {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
-                      <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <Switch id="withdrawalFeeForTransfers" onCheckedChange={(v) => setValue("withdrawalFeeForTransfers", v)} defaultChecked={template?.withdrawalFeeForTransfers ?? false} />
+              <Switch
+                id="withdrawalFeeForTransfers"
+                onCheckedChange={(v) => setValue("withdrawalFeeForTransfers", v)}
+                defaultChecked={template?.withdrawalFeeForTransfers ?? false}
+              />
               <Label htmlFor="withdrawalFeeForTransfers">Withdrawal Fee for Transfers</Label>
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <Switch id="enforceMinRequiredBalance" onCheckedChange={(v) => setValue("enforceMinRequiredBalance", v)} />
+              <Switch
+                id="enforceMinRequiredBalance"
+                onCheckedChange={(v) => setValue("enforceMinRequiredBalance", v)}
+              />
               <Label htmlFor="enforceMinRequiredBalance">Enforce Min Balance</Label>
             </div>
             {enforceMinRequiredBalance && (
@@ -492,10 +559,17 @@ const CreateDepositAccountPage: React.FC = () => {
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}>
+          <Button
+            variant="outline"
+            onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
           </Button>
-          <Button type="submit" disabled={createAccount.isPending || updateAccount.isPending} className="bg-[#D32F2F] hover:bg-red-700">
+          <Button
+            type="submit"
+            disabled={createAccount.isPending || updateAccount.isPending}
+            className="bg-[#D32F2F] hover:bg-red-700"
+          >
             {(createAccount.isPending || updateAccount.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" /> {isEditMode ? "Save Changes" : "Open Account"}
           </Button>

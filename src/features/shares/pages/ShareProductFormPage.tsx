@@ -122,10 +122,11 @@ const ShareProductFormPage: FC = () => {
       lockinPeriodFrequencyType: String(product.lockinPeriodFrequencyType?.id ?? ""),
       minimumActivePeriodForDividends: String(product.minimumActivePeriodForDividends ?? ""),
       accountingRule: String(product.accountingRule?.id ?? ""),
-      marketPricePeriods: product.marketPricePeriods?.map((p) => ({
-        fromDate: p.fromDate ?? "",
-        shareValue: String(p.shareValue ?? ""),
-      })) ?? [],
+      marketPricePeriods:
+        product.marketPricePeriods?.map((p) => ({
+          fromDate: p.fromDate ?? "",
+          shareValue: String(p.shareValue ?? ""),
+        })) ?? [],
       chargesSelected: product.chargesSelected?.map((c) => String(c.id)) ?? [],
     });
   }, [product, reset]);
@@ -161,7 +162,9 @@ const ShareProductFormPage: FC = () => {
         maximumShares: values.maximumShares ? Number(values.maximumShares) : undefined,
         allowDividendCalculationForInactiveClients: values.allowDividendCalculationForInactiveClients ?? false,
         lockinPeriodFrequency: values.lockinPeriodFrequency ? Number(values.lockinPeriodFrequency) : undefined,
-        lockinPeriodFrequencyType: values.lockinPeriodFrequencyType ? Number(values.lockinPeriodFrequencyType) : undefined,
+        lockinPeriodFrequencyType: values.lockinPeriodFrequencyType
+          ? Number(values.lockinPeriodFrequencyType)
+          : undefined,
         minimumActivePeriodForDividends: values.minimumActivePeriodForDividends
           ? Number(values.minimumActivePeriodForDividends)
           : undefined,
@@ -181,7 +184,9 @@ const ShareProductFormPage: FC = () => {
         payload.shareReferenceId = values.shareReferenceId ? Number(values.shareReferenceId) : undefined;
         payload.shareSuspenseId = values.shareSuspenseId ? Number(values.shareSuspenseId) : undefined;
         payload.shareEquityId = values.shareEquityId ? Number(values.shareEquityId) : undefined;
-        payload.incomeFromFeeAccountId = values.incomeFromFeeAccountId ? Number(values.incomeFromFeeAccountId) : undefined;
+        payload.incomeFromFeeAccountId = values.incomeFromFeeAccountId
+          ? Number(values.incomeFromFeeAccountId)
+          : undefined;
       }
 
       if (isEdit) {
@@ -199,7 +204,7 @@ const ShareProductFormPage: FC = () => {
 
   if ((isEdit && productLoading) || templateLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6  m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -207,7 +212,7 @@ const ShareProductFormPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className=" m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Share Product" : "New Share Product"}
         description={isEdit ? `Editing product #${id}` : "Create a new share product"}
@@ -421,9 +426,7 @@ const ShareProductFormPage: FC = () => {
             <CardTitle className="text-base">Market Price Periods</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.length === 0 && (
-              <p className="text-sm text-gray-500">No market price periods defined.</p>
-            )}
+            {fields.length === 0 && <p className="text-sm text-gray-500">No market price periods defined.</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-4">
                 <div className="flex-1">
@@ -448,12 +451,7 @@ const ShareProductFormPage: FC = () => {
                 </Button>
               </div>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append({ fromDate: "", shareValue: "" })}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => append({ fromDate: "", shareValue: "" })}>
               <Plus className="mr-2 h-4 w-4" /> Add Period
             </Button>
           </CardContent>

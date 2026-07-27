@@ -28,7 +28,13 @@ function enumVal(v: any, fallback = ""): string {
 }
 
 const PERIOD_TYPE_LABELS: Record<number, string> = { 0: "Days", 1: "Weeks", 2: "Months", 3: "Years" };
-const COMPOUNDING_LABELS: Record<number, string> = { 1: "Daily", 4: "Monthly", 5: "Quarterly", 6: "Semi-Annual", 7: "Annual" };
+const COMPOUNDING_LABELS: Record<number, string> = {
+  1: "Daily",
+  4: "Monthly",
+  5: "Quarterly",
+  6: "Semi-Annual",
+  7: "Annual",
+};
 const POSTING_LABELS: Record<number, string> = { 1: "Monthly", 4: "Quarterly", 5: "Semi-Annual", 7: "Annual" };
 const CALCULATION_LABELS: Record<number, string> = { 1: "Daily Balance", 2: "Average Daily Balance" };
 const DAYS_IN_YEAR_LABELS: Record<number, string> = { 360: "360 Days", 364: "364 Days", 365: "365 Days", 1: "Actual" };
@@ -76,7 +82,7 @@ const SavingsProductDetailPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6  m-auto">
         <PageHeader
           title="Error loading product"
           description={error?.message ?? "An unexpected error occurred."}
@@ -97,7 +103,7 @@ const SavingsProductDetailPage: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6  m-auto">
         <PageHeader
           title="Product Not Found"
           description="The requested savings product does not exist."
@@ -166,22 +172,34 @@ const SavingsProductDetailPage: React.FC = () => {
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
               label="Compounding Period"
-              value={COMPOUNDING_LABELS[p.interestCompoundingPeriodType?.id ?? p.interestCompoundingPeriodType] ?? enumVal(p.interestCompoundingPeriodType, "—")}
+              value={
+                COMPOUNDING_LABELS[p.interestCompoundingPeriodType?.id ?? p.interestCompoundingPeriodType] ??
+                enumVal(p.interestCompoundingPeriodType, "—")
+              }
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
               label="Posting Period"
-              value={POSTING_LABELS[p.interestPostingPeriodType?.id ?? p.interestPostingPeriodType] ?? enumVal(p.interestPostingPeriodType, "—")}
+              value={
+                POSTING_LABELS[p.interestPostingPeriodType?.id ?? p.interestPostingPeriodType] ??
+                enumVal(p.interestPostingPeriodType, "—")
+              }
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
               label="Calculation Method"
-              value={CALCULATION_LABELS[p.interestCalculationType?.id ?? p.interestCalculationType] ?? enumVal(p.interestCalculationType, "—")}
+              value={
+                CALCULATION_LABELS[p.interestCalculationType?.id ?? p.interestCalculationType] ??
+                enumVal(p.interestCalculationType, "—")
+              }
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
               label="Days in Year"
-              value={DAYS_IN_YEAR_LABELS[p.interestCalculationDaysInYearType?.id ?? p.interestCalculationDaysInYearType] ?? enumVal(p.interestCalculationDaysInYearType, "—")}
+              value={
+                DAYS_IN_YEAR_LABELS[p.interestCalculationDaysInYearType?.id ?? p.interestCalculationDaysInYearType] ??
+                enumVal(p.interestCalculationDaysInYearType, "—")
+              }
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
@@ -239,7 +257,11 @@ const SavingsProductDetailPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<Shield className="h-4 w-4" />} label="Allow Overdraft" value={p.allowOverdraft ? "Yes" : "No"} />
+            <InfoRow
+              icon={<Shield className="h-4 w-4" />}
+              label="Allow Overdraft"
+              value={p.allowOverdraft ? "Yes" : "No"}
+            />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
               label="Overdraft Limit"
@@ -263,8 +285,16 @@ const SavingsProductDetailPage: React.FC = () => {
             />
             {p.isDormancyTrackingActive && (
               <>
-                <InfoRow icon={<Clock className="h-4 w-4" />} label="Days to Inactive" value={p.daysToInactive ?? "—"} />
-                <InfoRow icon={<Clock className="h-4 w-4" />} label="Days to Dormancy" value={p.daysToDormancy ?? "—"} />
+                <InfoRow
+                  icon={<Clock className="h-4 w-4" />}
+                  label="Days to Inactive"
+                  value={p.daysToInactive ?? "—"}
+                />
+                <InfoRow
+                  icon={<Clock className="h-4 w-4" />}
+                  label="Days to Dormancy"
+                  value={p.daysToDormancy ?? "—"}
+                />
                 <InfoRow icon={<Clock className="h-4 w-4" />} label="Days to Escheat" value={p.daysToEscheat ?? "—"} />
               </>
             )}
@@ -279,7 +309,11 @@ const SavingsProductDetailPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Withhold Tax" value={p.withHoldTax ? "Yes" : "No"} />
+            <InfoRow
+              icon={<FileText className="h-4 w-4" />}
+              label="Withhold Tax"
+              value={p.withHoldTax ? "Yes" : "No"}
+            />
           </CardContent>
         </Card>
       </div>
@@ -300,9 +334,7 @@ const SavingsProductDetailPage: React.FC = () => {
                   {
                     key: "amount",
                     header: "Amount",
-                    cell: (r: any) => (
-                      <span className="font-mono">{(r.amount ?? 0).toLocaleString()}</span>
-                    ),
+                    cell: (r: any) => <span className="font-mono">{(r.amount ?? 0).toLocaleString()}</span>,
                   },
                   {
                     key: "chargeTimeType",

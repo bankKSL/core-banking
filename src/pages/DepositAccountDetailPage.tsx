@@ -351,7 +351,18 @@ const DepositAccountDetailPage: React.FC = () => {
                 >
                   Withdraw
                 </Button>
-                <Button variant="outline" size="sm" onClick={async () => { if (account) { await deleteMutation.mutateAsync(account.id); navigate("/deposits/saving-accounts"); } }} disabled={acting} className="text-red-600">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    if (account) {
+                      await deleteMutation.mutateAsync(account.id);
+                      navigate("/deposits/saving-accounts");
+                    }
+                  }}
+                  disabled={acting}
+                  className="text-red-600"
+                >
                   <Trash2 className="mr-1 h-4 w-4" /> Delete
                 </Button>
               </>
@@ -369,7 +380,13 @@ const DepositAccountDetailPage: React.FC = () => {
                   <CheckCircle2 className="mr-1 h-4 w-4" />
                   Activate
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleCommand("undoapproval")} disabled={acting} className="text-amber-600">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("undoapproval")}
+                  disabled={acting}
+                  className="text-amber-600"
+                >
                   Undo Approval
                 </Button>
               </>
@@ -414,13 +431,23 @@ const DepositAccountDetailPage: React.FC = () => {
                 <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
                   Force Withdrawal
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleApplyAnnualFees} disabled={applyAnnualFeesMutation.isPending}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleApplyAnnualFees}
+                  disabled={applyAnnualFeesMutation.isPending}
+                >
                   Apply Annual Fees
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setAssignOfficerDialogOpen(true)}>
                   Assign Officer
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleUnassignOfficer} disabled={unassignOfficerMutation.isPending}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUnassignOfficer}
+                  disabled={unassignOfficerMutation.isPending}
+                >
                   Unassign Officer
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setSearchDialogOpen(true)}>
@@ -463,10 +490,22 @@ const DepositAccountDetailPage: React.FC = () => {
                 >
                   Unblock
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleCommand("unblockCredit")} disabled={acting} className="text-emerald-600">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("unblockCredit")}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
                   Unblock Credit
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleCommand("unblockDebit")} disabled={acting} className="text-emerald-600">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("unblockDebit")}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
                   Unblock Debit
                 </Button>
                 <Button
@@ -486,6 +525,10 @@ const DepositAccountDetailPage: React.FC = () => {
                 Undo Reject
               </Button>
             )}
+            <Button variant="outline" size="sm" onClick={() => navigate(`/savings/${account.id}/calendars`)}>
+              <Calendar className="mr-1 h-4 w-4" />
+              Calendars
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/saving-accounts")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
               Back

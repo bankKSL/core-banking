@@ -283,7 +283,16 @@ const FixedDepositDetailPage: React.FC = () => {
                   <Ban className="mr-1 h-4 w-4" />
                   Withdraw
                 </Button>
-                <Button variant="outline" size="sm" onClick={async () => { await deleteMutation.mutateAsync(fd.id); navigate("/deposits/fixed"); }} disabled={actionLoading} className="text-red-600">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    await deleteMutation.mutateAsync(fd.id);
+                    navigate("/deposits/fixed");
+                  }}
+                  disabled={actionLoading}
+                  className="text-red-600"
+                >
                   <Trash2 className="mr-1 h-4 w-4" />
                   Delete
                 </Button>

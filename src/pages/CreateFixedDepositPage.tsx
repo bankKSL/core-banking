@@ -134,13 +134,20 @@ const CreateFixedDepositPage: React.FC = () => {
   const transferInterestToSavings = watch("transferInterestToSavings");
 
   const { data: offices = [], isLoading: officesLoading } = useOffices();
-  const clientsQuery = useMemo(() => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}), [officeId]);
+  const clientsQuery = useMemo(
+    () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
+    [officeId],
+  );
   const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
   const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
 
   const { data: template, isLoading: templateLoading } = useQuery({
     queryKey: ["fixeddepositaccounts", "template", clientId, productId],
-    queryFn: () => fetchFixedDepositAccountTemplate(clientId ? Number(clientId) : undefined, productId ? Number(productId) : undefined),
+    queryFn: () =>
+      fetchFixedDepositAccountTemplate(
+        clientId ? Number(clientId) : undefined,
+        productId ? Number(productId) : undefined,
+      ),
     enabled: !!clientId && !!productId,
     staleTime: 60_000,
   });
@@ -162,10 +169,12 @@ const CreateFixedDepositPage: React.FC = () => {
     };
 
     if (values.nominalAnnualInterestRate) payload.nominalAnnualInterestRate = Number(values.nominalAnnualInterestRate);
-    if (values.interestCompoundingPeriodType) payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
+    if (values.interestCompoundingPeriodType)
+      payload.interestCompoundingPeriodType = Number(values.interestCompoundingPeriodType);
     if (values.interestPostingPeriodType) payload.interestPostingPeriodType = Number(values.interestPostingPeriodType);
     if (values.interestCalculationType) payload.interestCalculationType = Number(values.interestCalculationType);
-    if (values.interestCalculationDaysInYearType) payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
+    if (values.interestCalculationDaysInYearType)
+      payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
     if (values.maturityInstructionId) payload.maturityInstructionId = Number(values.maturityInstructionId);
     if (values.transferInterestToSavings) payload.transferInterestToSavings = true;
     if (values.linkedAccount) payload.linkedAccount = Number(values.linkedAccount);
@@ -174,7 +183,8 @@ const CreateFixedDepositPage: React.FC = () => {
     if (values.preClosurePenalApplicable) {
       payload.preClosurePenalApplicable = true;
       if (values.preClosurePenalInterest) payload.preClosurePenalInterest = Number(values.preClosurePenalInterest);
-      if (values.preClosurePenalInterestOnTypeId) payload.preClosurePenalInterestOnTypeId = Number(values.preClosurePenalInterestOnTypeId);
+      if (values.preClosurePenalInterestOnTypeId)
+        payload.preClosurePenalInterestOnTypeId = Number(values.preClosurePenalInterestOnTypeId);
     }
 
     if (values.maturityInstructionId === "200") {
@@ -187,7 +197,7 @@ const CreateFixedDepositPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6 p-6">
+      <div className=" m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -270,10 +280,7 @@ const CreateFixedDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-1 gap-4">
             <div>
               <Label>Product *</Label>
-              <Select
-                value={productId}
-                onValueChange={(v) => setValue("productId", v, { shouldValidate: true })}
-              >
+              <Select value={productId} onValueChange={(v) => setValue("productId", v, { shouldValidate: true })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select product" />
                 </SelectTrigger>
@@ -446,10 +453,7 @@ const CreateFixedDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
               <Label>Maturity Instruction</Label>
-              <Select
-                value={maturityInstructionId}
-                onValueChange={(v) => setValue("maturityInstructionId", v)}
-              >
+              <Select value={maturityInstructionId} onValueChange={(v) => setValue("maturityInstructionId", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select instruction" />
                 </SelectTrigger>
@@ -466,11 +470,7 @@ const CreateFixedDepositPage: React.FC = () => {
             {maturityInstructionId === "200" && (
               <div>
                 <Label>Transfer to Savings Account ID</Label>
-                <Input
-                  type="number"
-                  {...register("linkedAccount")}
-                  placeholder="Savings account ID"
-                />
+                <Input type="number" {...register("linkedAccount")} placeholder="Savings account ID" />
               </div>
             )}
 
@@ -487,7 +487,12 @@ const CreateFixedDepositPage: React.FC = () => {
               <>
                 <div>
                   <Label>Penalty Interest Rate (%)</Label>
-                  <Input type="number" step="0.01" {...register("preClosurePenalInterest")} placeholder={String(template?.preClosurePenalInterest ?? "")} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    {...register("preClosurePenalInterest")}
+                    placeholder={String(template?.preClosurePenalInterest ?? "")}
+                  />
                 </div>
                 <div>
                   <Label>Penalty Applied On</Label>

@@ -143,6 +143,9 @@ import ChargeListPage from "@/features/charges/pages/ChargeListPage";
 import ChargeFormPage from "@/features/charges/pages/ChargeFormPage";
 import ShareProductListPage from "@/features/shares/pages/ShareProductListPage";
 import ShareProductFormPage from "@/features/shares/pages/ShareProductFormPage";
+import CalendarListPage from "@/features/calendars/pages/CalendarListPage";
+import MeetingListPage from "@/features/calendars/pages/MeetingListPage";
+import MeetingAttendancePage from "@/features/calendars/pages/MeetingAttendancePage";
 import ShareAccountListPage from "@/features/shares/pages/ShareAccountListPage";
 import ShareAccountFormPage from "@/features/shares/pages/ShareAccountFormPage";
 import ShareAccountDetailPage from "@/features/shares/pages/ShareAccountDetailPage";
@@ -381,6 +384,10 @@ function App() {
                   <Route path="/campaigns/email/new" element={<EmailCampaignFormPage />} />
                   <Route path="/campaigns/sms/:id" element={<CampaignDetailPage />} />
                   <Route path="/campaigns/email/:id" element={<CampaignDetailPage />} />
+                  {/* Calendars & Meetings (entity-specific) */}
+                  <Route path="/:entityType/:entityId/calendars" element={<CalendarListPage />} />
+                  <Route path="/:entityType/:entityId/meetings" element={<MeetingListPage />} />
+                  <Route path="/:entityType/:entityId/meetings/:meetingId/attendance" element={<MeetingAttendancePage />} />
                 </Routes>
               </AppLayout>
             </RequireAuth>
