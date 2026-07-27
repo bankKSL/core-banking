@@ -146,6 +146,7 @@ const sections: NavSectionConfig[] = [
       { label: "Currencies", path: "/currencies", icon: Wallet },
       { label: "Funds", path: "/funds", icon: Banknote },
       { label: "Payment Types", path: "/payment-types", icon: CreditCard },
+      { label: "Charges", path: "/charges", icon: Calculator },
       { label: "Working Days", path: "/working-days", icon: CalendarClock },
       { label: "Codes", path: "/codes", icon: ListOrdered },
     ],

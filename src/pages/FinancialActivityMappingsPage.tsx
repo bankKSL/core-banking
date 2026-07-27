@@ -142,7 +142,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
                   <SelectValue placeholder="Select account" />
                 </SelectTrigger>
                 <SelectContent>
-                  {glAccountOptions.map((a) => (
+                  {glAccountOptions?.map((a) => (
                     <SelectItem key={a.id} value={String(a.id)}>
                       {a.name} ({a.glCode})
                     </SelectItem>

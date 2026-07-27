@@ -134,6 +134,8 @@ import WorkingDaysPage from "@/features/working-days/pages/WorkingDaysPage";
 import CodeListPage from "@/features/codes/pages/CodeListPage";
 import CodeFormPage from "@/features/codes/pages/CodeFormPage";
 import CodeDetailPage from "@/features/codes/pages/CodeDetailPage";
+import ChargeListPage from "@/features/charges/pages/ChargeListPage";
+import ChargeFormPage from "@/features/charges/pages/ChargeFormPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -309,6 +311,9 @@ function App() {
                   <Route path="/codes/new" element={<CodeFormPage />} />
                   <Route path="/codes/:id" element={<CodeDetailPage />} />
                   <Route path="/codes/edit/:id" element={<CodeFormPage />} />
+                  <Route path="/charges" element={<ChargeListPage />} />
+                  <Route path="/charges/new" element={<ChargeFormPage />} />
+                  <Route path="/charges/edit/:id" element={<ChargeFormPage />} />
                   {/* Transfers */}
                   <Route path="/transfers/history" element={<TransferListPage />} />
                   <Route path="/transfers/new" element={<TransferFormPage />} />
