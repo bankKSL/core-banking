@@ -47,6 +47,10 @@ export async function updateLoanProduct(
   return data;
 }
 
+export async function deleteLoanProduct(productId: number): Promise<void> {
+  await client.delete(`/loanproducts/${productId}`);
+}
+
 // ─── Loans ───────────────────────────────────────────────────────
 
 export async function fetchLoans(params: LoanListParams = {}): Promise<LoanListResponse> {

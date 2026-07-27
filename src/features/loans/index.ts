@@ -162,7 +162,7 @@ export { useLoans, loanKeys } from "./hooks/useLoans";
 
 export { useLoan, useLoanByExternalId } from "./hooks/useLoan";
 
-export { useLoanProducts, useLoanProduct } from "./hooks/useLoanProducts";
+export { useLoanProducts, useLoanProduct, useDeleteLoanProduct } from "./hooks/useLoanProducts";
 
 export { useLoanTemplate } from "./hooks/useLoanTemplate";
 

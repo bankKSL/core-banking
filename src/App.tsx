@@ -136,6 +136,7 @@ import CodeFormPage from "@/features/codes/pages/CodeFormPage";
 import CodeDetailPage from "@/features/codes/pages/CodeDetailPage";
 import ChargeListPage from "@/features/charges/pages/ChargeListPage";
 import ChargeFormPage from "@/features/charges/pages/ChargeFormPage";
+import LoanReassignmentPage from "@/features/loans/pages/LoanReassignmentPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -231,6 +232,7 @@ function App() {
                   <Route path="/loans/view/:id" element={<LoanViewPage />} />
                   <Route path="/rescheduling" element={<RescheduleLoansPage />} />
                   <Route path="/rescheduling/new" element={<RescheduleLoanFormPage />} />
+                  <Route path="/loans/reassign" element={<LoanReassignmentPage />} />
                   <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />

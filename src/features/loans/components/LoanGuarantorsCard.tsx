@@ -1,7 +1,7 @@
 import { type FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ShieldCheck, Plus, Loader2, Trash2 } from "lucide-react";
+import { ShieldCheck, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import type { LoanGuarantor } from "../types/loan";
 import { createLoanGuarantorSchema, type CreateLoanGuarantorFormValues } from "../schemas/loan.schema";
-import { useLoanGuarantors, useAddLoanGuarantor, useDeleteLoanGuarantor } from "../hooks/useLoanGuarantors";
+import { useLoanGuarantors, useAddLoanGuarantor, useUpdateLoanGuarantor, useDeleteLoanGuarantor } from "../hooks/useLoanGuarantors";
 import { formatMoney } from "../utils/format";
 
 interface LoanGuarantorsCardProps {
@@ -26,10 +26,13 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
   const items = initial ?? guarantorsQuery.data ?? [];
 
   const addMutation = useAddLoanGuarantor();
+  const updateMutation = useUpdateLoanGuarantor();
   const deleteMutation = useDeleteLoanGuarantor();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<LoanGuarantor | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<LoanGuarantor | null>(null);
+  const [editAmount, setEditAmount] = useState("");
 
   const {
     register,
@@ -92,9 +95,17 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
                     <TableCell className="text-sm text-gray-500">{g.guarantorType?.value ?? "Existing Client"}</TableCell>
                     <TableCell className="text-right font-mono text-sm">{formatMoney(g.amount, currencyCode)}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(g)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          setEditTarget(g);
+                          setEditAmount(String(g.amount ?? 0));
+                        }}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(g)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -139,6 +150,42 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit guarantor dialog */}
+      <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Guarantor</DialogTitle>
+            <DialogDescription>Update guaranteed amount for {editTarget ? displayName(editTarget) : ""}.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="editGuarantorAmount">Guaranteed Amount</Label>
+              <Input id="editGuarantorAmount" type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditTarget(null)} disabled={updateMutation.isPending}>
+                Cancel
+              </Button>
+              <Button
+                disabled={updateMutation.isPending}
+                onClick={async () => {
+                  if (!editTarget) return;
+                  await updateMutation.mutateAsync({
+                    loanId,
+                    guarantorId: editTarget.id,
+                    payload: { amount: Number(editAmount) },
+                  });
+                  setEditTarget(null);
+                }}
+              >
+                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

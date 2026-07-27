@@ -4,16 +4,27 @@
 
 The Loan module manages the full loan lifecycle from application through closure. It supports individual, group, and JLG (Joint Liability Group) loans with configurable products, interest types, repayment schedules, charges, collateral, and guarantees.
 
-| Sub-Feature       | Base Path                         | Description                                                 |
-| ----------------- | --------------------------------- | ----------------------------------------------------------- |
-| Loan Accounts     | `/v1/loans`                       | Full CRUD + state commands (approve, disburse, repay, etc.) |
-| Loan Products     | `/v1/loanproducts`                | Product definitions (terms, interest, accounting)           |
-| Loan Transactions | `/v1/loans/{loanId}/transactions` | Repayments, waivers, write-offs, adjustments                |
-| Loan Charges      | `/v1/loans/{loanId}/charges`      | Fees and penalties applied to loans                         |
-| Loan Collateral   | `/v1/loans/{loanId}/collateral`   | Collateral items linked to loans                            |
-| Loan Guarantors   | `/v1/loans/{loanId}/guarantors`   | Guarantor management                                        |
-| Loan Rescheduling | `/v1/rescheduleloans`             | Reschedule loan repayment schedules                         |
-| Loan Schedule     | `/v1/loans/{loanId}/schedule`     | Repayment schedule operations                               |
+| Sub-Feature        | Base Path                                                  | Description                                                 |
+| ------------------ | ---------------------------------------------------------- | ----------------------------------------------------------- |
+| Loan Accounts      | `/v1/loans`                                                | Full CRUD + state commands (approve, disburse, repay, etc.) |
+| Loan Products      | `/v1/loanproducts`                                         | Product definitions (terms, interest, accounting)           |
+| Loan Transactions  | `/v1/loans/{loanId}/transactions`                          | Repayments, waivers, write-offs, adjustments                |
+| Loan Charges       | `/v1/loans/{loanId}/charges`                               | Fees and penalties applied to loans                         |
+| Loan Collateral    | `/v1/loans/{loanId}/collateral`                            | Collateral items linked to loans                            |
+| Loan Guarantors    | `/v1/loans/{loanId}/guarantors`                            | Guarantor management                                        |
+| Loan Rescheduling  | `/v1/rescheduleloans`                                      | Reschedule loan repayment schedules                         |
+| Loan Schedule      | `/v1/loans/{loanId}/schedule`                              | Repayment schedule operations                               |
+| Product Mix        | `/v1/loanproducts/{productId}/productmix`                  | Define mutually exclusive loan product restrictions         |
+| Loan Adjustment    | `/v1/loans/{loanId}/charges/{chargeId}?command=adjustment` | Adjust loan charges                                         |
+| Adjust Transaction | `/v1/loans/{loanId}/transactions/{transactionId}`          | Reverse/modify existing loan transactions                   |
+| Point-in-Time View | `/v1/loans/at-date/{loanId}`                               | View loan state at a specific historical date               |
+| Interest Pause     | `/v1/loans/{loanId}/interest-pauses`                       | Pause interest accrual during a date range                  |
+| Bulk Reassignment  | `/v1/loans/loanreassignment`                               | Bulk reassign loans between loan officers                   |
+| Buydown Fees       | `/v1/loans/{loanId}/buydown-fees`                          | Third-party fee to buy down interest rate                   |
+| Capitalized Income | `/v1/loans/{loanId}/capitalized-incomes`                   | Deferred income amortized over loan life                    |
+| Post-Dated Checks  | `/v1/loans/{loanId}/postdatedchecks`                       | Manage post-dated check payments                            |
+| Loan Documents     | `/v1/loans/{loanId}/documents`                             | Upload/download/delete loan documents                       |
+| Loan Notes         | `/v1/loans/{loanId}/notes`                                 | Add/view/edit/delete notes on loans                         |
 
 ---
 
@@ -63,33 +74,41 @@ The Loan module manages the full loan lifecycle from application through closure
 
 ### Transaction Types
 
-| Type ID | Name                   | Direction |
-| ------- | ---------------------- | --------- |
-| 1       | Repayment              | Credit    |
-| 2       | Disbursement           | Debit     |
-| 3       | Waive Interest         | —         |
-| 4       | Repayment (reversal)   | —         |
-| 5       | Write Off              | —         |
-| 6       | Marked for Reschedule  | —         |
-| 7       | Recovery Repayment     | Credit    |
-| 8       | Waive Charges          | —         |
-| 9       | Accrual                | —         |
-| 10      | Initiate Transfer      | —         |
-| 11      | Approve Transfer       | —         |
-| 12      | Withdraw Transfer      | —         |
-| 13      | Reject Transfer        | —         |
-| 14      | Refund                 | Credit    |
-| 15      | Charge Payment         | Debit     |
-| 16      | Refund (transfer)      | Credit    |
-| 17      | Charge Off             | —         |
-| 18      | Down Payment           | Debit     |
-| 19      | Interest Refund        | Credit    |
-| 20      | Goodwill Credit        | Credit    |
-| 21      | Merchant Issued Refund | Credit    |
-| 22      | Payout Refund          | Credit    |
-| 23      | Capitalized Income     | —         |
-| 24      | Credit Balance Refund  | Credit    |
-| 25      | Accrual Activity       | —         |
+| Type ID | Name                                 | Direction |
+| ------- | ------------------------------------ | --------- |
+| 1       | Repayment                            | Credit    |
+| 2       | Disbursement                         | Debit     |
+| 3       | Waive Interest                       | —         |
+| 4       | Repayment (reversal)                 | —         |
+| 5       | Write Off                            | —         |
+| 6       | Marked for Reschedule                | —         |
+| 7       | Recovery Repayment                   | Credit    |
+| 8       | Waive Charges                        | —         |
+| 9       | Accrual                              | —         |
+| 10      | Initiate Transfer                    | —         |
+| 11      | Approve Transfer                     | —         |
+| 12      | Withdraw Transfer                    | —         |
+| 13      | Reject Transfer                      | —         |
+| 14      | Refund                               | Credit    |
+| 15      | Charge Payment                       | Debit     |
+| 16      | Refund (transfer)                    | Credit    |
+| 17      | Charge Off                           | —         |
+| 18      | Down Payment                         | Debit     |
+| 19      | Interest Refund                      | Credit    |
+| 20      | Goodwill Credit                      | Credit    |
+| 21      | Merchant Issued Refund               | Credit    |
+| 22      | Payout Refund                        | Credit    |
+| 23      | Capitalized Income                   | —         |
+| 24      | Credit Balance Refund                | Credit    |
+| 25      | Accrual Activity                     | —         |
+| 35      | Capitalized Income Entry             | Debit     |
+| 36      | Capitalized Income Amortization      | —         |
+| 37      | Capitalized Income Adjustment        | —         |
+| 39      | Capitalized Income Amortization Adj. | —         |
+| 40      | Buy Down Fee                         | Debit     |
+| 41      | Buy Down Fee Adjustment              | —         |
+| 42      | Buy Down Fee Amortization            | —         |
+| 43      | Buy Down Fee Amortization Adjustment | —         |
 
 ---
 
@@ -179,6 +198,102 @@ The Loan module manages the full loan lifecycle from application through closure
 | `GET`  | `/v1/rescheduleloans/{scheduleId}` | Detail                       |
 | `POST` | `/v1/rescheduleloans`              | Create reschedule request    |
 | `POST` | `/v1/rescheduleloans/{scheduleId}` | Command: `approve`, `reject` |
+
+### 3.8 Product Mix — `/v1/loanproducts/{productId}/productmix`
+
+| Method   | Path                                      | Description                            |
+| -------- | ----------------------------------------- | -------------------------------------- |
+| `GET`    | `/v1/loanproducts/{productId}/productmix` | Details + `?template=true` for options |
+| `POST`   | `/v1/loanproducts/{productId}/productmix` | Create product mix restrictions        |
+| `PUT`    | `/v1/loanproducts/{productId}/productmix` | Update restrictions                    |
+| `DELETE` | `/v1/loanproducts/{productId}/productmix` | Delete all restrictions                |
+
+Restriction defines products that **cannot co-exist** as active loans with the same client/group. Enforced during loan application validation.
+
+### 3.9 Point-in-Time View — `/v1/loans/at-date`
+
+| Method | Path                                                            | Description                                 |
+| ------ | --------------------------------------------------------------- | ------------------------------------------- |
+| `GET`  | `/v1/loans/at-date/{loanId}?date=...&dateFormat=...&locale=...` | Snapshot of loan state at a specific date   |
+| `GET`  | `/v1/loans/at-date/external-id/{loanExternalId}?date=...`       | By external loan ID                         |
+| `POST` | `/v1/loans/at-date/search`                                      | Bulk retrieve by loan IDs `{loanIds, date}` |
+| `POST` | `/v1/loans/at-date/search/external-id`                          | Bulk retrieve by external IDs               |
+
+All computation is in-memory and **not persisted** (transaction is rolled back). Returns principal, interest, fee, penalty, total breakdowns plus arrears data.
+
+### 3.10 Interest Pause — `/v1/loans/{loanId}/interest-pauses`
+
+| Method   | Path                                | Description                       |
+| -------- | ----------------------------------- | --------------------------------- |
+| `GET`    | `.../interest-pauses`               | List pauses                       |
+| `POST`   | `.../interest-pauses`               | Create pause (startDate, endDate) |
+| `PUT`    | `.../interest-pauses/{variationId}` | Update pause                      |
+| `DELETE` | `.../interest-pauses/{variationId}` | Delete pause                      |
+
+Only supported for **progressive** loans with **interest recalculation enabled** on **active** loans. Regenerates schedule after create/update/delete.
+
+### 3.11 Bulk Reassignment — `/v1/loans/loanreassignment`
+
+| Method | Path                                  | Description                                 |
+| ------ | ------------------------------------- | ------------------------------------------- |
+| `GET`  | `/v1/loans/loanreassignment/template` | Template with office + loan officer options |
+| `POST` | `/v1/loans/loanreassignment`          | Execute bulk reassignment                   |
+
+Also supports single-loan commands via `POST /v1/loans/{loanId}?command=assignloanofficer` and `?command=unassignloanofficer`.
+
+### 3.12 Buydown Fees — `/v1/loans/{loanId}/buydown-fees`
+
+| Method | Path               | Description                           |
+| ------ | ------------------ | ------------------------------------- |
+| `GET`  | `.../buydown-fees` | List buydown fee amortization details |
+
+Buydown fees are added via loan transactions (type 40, `BUY_DOWN_FEE`). The feature is enabled at the **loan product** level via `enableBuyDownFee`.
+
+### 3.13 Capitalized Income — `/v1/loans/{loanId}/capitalized-incomes`
+
+| Method | Path                             | Description                                    |
+| ------ | -------------------------------- | ---------------------------------------------- |
+| `GET`  | `.../capitalized-incomes`        | List capitalized income details (amortization) |
+| `GET`  | `.../capitalized-incomes/{txId}` | Allocation data per transaction                |
+
+Capitalized income is added via loan transactions (type 35, `CAPITALIZED_INCOME`). Enabled at the **loan product** level via `enableIncomeCapitalization`.
+
+### 3.14 Post-Dated Checks — `/v1/loans/{loanId}/postdatedchecks`
+
+| Method   | Path                                           | Description               |
+| -------- | ---------------------------------------------- | ------------------------- |
+| `GET`    | `.../postdatedchecks`                          | List PDCs                 |
+| `GET`    | `.../postdatedchecks/{installmentId}`          | Single PDC by installment |
+| `PUT`    | `.../postdatedchecks/{pdcId}?editType=update`  | Update PDC details        |
+| `PUT`    | `.../postdatedchecks/{pdcId}?editType=bounced` | Mark PDC as bounced       |
+| `DELETE` | `.../postdatedchecks/{pdcId}`                  | Delete PDC                |
+
+Statuses: `0=PENDING`, `1=BOUNCED`, `2=PAID`. PDCs can also be passed at loan disbursement via a `postDatedChecks` JSON array.
+
+### 3.15 Loan Documents — `/v1/loans/{loanId}/documents`
+
+| Method   | Path                                    | Description                                   |
+| -------- | --------------------------------------- | --------------------------------------------- |
+| `GET`    | `.../documents`                         | List documents                                |
+| `GET`    | `.../documents/{documentId}`            | Document metadata                             |
+| `GET`    | `.../documents/{documentId}/attachment` | Download binary file                          |
+| `POST`   | `.../documents`                         | Upload (multipart: file + name + description) |
+| `PUT`    | `.../documents/{documentId}`            | Update (multipart)                            |
+| `DELETE` | `.../documents/{documentId}`            | Delete                                        |
+
+Uses generic document infrastructure (`{entityType}/{entityId}/documents`). Files stored on filesystem or S3 depending on configuration.
+
+### 3.16 Loan Notes — `/v1/loans/{loanId}/notes`
+
+| Method   | Path                 | Description                             |
+| -------- | -------------------- | --------------------------------------- |
+| `GET`    | `.../notes`          | List notes (descending by created date) |
+| `GET`    | `.../notes/{noteId}` | Single note                             |
+| `POST`   | `.../notes`          | Create note `{note: "..."}`             |
+| `PUT`    | `.../notes/{noteId}` | Update note                             |
+| `DELETE` | `.../notes/{noteId}` | Delete note                             |
+
+Notes can also be retrieved inline with loan detail via `GET /v1/loans/{id}?associations=notes`. Two note types: `LOAN (200)` — general, `LOAN_TRANSACTION (300)` — attached to specific transactions.
 
 ---
 
@@ -425,6 +540,12 @@ POST /v1/loanproducts
 | Reschedule Reason               | `GET /v1/rescheduleloans/template`                                         | `name`        | `id`        | Yes           | Code: `RescheduleLoansReason`           |
 | Days in Year Type               | template → `daysInYearTypeOptions`                                         | `value`       | `id`        | Yes (product) | 360, 365                                |
 | Days in Month Type              | template → `daysInMonthTypeOptions`                                        | `value`       | `id`        | Yes (product) | 30, actual                              |
+| From Loan Officer (reassign)    | `GET /v1/loans/loanreassignment/template?officeId=X`                       | `displayName` | `id`        | Yes           | Filtered by office                      |
+| Buydown Income Type             | `GET /v1/loanproducts/template` → `buyDownFeeIncomeTypeOptions`            | `value`       | `id`        | Yes (product) | FEE / INTEREST                          |
+| Buydown Calculation Type        | `GET /v1/loanproducts/template` → `buyDownFeeCalculationTypeOptions`       | `value`       | `id`        | Yes (product) | FLAT                                    |
+| Capitalized Income Type         | `GET /v1/loanproducts/template` → `capitalizedIncomeTypeOptions`           | `value`       | `id`        | Yes (product) | FEE / INTEREST                          |
+| Product Mix (restricted)        | `GET /v1/loanproducts/{id}/productmix` → `restrictedProducts`              | `name`        | `id`        | No            | Products that cannot co-exist           |
+| Product Mix (options)           | `GET /v1/loanproducts/{id}/productmix?template=true` → `productOptions`    | `name`        | `id`        | No            | Products not in any mix                 |
 
 ---
 
@@ -594,6 +715,28 @@ POST /v1/loans → resourceId (submitted state)
 
 - `enableDownPayment`, `disbursedAmountPercentageDownPayment`
 - `enableAutoRepaymentForDownPayment`, `repaymentStartDateType`
+
+**Buydown Fee** (progressive loan only, 3rd-party interest rate buydown)
+
+- `enableBuyDownFee`, `merchantBuyDownFee` (boolean)
+- `buyDownFeeCalculationType` (enum: `FLAT`)
+- `buyDownFeeStrategy` (enum: `EQUAL_AMORTIZATION`)
+- `buyDownFeeIncomeType` (enum: `FEE` / `INTEREST`)
+- GL accounts: `buyDownExpenseAccountId`, `incomeFromBuyDownAccountId`
+
+**Income Capitalization** (progressive loan only, deferred income recognition)
+
+- `enableIncomeCapitalization` (boolean)
+- `capitalizedIncomeCalculationType` (enum: `FLAT`)
+- `capitalizedIncomeStrategy` (enum: `EQUAL_AMORTIZATION`)
+- `capitalizedIncomeType` (enum: `FEE` / `INTEREST`)
+- GL accounts: `deferredIncomeLiabilityAccountId`, `incomeFromCapitalizationAccountId`
+- Optional: per-classification mappings `capitalizedIncomeClassificationToIncomeAccountMappings`
+
+**Product Mix Restrictions**
+
+- Managed via separate API at `/v1/loanproducts/{productId}/productmix`
+- `restrictedProducts` — list of product IDs that cannot co-exist with this product for the same client/group
 
 **Charges** (multi-select)
 
@@ -1062,6 +1205,13 @@ export interface EnumOptionData {
   value: string;
 }
 
+export interface OfficeData {
+  id: number;
+  name: string;
+  nameDecorated: string;
+  officeType: EnumOptionData;
+}
+
 export interface CurrencyData {
   code: string;
   name: string;
@@ -1181,6 +1331,222 @@ export interface LoanRescheduleRequestData {
   extraTerms: number;
 }
 
+// ============================================================
+// Product Mix
+// ============================================================
+export interface ProductMixData {
+  productId: number;
+  productName: string;
+  restrictedProducts: LoanProductData[];
+  allowedProducts: LoanProductData[];
+  productOptions?: LoanProductData[];
+}
+
+export interface ProductMixRequest {
+  restrictedProducts: number[];
+}
+
+// ============================================================
+// Interest Pause
+// ============================================================
+export interface InterestPauseRequest {
+  startDate: string;
+  endDate: string;
+  dateFormat: string;
+  locale: string;
+}
+
+export interface InterestPauseResponse {
+  id: number;
+  startDate: string;
+  endDate: string;
+}
+
+// ============================================================
+// Point-in-Time
+// ============================================================
+export interface LoanPointInTimeData {
+  id: number;
+  accountNo: string;
+  status: LoanStatusEnumData;
+  currency: CurrencyData;
+  principal: LoanPrincipalData;
+  interest: LoanInterestData;
+  fee: LoanFeeData;
+  penalty: LoanPenaltyData;
+  total: LoanTotalAmountData;
+  clientId: number;
+  clientDisplayName: string;
+  loanProductId: number;
+  loanProductName: string;
+  arrears: LoanArrearsData;
+}
+
+export interface LoanPrincipalData {
+  principalDisbursed: number;
+  principalAdjustments: number;
+  principalPaid: number;
+  principalWrittenOff: number;
+  principalOutstanding: number;
+}
+
+export interface LoanInterestData {
+  interestCharged: number;
+  interestPaid: number;
+  interestWaived: number;
+  interestWrittenOff: number;
+  interestOutstanding: number;
+}
+
+export interface LoanFeeData {
+  feeChargesCharged: number;
+  feeAdjustments: number;
+  feeChargesDueAtDisbursementCharged: number;
+  feeChargesPaid: number;
+  feeChargesWaived: number;
+  feeChargesWrittenOff: number;
+  feeChargesOutstanding: number;
+}
+
+export interface LoanPenaltyData {
+  penaltyChargesCharged: number;
+  penaltyAdjustments: number;
+  penaltyChargesPaid: number;
+  penaltyChargesWaived: number;
+  penaltyChargesWrittenOff: number;
+  penaltyChargesOutstanding: number;
+}
+
+export interface LoanTotalAmountData {
+  totalExpectedRepayment: number;
+  totalRepayment: number;
+  totalExpectedCostOfLoan: number;
+  totalCostOfLoan: number;
+  totalWaived: number;
+  totalWrittenOff: number;
+  totalOutstanding: number;
+}
+
+export interface LoanArrearsData {
+  principalOverdue: number;
+  interestOverdue: number;
+  feeOverdue: number;
+  penaltyOverdue: number;
+  totalOverdue: number;
+  overdueSinceDate: string;
+  isOverdue: boolean;
+}
+
+// ============================================================
+// Buydown Fee & Capitalized Income
+// ============================================================
+export interface BuydownFeeDetails {
+  id: number;
+  amount: number;
+  amortizedAmount: number;
+  unrecognizedAmount: number;
+  amountAdjustment: number;
+  chargedOffAmount: number;
+}
+
+export interface CapitalizedIncomeDetails {
+  amount: number;
+  amortizedAmount: number;
+  unrecognizedAmount: number;
+  amountAdjustment: number;
+  chargedOffAmount: number;
+}
+
+// ============================================================
+// Post-Dated Checks
+// ============================================================
+export interface PostDatedCheckData {
+  id: number;
+  installmentId: number;
+  name: string;
+  accountNo: string;
+  amount: number;
+  installmentDate: string;
+  checkNo: string;
+  status: "PENDING" | "BOUNCED" | "PAID";
+}
+
+// ============================================================
+// Loan Documents
+// ============================================================
+export interface LoanDocumentData {
+  id: number;
+  parentEntityType: string;
+  parentEntityId: number;
+  name: string;
+  fileName: string;
+  size: number;
+  type: string;
+  description: string;
+  location: string;
+  storageType: number;
+}
+
+// ============================================================
+// Loan Notes
+// ============================================================
+export interface LoanNoteData {
+  id: number;
+  loanId: number;
+  noteType: EnumOptionData;
+  note: string;
+  createdById: number;
+  createdByUsername: string;
+  createdOn: string;
+  updatedById: number | null;
+  updatedOn: string | null;
+}
+
+// ============================================================
+// Bulk Reassignment
+// ============================================================
+export interface BulkReassignmentRequest {
+  fromLoanOfficerId: number;
+  toLoanOfficerId: number;
+  assignmentDate: string;
+  loans: number[];
+  locale: string;
+  dateFormat: string;
+}
+
+export interface BulkTransferData {
+  officeOptions: OfficeData[];
+  loanOfficerOptions: StaffData[];
+  accountSummaryCollection: StaffAccountSummaryData[];
+}
+
+export interface StaffAccountSummaryData {
+  staffId: number;
+  staffName: string;
+  clients: ClientLoanSummaryData[];
+  groups: GroupLoanSummaryData[];
+}
+
+export interface ClientLoanSummaryData {
+  clientId: number;
+  clientName: string;
+  loans: LoanSummaryItemData[];
+}
+
+export interface GroupLoanSummaryData {
+  groupId: number;
+  groupName: string;
+  loans: LoanSummaryItemData[];
+}
+
+export interface LoanSummaryItemData {
+  loanId: number;
+  accountNo: string;
+  principal: number;
+  outstanding: number;
+  status: LoanStatusEnumData;
+}
+
 export interface CommandProcessingResult {
   resourceId: number;
   clientId?: number;
@@ -1217,6 +1583,13 @@ export const loanKeys = {
   guarantors: (loanId: number) => [...loanKeys.all, "guarantors", loanId] as const,
   schedule: (loanId: number) => [...loanKeys.all, "schedule", loanId] as const,
   delinquencyTags: (loanId: number) => [...loanKeys.all, "delinquency", loanId] as const,
+  pointInTime: (loanId: number, date: string) => [...loanKeys.all, "pointInTime", loanId, date] as const,
+  interestPauses: (loanId: number) => [...loanKeys.all, "interestPauses", loanId] as const,
+  buydownFees: (loanId: number) => [...loanKeys.all, "buydownFees", loanId] as const,
+  capitalizedIncomes: (loanId: number) => [...loanKeys.all, "capitalizedIncomes", loanId] as const,
+  postDatedChecks: (loanId: number) => [...loanKeys.all, "postDatedChecks", loanId] as const,
+  documents: (loanId: number) => [...loanKeys.all, "documents", loanId] as const,
+  notes: (loanId: number) => [...loanKeys.all, "notes", loanId] as const,
 };
 
 export const loanProductKeys = {
@@ -1224,6 +1597,7 @@ export const loanProductKeys = {
   list: () => [...loanProductKeys.all, "list"] as const,
   detail: (id: number) => [...loanProductKeys.all, "detail", id] as const,
   template: () => [...loanProductKeys.all, "template"] as const,
+  productMix: (id: number) => [...loanProductKeys.all, "productMix", id] as const,
 };
 
 export const rescheduleLoanKeys = {
@@ -1232,22 +1606,35 @@ export const rescheduleLoanKeys = {
   detail: (id: number) => [...rescheduleLoanKeys.all, "detail", id] as const,
   template: () => [...rescheduleLoanKeys.all, "template"] as const,
 };
+
+export const loanReassignmentKeys = {
+  all: ["loanReassignment"] as const,
+  template: (officeId?: number, fromLoanOfficerId?: number) =>
+    [...loanReassignmentKeys.all, "template", officeId, fromLoanOfficerId] as const,
+};
 ```
 
 ### Cache Invalidation
 
-| Mutation                             | Invalidate                                                                  |
-| ------------------------------------ | --------------------------------------------------------------------------- |
-| Create/Update/Delete Loan            | `loanKeys.all`                                                              |
-| Approve/Reject/Withdraw              | `loanKeys.detail(id)`, `loanKeys.all`                                       |
-| Disburse/Undo Disbursal              | `loanKeys.detail(id)`, `loanKeys.transactions(id)`, `loanKeys.schedule(id)` |
-| Create Transaction (repayment, etc.) | `loanKeys.detail(id)`, `loanKeys.transactions(id)`, `loanKeys.schedule(id)` |
-| Adjust/Undo Transaction              | `loanKeys.detail(id)`, `loanKeys.transactions(id)`, `loanKeys.schedule(id)` |
-| Write Off / Charge Off               | `loanKeys.detail(id)`, `loanKeys.transactions(id)`                          |
-| Add/Update/Delete Charge             | `loanKeys.charges(id)`, `loanKeys.detail(id)`                               |
-| Pay/Waive Charge                     | `loanKeys.charges(id)`, `loanKeys.detail(id)`, `loanKeys.transactions(id)`  |
-| Create Reschedule Request            | `rescheduleLoanKeys.all`                                                    |
-| Approve/Reject Reschedule            | `rescheduleLoanKeys.all`, `loanKeys.detail(loanId)`                         |
+| Mutation                             | Invalidate                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Create/Update/Delete Loan            | `loanKeys.all`                                                                                   |
+| Approve/Reject/Withdraw              | `loanKeys.detail(id)`, `loanKeys.all`                                                            |
+| Disburse/Undo Disbursal              | `loanKeys.detail(id)`, `loanKeys.transactions(id)`, `loanKeys.schedule(id)`                      |
+| Create Transaction (repayment, etc.) | `loanKeys.detail(id)`, `loanKeys.transactions(id)`, `loanKeys.schedule(id)`                      |
+| Adjust/Undo Transaction              | `loanKeys.detail(id)`, `loanKeys.transactions(id)`, `loanKeys.schedule(id)`                      |
+| Write Off / Charge Off               | `loanKeys.detail(id)`, `loanKeys.transactions(id)`                                               |
+| Add/Update/Delete Charge             | `loanKeys.charges(id)`, `loanKeys.detail(id)`                                                    |
+| Pay/Waive Charge                     | `loanKeys.charges(id)`, `loanKeys.detail(id)`, `loanKeys.transactions(id)`                       |
+| Create Reschedule Request            | `rescheduleLoanKeys.all`                                                                         |
+| Approve/Reject Reschedule            | `rescheduleLoanKeys.all`, `loanKeys.detail(loanId)`                                              |
+| Create/Update/Delete Product Mix     | `loanProductKeys.productMix(productId)`, `loanProductKeys.all`                                   |
+| Create/Update/Delete Interest Pause  | `loanKeys.detail(loanId)`, `loanKeys.interestPauses(loanId)`, `loanKeys.schedule(loanId)`        |
+| Add Buydown Fee / Capitalized Income | `loanKeys.detail(loanId)`, `loanKeys.buydownFees(loanId)`, `loanKeys.capitalizedIncomes(loanId)` |
+| Bulk Reassign Loan Officers          | `loanKeys.all`                                                                                   |
+| Create/Update/Delete PDC             | `loanKeys.postDatedChecks(loanId)`, `loanKeys.detail(loanId)`                                    |
+| Upload/Update/Delete Document        | `loanKeys.documents(loanId)`                                                                     |
+| Create/Update/Delete Note            | `loanKeys.notes(loanId)`                                                                         |
 
 ### Example Hooks
 
@@ -1458,6 +1845,14 @@ export const TRANSACTION_TYPE = {
   CHARGE_OFF: 17,
   DOWN_PAYMENT: 18,
   INTEREST_REFUND: 19,
+  CAPITALIZED_INCOME: 35,
+  CAPITALIZED_INCOME_AMORTIZATION: 36,
+  CAPITALIZED_INCOME_ADJUSTMENT: 37,
+  CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT: 39,
+  BUY_DOWN_FEE: 40,
+  BUY_DOWN_FEE_ADJUSTMENT: 41,
+  BUY_DOWN_FEE_AMORTIZATION: 42,
+  BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT: 43,
 } as const;
 
 export const LOAN_COMMANDS = {
@@ -1484,6 +1879,8 @@ export const LOAN_COMMANDS = {
   RE_AGE: "reAge",
   RE_AMORTIZE: "reAmortize",
   CREDIT_BALANCE_REFUND: "creditBalanceRefund",
+  ASSIGN_LOAN_OFFICER: "assignloanofficer",
+  UNASSIGN_LOAN_OFFICER: "unassignloanofficer",
 } as const;
 ```
 
@@ -1535,8 +1932,12 @@ export const LOAN_COMMANDS = {
 - [ ] Interest Refund
 - [ ] Re-Age / Undo Re-Age
 - [ ] Re-Amortize / Undo Re-Amortize
-- [ ] Capitalized Income
-- [ ] Adjust/Undo/Reverse Transaction
+- [ ] Capitalized Income (add to loan)
+- [ ] Capitalized Income Adjustment
+- [ ] Buy Down Fee (add to loan)
+- [ ] Buy Down Fee Adjustment
+- [ ] Adjust/Undo/Reverse Transaction (with optional new amount + date)
+- [ ] Transaction chargeback
 
 ### Loan Charges
 
@@ -1576,6 +1977,63 @@ export const LOAN_COMMANDS = {
 - [ ] Multi-disburse configuration
 - [ ] Down payment configuration
 - [ ] Accounting rule + GL mapping configuration
+- [ ] Buydown fee configuration (`enableBuyDownFee`, merchant flag, income type)
+- [ ] Income capitalization configuration (`enableIncomeCapitalization`, income type, GL accounts)
+- [ ] Product mix restrictions (`GET/PUT/POST/DELETE /v1/loanproducts/{id}/productmix`)
+- [ ] Product mix enforcement during loan application (restricted product check)
+
+### Point-in-Time View
+
+- [ ] Single loan snapshot (`GET /v1/loans/at-date/{id}?date=...`)
+- [ ] Bulk snapshot search (`POST /v1/loans/at-date/search`)
+
+### Interest Pause
+
+- [ ] Create pause (`POST /v1/loans/{id}/interest-pauses`)
+- [ ] List pauses (`GET /v1/loans/{id}/interest-pauses`)
+- [ ] Update pause (`PUT /v1/loans/{id}/interest-pauses/{vid}`)
+- [ ] Delete pause (`DELETE /v1/loans/{id}/interest-pauses/{vid}`)
+- [ ] Validation: progressive loan only, active status, no overlap, date bounds
+- [ ] Schedule regeneration after pause change
+
+### Bulk Loan Reassignment
+
+- [ ] Reassignment template (`GET /v1/loans/loanreassignment/template`)
+- [ ] Execute bulk reassignment (`POST /v1/loans/loanreassignment`)
+- [ ] Single loan officer assign/unassign commands
+
+### Buydown Fees
+
+- [ ] View buydown fee amortization details (`GET /v1/loans/{id}/buydown-fees`)
+
+### Capitalized Income
+
+- [ ] View capitalized income details & allocation (`GET /v1/loans/{id}/capitalized-incomes`)
+
+### Post-Dated Checks
+
+- [ ] List PDCs (`GET /v1/loans/{id}/postdatedchecks`)
+- [ ] Update PDC details (`PUT ...?editType=update`)
+- [ ] Mark PDC bounced (`PUT ...?editType=bounced`)
+- [ ] Delete PDC (`DELETE ...`)
+- [ ] Pass PDCs during disbursement (`postDatedChecks` JSON array)
+- [ ] Display PDC status (Pending / Bounced / Paid)
+
+### Loan Documents
+
+- [ ] Document list (`GET /v1/loans/{id}/documents`)
+- [ ] Document upload (multipart: file + name + description)
+- [ ] Document download (binary attachment)
+- [ ] Document update (replace file + metadata)
+- [ ] Document delete
+
+### Loan Notes
+
+- [ ] Notes list (inline via `?associations=notes` or dedicated endpoint)
+- [ ] Create note (`POST /v1/loans/{id}/notes`)
+- [ ] Edit note (`PUT /v1/loans/{id}/notes/{noteId}`)
+- [ ] Delete note (`DELETE /v1/loans/{id}/notes/{noteId}`)
+- [ ] Separate loan-level vs loan-transaction-level notes
 
 ### Loan Rescheduling
 

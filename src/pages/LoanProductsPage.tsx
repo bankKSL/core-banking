@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { useLoanProducts } from "@/features/loans";
+import { useLoanProducts, useDeleteLoanProduct } from "@/features/loans";
 import type { LoanProduct } from "@/features/loans";
 
 /** Extract string value from Finfact enum objects {id,code,value} or primitive */
@@ -24,13 +24,20 @@ const LoanProductsPage: React.FC = () => {
   const { data: products = [], isLoading, refetch } = useLoanProducts();
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<LoanProduct | null>(null);
+  const deleteMutation = useDeleteLoanProduct();
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return products.filter((p) => p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q));
   }, [products, search]);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+    } catch {
+      // handled
+    }
     setDeleteTarget(null);
   };
 
@@ -139,6 +146,7 @@ const LoanProductsPage: React.FC = () => {
         description={`Delete "${deleteTarget?.name}"?`}
         confirmLabel="Delete"
         variant="destructive"
+        loading={deleteMutation.isPending}
       />
     </div>
   );

@@ -17,6 +17,10 @@ import LoanChargesCard from "../components/LoanChargesCard";
 import LoanCollateralCard from "../components/LoanCollateralCard";
 import LoanGuarantorsCard from "../components/LoanGuarantorsCard";
 import LoanDelinquencyCard from "../components/LoanDelinquencyCard";
+import LoanNotesCard from "../components/LoanNotesCard";
+import LoanDocumentsCard from "../components/LoanDocumentsCard";
+import LoanPDCsCard from "../components/LoanPDCsCard";
+import InterestPauseCard from "../components/InterestPauseCard";
 
 const LoanViewPage: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -105,6 +109,10 @@ const LoanViewPage: FC = () => {
           <TabsTrigger value="collateral">Collateral ({collateral.length})</TabsTrigger>
           <TabsTrigger value="guarantors">Guarantors ({guarantors.length})</TabsTrigger>
           <TabsTrigger value="delinquency">Delinquency</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="pdcs">Post-Dated Checks</TabsTrigger>
+          <TabsTrigger value="interestPause">Interest Pause</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="mt-4">
@@ -112,7 +120,7 @@ const LoanViewPage: FC = () => {
         </TabsContent>
 
         <TabsContent value="transactions" className="mt-4">
-          <LoanTransactionsTable transactions={transactions} />
+          <LoanTransactionsTable transactions={transactions} loanId={loan.id} onSuccess={handleSuccess} />
         </TabsContent>
 
         <TabsContent value="schedule" className="mt-4">
@@ -133,6 +141,22 @@ const LoanViewPage: FC = () => {
 
         <TabsContent value="delinquency" className="mt-4">
           <LoanDelinquencyCard loan={loan} />
+        </TabsContent>
+
+        <TabsContent value="notes" className="mt-4">
+          <LoanNotesCard loanId={loan.id} />
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <LoanDocumentsCard loanId={loan.id} />
+        </TabsContent>
+
+        <TabsContent value="pdcs" className="mt-4">
+          <LoanPDCsCard loanId={loan.id} currencyCode={currencyCode} />
+        </TabsContent>
+
+        <TabsContent value="interestPause" className="mt-4">
+          <InterestPauseCard loanId={loan.id} />
         </TabsContent>
       </Tabs>
     </div>

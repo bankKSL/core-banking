@@ -78,6 +78,7 @@ const sections: NavSectionConfig[] = [
       { label: "External Asset Owners", path: "/external-asset-owners/owners", icon: UsersRound },
       { label: "Transfers (Investor)", path: "/external-asset-owners/transfers", icon: ArrowRightLeft },
       { label: "Reschedule Requests", path: "/rescheduling", icon: CalendarClock },
+      { label: "Bulk Reassignment", path: "/loans/reassign", icon: ArrowRightLeft },
     ],
   },
   {

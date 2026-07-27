@@ -1,13 +1,17 @@
-import type { FC } from "react";
-import { DollarSign } from "lucide-react";
+import { type FC, useState } from "react";
+import { DollarSign, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { AdjustTransactionDialog } from "./AdjustTransactionDialog";
 import type { LoanTransaction } from "../types/loan";
 
 interface LoanTransactionsTableProps {
   transactions: LoanTransaction[];
   loading?: boolean;
+  loanId?: number;
+  onSuccess?: () => void;
 }
 
 const formatCurrency = (n: number, code = "USD") =>
@@ -30,7 +34,8 @@ const formatTxDate = (tx: LoanTransaction): string => {
   return "—";
 };
 
-const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, loading }) => {
+const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, loading, loanId, onSuccess }) => {
+  const [adjustTarget, setAdjustTarget] = useState<LoanTransaction | null>(null);
   if (loading) {
     return (
       <Card>
@@ -85,6 +90,7 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
               <TableHead className="text-right">Principal</TableHead>
               <TableHead className="text-right">Interest</TableHead>
               <TableHead>Status</TableHead>
+              {loanId && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -108,11 +114,33 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
                     size="sm"
                   />
                 </TableCell>
+                {loanId && (
+                  <TableCell className="text-right">
+                    {!tx.manuallyReversed && (
+                      <Button variant="ghost" size="sm" onClick={() => setAdjustTarget(tx)}>
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </CardContent>
+
+      {loanId && (
+        <AdjustTransactionDialog
+          loanId={loanId}
+          transaction={adjustTarget}
+          open={!!adjustTarget}
+          onOpenChange={(open) => { if (!open) setAdjustTarget(null); }}
+          onSuccess={() => {
+            setAdjustTarget(null);
+            onSuccess?.();
+          }}
+        />
+      )}
     </Card>
   );
 };

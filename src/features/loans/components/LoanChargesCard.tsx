@@ -1,7 +1,7 @@
 import { type FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Receipt, Plus, Loader2, Trash2 } from "lucide-react";
+import { Receipt, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import {
   useLoanCharges,
   useLoanChargeTemplate,
   useAddLoanCharge,
+  useUpdateLoanCharge,
   useDeleteLoanCharge,
   useLoanChargeCommand,
 } from "../hooks/useLoanCharges";
@@ -34,10 +35,14 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
 
   const templateQuery = useLoanChargeTemplate(loanId);
   const addMutation = useAddLoanCharge();
+  const updateMutation = useUpdateLoanCharge();
   const deleteMutation = useDeleteLoanCharge();
   const commandMutation = useLoanChargeCommand();
 
   const [addOpen, setAddOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<LoanCharge | null>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editDueDate, setEditDueDate] = useState("");
   const [payTarget, setPayTarget] = useState<LoanCharge | null>(null);
   const [payDate, setPayDate] = useState(new Date().toISOString().split("T")[0]);
   const [waiveTarget, setWaiveTarget] = useState<LoanCharge | null>(null);
@@ -141,19 +146,28 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        {!isPaid && !isWaived && (
-                          <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => setPayTarget(charge)}>
-                              Pay
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setWaiveTarget(charge)}>
-                              Waive
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(charge)}>
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setEditTarget(charge);
+                            setEditAmount(String(charge.amount ?? 0));
+                            setEditDueDate(charge.dueDate ? (Array.isArray(charge.dueDate) ? new Date(charge.dueDate[0], charge.dueDate[1] - 1, charge.dueDate[2]).toISOString().split("T")[0] : charge.dueDate) : "");
+                          }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          {!isPaid && !isWaived && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => setPayTarget(charge)}>
+                                Pay
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => setWaiveTarget(charge)}>
+                                Waive
+                              </Button>
+                            </>
+                          )}
+                          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(charge)}>
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -213,6 +227,46 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit charge dialog */}
+      <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Charge</DialogTitle>
+            <DialogDescription>Update amount for {editTarget?.name}.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="editChargeAmount">Amount</Label>
+              <Input id="editChargeAmount" type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="editChargeDueDate">Due Date</Label>
+              <Input id="editChargeDueDate" type="date" value={editDueDate} onChange={(e) => setEditDueDate(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditTarget(null)} disabled={updateMutation.isPending}>
+                Cancel
+              </Button>
+              <Button
+                disabled={updateMutation.isPending}
+                onClick={async () => {
+                  if (!editTarget) return;
+                  await updateMutation.mutateAsync({
+                    loanId,
+                    chargeId: editTarget.id,
+                    payload: { amount: Number(editAmount), dueDate: editDueDate || undefined },
+                  });
+                  setEditTarget(null);
+                }}
+              >
+                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

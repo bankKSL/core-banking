@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchLoanProducts, fetchLoanProduct } from "../api/loan";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchLoanProducts, fetchLoanProduct, deleteLoanProduct } from "../api/loan";
 import { loanKeys } from "./useLoans";
 
 export function useLoanProducts() {
@@ -7,6 +7,16 @@ export function useLoanProducts() {
     queryKey: loanKeys.products,
     queryFn: () => fetchLoanProducts(),
     staleTime: 5 * 60_000,
+  });
+}
+
+export function useDeleteLoanProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => deleteLoanProduct(productId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: loanKeys.products });
+    },
   });
 }
 
