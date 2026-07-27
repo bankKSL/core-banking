@@ -60,6 +60,13 @@ import ProvisioningCategoryListPage from "@/features/provisioning/pages/Provisio
 import ProvisioningCategoryFormPage from "@/features/provisioning/pages/ProvisioningCategoryFormPage";
 import ProvisioningCriteriaListPage from "@/features/provisioning/pages/ProvisioningCriteriaListPage";
 import ProvisioningCriteriaFormPage from "@/features/provisioning/pages/ProvisioningCriteriaFormPage";
+import ReportListPage from "@/features/reports/pages/ReportListPage";
+import ReportFormPage from "@/features/reports/pages/ReportFormPage";
+import AdhocQueryListPage from "@/features/reports/pages/AdhocQueryListPage";
+import AdhocQueryFormPage from "@/features/reports/pages/AdhocQueryFormPage";
+import DatatableListPage from "@/features/datatables/pages/DatatableListPage";
+import DatatableFormPage from "@/features/datatables/pages/DatatableFormPage";
+import EntityDatatableCheckListPage from "@/features/datatables/pages/EntityDatatableCheckListPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import ClientListPage from "@/features/clients/pages/ClientListPage";
 import CreateClientPage from "@/features/clients/pages/CreateClientPage";
@@ -316,6 +323,15 @@ function App() {
                   <Route path="/provisioning-criteria" element={<ProvisioningCriteriaListPage />} />
                   <Route path="/provisioning-criteria/new" element={<ProvisioningCriteriaFormPage />} />
                   <Route path="/provisioning-criteria/edit/:id" element={<ProvisioningCriteriaFormPage />} />
+                  <Route path="/reports" element={<ReportListPage />} />
+                  <Route path="/reports/new" element={<ReportFormPage />} />
+                  <Route path="/reports/edit/:id" element={<ReportFormPage />} />
+                  <Route path="/adhoc-queries" element={<AdhocQueryListPage />} />
+                  <Route path="/adhoc-queries/new" element={<AdhocQueryFormPage />} />
+                  <Route path="/adhoc-queries/edit/:id" element={<AdhocQueryFormPage />} />
+                  <Route path="/datatables" element={<DatatableListPage />} />
+                  <Route path="/datatables/new" element={<DatatableFormPage />} />
+                  <Route path="/entity-datatable-checks" element={<EntityDatatableCheckListPage />} />
                   {/* Exchange Rates */}
                   <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                   {/* CRM */}

@@ -73,7 +73,7 @@ const RescheduleLoanFormPage: FC = () => {
         actions={
           <Button variant="outline" onClick={() => navigate("/rescheduling")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Requests
+            Back
           </Button>
         }
       />
@@ -186,7 +186,7 @@ const RescheduleLoanFormPage: FC = () => {
           </CardContent>
         </Card>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-3">
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting ? (
               <span className="flex items-center gap-2">

@@ -188,6 +188,17 @@ const sections: NavSectionConfig[] = [
     ],
   },
   {
+    id: "reports",
+    title: "Reports & Data",
+    defaultOpen: true,
+    items: [
+      { label: "Reports", path: "/reports", icon: FileText },
+      { label: "Adhoc Queries", path: "/adhoc-queries", icon: Calculator },
+      { label: "Datatables", path: "/datatables", icon: LayoutGrid },
+      { label: "Entity Checks", path: "/entity-datatable-checks", icon: ShieldCheck },
+    ],
+  },
+  {
     id: "cob",
     title: "Close of Business",
     defaultOpen: true,

@@ -288,7 +288,7 @@ const LoanForm: FC<LoanFormProps> = ({
       </Card>
 
       {/* Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3">
         <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
           {isSubmitting ? (
             <span className="flex items-center gap-2">
