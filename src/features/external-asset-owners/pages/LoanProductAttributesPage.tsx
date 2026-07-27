@@ -123,7 +123,7 @@ const LoanProductAttributesPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Loan Product Attributes"
         description={`Configure investor settings for loan product #${parsedId}`}

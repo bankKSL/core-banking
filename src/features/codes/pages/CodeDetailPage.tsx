@@ -9,17 +9,18 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCode, useCodeValues, useCreateCodeValue, useUpdateCodeValue, useDeleteCodeValue, useDeleteCode } from "../hooks/useCodes";
+import {
+  useCode,
+  useCodeValues,
+  useCreateCodeValue,
+  useUpdateCodeValue,
+  useDeleteCodeValue,
+  useDeleteCode,
+} from "../hooks/useCodes";
 import type { CodeValue } from "../api/codes";
 
 const CodeDetailPage: React.FC = () => {
@@ -78,7 +79,17 @@ const CodeDetailPage: React.FC = () => {
       await createValueMutation.mutateAsync(payload);
     }
     setValueDialog({ open: false });
-  }, [codeId, formName, formPosition, formDescription, formActive, formMandatory, valueDialog.editValue, createValueMutation, updateValueMutation]);
+  }, [
+    codeId,
+    formName,
+    formPosition,
+    formDescription,
+    formActive,
+    formMandatory,
+    valueDialog.editValue,
+    createValueMutation,
+    updateValueMutation,
+  ]);
 
   const handleDeleteValue = useCallback(async () => {
     if (!codeId || !deleteTarget) return;
@@ -114,9 +125,13 @@ const CodeDetailPage: React.FC = () => {
       header: "Active",
       accessorFn: (row) =>
         row.isActive ? (
-          <Badge variant="success" size="sm">Active</Badge>
+          <Badge variant="success" size="sm">
+            Active
+          </Badge>
         ) : (
-          <Badge variant="default" size="sm">Inactive</Badge>
+          <Badge variant="default" size="sm">
+            Inactive
+          </Badge>
         ),
     },
     {
@@ -143,7 +158,7 @@ const CodeDetailPage: React.FC = () => {
 
   if (codeLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
         <Card>
@@ -225,16 +240,33 @@ const CodeDetailPage: React.FC = () => {
           <div className="space-y-4 py-4">
             <div>
               <Label htmlFor="cvName">Value Name *</Label>
-              <Input id="cvName" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="e.g. Male" />
+              <Input
+                id="cvName"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="e.g. Male"
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="cvPosition">Position</Label>
-                <Input id="cvPosition" type="number" min="0" value={formPosition} onChange={(e) => setFormPosition(e.target.value)} placeholder="0" />
+                <Input
+                  id="cvPosition"
+                  type="number"
+                  min="0"
+                  value={formPosition}
+                  onChange={(e) => setFormPosition(e.target.value)}
+                  placeholder="0"
+                />
               </div>
               <div>
                 <Label htmlFor="cvDesc">Description</Label>
-                <Input id="cvDesc" value={formDescription} onChange={(e) => setFormDescription(e.target.value)} placeholder="Optional" />
+                <Input
+                  id="cvDesc"
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="Optional"
+                />
               </div>
             </div>
             <div className="flex items-center gap-6">
@@ -249,8 +281,13 @@ const CodeDetailPage: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setValueDialog({ open: false })}>Cancel</Button>
-            <Button onClick={handleValueSubmit} disabled={!formName.trim() || createValueMutation.isPending || updateValueMutation.isPending}>
+            <Button variant="outline" onClick={() => setValueDialog({ open: false })}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleValueSubmit}
+              disabled={!formName.trim() || createValueMutation.isPending || updateValueMutation.isPending}
+            >
               {createValueMutation.isPending || updateValueMutation.isPending ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
@@ -259,7 +296,9 @@ const CodeDetailPage: React.FC = () => {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
+        onOpenChange={(o) => {
+          if (!o) setDeleteTarget(null);
+        }}
         title="Delete Code Value"
         description="Are you sure you want to delete this code value?"
         confirmLabel="Delete"

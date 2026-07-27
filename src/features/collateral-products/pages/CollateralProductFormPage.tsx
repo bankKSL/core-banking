@@ -86,7 +86,7 @@ const CollateralProductFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Collateral Product" : "Create Collateral Product"}
         description={isEdit ? `Editing "${product?.name}"` : "Define a new collateral product type"}

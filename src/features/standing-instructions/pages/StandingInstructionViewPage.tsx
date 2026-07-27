@@ -56,7 +56,7 @@ const StandingInstructionViewPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />
         <Card>
@@ -90,7 +90,7 @@ const StandingInstructionViewPage: React.FC = () => {
   const priorityLabel = PRIORITY_CONFIG[instruction.priority?.id]?.label ?? instruction.priority?.value ?? "—";
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={instruction.name ?? "Standing Instruction"}
         description="View standing instruction details"
@@ -121,10 +121,7 @@ const StandingInstructionViewPage: React.FC = () => {
           <CardContent>
             <DetailRow label="Office" value={instruction.fromOffice?.name ?? "—"} />
             <DetailRow label="Client" value={instruction.fromClient?.displayName ?? "—"} />
-            <DetailRow
-              label="Account Type"
-              value={ACCOUNT_TYPE_LABELS[instruction.fromAccountType?.id] ?? "—"}
-            />
+            <DetailRow label="Account Type" value={ACCOUNT_TYPE_LABELS[instruction.fromAccountType?.id] ?? "—"} />
             <DetailRow
               label="Account"
               value={`${instruction.fromAccount?.accountNo ?? "—"} — ${instruction.fromAccount?.productName ?? ""}`}
@@ -139,10 +136,7 @@ const StandingInstructionViewPage: React.FC = () => {
           <CardContent>
             <DetailRow label="Office" value={instruction.toOffice?.name ?? "—"} />
             <DetailRow label="Client" value={instruction.toClient?.displayName ?? "—"} />
-            <DetailRow
-              label="Account Type"
-              value={ACCOUNT_TYPE_LABELS[instruction.toAccountType?.id] ?? "—"}
-            />
+            <DetailRow label="Account Type" value={ACCOUNT_TYPE_LABELS[instruction.toAccountType?.id] ?? "—"} />
             <DetailRow
               label="Account"
               value={`${instruction.toAccount?.accountNo ?? "—"} — ${instruction.toAccount?.productName ?? ""}`}
@@ -162,23 +156,19 @@ const StandingInstructionViewPage: React.FC = () => {
           />
           <DetailRow
             label="Instruction Type"
-            value={INSTRUCTION_TYPE_LABELS[instruction.instructionType?.id] ?? instruction.instructionType?.value ?? "—"}
+            value={
+              INSTRUCTION_TYPE_LABELS[instruction.instructionType?.id] ?? instruction.instructionType?.value ?? "—"
+            }
           />
           <DetailRow label="Priority" value={priorityLabel} />
-          <DetailRow
-            label="Status"
-            value={<StandingInstructionStatusBadge status={instruction.status} />}
-          />
+          <DetailRow label="Status" value={<StandingInstructionStatusBadge status={instruction.status} />} />
           <DetailRow label="Amount" value={formatAmount(instruction.amount)} />
           <DetailRow
             label="Recurrence Type"
             value={RECURRENCE_TYPE_LABELS[instruction.recurrenceType?.id] ?? instruction.recurrenceType?.value ?? "—"}
           />
           {instruction.recurrenceFrequency && (
-            <DetailRow
-              label="Recurrence Frequency"
-              value={instruction.recurrenceFrequency?.value ?? "—"}
-            />
+            <DetailRow label="Recurrence Frequency" value={instruction.recurrenceFrequency?.value ?? "—"} />
           )}
           {instruction.recurrenceInterval && (
             <DetailRow label="Recurrence Interval" value={String(instruction.recurrenceInterval)} />

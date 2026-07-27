@@ -1,15 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Play,
-  Loader2,
-  RefreshCw,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { ArrowLeft, Play, Loader2, RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +27,7 @@ const CatchUpPage: FC = () => {
   const isRunning = catchUpStatus?.isCatchUpRunning;
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="COB Catch-Up"
         description="Trigger and monitor end-of-day catch-up processing for loan accounts"
@@ -88,12 +79,7 @@ const CatchUpPage: FC = () => {
                 All loans are up to date
               </div>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => refetchOldest()}
-              className="mt-2"
-            >
+            <Button variant="ghost" size="sm" onClick={() => refetchOldest()} className="mt-2">
               <RefreshCw className="mr-1 h-3 w-3" />
               Refresh
             </Button>
@@ -117,9 +103,7 @@ const CatchUpPage: FC = () => {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant={isRunning ? "warning" : "success"}>
-                    {isRunning ? "Running" : "Idle"}
-                  </Badge>
+                  <Badge variant={isRunning ? "warning" : "success"}>{isRunning ? "Running" : "Idle"}</Badge>
                 </div>
                 {catchUpStatus?.processingDate && (
                   <div>
@@ -127,11 +111,7 @@ const CatchUpPage: FC = () => {
                     <p className="text-sm font-medium">{catchUpStatus.processingDate}</p>
                   </div>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => refetchStatus()}
-                >
+                <Button variant="ghost" size="sm" onClick={() => refetchStatus()}>
                   <RefreshCw className="mr-1 h-3 w-3" />
                   Refresh
                 </Button>
@@ -147,8 +127,8 @@ const CatchUpPage: FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-gray-500">
-            This will run COB processing for all loans that are behind, starting from the oldest
-            unprocessed business date. The process runs one business date at a time.
+            This will run COB processing for all loans that are behind, starting from the oldest unprocessed business
+            date. The process runs one business date at a time.
           </p>
 
           {lastResult && (

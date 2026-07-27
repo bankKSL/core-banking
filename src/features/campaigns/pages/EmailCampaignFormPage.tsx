@@ -10,17 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  createEmailCampaignSchema,
-  type CreateEmailCampaignFormValues,
-} from "../schemas/campaign.schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createEmailCampaignSchema, type CreateEmailCampaignFormValues } from "../schemas/campaign.schema";
 import {
   useEmailCampaignTemplate,
   useEmailCampaign,
@@ -126,12 +117,10 @@ const EmailCampaignFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Email Campaign" : "Create Email Campaign"}
-        description={
-          isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new email marketing campaign"
-        }
+        description={isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new email marketing campaign"}
         actions={
           <Button variant="outline" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -197,21 +186,13 @@ const EmailCampaignFormPage: FC = () => {
 
             <div>
               <Label htmlFor="paramValue">Param Value (JSON) *</Label>
-              <Input
-                id="paramValue"
-                {...register("paramValue")}
-                placeholder='e.g. {"officeId":1}'
-              />
+              <Input id="paramValue" {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
               {errors.paramValue && <p className="text-xs text-red-500 mt-1">{errors.paramValue.message}</p>}
             </div>
 
             <div>
               <Label htmlFor="emailSubject">Subject *</Label>
-              <Input
-                id="emailSubject"
-                {...register("emailSubject")}
-                placeholder="e.g. Your Monthly Statement"
-              />
+              <Input id="emailSubject" {...register("emailSubject")} placeholder="e.g. Your Monthly Statement" />
               {errors.emailSubject && <p className="text-xs text-red-500 mt-1">{errors.emailSubject.message}</p>}
             </div>
 
@@ -255,22 +236,12 @@ const EmailCampaignFormPage: FC = () => {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="recurrence">Recurrence Rule *</Label>
-                <Input
-                  id="recurrence"
-                  {...register("recurrence")}
-                  placeholder="e.g. FREQ=MONTHLY;INTERVAL=1"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  RFC 5545 recurrence rule format.
-                </p>
+                <Input id="recurrence" {...register("recurrence")} placeholder="e.g. FREQ=MONTHLY;INTERVAL=1" />
+                <p className="text-xs text-gray-500 mt-1">RFC 5545 recurrence rule format.</p>
               </div>
               <div>
                 <Label htmlFor="recurrenceStartDate">Recurrence Start Date *</Label>
-                <Input
-                  id="recurrenceStartDate"
-                  type="date"
-                  {...register("recurrenceStartDate")}
-                />
+                <Input id="recurrenceStartDate" type="date" {...register("recurrenceStartDate")} />
               </div>
             </CardContent>
           </Card>

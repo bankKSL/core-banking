@@ -95,7 +95,7 @@ const ConditionsPage: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="all">All Rules</TabsTrigger>
             <TabsTrigger value="byCampaign">By Campaign</TabsTrigger>
           </TabsList>

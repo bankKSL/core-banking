@@ -8,10 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  createOwnerSchema,
-  type CreateOwnerFormValues,
-} from "../schemas/externalAssetOwner.schema";
+import { createOwnerSchema, type CreateOwnerFormValues } from "../schemas/externalAssetOwner.schema";
 import { useCreateExternalAssetOwner } from "../hooks/useExternalAssetOwners";
 
 const ExternalAssetOwnerFormPage: FC = () => {
@@ -35,7 +32,7 @@ const ExternalAssetOwnerFormPage: FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Create External Asset Owner"
         description="Register a new external investor"
@@ -62,9 +59,7 @@ const ExternalAssetOwnerFormPage: FC = () => {
                 {...register("ownerExternalId")}
                 placeholder="e.g. 36efeb06-d835-48a1-99eb-09bd1d348c1e"
               />
-              {errors.ownerExternalId && (
-                <p className="text-xs text-red-500 mt-1">{errors.ownerExternalId.message}</p>
-              )}
+              {errors.ownerExternalId && <p className="text-xs text-red-500 mt-1">{errors.ownerExternalId.message}</p>}
               <p className="text-xs text-gray-500 mt-1">
                 A unique identifier for the external investor. This cannot be changed after creation.
               </p>

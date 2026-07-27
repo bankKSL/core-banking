@@ -140,7 +140,7 @@ const GLAccountFormPage: React.FC = () => {
 
   if ((isEdit && accountLoading) || templateLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -148,7 +148,7 @@ const GLAccountFormPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit GL Account" : "Create GL Account"}
         description="Configure a general ledger account in the chart of accounts."

@@ -10,12 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  useAccountDetails,
-  useAccountTransactions,
-  useAccountIdentifiers,
-  useAccountKYC,
-} from "../hooks/useInterop";
+import { useAccountDetails, useAccountTransactions, useAccountIdentifiers, useAccountKYC } from "../hooks/useInterop";
 import { IDENTIFIER_TYPE_OPTIONS } from "../types/interop";
 import type { InteropIdentifier, AccountTransaction, KYCData, AccountDetailResponse } from "../types/interop";
 
@@ -36,9 +31,7 @@ function AccountOverview({ account }: { account: AccountDetailResponse }) {
       </div>
       <div>
         <p className="text-xs text-gray-500">Status</p>
-        <Badge variant={account.status === "ACTIVE" ? "success" : "default"}>
-          {account.status ?? "—"}
-        </Badge>
+        <Badge variant={account.status === "ACTIVE" ? "success" : "default"}>{account.status ?? "—"}</Badge>
       </div>
       <div>
         <p className="text-xs text-gray-500">Currency</p>
@@ -46,15 +39,11 @@ function AccountOverview({ account }: { account: AccountDetailResponse }) {
       </div>
       <div>
         <p className="text-xs text-gray-500">Balance</p>
-        <p className="text-sm font-mono font-medium">
-          {account.accountBalance?.toFixed(2) ?? "—"}
-        </p>
+        <p className="text-sm font-mono font-medium">{account.accountBalance?.toFixed(2) ?? "—"}</p>
       </div>
       <div>
         <p className="text-xs text-gray-500">Available Balance</p>
-        <p className="text-sm font-mono">
-          {account.availableBalance?.toFixed(2) ?? "—"}
-        </p>
+        <p className="text-sm font-mono">{account.availableBalance?.toFixed(2) ?? "—"}</p>
       </div>
       <div>
         <p className="text-xs text-gray-500">Client</p>
@@ -76,7 +65,11 @@ function IdentifiersTab({ identifiers, loading }: { identifiers: InteropIdentifi
     },
     { key: "value", header: "Value", cell: (r) => <span className="font-mono text-sm">{r.value}</span> },
     { key: "subType", header: "Sub Type", cell: (r) => r.subType ?? "—" },
-    { key: "createdOn", header: "Created", cell: (r) => (r.createdOn ? new Date(r.createdOn).toLocaleDateString() : "—") },
+    {
+      key: "createdOn",
+      header: "Created",
+      cell: (r) => (r.createdOn ? new Date(r.createdOn).toLocaleDateString() : "—"),
+    },
   ];
 
   if (loading) return <Skeleton className="h-32 w-full" />;
@@ -101,24 +94,18 @@ function TransactionsTab({ transactions, loading }: { transactions: AccountTrans
     {
       key: "debit",
       header: "Debit",
-      cell: (r) =>
-        r.debit ? <span className="font-mono text-red-600">{(r.debit).toFixed(2)}</span> : "—",
+      cell: (r) => (r.debit ? <span className="font-mono text-red-600">{r.debit.toFixed(2)}</span> : "—"),
     },
     {
       key: "credit",
       header: "Credit",
-      cell: (r) =>
-        r.credit ? <span className="font-mono text-emerald-600">{(r.credit).toFixed(2)}</span> : "—",
+      cell: (r) => (r.credit ? <span className="font-mono text-emerald-600">{r.credit.toFixed(2)}</span> : "—"),
     },
     {
       key: "runningBalance",
       header: "Balance",
       cell: (r) =>
-        r.runningBalance !== undefined ? (
-          <span className="font-mono">{r.runningBalance.toFixed(2)}</span>
-        ) : (
-          "—"
-        ),
+        r.runningBalance !== undefined ? <span className="font-mono">{r.runningBalance.toFixed(2)}</span> : "—",
     },
   ];
 
@@ -173,12 +160,8 @@ const InteropAccountDetailPage: FC = () => {
   const [accountId, setAccountId] = useState(searchParams.get("id") ?? "");
 
   const { data: account, isLoading: accountLoading } = useAccountDetails(accountId || undefined);
-  const { data: transactions = [], isLoading: txLoading } = useAccountTransactions(
-    accountId || undefined,
-  );
-  const { data: identifiers = [], isLoading: idLoading } = useAccountIdentifiers(
-    accountId || undefined,
-  );
+  const { data: transactions = [], isLoading: txLoading } = useAccountTransactions(accountId || undefined);
+  const { data: identifiers = [], isLoading: idLoading } = useAccountIdentifiers(accountId || undefined);
   const { data: kyc, isLoading: kycLoading } = useAccountKYC(accountId || undefined);
 
   return (
@@ -209,10 +192,7 @@ const InteropAccountDetailPage: FC = () => {
                 placeholder="e.g. ext-uuid-account-id"
               />
             </div>
-            <Button
-              onClick={() => setAccountId(accountId)}
-              className="bg-[#D32F2F] hover:bg-red-700"
-            >
+            <Button onClick={() => setAccountId(accountId)} className="bg-[#D32F2F] hover:bg-red-700">
               <Search className="mr-2 h-4 w-4" />
               Search
             </Button>
@@ -230,7 +210,7 @@ const InteropAccountDetailPage: FC = () => {
 
       {accountId && !accountLoading && account && (
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="identifiers">Identifiers</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>

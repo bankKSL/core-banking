@@ -382,7 +382,7 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
           sidebarCollapsed ? "justify-center" : "justify-between",
         )}
       >
-        {!sidebarCollapsed && (
+        {/* {!sidebarCollapsed && (
           <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg">
               <img src="/insee.png" alt="" />
@@ -393,7 +393,7 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
               <span className="text-xs text-gray-500 dark:text-gray-400">Dashboard</span>
             </div>
           </div>
-        )}
+        )} */}
         {sidebarCollapsed && (
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#D32F2F]">
             <LayoutDashboard className="h-4.5 w-4.5 text-white" />

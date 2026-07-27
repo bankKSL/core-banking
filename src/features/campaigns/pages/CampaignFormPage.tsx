@@ -11,17 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  createSmsCampaignSchema,
-  type CreateSmsCampaignFormValues,
-} from "../schemas/campaign.schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createSmsCampaignSchema, type CreateSmsCampaignFormValues } from "../schemas/campaign.schema";
 import {
   useSmsCampaignTemplate,
   useSmsCampaign,
@@ -139,12 +130,10 @@ const CampaignFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit SMS Campaign" : "Create SMS Campaign"}
-        description={
-          isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new SMS marketing campaign"
-        }
+        description={isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new SMS marketing campaign"}
         actions={
           <Button variant="outline" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -208,20 +197,14 @@ const CampaignFormPage: FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Switch
-                checked={isNotification}
-                onCheckedChange={(v) => setValue("isNotification", v)}
-              />
+              <Switch checked={isNotification} onCheckedChange={(v) => setValue("isNotification", v)} />
               <Label>Is Notification (no provider needed)</Label>
             </div>
 
             {!isNotification && campaignType === "1" && (
               <div>
                 <Label>SMS Provider</Label>
-                <Select
-                  value={watch("providerId")}
-                  onValueChange={(v) => setValue("providerId", v)}
-                >
+                <Select value={watch("providerId")} onValueChange={(v) => setValue("providerId", v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select provider" />
                   </SelectTrigger>
@@ -259,14 +242,8 @@ const CampaignFormPage: FC = () => {
             {isDirectOrSchedule && (
               <div>
                 <Label htmlFor="paramValue">Param Value (JSON)</Label>
-                <Input
-                  id="paramValue"
-                  {...register("paramValue")}
-                  placeholder='e.g. {"officeId":1}'
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  JSON key-value pairs matching report parameters.
-                </p>
+                <Input id="paramValue" {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
+                <p className="text-xs text-gray-500 mt-1">JSON key-value pairs matching report parameters.</p>
               </div>
             )}
 
@@ -293,10 +270,7 @@ const CampaignFormPage: FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Frequency *</Label>
-                  <Select
-                    value={watch("frequency")}
-                    onValueChange={(v) => setValue("frequency", v)}
-                  >
+                  <Select value={watch("frequency")} onValueChange={(v) => setValue("frequency", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
@@ -317,10 +291,7 @@ const CampaignFormPage: FC = () => {
               {watch("frequency") === "2" && (
                 <div>
                   <Label>Repeats On Day</Label>
-                  <Select
-                    value={watch("repeatsOnDay")}
-                    onValueChange={(v) => setValue("repeatsOnDay", v)}
-                  >
+                  <Select value={watch("repeatsOnDay")} onValueChange={(v) => setValue("repeatsOnDay", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select day" />
                     </SelectTrigger>
@@ -336,11 +307,7 @@ const CampaignFormPage: FC = () => {
               )}
               <div>
                 <Label htmlFor="recurrenceStartDate">Recurrence Start Date *</Label>
-                <Input
-                  id="recurrenceStartDate"
-                  type="datetime-local"
-                  {...register("recurrenceStartDate")}
-                />
+                <Input id="recurrenceStartDate" type="datetime-local" {...register("recurrenceStartDate")} />
               </div>
             </CardContent>
           </Card>

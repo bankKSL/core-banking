@@ -1,15 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import {
-  ArrowLeft,
-  Play,
-  XCircle,
-  RotateCcw,
-  Trash2,
-  Loader2,
-  Megaphone,
-  Eye,
-} from "lucide-react";
+import { ArrowLeft, Play, XCircle, RotateCcw, Trash2, Loader2, Megaphone, Eye } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -19,12 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   useSmsCampaign,
   useActivateSmsCampaign,
@@ -37,11 +23,7 @@ import {
   useReactivateEmailCampaign,
   useDeleteEmailCampaign,
 } from "../hooks/useCampaigns";
-import {
-  STATUS_LABELS,
-  TRIGGER_TYPE_LABELS,
-  CAMPAIGN_TYPE_LABELS,
-} from "../types/campaign";
+import { STATUS_LABELS, TRIGGER_TYPE_LABELS, CAMPAIGN_TYPE_LABELS } from "../types/campaign";
 
 const CampaignDetailPage: FC = () => {
   const navigate = useNavigate();
@@ -74,15 +56,27 @@ const CampaignDetailPage: FC = () => {
     if (!numericId || !actionDialog || !actionDate) return;
     if (isSms) {
       if (actionDialog === "activate") {
-        await activateSms.mutateAsync({ id: numericId, payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+        await activateSms.mutateAsync({
+          id: numericId,
+          payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+        });
       } else {
-        await closeSms.mutateAsync({ id: numericId, payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+        await closeSms.mutateAsync({
+          id: numericId,
+          payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+        });
       }
     } else {
       if (actionDialog === "activate") {
-        await activateEmail.mutateAsync({ id: numericId, payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+        await activateEmail.mutateAsync({
+          id: numericId,
+          payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+        });
       } else {
-        await closeEmail.mutateAsync({ id: numericId, payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+        await closeEmail.mutateAsync({
+          id: numericId,
+          payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+        });
       }
     }
     setActionDialog(null);
@@ -121,7 +115,7 @@ const CampaignDetailPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={campaign.campaignName}
         description={`${isSms ? "SMS" : "Email"} campaign details and management`}
@@ -167,7 +161,7 @@ const CampaignDetailPage: FC = () => {
               <p className="text-xs text-gray-500">Campaign Type</p>
               <p className="text-sm font-medium">
                 {isSms
-                  ? CAMPAIGN_TYPE_LABELS[(campaign as any).campaignType] ?? (campaign as any).campaignType
+                  ? (CAMPAIGN_TYPE_LABELS[(campaign as any).campaignType] ?? (campaign as any).campaignType)
                   : "Email"}
               </p>
             </div>
@@ -211,31 +205,18 @@ const CampaignDetailPage: FC = () => {
       <Dialog open={!!actionDialog} onOpenChange={(o) => !o && setActionDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {actionDialog === "activate" ? "Activate Campaign" : "Close Campaign"}
-            </DialogTitle>
+            <DialogTitle>{actionDialog === "activate" ? "Activate Campaign" : "Close Campaign"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="actionDate">
-                {actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}
-              </Label>
-              <Input
-                id="actionDate"
-                type="date"
-                value={actionDate}
-                onChange={(e) => setActionDate(e.target.value)}
-              />
+              <Label htmlFor="actionDate">{actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}</Label>
+              <Input id="actionDate" type="date" value={actionDate} onChange={(e) => setActionDate(e.target.value)} />
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setActionDialog(null)}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleAction}
-                disabled={!actionDate}
-                className="bg-[#D32F2F] hover:bg-red-700"
-              >
+              <Button onClick={handleAction} disabled={!actionDate} className="bg-[#D32F2F] hover:bg-red-700">
                 {actionDialog === "activate" ? "Activate" : "Close"}
               </Button>
             </div>

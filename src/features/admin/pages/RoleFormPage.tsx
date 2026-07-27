@@ -62,7 +62,7 @@ const RoleFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Role" : "Create Role"}
         description={isEdit ? `Editing role #${id}` : "Define a new application role"}

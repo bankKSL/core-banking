@@ -122,7 +122,7 @@ const AccountingRuleFormPage: React.FC = () => {
 
   if ((isEdit && ruleLoading) || templateLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -146,7 +146,7 @@ const AccountingRuleFormPage: React.FC = () => {
   );
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Accounting Rule" : "Create Accounting Rule"}
         description="Define a debit/credit template for non-accountant users."

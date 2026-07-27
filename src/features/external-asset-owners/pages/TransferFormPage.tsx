@@ -8,17 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  saleTransferSchema,
-  type SaleTransferFormValues,
-} from "../schemas/externalAssetOwner.schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { saleTransferSchema, type SaleTransferFormValues } from "../schemas/externalAssetOwner.schema";
 import { useExecuteTransferByLoanId } from "../hooks/useExternalAssetOwners";
 
 type TransferType = "sale" | "buyback" | "intermediarySale";
@@ -97,7 +88,7 @@ const TransferFormPage: FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="New Transfer"
         description="Create a loan sale, buyback, or intermediary sale"
@@ -119,10 +110,7 @@ const TransferFormPage: FC = () => {
           <CardContent className="space-y-4">
             <div>
               <Label>Transfer Type *</Label>
-              <Select
-                value={transferType}
-                onValueChange={(v) => handleTypeChange(v as TransferType)}
-              >
+              <Select value={transferType} onValueChange={(v) => handleTypeChange(v as TransferType)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -156,23 +144,15 @@ const TransferFormPage: FC = () => {
                     placeholder="e.g. 36efeb06-d835-48a1-99eb-09bd1d348c1e"
                   />
                   {errors.ownerExternalId && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.ownerExternalId.message}
-                    </p>
+                    <p className="text-xs text-red-500 mt-1">{errors.ownerExternalId.message}</p>
                   )}
                 </div>
 
                 <div>
                   <Label htmlFor="purchasePriceRatio">Purchase Price Ratio *</Label>
-                  <Input
-                    id="purchasePriceRatio"
-                    {...register("purchasePriceRatio")}
-                    placeholder="e.g. 1.23456789"
-                  />
+                  <Input id="purchasePriceRatio" {...register("purchasePriceRatio")} placeholder="e.g. 1.23456789" />
                   {errors.purchasePriceRatio && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.purchasePriceRatio.message}
-                    </p>
+                    <p className="text-xs text-red-500 mt-1">{errors.purchasePriceRatio.message}</p>
                   )}
                 </div>
 
@@ -189,16 +169,8 @@ const TransferFormPage: FC = () => {
 
             <div>
               <Label htmlFor="settlementDate">Settlement Date *</Label>
-              <Input
-                id="settlementDate"
-                type="date"
-                {...register("settlementDate")}
-              />
-              {errors.settlementDate && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.settlementDate.message}
-                </p>
-              )}
+              <Input id="settlementDate" type="date" {...register("settlementDate")} />
+              {errors.settlementDate && <p className="text-xs text-red-500 mt-1">{errors.settlementDate.message}</p>}
             </div>
 
             <div>
@@ -215,19 +187,11 @@ const TransferFormPage: FC = () => {
           </CardContent>
         </Card>
         <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => navigate("/external-asset-owners/transfers")}
-          >
+          <Button variant="outline" type="button" onClick={() => navigate("/external-asset-owners/transfers")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-[#D32F2F] hover:bg-red-700"
-          >
+          <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
             Submit Transfer

@@ -203,7 +203,7 @@ const FixedDepositDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -231,7 +231,7 @@ const FixedDepositDetailPage: React.FC = () => {
   const isRejectedOrWithdrawn = statusCode.includes("rejected") || statusCode.includes("withdrawn");
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={`FD ${fd.accountNo}`}
         description={`${fd.depositProductName ?? "Fixed Deposit"} — ${fd.clientName ?? `Client #${fd.clientId}`}`}
@@ -363,7 +363,7 @@ const FixedDepositDetailPage: React.FC = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="general">
             <Info className="h-4 w-4 mr-1" />
             General

@@ -39,9 +39,7 @@ const BusinessStepConfigPage: FC = () => {
 
   const allAvailableSteps = availableSteps?.availableBusinessSteps ?? [];
 
-  const unusedSteps = allAvailableSteps.filter(
-    (s) => !orderedSteps.find((o) => o.stepName === s.stepName),
-  );
+  const unusedSteps = allAvailableSteps.filter((s) => !orderedSteps.find((o) => o.stepName === s.stepName));
 
   const moveStep = (index: number, direction: -1 | 1) => {
     const newIndex = index + direction;
@@ -82,7 +80,7 @@ const BusinessStepConfigPage: FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Business Step Configuration"
         description="Configure the order of business steps executed during COB processing"

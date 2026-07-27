@@ -10,13 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { partySearchSchema, type PartySearchFormValues } from "../schemas/interop.schema";
 import { usePartyLookup } from "../hooks/useInterop";
 import { IDENTIFIER_TYPE_OPTIONS } from "../types/interop";
@@ -49,7 +43,7 @@ const PartySearchPage: FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Lookup Party"
         description="Find an account by secondary identifier (MSISDN, email, IBAN, etc.)"
@@ -67,12 +61,9 @@ const PartySearchPage: FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label>Identifier Type *</Label>
-              <Select
-                onValueChange={(v) => setValue("idType", v)}
-                defaultValue="MSISDN"
-              >
+              <div>
+                <Label>Identifier Type *</Label>
+                <Select onValueChange={(v) => setValue("idType", v)} defaultValue="MSISDN">
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -84,20 +75,12 @@ const PartySearchPage: FC = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.idType && (
-                  <p className="text-xs text-red-500 mt-1">{errors.idType.message}</p>
-                )}
+                {errors.idType && <p className="text-xs text-red-500 mt-1">{errors.idType.message}</p>}
               </div>
               <div>
                 <Label htmlFor="idValue">Identifier Value *</Label>
-                <Input
-                  id="idValue"
-                  {...register("idValue")}
-                  placeholder="e.g. 254700111222"
-                />
-                {errors.idValue && (
-                  <p className="text-xs text-red-500 mt-1">{errors.idValue.message}</p>
-                )}
+                <Input id="idValue" {...register("idValue")} placeholder="e.g. 254700111222" />
+                {errors.idValue && <p className="text-xs text-red-500 mt-1">{errors.idValue.message}</p>}
               </div>
               <div className="flex items-end">
                 <Button type="submit" className="bg-[#D32F2F] hover:bg-red-700 w-full">
@@ -148,11 +131,7 @@ const PartySearchPage: FC = () => {
                 )}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/interop/account?id=${party.accountId}`)}
-                >
+                <Button variant="outline" size="sm" onClick={() => navigate(`/interop/account?id=${party.accountId}`)}>
                   View Account
                 </Button>
                 <Button

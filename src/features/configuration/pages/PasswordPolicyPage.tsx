@@ -24,7 +24,7 @@ const PasswordPolicyPage: FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Password Policy"
         description="View and change the active password validation policy"

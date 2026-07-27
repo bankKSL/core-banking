@@ -1,9 +1,25 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft, Wallet, Calendar, Clock, DollarSign, Percent, User, Info,
-  ArrowLeftRight, CheckCircle2, XCircle, LogOut, Loader2, Repeat, Ban,
-  Undo2, Calculator, PiggyBank, Power,
+  ArrowLeft,
+  Wallet,
+  Calendar,
+  Clock,
+  DollarSign,
+  Percent,
+  User,
+  Info,
+  ArrowLeftRight,
+  CheckCircle2,
+  XCircle,
+  LogOut,
+  Loader2,
+  Repeat,
+  Ban,
+  Undo2,
+  Calculator,
+  PiggyBank,
+  Power,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,9 +49,22 @@ import RecurringDepositTransactions from "@/features/deposits/components/Recurri
 
 function Hash(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" x2="20" y1="9" y2="9" /><line x1="4" x2="20" y1="15" y2="15" />
-      <line x1="10" x2="8" y1="3" y2="21" /><line x1="16" x2="14" y1="3" y2="21" />
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="4" x2="20" y1="9" y2="9" />
+      <line x1="4" x2="20" y1="15" y2="15" />
+      <line x1="10" x2="8" y1="3" y2="21" />
+      <line x1="16" x2="14" y1="3" y2="21" />
     </svg>
   );
 }
@@ -45,7 +74,11 @@ const formatCurrency = (n: number, code = "USD") =>
 
 const formatDate = (d?: string) => (d ? new Date(d).toLocaleDateString() : "—");
 
-const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({ icon, label, value }) => (
+const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({
+  icon,
+  label,
+  value,
+}) => (
   <div className="flex items-start gap-3 py-2">
     <span className="mt-0.5 text-gray-400">{icon}</span>
     <div className="min-w-0 flex-1">
@@ -76,11 +109,14 @@ const RecurringDepositDetailPage: React.FC = () => {
   const [newRecurringAmount, setNewRecurringAmount] = useState("");
   const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split("T")[0]);
 
-  const runCommand = useCallback(async (command: string, data: Record<string, unknown> = {}) => {
-    if (!rd) return;
-    await commandMutation.mutateAsync({ accountId: rd.id, command, data });
-    refetch();
-  }, [rd, commandMutation, refetch]);
+  const runCommand = useCallback(
+    async (command: string, data: Record<string, unknown> = {}) => {
+      if (!rd) return;
+      await commandMutation.mutateAsync({ accountId: rd.id, command, data });
+      refetch();
+    },
+    [rd, commandMutation, refetch],
+  );
 
   const handleClose = useCallback(async () => {
     if (!rd) return;
@@ -126,7 +162,7 @@ const RecurringDepositDetailPage: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -136,7 +172,9 @@ const RecurringDepositDetailPage: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-red-600">Failed to load: {String(error)}</p>
-          <Button variant="outline" className="mt-2" onClick={() => refetch()}>Retry</Button>
+          <Button variant="outline" className="mt-2" onClick={() => refetch()}>
+            Retry
+          </Button>
         </div>
       </div>
     );
@@ -150,115 +188,269 @@ const RecurringDepositDetailPage: React.FC = () => {
   const acting = commandMutation.isPending;
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={`RD ${rd.accountNo}`}
         description={`${rd.depositProductName ?? "Recurring Deposit"} — ${rd.clientName ?? `Client #${rd.clientId}`}`}
         actions={
           <div className="flex items-center gap-2 flex-wrap">
-            {statusConfig && <Badge variant={statusConfig.variant === "success" ? "success" : statusConfig.variant === "error" ? "error" : "info"}>{statusConfig.label}</Badge>}
+            {statusConfig && (
+              <Badge
+                variant={
+                  statusConfig.variant === "success" ? "success" : statusConfig.variant === "error" ? "error" : "info"
+                }
+              >
+                {statusConfig.label}
+              </Badge>
+            )}
             {isPending && (
               <>
-                <Button variant="outline" size="sm" onClick={() => runCommand("approve", { approvedOnDate: new Date().toISOString().split("T")[0] })} disabled={acting} className="text-emerald-600 border-emerald-200">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => runCommand("approve", { approvedOnDate: new Date().toISOString().split("T")[0] })}
+                  disabled={acting}
+                  className="text-emerald-600 border-emerald-200"
+                >
                   {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                  <CheckCircle2 className="mr-1 h-4 w-4" />Approve
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                  Approve
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => rejectRecurringDeposit(rd.id).then(() => refetch())} disabled={acting} className="text-red-600">
-                  <XCircle className="mr-1 h-4 w-4" />Reject
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => rejectRecurringDeposit(rd.id).then(() => refetch())}
+                  disabled={acting}
+                  className="text-red-600"
+                >
+                  <XCircle className="mr-1 h-4 w-4" />
+                  Reject
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => withdrawRecurringDeposit(rd.id).then(() => refetch())} disabled={acting} className="text-amber-600">
-                  <Ban className="mr-1 h-4 w-4" />Withdraw
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => withdrawRecurringDeposit(rd.id).then(() => refetch())}
+                  disabled={acting}
+                  className="text-amber-600"
+                >
+                  <Ban className="mr-1 h-4 w-4" />
+                  Withdraw
                 </Button>
               </>
             )}
             {isApproved && (
               <>
-                <Button variant="outline" size="sm" onClick={() => runCommand("activate", { activatedOnDate: new Date().toISOString().split("T")[0] })} disabled={acting} className="text-emerald-600">
-                  <CheckCircle2 className="mr-1 h-4 w-4" />Activate
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => runCommand("activate", { activatedOnDate: new Date().toISOString().split("T")[0] })}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                  Activate
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => runCommand("undoapproval")} disabled={acting}>
-                  <Undo2 className="mr-1 h-4 w-4" />Undo Approval
+                  <Undo2 className="mr-1 h-4 w-4" />
+                  Undo Approval
                 </Button>
               </>
             )}
             {isActive && (
               <>
-                <Button variant="outline" size="sm" onClick={() => calculateInterestRecurringDeposit(rd.id).then(() => refetch())} disabled={acting}>
-                  <Calculator className="mr-1 h-4 w-4" />Calc Interest
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => calculateInterestRecurringDeposit(rd.id).then(() => refetch())}
+                  disabled={acting}
+                >
+                  <Calculator className="mr-1 h-4 w-4" />
+                  Calc Interest
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => postInterestRecurringDeposit(rd.id).then(() => refetch())} disabled={acting}>
-                  <DollarSign className="mr-1 h-4 w-4" />Post Interest
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => postInterestRecurringDeposit(rd.id).then(() => refetch())}
+                  disabled={acting}
+                >
+                  <DollarSign className="mr-1 h-4 w-4" />
+                  Post Interest
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setDepositDialogOpen(true)}>
-                  <PiggyBank className="mr-1 h-4 w-4" />Deposit
+                  <PiggyBank className="mr-1 h-4 w-4" />
+                  Deposit
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setWithdrawalDialogOpen(true)}>
-                  <Ban className="mr-1 h-4 w-4" />Withdraw
+                  <Ban className="mr-1 h-4 w-4" />
+                  Withdraw
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setUpdateAmountDialogOpen(true)}>
-                  <Repeat className="mr-1 h-4 w-4" />Update Amount
+                  <Repeat className="mr-1 h-4 w-4" />
+                  Update Amount
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => { setIsPremature(true); setCloseDialogOpen(true); }} className="text-amber-600">
-                  <XCircle className="mr-1 h-4 w-4" />Premature Close
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsPremature(true);
+                    setCloseDialogOpen(true);
+                  }}
+                  className="text-amber-600"
+                >
+                  <XCircle className="mr-1 h-4 w-4" />
+                  Premature Close
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => { setIsPremature(false); setCloseDialogOpen(true); }} className="text-gray-600">
-                  <LogOut className="mr-1 h-4 w-4" />Close
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsPremature(false);
+                    setCloseDialogOpen(true);
+                  }}
+                  className="text-gray-600"
+                >
+                  <LogOut className="mr-1 h-4 w-4" />
+                  Close
                 </Button>
               </>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/recurring")}>
-              <ArrowLeft className="mr-1 h-4 w-4" />Back
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Back
             </Button>
           </div>
         }
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="general"><Info className="h-4 w-4 mr-1" />General</TabsTrigger>
-          <TabsTrigger value="transactions"><ArrowLeftRight className="h-4 w-4 mr-1" />Transactions</TabsTrigger>
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="general">
+            <Info className="h-4 w-4 mr-1" />
+            General
+          </TabsTrigger>
+          <TabsTrigger value="transactions">
+            <ArrowLeftRight className="h-4 w-4 mr-1" />
+            Transactions
+          </TabsTrigger>
         </TabsList>
         <Separator className="my-4" />
         <TabsContent value="general" className="mt-0 space-y-6">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2"><Wallet className="h-4 w-4 text-emerald-500" />Account Info</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-emerald-500" />
+                  Account Info
+                </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-                <InfoRow icon={<Hash className="h-4 w-4" />} label="Account No" value={<code className="text-xs">{rd.accountNo}</code>} />
-                <InfoRow icon={<User className="h-4 w-4" />} label="Client" value={rd.clientName ?? `#${rd.clientId}`} />
+                <InfoRow
+                  icon={<Hash className="h-4 w-4" />}
+                  label="Account No"
+                  value={<code className="text-xs">{rd.accountNo}</code>}
+                />
+                <InfoRow
+                  icon={<User className="h-4 w-4" />}
+                  label="Client"
+                  value={rd.clientName ?? `#${rd.clientId}`}
+                />
                 <InfoRow icon={<Wallet className="h-4 w-4" />} label="Product" value={rd.depositProductName ?? "—"} />
-                <InfoRow icon={<Repeat className="h-4 w-4" />} label="Recurring Amount" value={formatCurrency(rd.recurringDepositAmount ?? 0, rd.currency?.code)} />
-                <InfoRow icon={<Clock className="h-4 w-4" />} label="Frequency" value={`Every ${rd.recurringDepositFrequency ?? 1} ${rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? ""}`} />
-                <InfoRow icon={<DollarSign className="h-4 w-4" />} label="Balance" value={formatCurrency(rd.accountBalance ?? 0, rd.currency?.code)} />
-                <InfoRow icon={<DollarSign className="h-4 w-4 text-emerald-500" />} label="Maturity Amount" value={formatCurrency(rd.maturityAmount ?? 0, rd.currency?.code)} />
-                <InfoRow icon={<Percent className="h-4 w-4" />} label="Interest Rate" value={`${rd.interestRate ?? rd.nominalAnnualInterestRate ?? 0}%`} />
-                <InfoRow icon={<Clock className="h-4 w-4" />} label="Period" value={`${rd.depositPeriod ?? "—"} ${rd.depositPeriodFrequencyType?.value?.toLowerCase() ?? ""}`} />
+                <InfoRow
+                  icon={<Repeat className="h-4 w-4" />}
+                  label="Recurring Amount"
+                  value={formatCurrency(rd.recurringDepositAmount ?? 0, rd.currency?.code)}
+                />
+                <InfoRow
+                  icon={<Clock className="h-4 w-4" />}
+                  label="Frequency"
+                  value={`Every ${rd.recurringDepositFrequency ?? 1} ${rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? ""}`}
+                />
+                <InfoRow
+                  icon={<DollarSign className="h-4 w-4" />}
+                  label="Balance"
+                  value={formatCurrency(rd.accountBalance ?? 0, rd.currency?.code)}
+                />
+                <InfoRow
+                  icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
+                  label="Maturity Amount"
+                  value={formatCurrency(rd.maturityAmount ?? 0, rd.currency?.code)}
+                />
+                <InfoRow
+                  icon={<Percent className="h-4 w-4" />}
+                  label="Interest Rate"
+                  value={`${rd.interestRate ?? rd.nominalAnnualInterestRate ?? 0}%`}
+                />
+                <InfoRow
+                  icon={<Clock className="h-4 w-4" />}
+                  label="Period"
+                  value={`${rd.depositPeriod ?? "—"} ${rd.depositPeriodFrequencyType?.value?.toLowerCase() ?? ""}`}
+                />
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2"><Calendar className="h-4 w-4 text-gray-400" />Timeline</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  Timeline
+                </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-                <InfoRow icon={<Calendar className="h-4 w-4" />} label="Submitted" value={formatDate(rd.timeline?.submittedOnDate)} />
-                <InfoRow icon={<Calendar className="h-4 w-4" />} label="Approved" value={formatDate(rd.timeline?.approvedOnDate)} />
-                <InfoRow icon={<Calendar className="h-4 w-4" />} label="Activated" value={formatDate(rd.timeline?.activatedOnDate)} />
-                <InfoRow icon={<Calendar className="h-4 w-4" />} label="Closed" value={formatDate(rd.timeline?.closedOnDate)} />
-                <InfoRow icon={<DollarSign className="h-4 w-4" />} label="Expected Maturity" value={formatDate(rd.expectedMaturityDate)} />
-                <InfoRow icon={<Calendar className="h-4 w-4" />} label="First Deposit" value={formatDate(rd.expectedFirstDepositOnDate)} />
+                <InfoRow
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Submitted"
+                  value={formatDate(rd.timeline?.submittedOnDate)}
+                />
+                <InfoRow
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Approved"
+                  value={formatDate(rd.timeline?.approvedOnDate)}
+                />
+                <InfoRow
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Activated"
+                  value={formatDate(rd.timeline?.activatedOnDate)}
+                />
+                <InfoRow
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Closed"
+                  value={formatDate(rd.timeline?.closedOnDate)}
+                />
+                <InfoRow
+                  icon={<DollarSign className="h-4 w-4" />}
+                  label="Expected Maturity"
+                  value={formatDate(rd.expectedMaturityDate)}
+                />
+                <InfoRow
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="First Deposit"
+                  value={formatDate(rd.expectedFirstDepositOnDate)}
+                />
               </CardContent>
             </Card>
             <Card className="col-span-full">
               <CardHeader>
-                <CardTitle className="text-base"><DollarSign className="inline mr-2 h-4 w-4" />Interest Configuration</CardTitle>
+                <CardTitle className="text-base">
+                  <DollarSign className="inline mr-2 h-4 w-4" />
+                  Interest Configuration
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-gray-500">Compounding:</span> <span className="font-medium">{rd.interestCompoundingPeriodType?.value ?? "—"}</span></div>
-                <div><span className="text-gray-500">Posting:</span> <span className="font-medium">{rd.interestPostingPeriodType?.value ?? "—"}</span></div>
-                <div><span className="text-gray-500">Calculation:</span> <span className="font-medium">{rd.interestCalculationType?.value ?? "—"}</span></div>
-                <div><span className="text-gray-500">Days/Year:</span> <span className="font-medium">{rd.interestCalculationDaysInYearType?.value ?? "—"}</span></div>
+                <div>
+                  <span className="text-gray-500">Compounding:</span>{" "}
+                  <span className="font-medium">{rd.interestCompoundingPeriodType?.value ?? "—"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Posting:</span>{" "}
+                  <span className="font-medium">{rd.interestPostingPeriodType?.value ?? "—"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Calculation:</span>{" "}
+                  <span className="font-medium">{rd.interestCalculationType?.value ?? "—"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Days/Year:</span>{" "}
+                  <span className="font-medium">{rd.interestCalculationDaysInYearType?.value ?? "—"}</span>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -328,7 +520,11 @@ const RecurringDepositDetailPage: React.FC = () => {
               <Label>Date</Label>
               <Input type="date" value={withdrawalDate} onChange={(e) => setWithdrawalDate(e.target.value)} />
             </div>
-            <Button onClick={handleWithdrawal} disabled={!withdrawalAmount || makeTxnMutation.isPending} variant="destructive">
+            <Button
+              onClick={handleWithdrawal}
+              disabled={!withdrawalAmount || makeTxnMutation.isPending}
+              variant="destructive"
+            >
               {makeTxnMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Withdraw
             </Button>
@@ -346,7 +542,12 @@ const RecurringDepositDetailPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <Label>New Recurring Amount</Label>
-              <Input type="number" value={newRecurringAmount} onChange={(e) => setNewRecurringAmount(e.target.value)} placeholder={String(rd.recurringDepositAmount ?? 0)} />
+              <Input
+                type="number"
+                value={newRecurringAmount}
+                onChange={(e) => setNewRecurringAmount(e.target.value)}
+                placeholder={String(rd.recurringDepositAmount ?? 0)}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Effective Date</Label>

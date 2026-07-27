@@ -34,7 +34,7 @@ const BusinessDatePage: FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Business Date"
         description="View and update system business dates"
@@ -73,15 +73,9 @@ const BusinessDatePage: FC = () => {
                       {bd.type}
                     </Badge>
                     <p className="text-sm font-mono">{bd.date}</p>
-                    {bd.description && (
-                      <p className="text-xs text-gray-500 mt-0.5">{bd.description}</p>
-                    )}
+                    {bd.description && <p className="text-xs text-gray-500 mt-0.5">{bd.description}</p>}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(bd.type, bd.date)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(bd.type, bd.date)}>
                     Update
                   </Button>
                 </div>
@@ -94,19 +88,12 @@ const BusinessDatePage: FC = () => {
       {editType && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
-              Update {editType}
-            </CardTitle>
+            <CardTitle className="text-base">Update {editType}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="editBusinessDate">Date</Label>
-              <Input
-                id="editBusinessDate"
-                type="date"
-                value={editDate}
-                onChange={(e) => setEditDate(e.target.value)}
-              />
+              <Input id="editBusinessDate" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setEditType(null)}>
@@ -117,9 +104,7 @@ const BusinessDatePage: FC = () => {
                 disabled={updateMutation.isPending}
                 className="bg-[#D32F2F] hover:bg-red-700"
               >
-                {updateMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
                 Update
               </Button>

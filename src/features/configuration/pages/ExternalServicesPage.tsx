@@ -58,7 +58,7 @@ const ExternalServicesPage: FC = () => {
   const isSensitive = (name: string) => SENSITIVE_FIELDS.some((f) => name.toLowerCase().includes(f.toLowerCase()));
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="External Services"
         description="Configure S3, SMTP, SMS, and Notification service integrations"

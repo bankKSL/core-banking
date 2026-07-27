@@ -172,7 +172,7 @@ const LoanProductFormPage: React.FC = () => {
 
   if (isEdit && productLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="max-w-4xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -180,7 +180,7 @@ const LoanProductFormPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Loan Product" : "Create Loan Product"}
         description="Configure the loan product terms and settings."

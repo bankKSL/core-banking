@@ -9,13 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { transferSchema, type TransferFormValues } from "../schemas/interop.schema";
 import { useCreateQuote, useExecuteTransfer } from "../hooks/useInterop";
 import type { QuoteResponse, TransferResponse } from "../types/interop";
@@ -66,12 +60,8 @@ const InteropTransferPage: FC = () => {
       initiator: values.initiator as any,
       initiatorType: values.initiatorType as any,
     },
-    fspFee: values.fspFee
-      ? { amount: values.fspFee, currency: values.currency }
-      : undefined,
-    fspCommission: values.fspCommission
-      ? { amount: values.fspCommission, currency: values.currency }
-      : undefined,
+    fspFee: values.fspFee ? { amount: values.fspFee, currency: values.currency } : undefined,
+    fspCommission: values.fspCommission ? { amount: values.fspCommission, currency: values.currency } : undefined,
     note: values.note || undefined,
     expiration: new Date(Date.now() + 86400000).toISOString(),
     locale: "en",
@@ -109,7 +99,7 @@ const InteropTransferPage: FC = () => {
   const isPayer = watch("transactionRole") === "PAYER";
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title="Interop Transfer"
         description="Create quotes, prepare holds, and commit transfers"
@@ -158,10 +148,7 @@ const InteropTransferPage: FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Transaction Role *</Label>
-                  <Select
-                    onValueChange={(v) => setValue("transactionRole", v)}
-                    defaultValue="PAYER"
-                  >
+                  <Select onValueChange={(v) => setValue("transactionRole", v)} defaultValue="PAYER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -173,10 +160,7 @@ const InteropTransferPage: FC = () => {
                 </div>
                 <div>
                   <Label>Scenario *</Label>
-                  <Select
-                    onValueChange={(v) => setValue("scenario", v)}
-                    defaultValue="TRANSFER"
-                  >
+                  <Select onValueChange={(v) => setValue("scenario", v)} defaultValue="TRANSFER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -193,10 +177,7 @@ const InteropTransferPage: FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Initiator *</Label>
-                  <Select
-                    onValueChange={(v) => setValue("initiator", v)}
-                    defaultValue="PAYER"
-                  >
+                  <Select onValueChange={(v) => setValue("initiator", v)} defaultValue="PAYER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -208,10 +189,7 @@ const InteropTransferPage: FC = () => {
                 </div>
                 <div>
                   <Label>Initiator Type *</Label>
-                  <Select
-                    onValueChange={(v) => setValue("initiatorType", v)}
-                    defaultValue="CONSUMER"
-                  >
+                  <Select onValueChange={(v) => setValue("initiatorType", v)} defaultValue="CONSUMER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -231,11 +209,7 @@ const InteropTransferPage: FC = () => {
             </CardContent>
           </Card>
           <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => navigate("/interop/dashboard")}
-            >
+            <Button variant="outline" type="button" onClick={() => navigate("/interop/dashboard")}>
               Cancel
             </Button>
             <Button
@@ -244,9 +218,7 @@ const InteropTransferPage: FC = () => {
               disabled={quoteMutation.isPending}
               className="bg-[#D32F2F] hover:bg-red-700"
             >
-              {quoteMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {quoteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Quote className="mr-2 h-4 w-4" />
               Get Quote
             </Button>
@@ -266,9 +238,7 @@ const InteropTransferPage: FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-gray-500">State</p>
-                <Badge variant={quote.state === "ACCEPTED" ? "success" : "error"}>
-                  {quote.state}
-                </Badge>
+                <Badge variant={quote.state === "ACCEPTED" ? "success" : "error"}>{quote.state}</Badge>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Transaction Code</p>
@@ -284,10 +254,7 @@ const InteropTransferPage: FC = () => {
               )}
             </div>
             <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setStep("form")}
-              >
+              <Button variant="outline" onClick={() => setStep("form")}>
                 Back to Form
               </Button>
               <Button
@@ -298,9 +265,7 @@ const InteropTransferPage: FC = () => {
                 disabled={transferMutation.isPending}
                 className="bg-[#D32F2F] hover:bg-red-700"
               >
-                {transferMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {transferMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Send className="mr-2 h-4 w-4" />
                 Prepare Transfer
               </Button>
@@ -332,9 +297,7 @@ const InteropTransferPage: FC = () => {
               {transferResult.completedTimestamp && (
                 <div>
                   <p className="text-xs text-gray-500">Completed</p>
-                  <p className="text-sm">
-                    {new Date(transferResult.completedTimestamp).toLocaleString()}
-                  </p>
+                  <p className="text-sm">{new Date(transferResult.completedTimestamp).toLocaleString()}</p>
                 </div>
               )}
             </div>

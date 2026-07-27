@@ -241,7 +241,7 @@ const CampaignListPage: FC = () => {
         <CardContent className="p-0">
           <Tabs value={tab} onValueChange={setTab}>
             <div className="px-6 pt-4">
-              <TabsList>
+              <TabsList className="flex-wrap h-auto gap-1">
                 <TabsTrigger value="sms" className="flex items-center gap-2">
                   <Megaphone className="h-4 w-4" />
                   SMS Campaigns
