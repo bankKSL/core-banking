@@ -222,7 +222,7 @@ const CreateDepositAccountPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className=" m-auto space-y-6 p-6">
+      <div className="m-auto max-w-4xl space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -230,7 +230,7 @@ const CreateDepositAccountPage: React.FC = () => {
   }
 
   return (
-    <div className=" m-auto space-y-6 p-6">
+    <div className="m-auto max-w-4xl space-y-6 p-6">
       <PageHeader
         title={isEditMode ? "Edit Savings Account" : "New Savings Account"}
         description={isEditMode ? `Editing account #${id}` : "Open a new savings account"}

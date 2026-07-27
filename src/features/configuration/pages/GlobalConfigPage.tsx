@@ -1,5 +1,8 @@
-import { type FC, useState } from "react";
+import { type FC, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Search, Save, Loader2, ToggleLeft, ToggleRight, Lock } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -8,11 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useConfigurations, useUpdateConfiguration } from "../hooks/useConfiguration";
 import type { GlobalConfiguration } from "../types/configuration";
+
+const editConfigSchema = z.object({
+  enabled: z.boolean(),
+  value: z.string().optional(),
+  stringValue: z.string().optional(),
+  dateValue: z.string().optional(),
+});
+
+type EditConfigFormValues = z.infer<typeof editConfigSchema>;
 
 const GlobalConfigPage: FC = () => {
   const navigate = useNavigate();
@@ -20,10 +33,16 @@ const GlobalConfigPage: FC = () => {
   const updateMutation = useUpdateConfiguration();
   const [search, setSearch] = useState("");
   const [editConfig, setEditConfig] = useState<GlobalConfiguration | null>(null);
-  const [editEnabled, setEditEnabled] = useState(false);
-  const [editValue, setEditValue] = useState("");
-  const [editStringValue, setEditStringValue] = useState("");
-  const [editDateValue, setEditDateValue] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+  } = useForm<EditConfigFormValues>({
+    resolver: zodResolver(editConfigSchema),
+    defaultValues: { enabled: false, value: "", stringValue: "", dateValue: "" },
+  });
 
   const filtered = search
     ? configs.filter(
@@ -35,21 +54,26 @@ const GlobalConfigPage: FC = () => {
 
   const openEdit = (config: GlobalConfiguration) => {
     setEditConfig(config);
-    setEditEnabled(config.enabled);
-    setEditValue(config.value !== undefined ? String(config.value) : "");
-    setEditStringValue(config.stringValue ?? "");
-    setEditDateValue(config.dateValue ?? "");
+    reset({
+      enabled: config.enabled,
+      value: config.value !== undefined ? String(config.value) : "",
+      stringValue: config.stringValue ?? "",
+      dateValue: config.dateValue ?? "",
+    });
   };
 
-  const handleSave = async () => {
-    if (!editConfig) return;
-    const payload: Record<string, unknown> = { enabled: editEnabled };
-    if (editValue) payload.value = Number(editValue);
-    if (editStringValue) payload.stringValue = editStringValue;
-    if (editDateValue) payload.dateValue = editDateValue;
-    await updateMutation.mutateAsync({ id: editConfig.id, payload });
-    setEditConfig(null);
-  };
+  const onSubmit = useCallback(
+    async (values: EditConfigFormValues) => {
+      if (!editConfig) return;
+      const payload: Record<string, unknown> = { enabled: values.enabled };
+      if (values.value) payload.value = Number(values.value);
+      if (values.stringValue) payload.stringValue = values.stringValue;
+      if (values.dateValue) payload.dateValue = values.dateValue;
+      await updateMutation.mutateAsync({ id: editConfig.id, payload });
+      setEditConfig(null);
+    },
+    [editConfig, updateMutation],
+  );
 
   const columns: ColumnDef<GlobalConfiguration>[] = [
     {
@@ -166,65 +190,60 @@ const GlobalConfigPage: FC = () => {
         </CardContent>
       </Card>
 
+      {updateMutation.isError && (
+        <ErrorState
+          title="Failed to save configuration"
+          message={
+            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+          }
+          onRetry={() => updateMutation.reset()}
+        />
+      )}
+
       <Dialog open={!!editConfig} onOpenChange={(o) => !o && setEditConfig(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Configuration</DialogTitle>
           </DialogHeader>
           {editConfig && (
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <p className="text-sm font-medium">{editConfig.name}</p>
                 {editConfig.description && <p className="text-xs text-gray-500">{editConfig.description}</p>}
               </div>
               <div className="flex items-center gap-2">
-                <Switch checked={editEnabled} onCheckedChange={setEditEnabled} />
+                <Controller
+                  control={control}
+                  name="enabled"
+                  render={({ field }) => (
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  )}
+                />
                 <Label>Enabled</Label>
               </div>
               <div>
                 <Label htmlFor="editValue">Value</Label>
-                <Input
-                  id="editValue"
-                  type="number"
-                  min="0"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  placeholder="Numeric value"
-                />
+                <Input id="editValue" type="number" min="0" {...register("value")} placeholder="Numeric value" />
               </div>
               <div>
                 <Label htmlFor="editStringValue">String Value</Label>
-                <Input
-                  id="editStringValue"
-                  value={editStringValue}
-                  onChange={(e) => setEditStringValue(e.target.value)}
-                  placeholder="Text value"
-                />
+                <Input id="editStringValue" {...register("stringValue")} placeholder="Text value" />
               </div>
               <div>
                 <Label htmlFor="editDateValue">Date Value</Label>
-                <Input
-                  id="editDateValue"
-                  type="date"
-                  value={editDateValue}
-                  onChange={(e) => setEditDateValue(e.target.value)}
-                />
+                <Input id="editDateValue" type="date" {...register("dateValue")} />
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <Button variant="outline" onClick={() => setEditConfig(null)}>
+                <Button variant="outline" type="button" onClick={() => setEditConfig(null)}>
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={updateMutation.isPending}
-                  className="bg-[#D32F2F] hover:bg-red-700"
-                >
+                <Button type="submit" disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
                   {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
                   Save
                 </Button>
               </div>
-            </div>
+            </form>
           )}
         </DialogContent>
       </Dialog>

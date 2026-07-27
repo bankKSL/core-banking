@@ -1,5 +1,8 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Pencil, Trash2, Plus, DollarSign, Landmark, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Separator } from "@/components/ui/separator";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -28,6 +32,22 @@ import type { Cashier } from "../types/teller";
 
 const STATUS_LABELS: Record<number, string> = { 100: "Pending", 300: "Active", 400: "Inactive", 600: "Closed" };
 
+const cashierSchema = z.object({
+  selectedStaffId: z.string().min(1, "Staff is required"),
+  cashierStartDate: z.string().min(1, "Start date is required"),
+  cashierEndDate: z.string().min(1, "End date is required"),
+  isFullDay: z.boolean(),
+  cashierDescription: z.string().optional(),
+});
+type CashierFormValues = z.infer<typeof cashierSchema>;
+
+const cashTxnSchema = z.object({
+  txnAmount: z.coerce.number({ invalid_type_error: "Amount is required" }).positive("Must be positive"),
+  txnDate: z.string().min(1, "Date is required"),
+  txnNote: z.string().min(1, "Note is required"),
+});
+type CashTxnFormValues = z.infer<typeof cashTxnSchema>;
+
 const TellerDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -40,62 +60,88 @@ const TellerDetailPage: FC = () => {
   const settleMutation = useSettleCash();
 
   const [cashierDialogOpen, setCashierDialogOpen] = useState(false);
-  const [selectedStaffId, setSelectedStaffId] = useState("");
-  const [cashierStartDate, setCashierStartDate] = useState(new Date().toISOString().split("T")[0]);
-  const [cashierEndDate, setCashierEndDate] = useState(new Date().toISOString().split("T")[0]);
-  const [isFullDay, setIsFullDay] = useState(true);
-  const [cashierDescription, setCashierDescription] = useState("");
-
   const [deleteCashierId, setDeleteCashierId] = useState<number | null>(null);
-
   const [cashTxnDialog, setCashTxnDialog] = useState<{ cashierId: number; type: "allocate" | "settle" } | null>(null);
-  const [txnAmount, setTxnAmount] = useState("");
-  const [txnDate, setTxnDate] = useState(new Date().toISOString().split("T")[0]);
-  const [txnNote, setTxnNote] = useState("");
-
   const [selectedCashierTxns, setSelectedCashierTxns] = useState<number | null>(null);
+
   const { data: cashierTxns } = useCashierTransactions(
     id,
     selectedCashierTxns != null ? String(selectedCashierTxns) : undefined,
   );
 
-  const handleCreateCashier = useCallback(async () => {
-    if (!id || !selectedStaffId) return;
-    await createCashierMutation.mutateAsync({
-      tellerId: id,
-      payload: {
-        staffId: Number(selectedStaffId),
-        startDate: cashierStartDate,
-        endDate: cashierEndDate,
-        isFullDay,
-        description: cashierDescription || undefined,
+  const {
+    register: registerCashier,
+    handleSubmit: handleSubmitCashier,
+    control: controlCashier,
+    reset: resetCashier,
+    formState: { errors: cashierErrors },
+  } = useForm<CashierFormValues>({
+    resolver: zodResolver(cashierSchema),
+    defaultValues: {
+      selectedStaffId: "",
+      cashierStartDate: new Date().toISOString().split("T")[0],
+      cashierEndDate: new Date().toISOString().split("T")[0],
+      isFullDay: true,
+      cashierDescription: "",
+    },
+  });
+
+  const {
+    register: registerTxn,
+    handleSubmit: handleSubmitTxn,
+    reset: resetTxn,
+    formState: { errors: txnErrors },
+  } = useForm<CashTxnFormValues>({
+    resolver: zodResolver(cashTxnSchema),
+    defaultValues: {
+      txnAmount: 0,
+      txnDate: new Date().toISOString().split("T")[0],
+      txnNote: "",
+    },
+  });
+
+  const onSubmitCashier = useCallback(
+    async (values: CashierFormValues) => {
+      if (!id) return;
+      await createCashierMutation.mutateAsync({
+        tellerId: id,
+        payload: {
+          staffId: Number(values.selectedStaffId),
+          startDate: values.cashierStartDate,
+          endDate: values.cashierEndDate,
+          isFullDay: values.isFullDay,
+          description: values.cashierDescription || undefined,
+          locale: "en",
+          dateFormat: "yyyy-MM-dd",
+        },
+      });
+      setCashierDialogOpen(false);
+      resetCashier();
+    },
+    [id, createCashierMutation, resetCashier],
+  );
+
+  const onSubmitCashTxn = useCallback(
+    async (values: CashTxnFormValues) => {
+      if (!id || !cashTxnDialog) return;
+      const payload = {
+        txnDate: values.txnDate,
+        txnAmount: values.txnAmount,
+        currencyCode: "USD",
+        txnNote: values.txnNote,
         locale: "en",
         dateFormat: "yyyy-MM-dd",
-      },
-    });
-    setCashierDialogOpen(false);
-    setSelectedStaffId("");
-  }, [id, selectedStaffId, cashierStartDate, cashierEndDate, isFullDay, cashierDescription, createCashierMutation]);
-
-  const handleCashTxn = useCallback(async () => {
-    if (!id || !cashTxnDialog || !txnAmount) return;
-    const payload = {
-      txnDate,
-      txnAmount: Number(txnAmount),
-      currencyCode: "USD",
-      txnNote: txnNote || "Cash operation",
-      locale: "en",
-      dateFormat: "yyyy-MM-dd",
-    };
-    if (cashTxnDialog.type === "allocate") {
-      await allocateMutation.mutateAsync({ tellerId: id, cashierId: cashTxnDialog.cashierId, payload });
-    } else {
-      await settleMutation.mutateAsync({ tellerId: id, cashierId: cashTxnDialog.cashierId, payload });
-    }
-    setCashTxnDialog(null);
-    setTxnAmount("");
-    setTxnNote("");
-  }, [id, cashTxnDialog, txnAmount, txnDate, txnNote, allocateMutation, settleMutation]);
+      };
+      if (cashTxnDialog.type === "allocate") {
+        await allocateMutation.mutateAsync({ tellerId: id, cashierId: cashTxnDialog.cashierId, payload });
+      } else {
+        await settleMutation.mutateAsync({ tellerId: id, cashierId: cashTxnDialog.cashierId, payload });
+      }
+      setCashTxnDialog(null);
+      resetTxn();
+    },
+    [id, cashTxnDialog, allocateMutation, settleMutation, resetTxn],
+  );
 
   const cashierColumns: ColumnDef<Cashier>[] = [
     {
@@ -181,10 +227,34 @@ const TellerDetailPage: FC = () => {
         }
       />
 
+      {createCashierMutation.isError && (
+        <ErrorState
+          title="Failed to assign cashier"
+          message={
+            createCashierMutation.error instanceof Error
+              ? createCashierMutation.error.message
+              : "An unexpected error occurred."
+          }
+          onRetry={() => createCashierMutation.reset()}
+        />
+      )}
+
+      {(allocateMutation.isError || settleMutation.isError) && (
+        <ErrorState
+          title={`Failed to ${cashTxnDialog?.type === "allocate" ? "allocate" : "settle"} cash`}
+          message={
+            (allocateMutation.error ?? settleMutation.error) instanceof Error
+              ? (allocateMutation.error ?? settleMutation.error).message
+              : "An unexpected error occurred."
+          }
+          onRetry={() => { allocateMutation.reset(); settleMutation.reset(); }}
+        />
+      )}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Cashiers</CardTitle>
-          <Button size="sm" onClick={() => setCashierDialogOpen(true)}>
+          <Button size="sm" onClick={() => { setCashierDialogOpen(true); resetCashier(); }}>
             <Plus className="mr-1 h-4 w-4" />
             Assign Cashier
           </Button>
@@ -232,8 +302,8 @@ const TellerDetailPage: FC = () => {
                               : `Type ${t.txnType}`}
                     </span>
                     <span className="font-mono">${Number(t.txnAmount).toFixed(2)}</span>
-                    <span className="text-gray-500">{t.txnDate ? new Date(t.txnDate).toLocaleDateString() : "—"}</span>
-                    <span className="text-gray-400 text-xs">{t.txnNote ?? "—"}</span>
+                    <span className="text-gray-500">{t.txnDate ? new Date(t.txnDate).toLocaleDateString() : "\u2014"}</span>
+                    <span className="text-gray-400 text-xs">{t.txnNote ?? "\u2014"}</span>
                   </div>
                 ))}
               </div>
@@ -244,58 +314,69 @@ const TellerDetailPage: FC = () => {
         </Card>
       )}
 
-      <Dialog open={cashierDialogOpen} onOpenChange={setCashierDialogOpen}>
+      <Dialog open={cashierDialogOpen} onOpenChange={(o) => { if (!o) { setCashierDialogOpen(false); resetCashier(); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Cashier</DialogTitle>
             <DialogDescription>Assign a staff member as cashier to this teller.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmitCashier(onSubmitCashier)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <Label>Staff *</Label>
-              <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select staff" />
-                </SelectTrigger>
-                <SelectContent>
-                  {template?.staffOptions?.map((s) => (
-                    <SelectItem key={s.id} value={String(s.id)}>
-                      {s.displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={controlCashier}
+                name="selectedStaffId"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select staff" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {template?.staffOptions?.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.displayName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {cashierErrors.selectedStaffId && <p className="text-xs text-red-500">{cashierErrors.selectedStaffId.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label>Start Date</Label>
-                <Input type="date" value={cashierStartDate} onChange={(e) => setCashierStartDate(e.target.value)} />
+                <Input type="date" {...registerCashier("cashierStartDate")} />
+                {cashierErrors.cashierStartDate && <p className="text-xs text-red-500">{cashierErrors.cashierStartDate.message}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>End Date</Label>
-                <Input type="date" value={cashierEndDate} onChange={(e) => setCashierEndDate(e.target.value)} />
+                <Input type="date" {...registerCashier("cashierEndDate")} />
+                {cashierErrors.cashierEndDate && <p className="text-xs text-red-500">{cashierErrors.cashierEndDate.message}</p>}
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Switch id="isFullDay" checked={isFullDay} onCheckedChange={setIsFullDay} />
+              <Controller
+                control={controlCashier}
+                name="isFullDay"
+                render={({ field }) => (
+                  <Switch id="isFullDay" checked={field.value} onCheckedChange={field.onChange} />
+                )}
+              />
               <Label htmlFor="isFullDay">Full Day</Label>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Description</Label>
-              <Input
-                value={cashierDescription}
-                onChange={(e) => setCashierDescription(e.target.value)}
-                placeholder="Optional"
-              />
+              <Input {...registerCashier("cashierDescription")} placeholder="Optional" />
             </div>
-            <Button onClick={handleCreateCashier} disabled={!selectedStaffId || createCashierMutation.isPending}>
+            <Button type="submit" disabled={createCashierMutation.isPending}>
               {createCashierMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Assign Cashier
             </Button>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!cashTxnDialog} onOpenChange={() => setCashTxnDialog(null)}>
+      <Dialog open={!!cashTxnDialog} onOpenChange={() => { setCashTxnDialog(null); resetTxn(); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{cashTxnDialog?.type === "allocate" ? "Allocate Cash" : "Settle Cash"}</DialogTitle>
@@ -303,29 +384,32 @@ const TellerDetailPage: FC = () => {
               {cashTxnDialog?.type === "allocate" ? "Assign cash to the cashier." : "Settle cash from the cashier."}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmitTxn(onSubmitCashTxn)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <Label>Amount *</Label>
-              <Input type="number" step="0.01" value={txnAmount} onChange={(e) => setTxnAmount(e.target.value)} />
+              <Input type="number" step="0.01" {...registerTxn("txnAmount", { valueAsNumber: true })} />
+              {txnErrors.txnAmount && <p className="text-xs text-red-500">{txnErrors.txnAmount.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Date</Label>
-              <Input type="date" value={txnDate} onChange={(e) => setTxnDate(e.target.value)} />
+              <Input type="date" {...registerTxn("txnDate")} />
+              {txnErrors.txnDate && <p className="text-xs text-red-500">{txnErrors.txnDate.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Note *</Label>
-              <Input value={txnNote} onChange={(e) => setTxnNote(e.target.value)} placeholder="e.g. Starting cash" />
+              <Input {...registerTxn("txnNote")} placeholder="e.g. Starting cash" />
+              {txnErrors.txnNote && <p className="text-xs text-red-500">{txnErrors.txnNote.message}</p>}
             </div>
             <Button
-              onClick={handleCashTxn}
-              disabled={!txnAmount || !txnNote || allocateMutation.isPending || settleMutation.isPending}
+              type="submit"
+              disabled={allocateMutation.isPending || settleMutation.isPending}
             >
               {(allocateMutation.isPending || settleMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               {cashTxnDialog?.type === "allocate" ? "Allocate" : "Settle"}
             </Button>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 

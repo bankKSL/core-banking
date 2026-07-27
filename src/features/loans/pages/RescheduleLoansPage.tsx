@@ -1,12 +1,14 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, AlertTriangle, CalendarClock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Plus, CalendarClock } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,28 +26,35 @@ const resolveStatus = (req: LoanRescheduleRequest): string => {
   return "Unknown";
 };
 
+interface ActionFormValues {
+  actionDate: string;
+}
+
 const RescheduleLoansPage: FC = () => {
   const navigate = useNavigate();
   const { data: requests = [], isLoading, isError, error, refetch } = useRescheduleRequests();
   const commandMutation = useRescheduleRequestCommand();
 
   const [action, setAction] = useState<{ req: LoanRescheduleRequest; command: "approve" | "reject" } | null>(null);
-  const [dateInput, setDateInput] = useState(today());
+
+  const { register, handleSubmit, reset } = useForm<ActionFormValues>({
+    defaultValues: { actionDate: today() },
+  });
 
   const openAction = (req: LoanRescheduleRequest, command: "approve" | "reject") => {
     setAction({ req, command });
-    setDateInput(today());
+    reset({ actionDate: today() });
   };
 
-  const handleAction = async () => {
+  const handleAction = handleSubmit(async (values) => {
     if (!action) return;
     await commandMutation.mutateAsync({
       scheduleId: action.req.id,
       command: action.command,
-      payload: action.command === "approve" ? { approvedOnDate: dateInput } : { rejectedOnDate: dateInput },
+      payload: action.command === "approve" ? { approvedOnDate: values.actionDate } : { rejectedOnDate: values.actionDate },
     });
     setAction(null);
-  };
+  });
 
   const columns: ColumnDef<LoanRescheduleRequest>[] = [
     {
@@ -134,13 +143,11 @@ const RescheduleLoansPage: FC = () => {
     return (
       <div className="space-y-6">
         <PageHeader title="Reschedule Requests" description="Loan rescheduling requests" />
-        <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span className="text-sm">Failed to load reschedule requests. {error?.message ?? "Please try again."}</span>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </div>
+        <ErrorState
+          title="Failed to load requests"
+          message={error?.message ?? "Failed to load reschedule requests. Please try again."}
+          onRetry={refetch}
+        />
       </div>
     );
   }
@@ -177,7 +184,6 @@ const RescheduleLoansPage: FC = () => {
         </CardContent>
       </Card>
 
-      {/* Approve / reject dialog */}
       <Dialog open={!!action} onOpenChange={(open) => !open && setAction(null)}>
         <DialogContent>
           <DialogHeader>
@@ -188,24 +194,35 @@ const RescheduleLoansPage: FC = () => {
                 : `Reject the reschedule request for loan ${action?.req.loanAccountNo ?? `#${action?.req.loanId}`}?`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleAction} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="actionDate">{action?.command === "approve" ? "Approved On" : "Rejected On"}</Label>
-              <Input id="actionDate" type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
+              <Input id="actionDate" type="date" {...register("actionDate")} />
             </div>
+
+            {commandMutation.isError && (
+              <ErrorState
+                title="Failed to process request"
+                message={
+                  commandMutation.error instanceof Error ? commandMutation.error.message : "An unexpected error occurred."
+                }
+                onRetry={() => commandMutation.reset()}
+              />
+            )}
+
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setAction(null)} disabled={commandMutation.isPending}>
+              <Button variant="outline" type="button" onClick={() => setAction(null)} disabled={commandMutation.isPending}>
                 Cancel
               </Button>
               <Button
+                type="submit"
                 variant={action?.command === "reject" ? "destructive" : "default"}
-                onClick={handleAction}
                 disabled={commandMutation.isPending}
               >
                 {commandMutation.isPending ? "Processing..." : action?.command === "approve" ? "Approve" : "Reject"}
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

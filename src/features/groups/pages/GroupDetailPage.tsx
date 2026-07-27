@@ -19,6 +19,9 @@ import {
   Shield,
   UserCircle,
 } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +53,24 @@ import type { GroupRoleData, GroupClosureReason } from "../types/group";
 
 const formatDate = (d?: string) => (d ? new Date(d).toLocaleDateString() : "—");
 
+const closeGroupSchema = z.object({
+  closureDate: z.string().min(1, "Closure date is required"),
+  closureReasonId: z.string().min(1, "Closure reason is required"),
+});
+
+const addClientSchema = z.object({
+  clientId: z.string().min(1, "Client is required"),
+});
+
+const assignStaffSchema = z.object({
+  staffId: z.string().min(1, "Staff ID is required"),
+});
+
+const assignRoleSchema = z.object({
+  clientId: z.string().min(1, "Client is required"),
+  roleId: z.string().min(1, "Role ID is required"),
+});
+
 const GroupDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -73,13 +94,27 @@ const GroupDetailPage: FC = () => {
   const [showAssignStaffDialog, setShowAssignStaffDialog] = useState(false);
   const [showAssignRoleDialog, setShowAssignRoleDialog] = useState(false);
 
-  const [closeDate, setCloseDate] = useState("");
-  const [closeReasonId, setCloseReasonId] = useState("");
-  const [newClientId, setNewClientId] = useState("");
   const [clientSearch, setClientSearch] = useState("");
-  const [newStaffId, setNewStaffId] = useState("");
-  const [roleClientId, setRoleClientId] = useState("");
-  const [roleId, setRoleId] = useState("");
+
+  const closeForm = useForm({
+    resolver: zodResolver(closeGroupSchema),
+    defaultValues: { closureDate: "", closureReasonId: "" },
+  });
+
+  const addClientForm = useForm({
+    resolver: zodResolver(addClientSchema),
+    defaultValues: { clientId: "" },
+  });
+
+  const assignStaffForm = useForm({
+    resolver: zodResolver(assignStaffSchema),
+    defaultValues: { staffId: "" },
+  });
+
+  const assignRoleForm = useForm({
+    resolver: zodResolver(assignRoleSchema),
+    defaultValues: { clientId: "", roleId: "" },
+  });
 
   const statusLabel = resolveGroupStatusLabel(group?.status);
   const isPending = group?.status?.id === 100 || group?.status?.code === "grouping.status.pending";
@@ -105,17 +140,19 @@ const GroupDetailPage: FC = () => {
     } catch { /* handled */ }
   }, [group, deleteMutation, navigate]);
 
-  const handleClose = useCallback(async () => {
-    if (!group?.id || !closeDate || !closeReasonId) return;
-    await closeMutation.mutateAsync({
-      groupId: group.id,
-      payload: { closureDate: closeDate, closureReasonId: Number(closeReasonId) },
-    });
-    setShowCloseDialog(false);
-    setCloseDate("");
-    setCloseReasonId("");
-    refetch();
-  }, [group, closeDate, closeReasonId, closeMutation, refetch]);
+  const onCloseSubmit = useCallback(
+    async (values: { closureDate: string; closureReasonId: string }) => {
+      if (!group?.id) return;
+      await closeMutation.mutateAsync({
+        groupId: group.id,
+        payload: { closureDate: values.closureDate, closureReasonId: Number(values.closureReasonId) },
+      });
+      closeForm.reset();
+      setShowCloseDialog(false);
+      refetch();
+    },
+    [group, closeMutation, closeForm, refetch],
+  );
 
   const handleRemoveClient = useCallback(async (clientId: number) => {
     if (!group?.id) return;
@@ -123,22 +160,28 @@ const GroupDetailPage: FC = () => {
     refetch();
   }, [group, disassociateMutation, refetch]);
 
-  const handleAddClient = useCallback(async () => {
-    if (!group?.id || !newClientId) return;
-    await associateMutation.mutateAsync({ groupId: group.id, clientIds: [Number(newClientId)] });
-    setShowAddClientDialog(false);
-    setNewClientId("");
-    setClientSearch("");
-    refetch();
-  }, [group, newClientId, associateMutation, refetch]);
+  const onAddClientSubmit = useCallback(
+    async (values: { clientId: string }) => {
+      if (!group?.id) return;
+      await associateMutation.mutateAsync({ groupId: group.id, clientIds: [Number(values.clientId)] });
+      addClientForm.reset();
+      setClientSearch("");
+      setShowAddClientDialog(false);
+      refetch();
+    },
+    [group, associateMutation, addClientForm, refetch],
+  );
 
-  const handleAssignStaff = useCallback(async () => {
-    if (!group?.id || !newStaffId) return;
-    await assignStaffMutation.mutateAsync({ groupId: group.id, staffId: Number(newStaffId) });
-    setShowAssignStaffDialog(false);
-    setNewStaffId("");
-    refetch();
-  }, [group, newStaffId, assignStaffMutation, refetch]);
+  const onAssignStaffSubmit = useCallback(
+    async (values: { staffId: string }) => {
+      if (!group?.id) return;
+      await assignStaffMutation.mutateAsync({ groupId: group.id, staffId: Number(values.staffId) });
+      assignStaffForm.reset();
+      setShowAssignStaffDialog(false);
+      refetch();
+    },
+    [group, assignStaffMutation, assignStaffForm, refetch],
+  );
 
   const handleUnassignStaff = useCallback(async () => {
     if (!group?.id || !group.staffId) return;
@@ -146,18 +189,20 @@ const GroupDetailPage: FC = () => {
     refetch();
   }, [group, unassignStaffMutation, refetch]);
 
-  const handleAssignRole = useCallback(async () => {
-    if (!group?.id || !roleClientId || !roleId) return;
-    await assignRoleMutation.mutateAsync({
-      groupId: group.id,
-      clientId: Number(roleClientId),
-      roleId: Number(roleId),
-    });
-    setShowAssignRoleDialog(false);
-    setRoleClientId("");
-    setRoleId("");
-    refetch();
-  }, [group, roleClientId, roleId, assignRoleMutation, refetch]);
+  const onAssignRoleSubmit = useCallback(
+    async (values: { clientId: string; roleId: string }) => {
+      if (!group?.id) return;
+      await assignRoleMutation.mutateAsync({
+        groupId: group.id,
+        clientId: Number(values.clientId),
+        roleId: Number(values.roleId),
+      });
+      assignRoleForm.reset();
+      setShowAssignRoleDialog(false);
+      refetch();
+    },
+    [group, assignRoleMutation, assignRoleForm, refetch],
+  );
 
   const handleUnassignRole = useCallback(async (role: GroupRoleData) => {
     if (!group?.id) return;
@@ -306,7 +351,6 @@ const GroupDetailPage: FC = () => {
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Info Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -346,7 +390,6 @@ const GroupDetailPage: FC = () => {
           </CardContent>
         </Card>
 
-        {/* Timeline Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -377,7 +420,6 @@ const GroupDetailPage: FC = () => {
         </Card>
       </div>
 
-      {/* Client Members Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -401,7 +443,6 @@ const GroupDetailPage: FC = () => {
         </CardContent>
       </Card>
 
-      {/* Roles Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -425,7 +466,6 @@ const GroupDetailPage: FC = () => {
         </CardContent>
       </Card>
 
-      {/* Staff Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -461,7 +501,6 @@ const GroupDetailPage: FC = () => {
         </CardContent>
       </Card>
 
-      {/* Confirm Delete */}
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
@@ -472,7 +511,6 @@ const GroupDetailPage: FC = () => {
         confirmLabel="Delete"
       />
 
-      {/* Confirm Activate */}
       <ConfirmDialog
         open={showActivateConfirm}
         onOpenChange={setShowActivateConfirm}
@@ -482,157 +520,229 @@ const GroupDetailPage: FC = () => {
         variant="default"
       />
 
-      {/* Close Dialog */}
+      {closeMutation.isError && (
+        <ErrorState
+          title="Failed to close group"
+          message={closeMutation.error instanceof Error ? closeMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => closeMutation.reset()}
+        />
+      )}
+
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Close Group</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Closure Date</Label>
-              <Input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
+          <form onSubmit={closeForm.handleSubmit(onCloseSubmit)}>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label>Closure Date</Label>
+                <Input type="date" {...closeForm.register("closureDate")} />
+                {closeForm.formState.errors.closureDate && (
+                  <p className="text-xs text-red-500">{closeForm.formState.errors.closureDate.message}</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Closure Reason</Label>
+                <Controller
+                  name="closureReasonId"
+                  control={closeForm.control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select reason" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {closureReasons.map((r: GroupClosureReason) => (
+                          <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {closeForm.formState.errors.closureReasonId && (
+                  <p className="text-xs text-red-500">{closeForm.formState.errors.closureReasonId.message}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Closure Reason</Label>
-              <Select value={closeReasonId} onValueChange={setCloseReasonId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select reason" />
-                </SelectTrigger>
-                <SelectContent>
-                  {closureReasons.map((r: GroupClosureReason) => (
-                    <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCloseDialog(false)}>Cancel</Button>
-            <Button onClick={handleClose} disabled={!closeDate || !closeReasonId || closeMutation.isPending}>
-              {closeMutation.isPending ? "Closing..." : "Close Group"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCloseDialog(false); closeForm.reset(); }}>Cancel</Button>
+              <Button type="submit" disabled={closeMutation.isPending}>
+                {closeMutation.isPending ? "Closing..." : "Close Group"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
-      {/* Add Client Dialog */}
+      {associateMutation.isError && (
+        <ErrorState
+          title="Failed to add client"
+          message={associateMutation.error instanceof Error ? associateMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => associateMutation.reset()}
+        />
+      )}
+
       <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Client to Group</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Search Client</Label>
-              <Input
-                placeholder="Type to search..."
-                value={clientSearch}
-                onChange={(e) => setClientSearch(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Select Client</Label>
-              <Select value={newClientId} onValueChange={setNewClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredClients.length > 0 ? (
-                    filteredClients.map((c) => (
-                      <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="" disabled>No clients found</SelectItem>
+          <form onSubmit={addClientForm.handleSubmit(onAddClientSubmit)}>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label>Search Client</Label>
+                <Input
+                  placeholder="Type to search..."
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Select Client</Label>
+                <Controller
+                  name="clientId"
+                  control={addClientForm.control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredClients.length > 0 ? (
+                          filteredClients.map((c) => (
+                            <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>No clients found</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
                   )}
-                </SelectContent>
-              </Select>
+                />
+                {addClientForm.formState.errors.clientId && (
+                  <p className="text-xs text-red-500">{addClientForm.formState.errors.clientId.message}</p>
+                )}
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowAddClientDialog(false); setNewClientId(""); setClientSearch(""); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddClient} disabled={!newClientId || associateMutation.isPending}>
-              {associateMutation.isPending ? "Adding..." : "Add Client"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAddClientDialog(false); addClientForm.reset(); setClientSearch(""); }}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={addClientForm.watch("clientId") === "" || associateMutation.isPending}>
+                {associateMutation.isPending ? "Adding..." : "Add Client"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
-      {/* Assign Staff Dialog */}
+      {assignStaffMutation.isError && (
+        <ErrorState
+          title="Failed to assign staff"
+          message={assignStaffMutation.error instanceof Error ? assignStaffMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => assignStaffMutation.reset()}
+        />
+      )}
+
       <Dialog open={showAssignStaffDialog} onOpenChange={setShowAssignStaffDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Staff to Group</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Staff ID</Label>
-              <Input
-                type="number"
-                placeholder="Enter staff ID"
-                value={newStaffId}
-                onChange={(e) => setNewStaffId(e.target.value)}
-              />
+          <form onSubmit={assignStaffForm.handleSubmit(onAssignStaffSubmit)}>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label>Staff ID</Label>
+                <Input
+                  type="number"
+                  placeholder="Enter staff ID"
+                  {...assignStaffForm.register("staffId")}
+                />
+                {assignStaffForm.formState.errors.staffId && (
+                  <p className="text-xs text-red-500">{assignStaffForm.formState.errors.staffId.message}</p>
+                )}
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowAssignStaffDialog(false); setNewStaffId(""); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleAssignStaff} disabled={!newStaffId || assignStaffMutation.isPending}>
-              {assignStaffMutation.isPending ? "Assigning..." : "Assign Staff"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAssignStaffDialog(false); assignStaffForm.reset(); }}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={assignStaffMutation.isPending}>
+                {assignStaffMutation.isPending ? "Assigning..." : "Assign Staff"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
-      {/* Assign Role Dialog */}
+      {assignRoleMutation.isError && (
+        <ErrorState
+          title="Failed to assign role"
+          message={assignRoleMutation.error instanceof Error ? assignRoleMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => assignRoleMutation.reset()}
+        />
+      )}
+
       <Dialog open={showAssignRoleDialog} onOpenChange={setShowAssignRoleDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Role</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Client</Label>
-              <Select value={roleClientId} onValueChange={setRoleClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clientMembers.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <form onSubmit={assignRoleForm.handleSubmit(onAssignRoleSubmit)}>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label>Client</Label>
+                <Controller
+                  name="clientId"
+                  control={assignRoleForm.control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clientMembers.map((c) => (
+                          <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {assignRoleForm.formState.errors.clientId && (
+                  <p className="text-xs text-red-500">{assignRoleForm.formState.errors.clientId.message}</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Role ID</Label>
+                <Input
+                  type="number"
+                  placeholder="Enter role ID"
+                  {...assignRoleForm.register("roleId")}
+                />
+                {assignRoleForm.formState.errors.roleId && (
+                  <p className="text-xs text-red-500">{assignRoleForm.formState.errors.roleId.message}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Role ID</Label>
-              <Input
-                type="number"
-                placeholder="Enter role ID"
-                value={roleId}
-                onChange={(e) => setRoleId(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowAssignRoleDialog(false); setRoleClientId(""); setRoleId(""); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleAssignRole} disabled={!roleClientId || !roleId || assignRoleMutation.isPending}>
-              {assignRoleMutation.isPending ? "Assigning..." : "Assign Role"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAssignRoleDialog(false); assignRoleForm.reset(); }}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={assignRoleMutation.isPending}>
+                {assignRoleMutation.isPending ? "Assigning..." : "Assign Role"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
       {deleteMutation.isError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
-          {deleteMutation.error instanceof Error ? deleteMutation.error.message : "Failed to delete group."}
-        </div>
+        <ErrorState
+          title="Failed to delete group"
+          message={deleteMutation.error instanceof Error ? deleteMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => deleteMutation.reset()}
+        />
       )}
     </div>
   );

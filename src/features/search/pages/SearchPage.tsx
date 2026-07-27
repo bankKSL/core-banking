@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useCallback } from "react";
+import { type FC, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 import { Search, Users, UsersRound, Banknote, PiggyBank, Inbox } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,15 +42,24 @@ const ENTITY_LABELS: Record<string, string> = {
   savings: "Savings",
 };
 
-const SearchPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-  const [selectedResources, setSelectedResources] = useState<string[]>(["clients", "groups", "loans", "savings"]);
-  const [exactMatch, setExactMatch] = useState(false);
+interface SearchFormValues {
+  query: string;
+  exactMatch: boolean;
+}
 
+const SearchPage: FC = () => {
+  const navigate = useNavigate();
+  const [selectedResources, setSelectedResources] = useState<string[]>(["clients", "groups", "loans", "savings"]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { register, handleSubmit, control, watch } = useForm<SearchFormValues>({
+    defaultValues: { query: "", exactMatch: false },
+  });
+
+  const exactMatch = watch("exactMatch");
   const resourceParam = useMemo(() => selectedResources.join(","), [selectedResources]);
 
-  const { data, isLoading, isError, refetch, isRefetching } = useSearch(query, resourceParam, exactMatch);
+  const { data, isLoading, isError, refetch, isRefetching } = useSearch(searchQuery, resourceParam, exactMatch);
 
   const groupedResults = useMemo(() => {
     if (!data) return {};
@@ -62,9 +72,9 @@ const SearchPage: React.FC = () => {
     return groups;
   }, [data]);
 
-  const handleSearch = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
+  const onSubmit = useCallback(
+    (values: SearchFormValues) => {
+      setSearchQuery(values.query);
     },
     [],
   );
@@ -85,28 +95,18 @@ const SearchPage: React.FC = () => {
     [navigate],
   );
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        const target = e.target as HTMLInputElement;
-        setQuery(target.value);
-      }
-    },
-    [],
-  );
-
-  const resultCount = useMemo(() => data?.length ?? 0, [data]);
+  const resultCount = data?.length ?? 0;
 
   const emptyState = useMemo(() => {
-    if (!query) return { icon: <Search className="h-12 w-12" />, title: "Search", message: "Enter a search term to find clients, groups, loans, or savings accounts." };
+    if (!searchQuery) return { icon: <Search className="h-12 w-12" />, title: "Search", message: "Enter a search term to find clients, groups, loans, or savings accounts." };
     return { icon: <Inbox className="h-12 w-12" />, title: "No results found", message: "Try adjusting your search term or filters." };
-  }, [query]);
+  }, [searchQuery]);
 
   if (isError) {
     return (
       <div className="p-6">
         <PageHeader title="Global Search" description="Search across clients, groups, loans, and savings accounts" />
-        <ErrorState message="Failed to perform search." onRetry={refetch} />
+        <ErrorState title="Search failed" message="Failed to perform search." onRetry={refetch} />
       </div>
     );
   }
@@ -120,13 +120,12 @@ const SearchPage: React.FC = () => {
 
       <Card>
         <CardContent className="pt-6">
-          <form onSubmit={handleSearch} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="Search by name, account number, or external ID..."
-                defaultValue={query}
-                onKeyDown={handleKeyDown}
+                {...register("query")}
                 className="pl-10 pr-20"
               />
               <Button
@@ -163,7 +162,13 @@ const SearchPage: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
-                <Switch id="exact-match" checked={exactMatch} onCheckedChange={setExactMatch} />
+                <Controller
+                  control={control}
+                  name="exactMatch"
+                  render={({ field }) => (
+                    <Switch id="exact-match" checked={field.value} onCheckedChange={field.onChange} />
+                  )}
+                />
                 <Label htmlFor="exact-match" className="text-sm text-gray-500 cursor-pointer">
                   Exact match
                 </Label>
@@ -173,7 +178,6 @@ const SearchPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Loading */}
       {isLoading && (
         <Card>
           <CardHeader>
@@ -195,8 +199,7 @@ const SearchPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Results */}
-      {!isLoading && resultCount === 0 && query && (
+      {!isLoading && resultCount === 0 && searchQuery && (
         <Card>
           <CardContent>
             <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -208,7 +211,7 @@ const SearchPage: React.FC = () => {
         </Card>
       )}
 
-      {!isLoading && resultCount === 0 && !query && (
+      {!isLoading && resultCount === 0 && !searchQuery && (
         <Card>
           <CardContent>
             <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -220,7 +223,6 @@ const SearchPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Grouped Results */}
       {!isLoading && resultCount > 0 && (
         <div className="grid grid-cols-1 gap-6">
           {Object.entries(groupedResults).map(([entityType, items]) => {

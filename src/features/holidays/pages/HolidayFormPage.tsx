@@ -1,5 +1,8 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { type FC, useCallback, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Save, Loader2, Calendar } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useOffices } from "@/hooks/useOffices";
 import {
   useHoliday,
@@ -26,19 +30,22 @@ function formatDateInput(dateVal: number[] | null | undefined): string {
   return d.toISOString().split("T")[0];
 }
 
-const HolidayFormPage: React.FC = () => {
+const holidayFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().default(""),
+  fromDate: z.string().min(1, "From date is required"),
+  toDate: z.string().min(1, "To date is required"),
+  reschedulingType: z.number().nullable().default(null),
+  repaymentsRescheduledTo: z.string().optional().default(""),
+  selectedOfficeIds: z.array(z.number()).min(1, "At least one office must be selected"),
+});
+
+type HolidayFormValues = z.infer<typeof holidayFormSchema>;
+
+const HolidayFormPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
-
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [reschedulingType, setReschedulingType] = useState<number | null>(null);
-  const [repaymentsRescheduledTo, setRepaymentsRescheduledTo] = useState("");
-  const [selectedOfficeIds, setSelectedOfficeIds] = useState<number[]>([]);
-  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const { data: template, isLoading: isTemplateLoading } = useHolidayTemplate();
   const { data: existingHoliday, isLoading: isHolidayLoading } = useHoliday(
@@ -50,22 +57,44 @@ const HolidayFormPage: React.FC = () => {
   const updateMutation = useUpdateHoliday();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<HolidayFormValues>({
+    resolver: zodResolver(holidayFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      fromDate: "",
+      toDate: "",
+      reschedulingType: null,
+      repaymentsRescheduledTo: "",
+      selectedOfficeIds: [],
+    },
+  });
+
+  useEffect(() => {
+    if (existingHoliday) {
+      setValue("name", existingHoliday.name);
+      setValue("description", existingHoliday.description ?? "");
+      setValue("fromDate", formatDateInput(existingHoliday.fromDate));
+      setValue("toDate", formatDateInput(existingHoliday.toDate));
+      setValue("reschedulingType", existingHoliday.reschedulingType?.id ?? null);
+      setValue("repaymentsRescheduledTo", formatDateInput(existingHoliday.repaymentsRescheduledTo));
+      setValue("selectedOfficeIds", existingHoliday.offices?.map((o) => o.id) ?? []);
+    }
+  }, [existingHoliday, setValue]);
+
   const reschedulingTypeOptions: EnumOption[] = useMemo(
     () => template?.reschedulingTypeOptions ?? [],
     [template],
   );
 
-  useEffect(() => {
-    if (existingHoliday) {
-      setName(existingHoliday.name);
-      setDescription(existingHoliday.description ?? "");
-      setFromDate(formatDateInput(existingHoliday.fromDate));
-      setToDate(formatDateInput(existingHoliday.toDate));
-      setReschedulingType(existingHoliday.reschedulingType?.id ?? null);
-      setRepaymentsRescheduledTo(formatDateInput(existingHoliday.repaymentsRescheduledTo));
-      setSelectedOfficeIds(existingHoliday.offices?.map((o) => o.id) ?? []);
-    }
-  }, [existingHoliday]);
+  const reschedulingType = watch("reschedulingType");
 
   const selectedReschedulingTypeOption = useMemo(
     () => reschedulingTypeOptions.find((o) => o.id === reschedulingType),
@@ -80,78 +109,45 @@ const HolidayFormPage: React.FC = () => {
     return val.includes("specific") || val.includes("date");
   }, [selectedReschedulingTypeOption]);
 
-  const handleOfficeToggle = useCallback((officeId: number) => {
-    setSelectedOfficeIds((prev) =>
-      prev.includes(officeId)
-        ? prev.filter((oid) => oid !== officeId)
-        : [...prev, officeId],
-    );
-  }, []);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setMutationError(null);
-
+  const onSubmit = useCallback(
+    async (values: HolidayFormValues) => {
       const payload: Record<string, unknown> = {
-        name,
-        description: description || undefined,
-        fromDate,
-        toDate,
-        reschedulingType,
-        offices: selectedOfficeIds,
+        name: values.name,
+        description: values.description || undefined,
+        fromDate: values.fromDate,
+        toDate: values.toDate,
+        reschedulingType: values.reschedulingType,
+        offices: values.selectedOfficeIds,
       };
 
-      if (isSpecificDate && repaymentsRescheduledTo) {
-        payload.repaymentsRescheduledTo = repaymentsRescheduledTo;
+      if (isSpecificDate && values.repaymentsRescheduledTo) {
+        payload.repaymentsRescheduledTo = values.repaymentsRescheduledTo;
       }
 
-      try {
-        if (isEdit) {
-          await updateMutation.mutateAsync({ id: Number(id), values: payload });
-        } else {
-          await createMutation.mutateAsync(payload);
-        }
-        navigate("/holidays");
-      } catch (err: unknown) {
-        const error = err as {
-          response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } };
-        };
-        const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ??
-          "Failed to save holiday.";
-        setMutationError(msg);
+      if (isEdit) {
+        await updateMutation.mutateAsync({ id: Number(id), values: payload });
+      } else {
+        await createMutation.mutateAsync(payload);
       }
+      navigate("/holidays");
     },
-    [
-      name,
-      description,
-      fromDate,
-      toDate,
-      reschedulingType,
-      selectedOfficeIds,
-      isSpecificDate,
-      repaymentsRescheduledTo,
-      isEdit,
-      id,
-      createMutation,
-      updateMutation,
-      navigate,
-    ],
+    [isSpecificDate, isEdit, id, createMutation, updateMutation, navigate],
   );
 
   const isLoading = isTemplateLoading || isHolidayLoading || officesLoading;
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-5xl m-auto space-y-6 animate-pulse">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96" />
-        <div className="space-y-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 dark:bg-gray-700 rounded-md" />
-          ))}
-        </div>
+      <div className="p-6 max-w-5xl m-auto space-y-6">
+        <Skeleton className="h-8 w-64" variant="text" />
+        <Skeleton className="h-4 w-96" variant="text" />
+        <Card>
+          <CardContent className="space-y-4 py-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -168,13 +164,22 @@ const HolidayFormPage: React.FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit}>
-        {mutationError && (
-          <div className="mb-6">
-            <ErrorState message={mutationError} />
-          </div>
-        )}
+      {(createMutation.isError || updateMutation.isError) && (
+        <ErrorState
+          title="Failed to save holiday"
+          message={
+            (createMutation.isError ? createMutation.error : updateMutation.error) instanceof Error
+              ? (createMutation.isError ? createMutation.error : updateMutation.error).message
+              : "An unexpected error occurred."
+          }
+          onRetry={() => {
+            createMutation.reset();
+            updateMutation.reset();
+          }}
+        />
+      )}
 
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -187,18 +192,17 @@ const HolidayFormPage: React.FC = () => {
               <Label htmlFor="holidayName">Name *</Label>
               <Input
                 id="holidayName"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name")}
                 placeholder="e.g. New Year's Day"
               />
+              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
             </div>
 
             <div>
               <Label htmlFor="holidayDescription">Description</Label>
               <Textarea
                 id="holidayDescription"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...register("description")}
                 placeholder="Optional description"
               />
             </div>
@@ -209,38 +213,45 @@ const HolidayFormPage: React.FC = () => {
                 <Input
                   id="holidayFromDate"
                   type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
+                  {...register("fromDate")}
                 />
+                {errors.fromDate && <p className="text-xs text-red-500">{errors.fromDate.message}</p>}
               </div>
               <div>
                 <Label htmlFor="holidayToDate">To Date *</Label>
                 <Input
                   id="holidayToDate"
                   type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
+                  {...register("toDate")}
                 />
+                {errors.toDate && <p className="text-xs text-red-500">{errors.toDate.message}</p>}
               </div>
             </div>
 
             <div>
               <Label>Rescheduling Type *</Label>
-              <Select
-                value={reschedulingType != null ? String(reschedulingType) : ""}
-                onValueChange={(v) => setReschedulingType(Number(v))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select rescheduling type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {reschedulingTypeOptions.map((opt) => (
-                    <SelectItem key={opt.id} value={String(opt.id)}>
-                      {opt.value ?? opt.code ?? String(opt.id)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="reschedulingType"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value != null ? String(field.value) : ""}
+                    onValueChange={(v) => field.onChange(v ? Number(v) : null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select rescheduling type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reschedulingTypeOptions.map((opt) => (
+                        <SelectItem key={opt.id} value={String(opt.id)}>
+                          {opt.value ?? opt.code ?? String(opt.id)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.reschedulingType && <p className="text-xs text-red-500">{errors.reschedulingType.message}</p>}
             </div>
 
             {isSpecificDate && (
@@ -251,39 +262,55 @@ const HolidayFormPage: React.FC = () => {
                 <Input
                   id="holidayRepaymentsRescheduledTo"
                   type="date"
-                  value={repaymentsRescheduledTo}
-                  onChange={(e) => setRepaymentsRescheduledTo(e.target.value)}
+                  {...register("repaymentsRescheduledTo")}
                 />
               </div>
             )}
 
             <div>
               <Label>Offices *</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-1 max-h-60 overflow-y-auto border rounded-md p-3">
-                {offices.map((office) => {
-                  const checked = selectedOfficeIds.includes(office.id);
-                  return (
-                    <div key={office.id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`office-${office.id}`}
-                        checked={checked}
-                        onCheckedChange={() => handleOfficeToggle(office.id)}
-                      />
-                      <label
-                        htmlFor={`office-${office.id}`}
-                        className="text-sm font-medium leading-none cursor-pointer"
-                      >
-                        {office.name}
-                      </label>
+              <Controller
+                name="selectedOfficeIds"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-1 max-h-60 overflow-y-auto border rounded-md p-3">
+                      {offices.map((office) => {
+                        const checked = field.value.includes(office.id);
+                        return (
+                          <div key={office.id} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`office-${office.id}`}
+                              checked={checked}
+                              onCheckedChange={() => {
+                                if (checked) {
+                                  field.onChange(field.value.filter((oid) => oid !== office.id));
+                                } else {
+                                  field.onChange([...field.value, office.id]);
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={`office-${office.id}`}
+                              className="text-sm font-medium leading-none cursor-pointer"
+                            >
+                              {office.name}
+                            </label>
+                          </div>
+                        );
+                      })}
+                      {offices.length === 0 && (
+                        <p className="text-sm text-gray-500 col-span-full">
+                          No offices available.
+                        </p>
+                      )}
                     </div>
-                  );
-                })}
-                {offices.length === 0 && (
-                  <p className="text-sm text-gray-500 col-span-full">
-                    No offices available.
-                  </p>
+                    {errors.selectedOfficeIds && (
+                      <p className="text-xs text-red-500">{errors.selectedOfficeIds.message}</p>
+                    )}
+                  </>
                 )}
-              </div>
+              />
             </div>
           </CardContent>
         </Card>

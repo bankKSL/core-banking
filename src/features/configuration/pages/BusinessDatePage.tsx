@@ -1,7 +1,11 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Save, Loader2, Calendar } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,23 +14,40 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBusinessDates, useUpdateBusinessDate } from "../hooks/useConfiguration";
 
+const businessDateSchema = z.object({
+  editDate: z.string().min(1, "Date is required"),
+});
+
+type BusinessDateFormValues = z.infer<typeof businessDateSchema>;
+
 const BusinessDatePage: FC = () => {
   const navigate = useNavigate();
   const { data: businessDates = [], isLoading } = useBusinessDates();
   const updateMutation = useUpdateBusinessDate();
   const [editType, setEditType] = useState<string | null>(null);
-  const [editDate, setEditDate] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<BusinessDateFormValues>({
+    resolver: zodResolver(businessDateSchema),
+    defaultValues: {
+      editDate: "",
+    },
+  });
 
   const handleEdit = (type: string, currentDate: string) => {
     setEditType(type);
-    setEditDate(currentDate);
+    reset({ editDate: currentDate });
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (values: BusinessDateFormValues) => {
     if (!editType) return;
     await updateMutation.mutateAsync({
       type: editType,
-      date: editDate,
+      date: values.editDate,
       dateFormat: "yyyy-MM-dd",
       locale: "en",
     });
@@ -45,6 +66,15 @@ const BusinessDatePage: FC = () => {
           </Button>
         }
       />
+
+      {updateMutation.isError && (
+        <ErrorState
+          title="Failed to update business date"
+          message={updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => updateMutation.reset()}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -86,31 +116,34 @@ const BusinessDatePage: FC = () => {
       </Card>
 
       {editType && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Update {editType}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="editBusinessDate">Date</Label>
-              <Input id="editBusinessDate" type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setEditType(null)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={updateMutation.isPending}
-                className="bg-[#D32F2F] hover:bg-red-700"
-              >
-                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Save className="mr-2 h-4 w-4" />
-                Update
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Update {editType}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="editBusinessDate">Date</Label>
+                <Input id="editBusinessDate" type="date" {...register("editDate")} />
+                {errors.editDate && <p className="text-xs text-red-500 mt-1">{errors.editDate.message}</p>}
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => { setEditType(null); reset({ editDate: "" }); }}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  className="bg-[#D32F2F] hover:bg-red-700"
+                >
+                  {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Save className="mr-2 h-4 w-4" />
+                  Update
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
       )}
     </div>
   );

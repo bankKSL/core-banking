@@ -1,6 +1,9 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, Users, Link2, Unlink, Loader2 } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -33,6 +36,17 @@ const statusLabel: Record<string, string> = {
   "centerStatusType.closed": "Closed",
 };
 
+const closeCenterSchema = z.object({
+  closureReasonId: z.string().min(1, "Closure reason ID is required"),
+});
+
+const associateGroupsSchema = z.object({
+  groupIds: z.array(z.number()).min(1, "Select at least one group"),
+});
+
+type CloseCenterFormValues = z.infer<typeof closeCenterSchema>;
+type AssociateGroupsFormValues = z.infer<typeof associateGroupsSchema>;
+
 const CenterDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -46,51 +60,63 @@ const CenterDetailPage: FC = () => {
 
   const [associateOpen, setAssociateOpen] = useState(false);
   const [closeOpen, setCloseOpen] = useState(false);
-  const [closeReason, setCloseReason] = useState("");
-  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
-  const [disassociateIds, setDisassociateIds] = useState<number[]>([]);
   const [allGroups, setAllGroups] = useState<Array<{ id: number; name: string; officeName: string }>>([]);
+  const [disassociateIds, setDisassociateIds] = useState<number[]>([]);
+
+  const closeForm = useForm<CloseCenterFormValues>({
+    resolver: zodResolver(closeCenterSchema),
+    defaultValues: { closureReasonId: "" },
+  });
+
+  const associateForm = useForm<AssociateGroupsFormValues>({
+    resolver: zodResolver(associateGroupsSchema),
+    defaultValues: { groupIds: [] },
+  });
 
   const handleOpenAssociate = useCallback(async () => {
     setAssociateOpen(true);
+    associateForm.reset({ groupIds: [] });
     try {
       const res = await fetchGroups({ limit: 1000, offset: 0, paged: true });
       setAllGroups((res.pageItems ?? []).map((g) => ({ id: g.id!, name: g.name ?? "", officeName: g.officeName ?? "" })));
     } catch {
       setAllGroups([]);
     }
-  }, []);
+  }, [associateForm]);
 
   const handleActivate = useCallback(async () => {
     if (!centerId) return;
     await activateMutation.mutateAsync({ id: centerId, activationDate: new Date().toISOString().split("T")[0] });
   }, [centerId, activateMutation]);
 
-  const handleClose = useCallback(async () => {
-    if (!centerId || !closeReason) return;
-    await closeMutation.mutateAsync({ id: centerId, payload: { closureReasonId: Number(closeReason), closureDate: new Date().toISOString().split("T")[0] } });
-    setCloseOpen(false);
-    setCloseReason("");
-  }, [centerId, closeReason, closeMutation]);
+  const onCloseSubmit = useCallback(
+    async (values: CloseCenterFormValues) => {
+      if (!centerId) return;
+      await closeMutation.mutateAsync({
+        id: centerId,
+        payload: { closureReasonId: Number(values.closureReasonId), closureDate: new Date().toISOString().split("T")[0] },
+      });
+      closeForm.reset();
+      setCloseOpen(false);
+    },
+    [centerId, closeMutation, closeForm],
+  );
 
-  const handleAssociate = useCallback(async () => {
-    if (!centerId || selectedGroupIds.length === 0) return;
-    await associateMutation.mutateAsync({ centerId, groupIds: selectedGroupIds });
-    setAssociateOpen(false);
-    setSelectedGroupIds([]);
-  }, [centerId, selectedGroupIds, associateMutation]);
+  const onAssociateSubmit = useCallback(
+    async (values: AssociateGroupsFormValues) => {
+      if (!centerId || values.groupIds.length === 0) return;
+      await associateMutation.mutateAsync({ centerId, groupIds: values.groupIds });
+      associateForm.reset();
+      setAssociateOpen(false);
+    },
+    [centerId, associateMutation, associateForm],
+  );
 
   const handleDisassociate = useCallback(async () => {
     if (!centerId || disassociateIds.length === 0) return;
     await disassociateMutation.mutateAsync({ centerId, groupIds: disassociateIds });
     setDisassociateIds([]);
   }, [centerId, disassociateIds, disassociateMutation]);
-
-  const toggleGroupSelection = (groupId: number) => {
-    setSelectedGroupIds((prev) =>
-      prev.includes(groupId) ? prev.filter((g) => g !== groupId) : [...prev, groupId],
-    );
-  };
 
   const toggleDisassociateSelection = (groupId: number) => {
     setDisassociateIds((prev) =>
@@ -153,6 +179,8 @@ const CenterDetailPage: FC = () => {
   const availableGroups = allGroups.filter(
     (g) => !groupMembers.some((m) => m.id === g.id),
   );
+
+  const selectedGroupIds = associateForm.watch("groupIds");
 
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
@@ -312,86 +340,122 @@ const CenterDetailPage: FC = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={associateOpen} onOpenChange={setAssociateOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Associate Groups</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 max-h-80 overflow-y-auto">
-            {availableGroups.length === 0 ? (
-              <p className="text-sm text-gray-500">No groups available to associate.</p>
-            ) : (
-              availableGroups.map((group) => (
-                <label
-                  key={group.id}
-                  className="flex items-center gap-3 cursor-pointer rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedGroupIds.includes(group.id)}
-                    onChange={() => toggleGroupSelection(group.id)}
-                    className="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F]"
-                  />
-                  <div>
-                    <p className="text-sm font-medium">{group.name}</p>
-                    <p className="text-xs text-gray-500">{group.officeName}</p>
-                  </div>
-                </label>
-              ))
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAssociateOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAssociate}
-              disabled={selectedGroupIds.length === 0 || associateMutation.isPending}
-              className="bg-[#D32F2F] hover:bg-red-700"
-            >
-              {associateMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Link2 className="mr-2 h-4 w-4" />
-              )}
-              Associate ({selectedGroupIds.length})
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {closeMutation.isError && (
+        <ErrorState
+          title="Failed to close center"
+          message={closeMutation.error instanceof Error ? closeMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => closeMutation.reset()}
+        />
+      )}
 
       <Dialog open={closeOpen} onOpenChange={setCloseOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Close Center</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="closeReason">Closure Reason ID</Label>
-              <Input
-                id="closeReason"
-                type="number"
-                value={closeReason}
-                onChange={(e) => setCloseReason(e.target.value)}
-                placeholder="Enter closure reason ID"
-              />
+          <form onSubmit={closeForm.handleSubmit(onCloseSubmit)}>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="closeReason">Closure Reason ID</Label>
+                <Input
+                  id="closeReason"
+                  type="number"
+                  placeholder="Enter closure reason ID"
+                  {...closeForm.register("closureReasonId")}
+                />
+                {closeForm.formState.errors.closureReasonId && (
+                  <p className="text-xs text-red-500">{closeForm.formState.errors.closureReasonId.message}</p>
+                )}
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setCloseOpen(false); setCloseReason(""); }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleClose}
-              disabled={!closeReason || closeMutation.isPending}
-              variant="destructive"
-            >
-              {closeMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Confirm Close
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setCloseOpen(false); closeForm.reset(); }}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={closeMutation.isPending}
+                variant="destructive"
+              >
+                {closeMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Confirm Close
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {associateMutation.isError && (
+        <ErrorState
+          title="Failed to associate groups"
+          message={associateMutation.error instanceof Error ? associateMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => associateMutation.reset()}
+        />
+      )}
+
+      <Dialog open={associateOpen} onOpenChange={setAssociateOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Associate Groups</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={associateForm.handleSubmit(onAssociateSubmit)}>
+            <Controller
+              name="groupIds"
+              control={associateForm.control}
+              render={({ field }) => (
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {availableGroups.length === 0 ? (
+                    <p className="text-sm text-gray-500">No groups available to associate.</p>
+                  ) : (
+                    availableGroups.map((group) => (
+                      <label
+                        key={group.id}
+                        className="flex items-center gap-3 cursor-pointer rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={field.value.includes(group.id)}
+                          onChange={() => {
+                            const updated = field.value.includes(group.id)
+                              ? field.value.filter((id: number) => id !== group.id)
+                              : [...field.value, group.id];
+                            field.onChange(updated);
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F]"
+                        />
+                        <div>
+                          <p className="text-sm font-medium">{group.name}</p>
+                          <p className="text-xs text-gray-500">{group.officeName}</p>
+                        </div>
+                      </label>
+                    ))
+                  )}
+                  {associateForm.formState.errors.groupIds && (
+                    <p className="text-xs text-red-500">{associateForm.formState.errors.groupIds.message}</p>
+                  )}
+                </div>
+              )}
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setAssociateOpen(false); associateForm.reset(); }}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={selectedGroupIds.length === 0 || associateMutation.isPending}
+                className="bg-[#D32F2F] hover:bg-red-700"
+              >
+                {associateMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Link2 className="mr-2 h-4 w-4" />
+                )}
+                Associate ({selectedGroupIds.length})
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

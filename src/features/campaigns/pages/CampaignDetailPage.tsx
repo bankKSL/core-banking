@@ -1,5 +1,8 @@
-import { type FC, useState } from "react";
+import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Play, XCircle, RotateCcw, Trash2, Loader2, Megaphone, Eye } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -9,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -24,6 +28,11 @@ import {
   useDeleteEmailCampaign,
 } from "../hooks/useCampaigns";
 import { STATUS_LABELS, TRIGGER_TYPE_LABELS, CAMPAIGN_TYPE_LABELS } from "../types/campaign";
+
+const campaignActionSchema = z.object({
+  actionDate: z.string().min(1, "Date is required"),
+});
+type CampaignActionFormValues = z.infer<typeof campaignActionSchema>;
 
 const CampaignDetailPage: FC = () => {
   const navigate = useNavigate();
@@ -47,41 +56,52 @@ const CampaignDetailPage: FC = () => {
   const deleteEmail = useDeleteEmailCampaign();
 
   const [actionDialog, setActionDialog] = useState<"activate" | "close" | null>(null);
-  const [actionDate, setActionDate] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(false);
 
   const status = campaign?.status;
 
-  const handleAction = async () => {
-    if (!numericId || !actionDialog || !actionDate) return;
-    if (isSms) {
-      if (actionDialog === "activate") {
-        await activateSms.mutateAsync({
-          id: numericId,
-          payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
-        });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CampaignActionFormValues>({
+    resolver: zodResolver(campaignActionSchema),
+    defaultValues: { actionDate: "" },
+  });
+
+  const onSubmit = useCallback(
+    async (values: CampaignActionFormValues) => {
+      if (!numericId || !actionDialog) return;
+      if (isSms) {
+        if (actionDialog === "activate") {
+          await activateSms.mutateAsync({
+            id: numericId,
+            payload: { activationDate: values.actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+          });
+        } else {
+          await closeSms.mutateAsync({
+            id: numericId,
+            payload: { closureDate: values.actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+          });
+        }
       } else {
-        await closeSms.mutateAsync({
-          id: numericId,
-          payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
-        });
+        if (actionDialog === "activate") {
+          await activateEmail.mutateAsync({
+            id: numericId,
+            payload: { activationDate: values.actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+          });
+        } else {
+          await closeEmail.mutateAsync({
+            id: numericId,
+            payload: { closureDate: values.actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
+          });
+        }
       }
-    } else {
-      if (actionDialog === "activate") {
-        await activateEmail.mutateAsync({
-          id: numericId,
-          payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
-        });
-      } else {
-        await closeEmail.mutateAsync({
-          id: numericId,
-          payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" },
-        });
-      }
-    }
-    setActionDialog(null);
-    setActionDate("");
-  };
+      setActionDialog(null);
+    },
+    [numericId, actionDialog, isSms, activateSms, closeSms, activateEmail, closeEmail],
+  );
 
   const handleReactivate = async () => {
     if (!numericId) return;
@@ -127,15 +147,39 @@ const CampaignDetailPage: FC = () => {
         }
       />
 
+      {actionDialog === "activate" && (isSms ? activateSms.isError : activateEmail.isError) && (
+        <ErrorState
+          title="Failed to activate campaign"
+          message={
+            (isSms ? activateSms.error : activateEmail.error) instanceof Error
+              ? (isSms ? activateSms.error : activateEmail.error).message
+              : "An unexpected error occurred."
+          }
+          onRetry={() => (isSms ? activateSms : activateEmail).reset()}
+        />
+      )}
+
+      {actionDialog === "close" && (isSms ? closeSms.isError : closeEmail.isError) && (
+        <ErrorState
+          title="Failed to close campaign"
+          message={
+            (isSms ? closeSms.error : closeEmail.error) instanceof Error
+              ? (isSms ? closeSms.error : closeEmail.error).message
+              : "An unexpected error occurred."
+          }
+          onRetry={() => (isSms ? closeSms : closeEmail).reset()}
+        />
+      )}
+
       <div className="flex items-center gap-3">
         <StatusBadge status={STATUS_LABELS[status!]?.toLowerCase() ?? "unknown"} size="lg" />
         {status === 100 && (
-          <Button size="sm" onClick={() => setActionDialog("activate")} className="bg-emerald-600 hover:bg-emerald-700">
+          <Button size="sm" onClick={() => { setActionDialog("activate"); reset(); }} className="bg-emerald-600 hover:bg-emerald-700">
             <Play className="mr-1 h-4 w-4" /> Activate
           </Button>
         )}
         {status === 300 && (
-          <Button size="sm" variant="outline" onClick={() => setActionDialog("close")}>
+          <Button size="sm" variant="outline" onClick={() => { setActionDialog("close"); reset(); }}>
             <XCircle className="mr-1 h-4 w-4" /> Close
           </Button>
         )}
@@ -168,7 +212,7 @@ const CampaignDetailPage: FC = () => {
             <div>
               <p className="text-xs text-gray-500">Trigger Type</p>
               <p className="text-sm font-medium">
-                {TRIGGER_TYPE_LABELS[(campaign as any).triggerType] ?? (campaign as any).triggerType ?? "—"}
+                {TRIGGER_TYPE_LABELS[(campaign as any).triggerType] ?? (campaign as any).triggerType ?? "\u2014"}
               </p>
             </div>
             <div>
@@ -179,22 +223,22 @@ const CampaignDetailPage: FC = () => {
               <>
                 <div className="col-span-2">
                   <p className="text-xs text-gray-500">Message</p>
-                  <p className="text-sm">{(campaign as any).message ?? "—"}</p>
+                  <p className="text-sm">{(campaign as any).message ?? "\u2014"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Business Rule</p>
-                  <p className="text-sm">{(campaign as any).reportName ?? (campaign as any).runReportId ?? "—"}</p>
+                  <p className="text-sm">{(campaign as any).reportName ?? (campaign as any).runReportId ?? "\u2014"}</p>
                 </div>
               </>
             ) : (
               <>
                 <div>
                   <p className="text-xs text-gray-500">Subject</p>
-                  <p className="text-sm">{(campaign as any).emailSubject ?? "—"}</p>
+                  <p className="text-sm">{(campaign as any).emailSubject ?? "\u2014"}</p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-xs text-gray-500">Message</p>
-                  <p className="text-sm">{(campaign as any).emailMessage ?? "—"}</p>
+                  <p className="text-sm">{(campaign as any).emailMessage ?? "\u2014"}</p>
                 </div>
               </>
             )}
@@ -207,20 +251,35 @@ const CampaignDetailPage: FC = () => {
           <DialogHeader>
             <DialogTitle>{actionDialog === "activate" ? "Activate Campaign" : "Close Campaign"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="actionDate">{actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}</Label>
-              <Input id="actionDate" type="date" value={actionDate} onChange={(e) => setActionDate(e.target.value)} />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="actionDate">{actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}</Label>
+                <Input id="actionDate" type="date" {...register("actionDate")} />
+                {errors.actionDate && <p className="text-xs text-red-500">{errors.actionDate.message}</p>}
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" type="button" onClick={() => setActionDialog(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    actionDialog === "activate"
+                      ? (isSms ? activateSms.isPending : activateEmail.isPending)
+                      : (isSms ? closeSms.isPending : closeEmail.isPending)
+                  }
+                  className="bg-[#D32F2F] hover:bg-red-700"
+                >
+                  {(actionDialog === "activate"
+                    ? (isSms ? activateSms.isPending : activateEmail.isPending)
+                    : (isSms ? closeSms.isPending : closeEmail.isPending)
+                  ) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {actionDialog === "activate" ? "Activate" : "Close"}
+                </Button>
+              </div>
             </div>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setActionDialog(null)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAction} disabled={!actionDate} className="bg-[#D32F2F] hover:bg-red-700">
-                {actionDialog === "activate" ? "Activate" : "Close"}
-              </Button>
-            </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 

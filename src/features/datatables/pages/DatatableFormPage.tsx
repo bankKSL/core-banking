@@ -1,5 +1,8 @@
-import React, { useState, useCallback } from "react";
+import { type FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Save, Loader2, Plus, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,82 +35,65 @@ const COLUMN_TYPE_OPTIONS = [
   "Text",
 ];
 
-interface ColumnRow {
-  id: string;
-  name: string;
-  type: string;
-  length: number;
-  mandatory: boolean;
-}
+const columnSchema = z.object({
+  name: z.string().min(1, "Column name is required"),
+  type: z.string().min(1),
+  length: z.number().default(0),
+  mandatory: z.boolean().default(false),
+});
 
-const DatatableFormPage: React.FC = () => {
+const datatableFormSchema = z.object({
+  datatableName: z.string().min(1, "Datatable name is required"),
+  apptableName: z.string().min(1, "App table is required"),
+  multiRow: z.boolean().default(false),
+  columns: z.array(columnSchema).min(1, "At least one column is required"),
+});
+
+type DatatableFormValues = z.infer<typeof datatableFormSchema>;
+
+const DatatableFormPage: FC = () => {
   const navigate = useNavigate();
   const createMutation = useCreateDatatable();
 
-  const [datatableName, setDatatableName] = useState("");
-  const [apptableName, setApptableName] = useState("");
-  const [multiRow, setMultiRow] = useState(false);
-  const [columns, setColumns] = useState<ColumnRow[]>([
-    { id: crypto.randomUUID(), name: "", type: "String", length: 0, mandatory: false },
-  ]);
-  const [mutationError, setMutationError] = useState<string | null>(null);
-
-  const addColumn = useCallback(() => {
-    setColumns((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), name: "", type: "String", length: 0, mandatory: false },
-    ]);
-  }, []);
-
-  const removeColumn = useCallback((id: string) => {
-    setColumns((prev) => prev.filter((c) => c.id !== id));
-  }, []);
-
-  const updateColumn = useCallback((id: string, field: keyof ColumnRow, value: string | number | boolean) => {
-    setColumns((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
-  }, []);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setMutationError(null);
-
-      if (!datatableName.trim()) {
-        setMutationError("Datatable name is required.");
-        return;
-      }
-      if (!apptableName) {
-        setMutationError("App table is required.");
-        return;
-      }
-      const validColumns = columns.filter((c) => c.name.trim());
-      if (validColumns.length === 0) {
-        setMutationError("At least one column with a name is required.");
-        return;
-      }
-
-      try {
-        await createMutation.mutateAsync({
-          datatableName: datatableName.trim(),
-          apptableName,
-          multiRow,
-          columns: validColumns.map((c) => ({
-            name: c.name.trim(),
-            type: c.type,
-            length: c.length,
-            mandatory: c.mandatory,
-          })),
-        });
-        navigate("/datatables");
-      } catch (err: unknown) {
-        const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-        const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ??
-          "Failed to create datatable.";
-        setMutationError(msg);
-      }
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<DatatableFormValues>({
+    resolver: zodResolver(datatableFormSchema),
+    defaultValues: {
+      datatableName: "",
+      apptableName: "",
+      multiRow: false,
+      columns: [{ name: "", type: "String", length: 0, mandatory: false }],
     },
-    [datatableName, apptableName, multiRow, columns, createMutation, navigate],
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "columns",
+  });
+
+  const columnsWatch = watch("columns");
+
+  const onSubmit = useCallback(
+    async (values: DatatableFormValues) => {
+      await createMutation.mutateAsync({
+        datatableName: values.datatableName.trim(),
+        apptableName: values.apptableName,
+        multiRow: values.multiRow,
+        columns: values.columns.map((c) => ({
+          name: c.name.trim(),
+          type: c.type,
+          length: c.length,
+          mandatory: c.mandatory,
+        })),
+      });
+      navigate("/datatables");
+    },
+    [createMutation, navigate],
   );
 
   return (
@@ -122,13 +108,21 @@ const DatatableFormPage: React.FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit}>
-        {mutationError && (
-          <div className="mb-6">
-            <ErrorState message={mutationError} />
-          </div>
-        )}
+      {createMutation.isError && (
+        <div className="mb-6">
+          <ErrorState
+            title="Failed to create datatable"
+            message={
+              createMutation.error instanceof Error
+                ? createMutation.error.message
+                : "An unexpected error occurred."
+            }
+            onRetry={() => createMutation.reset()}
+          />
+        </div>
+      )}
 
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Datatable Details</CardTitle>
@@ -138,33 +132,50 @@ const DatatableFormPage: React.FC = () => {
               <Label htmlFor="datatableName">Datatable Name *</Label>
               <Input
                 id="datatableName"
-                value={datatableName}
-                onChange={(e) => setDatatableName(e.target.value)}
+                {...register("datatableName")}
                 placeholder="e.g. extra_client_details"
               />
+              {errors.datatableName && (
+                <p className="text-xs text-red-500">{errors.datatableName.message}</p>
+              )}
             </div>
 
             <div>
               <Label htmlFor="apptableName">App Table *</Label>
-              <Select value={apptableName} onValueChange={setApptableName}>
-                <SelectTrigger id="apptableName">
-                  <SelectValue placeholder="Select app table" />
-                </SelectTrigger>
-                <SelectContent>
-                  {APPTABLE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="apptableName"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="apptableName">
+                      <SelectValue placeholder="Select app table" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {APPTABLE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.apptableName && (
+                <p className="text-xs text-red-500">{errors.apptableName.message}</p>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
-              <Checkbox
-                id="multiRow"
-                checked={multiRow}
-                onCheckedChange={(checked) => setMultiRow(checked === true)}
+              <Controller
+                control={control}
+                name="multiRow"
+                render={({ field }) => (
+                  <Checkbox
+                    id="multiRow"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
               />
               <Label htmlFor="multiRow" className="cursor-pointer">Allow multiple rows per entity</Label>
             </div>
@@ -174,19 +185,24 @@ const DatatableFormPage: React.FC = () => {
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Columns</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={addColumn}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => append({ name: "", type: "String", length: 0, mandatory: false })}
+            >
               <Plus className="h-4 w-4 mr-1" /> Add Column
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {columns.map((col, index) => (
-              <div key={col.id} className="flex items-start gap-4 p-4 border rounded-lg relative">
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex items-start gap-4 p-4 border rounded-lg relative">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   className="absolute top-2 right-2 h-6 w-6"
-                  onClick={() => removeColumn(col.id)}
+                  onClick={() => remove(index)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -194,53 +210,72 @@ const DatatableFormPage: React.FC = () => {
                 <div className="flex-1 space-y-1">
                   <Label className="text-xs">Name *</Label>
                   <Input
-                    value={col.name}
-                    onChange={(e) => updateColumn(col.id, "name", e.target.value)}
+                    {...register(`columns.${index}.name`)}
                     placeholder={`Column ${index + 1}`}
                   />
+                  {errors.columns?.[index]?.name && (
+                    <p className="text-xs text-red-500">{errors.columns[index]!.name?.message}</p>
+                  )}
                 </div>
 
                 <div className="w-40 space-y-1">
                   <Label className="text-xs">Type</Label>
-                  <Select value={col.type} onValueChange={(v) => updateColumn(col.id, "type", v)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COLUMN_TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    control={control}
+                    name={`columns.${index}.type`}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COLUMN_TYPE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt}>
+                              {opt}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
 
-                {col.type !== "Text" && col.type !== "Dropdown" && (
+                {columnsWatch?.[index]?.type !== "Text" && columnsWatch?.[index]?.type !== "Dropdown" && (
                   <div className="w-24 space-y-1">
                     <Label className="text-xs">Length</Label>
                     <Input
                       type="number"
                       min="0"
-                      value={col.length || ""}
-                      onChange={(e) => updateColumn(col.id, "length", Number(e.target.value))}
+                      {...register(`columns.${index}.length`, { valueAsNumber: true })}
                       placeholder="0"
                     />
                   </div>
                 )}
 
                 <div className="flex items-center gap-2 pt-6">
-                  <Checkbox
-                    id={`mandatory-${col.id}`}
-                    checked={col.mandatory}
-                    onCheckedChange={(checked) => updateColumn(col.id, "mandatory", checked === true)}
+                  <Controller
+                    control={control}
+                    name={`columns.${index}.mandatory`}
+                    render={({ field }) => (
+                      <Checkbox
+                        id={`mandatory-${field.name}`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
                   />
-                  <Label htmlFor={`mandatory-${col.id}`} className="text-xs cursor-pointer">Mandatory</Label>
+                  <Label htmlFor={`mandatory-${field.name}`} className="text-xs cursor-pointer">Mandatory</Label>
                 </div>
               </div>
             ))}
 
-            {columns.length === 0 && (
+            {errors.columns?.root && (
+              <p className="text-sm text-red-500 text-center py-4">
+                {errors.columns.root.message}
+              </p>
+            )}
+
+            {fields.length === 0 && !errors.columns?.root && (
               <p className="text-sm text-gray-500 text-center py-4">
                 No columns defined. Click "Add Column" to add one.
               </p>

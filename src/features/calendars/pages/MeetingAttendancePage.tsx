@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { type FC, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -22,7 +24,9 @@ const ATTENDANCE_OPTIONS = [
   { id: 5, label: "Late" },
 ];
 
-const MeetingAttendancePage: React.FC = () => {
+type AttendanceFormValues = Record<string, number>;
+
+const MeetingAttendancePage: FC = () => {
   const { entityType, entityId, meetingId } = useParams<{
     entityType: string;
     entityId: string;
@@ -39,37 +43,37 @@ const MeetingAttendancePage: React.FC = () => {
   const updateMutation = useUpdateMeetingAttendance();
   const isSubmitting = updateMutation.isPending;
 
-  const [attendanceMap, setAttendanceMap] = useState<Record<number, number>>({});
+  const {
+    control,
+    handleSubmit,
+    reset,
+  } = useForm<AttendanceFormValues>({ defaultValues: {} });
 
   useEffect(() => {
     if (meeting?.clientsAttendance) {
-      const map: Record<number, number> = {};
+      const map: Record<string, number> = {};
       meeting.clientsAttendance.forEach((a) => {
-        map[a.clientId] = a.attendanceType?.id ?? 1;
+        map[String(a.clientId)] = a.attendanceType?.id ?? 1;
       });
-      setAttendanceMap(map);
+      reset(map);
     }
-  }, [meeting]);
+  }, [meeting, reset]);
 
-  const handleSave = async () => {
+  const onSubmit = async (values: AttendanceFormValues) => {
     if (!meeting) return;
     const payload = {
-      clientsAttendance: Object.entries(attendanceMap).map(([clientId, attendanceType]) => ({
+      clientsAttendance: Object.entries(values).map(([clientId, attendanceType]) => ({
         clientId: Number(clientId),
         attendanceType,
       })),
     };
 
-    try {
-      await updateMutation.mutateAsync({
-        entityType: entityType ?? "",
-        entityId: Number(entityId ?? 0),
-        meetingId: Number(meetingId ?? 0),
-        payload: payload as unknown as Record<string, unknown>,
-      });
-    } catch {
-      /* error handled by react-query */
-    }
+    await updateMutation.mutateAsync({
+      entityType: entityType ?? "",
+      entityId: Number(entityId ?? 0),
+      meetingId: Number(meetingId ?? 0),
+      payload: payload as unknown as Record<string, unknown>,
+    });
   };
 
   const meetingDate = meeting?.meetingDate
@@ -86,9 +90,9 @@ const MeetingAttendancePage: React.FC = () => {
         <PageHeader title="Meeting Attendance" description="Loading..." />
         <Card>
           <CardContent className="py-8">
-            <div className="space-y-4 animate-pulse">
+            <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-10 bg-gray-200 dark:bg-gray-700 rounded-md" />
+                <Skeleton key={i} className="h-10 w-full rounded-md" />
               ))}
             </div>
           </CardContent>
@@ -108,7 +112,7 @@ const MeetingAttendancePage: React.FC = () => {
             </Button>
           }
         />
-        <ErrorState message="Failed to load meeting attendance." onRetry={refetch} />
+        <ErrorState title="Failed to load meeting" message="Failed to load meeting attendance." onRetry={refetch} />
       </div>
     );
   }
@@ -125,55 +129,71 @@ const MeetingAttendancePage: React.FC = () => {
         }
       />
 
+      {updateMutation.isError && (
+        <ErrorState
+          title="Failed to save attendance"
+          message={
+            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+          }
+          onRetry={() => updateMutation.reset()}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Client Attendance</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {(!meeting?.clientsAttendance || meeting.clientsAttendance.length === 0) ? (
-              <p className="text-sm text-gray-500">No attendance records found.</p>
-            ) : (
-              meeting.clientsAttendance.map((att) => (
-                <div key={att.id} className="flex items-center justify-between gap-4 py-2 border-b last:border-0">
-                  <span className="text-sm font-medium flex-1">{att.clientName}</span>
-                  <Select
-                    value={String(attendanceMap[att.clientId] ?? att.attendanceType?.id ?? 1)}
-                    onValueChange={(v) =>
-                      setAttendanceMap((prev) => ({ ...prev, [att.clientId]: Number(v) }))
-                    }
-                  >
-                    <SelectTrigger className="w-36">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ATTENDANCE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.id} value={String(opt.id)}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))
-            )}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="space-y-3">
+              {(!meeting?.clientsAttendance || meeting.clientsAttendance.length === 0) ? (
+                <p className="text-sm text-gray-500">No attendance records found.</p>
+              ) : (
+                meeting.clientsAttendance.map((att) => (
+                  <div key={att.id} className="flex items-center justify-between gap-4 py-2 border-b last:border-0">
+                    <span className="text-sm font-medium flex-1">{att.clientName}</span>
+                    <Controller
+                      control={control}
+                      name={String(att.clientId)}
+                      render={({ field }) => (
+                        <Select
+                          value={String(field.value)}
+                          onValueChange={(v) => field.onChange(Number(v))}
+                        >
+                          <SelectTrigger className="w-36">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ATTENDANCE_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.id} value={String(opt.id)}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                ))
+              )}
 
-            {meeting?.clientsAttendance && meeting.clientsAttendance.length > 0 && (
-              <div className="flex justify-end pt-4">
-                <Button onClick={handleSave} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" /> Save Attendance
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
+              {meeting?.clientsAttendance && meeting.clientsAttendance.length > 0 && (
+                <div className="flex justify-end pt-4">
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" /> Save Attendance
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

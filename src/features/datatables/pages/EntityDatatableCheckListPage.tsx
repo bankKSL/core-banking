@@ -1,4 +1,7 @@
-import React, { useState, useMemo, useCallback } from "react";
+import { type FC, useMemo, useCallback, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Plus, Trash2, Loader2, Save } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,9 +19,18 @@ import {
   useCreateEntityDatatableCheck,
   useDeleteEntityDatatableCheck,
 } from "../hooks/useDatatables";
-import type { EntityDatatableCheck, EntityDatatableCheckTemplate } from "../api/datatables";
+import type { EntityDatatableCheck } from "../api/datatables";
 
-const EntityDatatableCheckListPage: React.FC = () => {
+const createCheckSchema = z.object({
+  entity: z.string().min(1, "Entity is required"),
+  datatableName: z.string().min(1, "Datatable is required"),
+  status: z.number({ invalid_type_error: "Status is required" }),
+  productId: z.string().optional(),
+});
+
+type CreateCheckFormValues = z.infer<typeof createCheckSchema>;
+
+const EntityDatatableCheckListPage: FC = () => {
   const { data: checks = [], isLoading, isError, refetch } = useEntityDatatableChecks();
   const { data: template } = useEntityDatatableCheckTemplate();
   const createMutation = useCreateEntityDatatableCheck();
@@ -27,10 +39,17 @@ const EntityDatatableCheckListPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<EntityDatatableCheck | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const [formEntity, setFormEntity] = useState("");
-  const [formDatatable, setFormDatatable] = useState("");
-  const [formStatus, setFormStatus] = useState<number | null>(null);
-  const [formProductId, setFormProductId] = useState("");
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { isValid },
+  } = useForm<CreateCheckFormValues>({
+    resolver: zodResolver(createCheckSchema),
+    defaultValues: { entity: "", datatableName: "", status: 0, productId: "" },
+    mode: "onChange",
+  });
 
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
@@ -42,33 +61,34 @@ const EntityDatatableCheckListPage: React.FC = () => {
     setDeleteTarget(null);
   }, [deleteTarget, deleteMutation]);
 
-  const handleCreate = useCallback(async () => {
-    if (!formEntity || !formDatatable || formStatus == null) return;
-    try {
-      await createMutation.mutateAsync({
-        entity: formEntity,
-        datatableName: formDatatable,
-        status: formStatus,
-        ...(formProductId ? { productId: Number(formProductId) } : {}),
-      });
-      setDialogOpen(false);
-      setFormEntity("");
-      setFormDatatable("");
-      setFormStatus(null);
-      setFormProductId("");
-    } catch {
-      // handled by mutation
-    }
-  }, [formEntity, formDatatable, formStatus, formProductId, createMutation]);
+  const onSubmit = useCallback(
+    async (values: CreateCheckFormValues) => {
+      try {
+        await createMutation.mutateAsync({
+          entity: values.entity,
+          datatableName: values.datatableName,
+          status: values.status,
+          ...(values.productId ? { productId: Number(values.productId) } : {}),
+        });
+        setDialogOpen(false);
+        reset();
+      } catch {
+        // handled by mutation
+      }
+    },
+    [createMutation, reset],
+  );
 
   const openDialog = useCallback(() => {
     if (!template) return;
-    setFormEntity(template.entities[0]?.value ?? "");
-    setFormDatatable(template.datatables[0]?.datatableName ?? "");
-    setFormStatus(template.statuses[0]?.id ?? null);
-    setFormProductId("");
+    reset({
+      entity: template.entities[0]?.value ?? "",
+      datatableName: template.datatables[0]?.datatableName ?? "",
+      status: template.statuses[0]?.id ?? 0,
+      productId: "",
+    });
     setDialogOpen(true);
-  }, [template]);
+  }, [template, reset]);
 
   const columns: ColumnDef<EntityDatatableCheck>[] = useMemo(
     () => [
@@ -120,7 +140,7 @@ const EntityDatatableCheckListPage: React.FC = () => {
             </Button>
           }
         />
-        <ErrorState message="Failed to load entity datatable checks." onRetry={refetch} />
+        <ErrorState title="Failed to load checks" message="Failed to load entity datatable checks." onRetry={refetch} />
       </div>
     );
   }
@@ -167,53 +187,71 @@ const EntityDatatableCheckListPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>New Entity Datatable Check</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Label htmlFor="checkEntity">Entity</Label>
-              <Select value={formEntity} onValueChange={setFormEntity}>
-                <SelectTrigger id="checkEntity">
-                  <SelectValue placeholder="Select entity" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(template?.entities ?? []).map((e) => (
-                    <SelectItem key={e.id} value={e.value}>
-                      {e.value}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="entity"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="checkEntity">
+                      <SelectValue placeholder="Select entity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(template?.entities ?? []).map((e) => (
+                        <SelectItem key={e.id} value={e.value}>
+                          {e.value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
               <Label htmlFor="checkDatatable">Datatable</Label>
-              <Select value={formDatatable} onValueChange={setFormDatatable}>
-                <SelectTrigger id="checkDatatable">
-                  <SelectValue placeholder="Select datatable" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(template?.datatables ?? []).map((d) => (
-                    <SelectItem key={d.datatableName} value={d.datatableName}>
-                      {d.datatableName} ({d.apptableName})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="datatableName"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="checkDatatable">
+                      <SelectValue placeholder="Select datatable" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(template?.datatables ?? []).map((d) => (
+                        <SelectItem key={d.datatableName} value={d.datatableName}>
+                          {d.datatableName} ({d.apptableName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
               <Label htmlFor="checkStatus">Status</Label>
-              <Select value={formStatus != null ? String(formStatus) : ""} onValueChange={(v) => setFormStatus(Number(v))}>
-                <SelectTrigger id="checkStatus">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(template?.statuses ?? []).map((s) => (
-                    <SelectItem key={s.id} value={String(s.id)}>
-                      {s.value}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value ? String(field.value) : ""} onValueChange={(v) => field.onChange(Number(v))}>
+                    <SelectTrigger id="checkStatus">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(template?.statuses ?? []).map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
@@ -222,26 +260,25 @@ const EntityDatatableCheckListPage: React.FC = () => {
                 id="checkProductId"
                 type="number"
                 min="0"
-                value={formProductId}
-                onChange={(e) => setFormProductId(e.target.value)}
+                {...register("productId")}
                 placeholder="Leave empty for all products"
               />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button variant="outline" type="button" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button
-                onClick={handleCreate}
-                disabled={createMutation.isPending || !formEntity || !formDatatable || formStatus == null}
+                type="submit"
+                disabled={createMutation.isPending || !isValid}
               >
                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
                 Create
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

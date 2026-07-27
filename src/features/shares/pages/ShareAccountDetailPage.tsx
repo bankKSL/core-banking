@@ -1,5 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { type FC, useMemo, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, ThumbsUp, ThumbsDown, Play, RotateCcw, XCircle, Plus } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,12 +19,12 @@ import { useShareAccount, useShareAccountCommand, useDividends } from "../hooks/
 import type { ShareAccount } from "../api/shares";
 
 function formatAmount(amount?: number | null): string {
-  if (amount == null) return "—";
+  if (amount == null) return "\u2014";
   return amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return "—";
+  if (!dateStr) return "\u2014";
   try {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -33,7 +36,13 @@ function formatDate(dateStr?: string | null): string {
   }
 }
 
-const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
+const shareActionSchema = z.object({
+  requestedDate: z.string().min(1, "Date is required"),
+  requestedShares: z.coerce.number({ invalid_type_error: "Must be a number" }).positive("Must be positive"),
+});
+type ShareActionFormValues = z.infer<typeof shareActionSchema>;
+
+const DetailRow: FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
   <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
     <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
     <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{value}</span>
@@ -42,7 +51,7 @@ const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label,
 
 type ActionDialog = "additionalShares" | "redeemShares" | "close" | null;
 
-const ShareAccountDetailPage = () => {
+const ShareAccountDetailPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const accountId = id ? Number(id) : undefined;
@@ -52,7 +61,16 @@ const ShareAccountDetailPage = () => {
 
   const [actionDialog, setActionDialog] = useState<ActionDialog>(null);
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
-  const [dialogValues, setDialogValues] = useState({ requestedDate: "", requestedShares: "" });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ShareActionFormValues>({
+    resolver: zodResolver(shareActionSchema),
+    defaultValues: { requestedDate: "", requestedShares: 0 },
+  });
 
   const productId = account?.productId;
   const { data: dividends } = useDividends(productId);
@@ -71,6 +89,26 @@ const ShareAccountDetailPage = () => {
     [accountId, commandMutation, refetch],
   );
 
+  const onSubmitDialog = useCallback(
+    async (values: ShareActionFormValues) => {
+      if (!accountId || !actionDialog) return;
+      const command = actionDialog === "additionalShares" ? "applyAdditionalShares" : "redeemShares";
+      await commandMutation.mutateAsync({
+        accountId,
+        command,
+        payload: {
+          requestedDate: values.requestedDate,
+          requestedShares: values.requestedShares,
+          dateFormat: "dd MMMM yyyy",
+          locale: "en",
+        },
+      });
+      refetch();
+      setActionDialog(null);
+    },
+    [accountId, actionDialog, commandMutation, refetch],
+  );
+
   const purchasedSharesColumns: ColumnDef<NonNullable<ShareAccount["purchasedShares"]>[number]>[] = useMemo(
     () => [
       {
@@ -81,7 +119,7 @@ const ShareAccountDetailPage = () => {
       {
         key: "totalShares",
         header: "Shares",
-        accessorFn: (row) => row.totalShares?.toLocaleString() ?? "—",
+        accessorFn: (row) => row.totalShares?.toLocaleString() ?? "\u2014",
       },
       {
         key: "unitPrice",
@@ -178,7 +216,7 @@ const ShareAccountDetailPage = () => {
     <div className="max-w-5xl m-auto space-y-6">
       <PageHeader
         title={`Share Account #${account.accountNo}`}
-        description={`${account.clientName} — ${account.productName}`}
+        description={`${account.clientName} \u2014 ${account.productName}`}
         actions={
           <>
             <StatusBadge status={statusCode} />
@@ -210,10 +248,10 @@ const ShareAccountDetailPage = () => {
 
             {isActive && (
               <>
-                <Button onClick={() => setActionDialog("additionalShares")}>
+                <Button onClick={() => { setActionDialog("additionalShares"); reset(); }}>
                   <Plus className="mr-2 h-4 w-4" /> Apply Additional Shares
                 </Button>
-                <Button variant="outline" onClick={() => setActionDialog("redeemShares")}>
+                <Button variant="outline" onClick={() => { setActionDialog("redeemShares"); reset(); }}>
                   <XCircle className="mr-2 h-4 w-4" /> Redeem Shares
                 </Button>
                 <Button variant="destructive" onClick={() => setActionDialog("close")}>
@@ -225,24 +263,34 @@ const ShareAccountDetailPage = () => {
         }
       />
 
+      {commandMutation.isError && (
+        <ErrorState
+          title={`Failed to ${actionDialog === "additionalShares" ? "apply shares" : actionDialog === "redeemShares" ? "redeem shares" : "perform action"}`}
+          message={
+            commandMutation.error instanceof Error ? commandMutation.error.message : "An unexpected error occurred."
+          }
+          onRetry={() => commandMutation.reset()}
+        />
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Account Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <DetailRow label="Client" value={account.clientName ?? "—"} />
-            <DetailRow label="Product" value={account.productName ?? "—"} />
-            <DetailRow label="External ID" value={account.externalId ?? "—"} />
+            <DetailRow label="Client" value={account.clientName ?? "\u2014"} />
+            <DetailRow label="Product" value={account.productName ?? "\u2014"} />
+            <DetailRow label="External ID" value={account.externalId ?? "\u2014"} />
             <DetailRow
               label="Savings Account"
-              value={account.savingsAccountId ? `#${account.savingsAccountId}` : "—"}
+              value={account.savingsAccountId ? `#${account.savingsAccountId}` : "\u2014"}
             />
             <DetailRow
               label="Total Shares"
               value={account.summary?.totalShares?.toLocaleString() ?? "0"}
             />
-            <DetailRow label="Currency" value={account.currency?.displaySymbol ?? account.currency?.code ?? "—"} />
+            <DetailRow label="Currency" value={account.currency?.displaySymbol ?? account.currency?.code ?? "\u2014"} />
           </CardContent>
         </Card>
 
@@ -398,103 +446,67 @@ const ShareAccountDetailPage = () => {
 
       <Dialog
         open={actionDialog === "additionalShares"}
-        onOpenChange={(open) => { if (!open) { setActionDialog(null); setDialogValues({ requestedDate: "", requestedShares: "" }); } }}
+        onOpenChange={(open) => { if (!open) { setActionDialog(null); reset(); } }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Apply Additional Shares</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="reqDate">Requested Date</Label>
-              <Input
-                id="reqDate"
-                type="date"
-                value={dialogValues.requestedDate}
-                onChange={(e) => setDialogValues((v) => ({ ...v, requestedDate: e.target.value }))}
-              />
+          <form onSubmit={handleSubmit(onSubmitDialog)}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="reqDate">Requested Date</Label>
+                <Input id="reqDate" type="date" {...register("requestedDate")} />
+                {errors.requestedDate && <p className="text-xs text-red-500">{errors.requestedDate.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="reqShares">Requested Shares</Label>
+                <Input id="reqShares" type="number" {...register("requestedShares", { valueAsNumber: true })} />
+                {errors.requestedShares && <p className="text-xs text-red-500">{errors.requestedShares.message}</p>}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="reqShares">Requested Shares</Label>
-              <Input
-                id="reqShares"
-                type="number"
-                value={dialogValues.requestedShares}
-                onChange={(e) => setDialogValues((v) => ({ ...v, requestedShares: e.target.value }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setActionDialog(null); setDialogValues({ requestedDate: "", requestedShares: "" }); }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                handleCommand("applyAdditionalShares", {
-                  requestedDate: dialogValues.requestedDate,
-                  requestedShares: Number(dialogValues.requestedShares),
-                  dateFormat: "dd MMMM yyyy",
-                  locale: "en",
-                });
-                setActionDialog(null);
-                setDialogValues({ requestedDate: "", requestedShares: "" });
-              }}
-              disabled={!dialogValues.requestedShares || !dialogValues.requestedDate}
-            >
-              Submit
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => { setActionDialog(null); reset(); }}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={commandMutation.isPending}>
+                Submit
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
       <Dialog
         open={actionDialog === "redeemShares"}
-        onOpenChange={(open) => { if (!open) { setActionDialog(null); setDialogValues({ requestedDate: "", requestedShares: "" }); } }}
+        onOpenChange={(open) => { if (!open) { setActionDialog(null); reset(); } }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Redeem Shares</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="redeemDate">Requested Date</Label>
-              <Input
-                id="redeemDate"
-                type="date"
-                value={dialogValues.requestedDate}
-                onChange={(e) => setDialogValues((v) => ({ ...v, requestedDate: e.target.value }))}
-              />
+          <form onSubmit={handleSubmit(onSubmitDialog)}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="redeemDate">Requested Date</Label>
+                <Input id="redeemDate" type="date" {...register("requestedDate")} />
+                {errors.requestedDate && <p className="text-xs text-red-500">{errors.requestedDate.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="redeemShares">Requested Shares</Label>
+                <Input id="redeemShares" type="number" {...register("requestedShares", { valueAsNumber: true })} />
+                {errors.requestedShares && <p className="text-xs text-red-500">{errors.requestedShares.message}</p>}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="redeemShares">Requested Shares</Label>
-              <Input
-                id="redeemShares"
-                type="number"
-                value={dialogValues.requestedShares}
-                onChange={(e) => setDialogValues((v) => ({ ...v, requestedShares: e.target.value }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setActionDialog(null); setDialogValues({ requestedDate: "", requestedShares: "" }); }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                handleCommand("redeemShares", {
-                  requestedDate: dialogValues.requestedDate,
-                  requestedShares: Number(dialogValues.requestedShares),
-                  dateFormat: "dd MMMM yyyy",
-                  locale: "en",
-                });
-                setActionDialog(null);
-                setDialogValues({ requestedDate: "", requestedShares: "" });
-              }}
-              disabled={!dialogValues.requestedShares || !dialogValues.requestedDate}
-            >
-              Redeem
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => { setActionDialog(null); reset(); }}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={commandMutation.isPending}>
+                Redeem
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

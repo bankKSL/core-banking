@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { useRole, useRolePermissions, useUpdateRolePermissions } from "../hooks/useRoles";
 
 const RoleDetailPage: FC = () => {
@@ -149,6 +150,14 @@ const RoleDetailPage: FC = () => {
           {Object.keys(filteredGroups).length === 0 && <p className="text-sm text-gray-500">No permissions found.</p>}
         </CardContent>
       </Card>
+
+      {updatePermsMutation.isError && (
+        <ErrorState
+          title="Failed to update permissions"
+          message={updatePermsMutation.error instanceof Error ? updatePermsMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => updatePermsMutation.reset()}
+        />
+      )}
     </div>
   );
 };

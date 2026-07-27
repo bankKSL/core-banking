@@ -1,7 +1,9 @@
 import { type FC, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { ArrowLeft, Save, Loader2, Eye, EyeOff, Globe } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +19,18 @@ const SENSITIVE_FIELDS = ["password", "secretKey", "secret_key", "authToken", "a
 const ExternalServicesPage: FC = () => {
   const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState(SERVICE_NAMES[0]);
-  const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set());
 
   const { data: service, isLoading } = useExternalService(selectedService);
+  const updateMutation = useUpdateExternalService();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm<Record<string, string>>({
+    defaultValues: {} as Record<string, string>,
+  });
 
   useEffect(() => {
     if (service?.properties) {
@@ -28,14 +38,10 @@ const ExternalServicesPage: FC = () => {
       service.properties.forEach((p) => {
         values[p.name] = p.value ?? "";
       });
-      setFormValues(values);
+      reset(values);
       setVisibleFields(new Set());
     }
-  }, [service]);
-
-  const handleChange = (name: string, value: string) => {
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-  };
+  }, [service, reset]);
 
   const toggleVisibility = (name: string) => {
     setVisibleFields((prev) => {
@@ -46,16 +52,16 @@ const ExternalServicesPage: FC = () => {
     });
   };
 
-  const updateMutation = useUpdateExternalService();
+  const isSensitive = (name: string) => SENSITIVE_FIELDS.some((f) => name.toLowerCase().includes(f.toLowerCase()));
 
-  const handleSave = async () => {
+  const onSubmit = async (values: Record<string, string>) => {
     await updateMutation.mutateAsync({
       serviceName: selectedService,
-      payload: formValues,
+      payload: values,
     });
   };
 
-  const isSensitive = (name: string) => SENSITIVE_FIELDS.some((f) => name.toLowerCase().includes(f.toLowerCase()));
+  const properties = service?.properties ?? [];
 
   return (
     <div className="max-w-4xl m-auto space-y-6">
@@ -69,87 +75,97 @@ const ExternalServicesPage: FC = () => {
           </Button>
         }
       />
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Service Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Service</Label>
-            <Select value={selectedService} onValueChange={setSelectedService}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SERVICE_NAMES.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
+
+      {updateMutation.isError && (
+        <ErrorState
+          title="Failed to save configuration"
+          message={updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => updateMutation.reset()}
+        />
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Service Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Service</Label>
+              <Select value={selectedService} onValueChange={setSelectedService}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SERVICE_NAMES.map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {Object.keys(formValues).length === 0 && (
-                <p className="text-sm text-gray-500">Select a service to view its configuration.</p>
-              )}
-              {Object.entries(formValues).map(([name, value]) => {
-                const sensitive = isSensitive(name);
-                const visible = visibleFields.has(name);
-                return (
-                  <div key={name}>
-                    <Label htmlFor={`field-${name}`}>
-                      {name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id={`field-${name}`}
-                        type={sensitive && !visible ? "password" : "text"}
-                        value={value}
-                        onChange={(e) => handleChange(name, e.target.value)}
-                      />
-                      {sensitive && (
-                        <button
-                          type="button"
-                          onClick={() => toggleVisibility(name)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {properties.length === 0 && (
+                  <p className="text-sm text-gray-500">Select a service to view its configuration.</p>
+                )}
+                {properties.map((p) => {
+                  const sensitive = isSensitive(p.name);
+                  const visible = visibleFields.has(p.name);
+                  return (
+                    <div key={p.name}>
+                      <Label htmlFor={`field-${p.name}`}>
+                        {p.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id={`field-${p.name}`}
+                          type={sensitive && !visible ? "password" : "text"}
+                          {...register(p.name)}
+                        />
+                        {sensitive && (
+                          <button
+                            type="button"
+                            onClick={() => toggleVisibility(p.name)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
 
-          {Object.keys(formValues).length > 0 && (
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={handleSave}
-                disabled={updateMutation.isPending}
-                className="bg-[#D32F2F] hover:bg-red-700"
-              >
-                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Save className="mr-2 h-4 w-4" />
-                Save Configuration
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {properties.length > 0 && (
+              <div className="flex justify-end pt-2">
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  className="bg-[#D32F2F] hover:bg-red-700"
+                >
+                  {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Configuration
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </form>
     </div>
   );
 };

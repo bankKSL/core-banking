@@ -1,7 +1,12 @@
-import React, { useState, useCallback, useMemo } from "react";
+import { type FC, useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2, Plus, X } from "lucide-react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Loader2, Plus, X, Save } from "lucide-react";
+import { z } from "zod";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,17 +14,29 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ErrorState } from "@/components/shared/ErrorState";
 import { useReport, useReportTemplate, useCreateReport, useUpdateReport } from "../hooks/useReports";
 
-interface ParameterEntry {
-  parameterName: string;
-  parameterType: string;
-  selectOne: boolean;
-  reportParameterName: string;
-}
+const reportFormSchema = z.object({
+  reportName: z.string().min(1, "Report name is required"),
+  reportType: z.string(),
+  reportSubType: z.string(),
+  reportCategory: z.string(),
+  description: z.string(),
+  reportSql: z.string(),
+  useReport: z.boolean(),
+  parameters: z.array(
+    z.object({
+      parameterName: z.string(),
+      parameterType: z.string(),
+      selectOne: z.boolean(),
+      reportParameterName: z.string(),
+    }),
+  ),
+});
 
-const ReportFormPage: React.FC = () => {
+type ReportFormValues = z.infer<typeof reportFormSchema>;
+
+const ReportFormPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -27,105 +44,96 @@ const ReportFormPage: React.FC = () => {
   const { data: template, isLoading: isTemplateLoading } = useReportTemplate();
   const { data: existingReport, isLoading: isReportLoading } = useReport(id ? Number(id) : undefined);
 
-  const [reportName, setReportName] = useState("");
-  const [reportType, setReportType] = useState("");
-  const [reportSubType, setReportSubType] = useState("");
-  const [reportCategory, setReportCategory] = useState("");
-  const [description, setDescription] = useState("");
-  const [reportSql, setReportSql] = useState("");
-  const [reportActive, setReportActive] = useState(false);
-  const [parameters, setParameters] = useState<ParameterEntry[]>([]);
-  const [mutationError, setMutationError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<ReportFormValues>({
+    resolver: zodResolver(reportFormSchema),
+    defaultValues: {
+      reportName: "",
+      reportType: "",
+      reportSubType: "",
+      reportCategory: "",
+      description: "",
+      reportSql: "",
+      useReport: false,
+      parameters: [],
+    },
+  });
 
-  const isLoaded = !!existingReport;
-  const resolvedReportName = isLoaded ? (existingReport?.reportName ?? "") : reportName;
-  const resolvedReportType = isLoaded ? (existingReport?.reportType ?? "") : reportType;
-  const resolvedReportSubType = isLoaded ? (existingReport?.reportSubType ?? "") : reportSubType;
-  const resolvedReportCategory = isLoaded ? (existingReport?.reportCategory ?? "") : reportCategory;
-  const resolvedDescription = isLoaded ? (existingReport?.description ?? "") : description;
-  const resolvedReportSql = isLoaded ? (existingReport?.reportSql ?? "") : reportSql;
-  const resolvedUseReport = isLoaded ? (existingReport?.useReport ?? false) : reportActive;
-  const resolvedParameters: ParameterEntry[] = useMemo(
-    () =>
-      isLoaded
-        ? (existingReport?.reportParameters?.map((p) => ({
+  const { fields, append, remove } = useFieldArray({ control, name: "parameters" });
+
+  useEffect(() => {
+    if (existingReport) {
+      reset({
+        reportName: existingReport.reportName ?? "",
+        reportType: existingReport.reportType ?? "",
+        reportSubType: existingReport.reportSubType ?? "",
+        reportCategory: existingReport.reportCategory ?? "",
+        description: existingReport.description ?? "",
+        reportSql: existingReport.reportSql ?? "",
+        useReport: existingReport.useReport ?? false,
+        parameters:
+          existingReport.reportParameters?.map((p) => ({
             parameterName: p.parameterName,
             parameterType: p.parameterType,
             selectOne: p.selectOne,
             reportParameterName: p.reportParameterName,
-          })) ?? [])
-        : parameters,
-    [isLoaded, existingReport, parameters],
-  );
+          })) ?? [],
+      });
+    }
+  }, [existingReport, reset]);
 
   const createMutation = useCreateReport();
   const updateMutation = useUpdateReport();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isLoaded = !!existingReport;
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setMutationError(null);
-      try {
-        const payload: Record<string, unknown> = {
-          reportName: resolvedReportName,
-          reportType: resolvedReportType,
-          reportSubType: resolvedReportSubType,
-          reportCategory: resolvedReportCategory,
-          description: resolvedDescription,
-          reportSql: resolvedReportSql,
-          useReport: resolvedUseReport,
-          reportParameters: resolvedParameters.map((p) => ({
-            parameterName: p.parameterName,
-            parameterType: p.parameterType,
-            selectOne: p.selectOne,
-            reportParameterName: p.reportParameterName,
-          })),
-        };
+  const reportName = watch("reportName");
+  const canSave = !isSubmitting && reportName.trim().length > 0;
 
-        if (isEdit) {
-          await updateMutation.mutateAsync({ id: Number(id), payload });
-        } else {
-          await createMutation.mutateAsync(payload);
-        }
-        navigate("/reports");
-      } catch (err: unknown) {
-        const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-        const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save report.";
-        setMutationError(msg);
+  const onSubmit = useCallback(
+    async (formValues: ReportFormValues) => {
+      const payload: Record<string, unknown> = {
+        reportName: formValues.reportName,
+        reportType: formValues.reportType,
+        reportSubType: formValues.reportSubType,
+        reportCategory: formValues.reportCategory,
+        description: formValues.description,
+        reportSql: formValues.reportSql,
+        useReport: formValues.useReport,
+        reportParameters: formValues.parameters.map((p) => ({
+          parameterName: p.parameterName,
+          parameterType: p.parameterType,
+          selectOne: p.selectOne,
+          reportParameterName: p.reportParameterName,
+        })),
+      };
+
+      if (isEdit) {
+        await updateMutation.mutateAsync({ id: Number(id), payload });
+      } else {
+        await createMutation.mutateAsync(payload);
       }
+      navigate("/reports");
     },
-    [resolvedReportName, resolvedReportType, resolvedReportSubType, resolvedReportCategory, resolvedDescription, resolvedReportSql, resolvedUseReport, resolvedParameters, isEdit, id, createMutation, updateMutation, navigate],
+    [isEdit, id, createMutation, updateMutation, navigate],
   );
-
-  const addParameter = useCallback(() => {
-    setParameters((prev) => [
-      ...prev,
-      { parameterName: "", parameterType: "", selectOne: false, reportParameterName: "" },
-    ]);
-  }, []);
-
-  const removeParameter = useCallback((index: number) => {
-    setParameters((prev) => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const updateParameter = useCallback((index: number, field: keyof ParameterEntry, value: unknown) => {
-    setParameters((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, [field]: value } : p)),
-    );
-  }, []);
 
   const isLoading = isTemplateLoading || isReportLoading;
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6 animate-pulse">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96" />
+      <div className="p-6 max-w-4xl m-auto space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
         <div className="space-y-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 dark:bg-gray-700 rounded-md" />
+            <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
       </div>
@@ -144,10 +152,23 @@ const ReportFormPage: React.FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit}>
-        {mutationError && (
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {(createMutation.isError || updateMutation.isError) && (
           <div className="mb-6">
-            <ErrorState message={mutationError} />
+            <ErrorState
+              title="Failed to save report"
+              message={
+                createMutation.error instanceof Error
+                  ? createMutation.error.message
+                  : updateMutation.error instanceof Error
+                    ? updateMutation.error.message
+                    : "An unexpected error occurred."
+              }
+              onRetry={() => {
+                createMutation.reset();
+                updateMutation.reset();
+              }}
+            />
           </div>
         )}
 
@@ -160,72 +181,78 @@ const ReportFormPage: React.FC = () => {
               <Label htmlFor="reportName">Report Name *</Label>
               <Input
                 id="reportName"
-                value={resolvedReportName}
-                onChange={(e) => { if (!isLoaded) setReportName(e.target.value); }}
+                {...register("reportName")}
                 placeholder="e.g. Client Loan Summary"
-                required
+                disabled={isLoaded}
               />
+              {errors.reportName && <p className="text-xs text-red-500">{errors.reportName.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Report Type</Label>
-                <Select
-                  value={resolvedReportType}
-                  onValueChange={(v) => { if (!isLoaded) setReportType(v); }}
-                  disabled={isLoaded}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(template?.paramTypes ?? []).map((opt) => (
-                      <SelectItem key={opt.id} value={String(opt.id)}>
-                        {opt.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="reportType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange} disabled={isLoaded}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.paramTypes ?? []).map((opt) => (
+                          <SelectItem key={opt.id} value={String(opt.id)}>
+                            {opt.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
 
               <div>
                 <Label>Report Sub Type</Label>
-                <Select
-                  value={resolvedReportSubType}
-                  onValueChange={(v) => { if (!isLoaded) setReportSubType(v); }}
-                  disabled={isLoaded}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select sub type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(template?.reportSubTypes ?? []).map((opt) => (
-                      <SelectItem key={opt.id} value={String(opt.id)}>
-                        {opt.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="reportSubType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange} disabled={isLoaded}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sub type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.reportSubTypes ?? []).map((opt) => (
+                          <SelectItem key={opt.id} value={String(opt.id)}>
+                            {opt.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
 
               <div>
                 <Label>Report Category</Label>
-                <Select
-                  value={resolvedReportCategory}
-                  onValueChange={(v) => { if (!isLoaded) setReportCategory(v); }}
-                  disabled={isLoaded}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(template?.reportCategories ?? []).map((opt) => (
-                      <SelectItem key={opt.id} value={String(opt.id)}>
-                        {opt.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="reportCategory"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange} disabled={isLoaded}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.reportCategories ?? []).map((opt) => (
+                          <SelectItem key={opt.id} value={String(opt.id)}>
+                            {opt.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
             </div>
 
@@ -233,9 +260,9 @@ const ReportFormPage: React.FC = () => {
               <Label htmlFor="description">Description</Label>
               <Input
                 id="description"
-                value={resolvedDescription}
-                onChange={(e) => { if (!isLoaded) setDescription(e.target.value); }}
+                {...register("description")}
                 placeholder="Brief description of the report"
+                disabled={isLoaded}
               />
             </div>
 
@@ -243,19 +270,20 @@ const ReportFormPage: React.FC = () => {
               <Label htmlFor="reportSql">Report SQL</Label>
               <Textarea
                 id="reportSql"
-                value={resolvedReportSql}
-                onChange={(e) => { if (!isLoaded) setReportSql(e.target.value); }}
+                {...register("reportSql")}
                 placeholder="SELECT ..."
                 rows={6}
+                disabled={isLoaded}
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <Checkbox
-                id="useReport"
-                checked={resolvedUseReport}
-                onCheckedChange={(checked) => { if (!isLoaded) setReportActive(!!checked); }}
-                disabled={isLoaded}
+              <Controller
+                name="useReport"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox id="useReport" checked={field.value} onCheckedChange={field.onChange} disabled={isLoaded} />
+                )}
               />
               <Label htmlFor="useReport">Active</Label>
             </div>
@@ -266,72 +294,84 @@ const ReportFormPage: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Parameters</CardTitle>
             {!isLoaded && (
-              <Button type="button" variant="outline" size="sm" onClick={addParameter}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  append({ parameterName: "", parameterType: "", selectOne: false, reportParameterName: "" })
+                }
+              >
                 <Plus className="mr-1 h-4 w-4" /> Add Parameter
               </Button>
             )}
           </CardHeader>
           <CardContent className="space-y-4">
-            {resolvedParameters.length === 0 && (
+            {fields.length === 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400">No parameters defined.</p>
             )}
-            {resolvedParameters.map((param, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 border rounded-md">
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex items-start gap-3 p-3 border rounded-md">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div>
                     <Label>Parameter Name</Label>
                     <Input
-                      value={param.parameterName}
-                      onChange={(e) => updateParameter(index, "parameterName", e.target.value)}
+                      {...register(`parameters.${index}.parameterName`)}
                       disabled={isLoaded}
                       placeholder="Name"
                     />
                   </div>
                   <div>
                     <Label>Parameter Type</Label>
-                    <Select
-                      value={param.parameterType}
-                      onValueChange={(v) => updateParameter(index, "parameterType", v)}
-                      disabled={isLoaded}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(template?.paramTypes ?? []).map((opt) => (
-                          <SelectItem key={opt.id} value={String(opt.id)}>
-                            {opt.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name={`parameters.${index}.parameterType`}
+                      control={control}
+                      render={({ field: controllerField }) => (
+                        <Select
+                          value={controllerField.value}
+                          onValueChange={controllerField.onChange}
+                          disabled={isLoaded}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(template?.paramTypes ?? []).map((opt) => (
+                              <SelectItem key={opt.id} value={String(opt.id)}>
+                                {opt.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
                   <div>
                     <Label>Report Param Name</Label>
                     <Input
-                      value={param.reportParameterName}
-                      onChange={(e) => updateParameter(index, "reportParameterName", e.target.value)}
+                      {...register(`parameters.${index}.reportParameterName`)}
                       disabled={isLoaded}
                       placeholder="Report param"
                     />
                   </div>
                   <div className="flex items-end gap-2">
                     <div className="flex items-center gap-2 pb-2">
-                      <Checkbox
-                        id={`selectOne-${index}`}
-                        checked={param.selectOne}
-                        onCheckedChange={(checked) => updateParameter(index, "selectOne", !!checked)}
-                        disabled={isLoaded}
+                      <Controller
+                        name={`parameters.${index}.selectOne`}
+                        control={control}
+                        render={({ field: controllerField }) => (
+                          <Checkbox
+                            id={`selectOne-${index}`}
+                            checked={controllerField.value}
+                            onCheckedChange={controllerField.onChange}
+                            disabled={isLoaded}
+                          />
+                        )}
                       />
                       <Label htmlFor={`selectOne-${index}`}>Select One</Label>
                     </div>
                     {!isLoaded && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeParameter(index)}
-                      >
+                      <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>
                         <X className="h-4 w-4 text-red-500" />
                       </Button>
                     )}
@@ -346,7 +386,7 @@ const ReportFormPage: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => navigate("/reports")}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting || !resolvedReportName}>
+          <Button type="submit" disabled={!canSave}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…

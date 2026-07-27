@@ -1,6 +1,9 @@
 import { type FC, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Pencil, Trash2, Lock, User, Mail, Building2, Shield } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ArrowLeft, Pencil, Trash2, Lock, User, Mail, Building2, Shield, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +11,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUser, useDeleteUser, useChangePassword } from "../hooks/useUsers";
+
+const passwordSchema = z
+  .object({
+    newPassword: z.string().min(1, "Password is required"),
+    repeatPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((data) => data.newPassword === data.repeatPassword, {
+    message: "Passwords do not match",
+    path: ["repeatPassword"],
+  });
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({ icon, label, value }) => (
   <div className="flex items-start gap-3 py-2">
@@ -29,19 +44,26 @@ const UserDetailPage: FC = () => {
   const deleteMutation = useDeleteUser();
   const changePwdMutation = useChangePassword();
   const [pwdDialogOpen, setPwdDialogOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const handleChangePassword = async () => {
-    if (!user || !newPassword || newPassword !== repeatPassword) return;
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { newPassword: "", repeatPassword: "" },
+  });
+
+  const onSubmit = async (values: PasswordFormValues) => {
+    if (!user) return;
     await changePwdMutation.mutateAsync({
       userId: user.id,
-      payload: { password: newPassword, repeatPassword },
+      payload: { password: values.newPassword, repeatPassword: values.repeatPassword },
     });
     setPwdDialogOpen(false);
-    setNewPassword("");
-    setRepeatPassword("");
+    reset();
   };
 
   if (isLoading)
@@ -71,7 +93,7 @@ const UserDetailPage: FC = () => {
             <Badge variant={user.isActive !== false ? "success" : "error"} size="sm">
               {user.isActive !== false ? "Active" : "Disabled"}
             </Badge>
-            <Button variant="outline" size="sm" onClick={() => setPwdDialogOpen(true)}>
+            <Button variant="outline" size="sm" onClick={() => { setPwdDialogOpen(true); reset(); }}>
               <Lock className="mr-1 h-4 w-4" />
               Change Password
             </Button>
@@ -102,13 +124,13 @@ const UserDetailPage: FC = () => {
             <InfoRow icon={<User className="h-4 w-4" />} label="Username" value={user.username} />
             <InfoRow icon={<User className="h-4 w-4" />} label="First Name" value={user.firstname} />
             <InfoRow icon={<User className="h-4 w-4" />} label="Last Name" value={user.lastname} />
-            <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={user.email ?? "—"} />
+            <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={user.email ?? "\u2014"} />
             <InfoRow
               icon={<Building2 className="h-4 w-4" />}
               label="Office"
               value={user.officeName ?? `#${user.officeId}`}
             />
-            <InfoRow icon={<Shield className="h-4 w-4" />} label="Staff ID" value={user.staffId ?? "—"} />
+            <InfoRow icon={<Shield className="h-4 w-4" />} label="Staff ID" value={user.staffId ?? "\u2014"} />
           </CardContent>
         </Card>
         <Card>
@@ -122,7 +144,7 @@ const UserDetailPage: FC = () => {
             <InfoRow
               icon={<Shield className="h-4 w-4" />}
               label="Roles"
-              value={user?.roles?.map((r) => r.name).join(", ") || "—"}
+              value={user?.roles?.map((r) => r.name).join(", ") || "\u2014"}
             />
             <InfoRow
               icon={<Lock className="h-4 w-4" />}
@@ -143,39 +165,38 @@ const UserDetailPage: FC = () => {
         </Card>
       </div>
 
-      <Dialog open={pwdDialogOpen} onOpenChange={setPwdDialogOpen}>
+      {changePwdMutation.isError && (
+        <ErrorState
+          title="Failed to change password"
+          message={
+            changePwdMutation.error instanceof Error ? changePwdMutation.error.message : "An unexpected error occurred."
+          }
+          onRetry={() => changePwdMutation.reset()}
+        />
+      )}
+
+      <Dialog open={pwdDialogOpen} onOpenChange={(o) => { if (!o) { setPwdDialogOpen(false); reset(); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>Set a new password for {user.username}.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
+              <Input id="newPassword" type="password" {...register("newPassword")} />
+              {errors.newPassword && <p className="text-xs text-red-500">{errors.newPassword.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="repeatPassword">Repeat Password</Label>
-              <Input
-                id="repeatPassword"
-                type="password"
-                value={repeatPassword}
-                onChange={(e) => setRepeatPassword(e.target.value)}
-              />
+              <Input id="repeatPassword" type="password" {...register("repeatPassword")} />
+              {errors.repeatPassword && <p className="text-xs text-red-500">{errors.repeatPassword.message}</p>}
             </div>
-            <Button
-              onClick={handleChangePassword}
-              disabled={!newPassword || newPassword !== repeatPassword || changePwdMutation.isPending}
-            >
-              {changePwdMutation.isPending && <span className="mr-2 animate-spin">⏳</span>}
+            <Button type="submit" disabled={changePwdMutation.isPending}>
+              {changePwdMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Change Password
             </Button>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 

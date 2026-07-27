@@ -1,5 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { type FC, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Plus, ThumbsUp, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +17,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useShareProducts, useDividends, useCreateDividend, useApproveDividend, useDeleteDividend } from "../hooks/useShares";
 import type { Dividend } from "../api/shares";
+
+const createDividendSchema = z.object({
+  dividendPeriodStartDate: z.string().min(1, "Start date is required"),
+  dividendPeriodEndDate: z.string().min(1, "End date is required"),
+  amount: z.string().min(1, "Amount is required"),
+});
+
+type CreateDividendFormValues = z.infer<typeof createDividendSchema>;
 
 function formatAmount(amount?: number | null): string {
   if (amount == null) return "—";
@@ -33,7 +44,7 @@ function formatDate(dateStr?: string | null): string {
   }
 }
 
-const DividendListPage = () => {
+const DividendListPage: FC = () => {
   const navigate = useNavigate();
   const { data: products } = useShareProducts();
   const [selectedProductId, setSelectedProductId] = useState<string>("");
@@ -46,14 +57,19 @@ const DividendListPage = () => {
   const deleteMutation = useDeleteDividend();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [createForm, setCreateForm] = useState({
-    dividendPeriodStartDate: "",
-    dividendPeriodEndDate: "",
-    amount: "",
-  });
-
   const [approveTarget, setApproveTarget] = useState<Dividend | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Dividend | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isValid },
+  } = useForm<CreateDividendFormValues>({
+    resolver: zodResolver(createDividendSchema),
+    defaultValues: { dividendPeriodStartDate: "", dividendPeriodEndDate: "", amount: "" },
+    mode: "onChange",
+  });
 
   const dividendList = useMemo(() => dividends ?? [], [dividends]);
 
@@ -103,25 +119,28 @@ const DividendListPage = () => {
     [],
   );
 
-  const handleCreateDividend = useCallback(async () => {
-    if (!productIdNum) return;
-    try {
-      await createMutation.mutateAsync({
-        productId: productIdNum,
-        payload: {
-          dividendPeriodStartDate: createForm.dividendPeriodStartDate,
-          dividendPeriodEndDate: createForm.dividendPeriodEndDate,
-          amount: Number(createForm.amount),
-          dateFormat: "dd MMMM yyyy",
-          locale: "en",
-        },
-      });
-      setShowCreateDialog(false);
-      setCreateForm({ dividendPeriodStartDate: "", dividendPeriodEndDate: "", amount: "" });
-    } catch {
-      // handled by mutation
-    }
-  }, [productIdNum, createForm, createMutation]);
+  const onCreateSubmit = useCallback(
+    async (values: CreateDividendFormValues) => {
+      if (!productIdNum) return;
+      try {
+        await createMutation.mutateAsync({
+          productId: productIdNum,
+          payload: {
+            dividendPeriodStartDate: values.dividendPeriodStartDate,
+            dividendPeriodEndDate: values.dividendPeriodEndDate,
+            amount: Number(values.amount),
+            dateFormat: "dd MMMM yyyy",
+            locale: "en",
+          },
+        });
+        setShowCreateDialog(false);
+        reset();
+      } catch {
+        // handled by mutation
+      }
+    },
+    [productIdNum, createMutation, reset],
+  );
 
   const handleApprove = useCallback(async () => {
     if (!approveTarget || !productIdNum) return;
@@ -177,7 +196,7 @@ const DividendListPage = () => {
               </Select>
             </div>
             {selectedProductId && (
-              <Button onClick={() => setShowCreateDialog(true)}>
+              <Button onClick={() => { setShowCreateDialog(true); reset(); }}>
                 <Plus className="mr-2 h-4 w-4" /> Create Dividend
               </Button>
             )}
@@ -214,44 +233,30 @@ const DividendListPage = () => {
           <DialogHeader>
             <DialogTitle>Create Dividend</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="periodStart">Period Start Date</Label>
-              <Input
-                id="periodStart"
-                type="date"
-                value={createForm.dividendPeriodStartDate}
-                onChange={(e) => setCreateForm((v) => ({ ...v, dividendPeriodStartDate: e.target.value }))}
-              />
+          <form onSubmit={handleSubmit(onCreateSubmit)}>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="periodStart">Period Start Date</Label>
+                <Input id="periodStart" type="date" {...register("dividendPeriodStartDate")} />
+              </div>
+              <div>
+                <Label htmlFor="periodEnd">Period End Date</Label>
+                <Input id="periodEnd" type="date" {...register("dividendPeriodEndDate")} />
+              </div>
+              <div>
+                <Label htmlFor="amount">Amount</Label>
+                <Input id="amount" type="number" step="0.01" {...register("amount")} />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="periodEnd">Period End Date</Label>
-              <Input
-                id="periodEnd"
-                type="date"
-                value={createForm.dividendPeriodEndDate}
-                onChange={(e) => setCreateForm((v) => ({ ...v, dividendPeriodEndDate: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                value={createForm.amount}
-                onChange={(e) => setCreateForm((v) => ({ ...v, amount: e.target.value }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateDividend} disabled={!createForm.amount || !createForm.dividendPeriodStartDate || !createForm.dividendPeriodEndDate}>
-              Create
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!isValid || createMutation.isPending}>
+                {createMutation.isPending ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

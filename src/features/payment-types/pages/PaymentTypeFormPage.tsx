@@ -1,99 +1,101 @@
-import React, { useState, useCallback } from "react";
+import { type FC, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ErrorState } from "@/components/shared/ErrorState";
 import { usePaymentType, useCreatePaymentType, useUpdatePaymentType } from "../hooks/usePaymentTypes";
 
-const PaymentTypeFormPage: React.FC = () => {
+const paymentTypeFormSchema = z.object({
+  name: z.string().min(1, "Name is required."),
+  description: z.string().optional(),
+  isCashPayment: z.boolean(),
+  position: z.number(),
+  codeName: z.string().optional(),
+});
+
+type PaymentTypeFormValues = z.infer<typeof paymentTypeFormSchema>;
+
+const PaymentTypeFormPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
 
-  const { data: existing, isLoading: isExistingLoading, isError } = usePaymentType(
+  const { data: existing, isLoading: isExistingLoading, isError: isExistingError } = usePaymentType(
     id ? Number(id) : undefined,
   );
-
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isCashPayment, setIsCashPayment] = useState(false);
-  const [position, setPosition] = useState(0);
-  const [codeName, setCodeName] = useState("");
-  const [isSystemDefined, setIsSystemDefined] = useState(false);
-  const [initialized, setInitialized] = useState(false);
-  const [mutationError, setMutationError] = useState<string | null>(null);
-
-  if (existing && !initialized) {
-    setName(existing.name ?? "");
-    setDescription(existing.description ?? "");
-    setIsCashPayment(existing.isCashPayment);
-    setPosition(existing.position);
-    setCodeName(existing.codeName ?? "");
-    setIsSystemDefined(existing.isSystemDefined);
-    setInitialized(true);
-  }
 
   const createMutation = useCreatePaymentType();
   const updateMutation = useUpdatePaymentType();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setMutationError(null);
-
-      if (!name.trim()) {
-        setMutationError("Name is required.");
-        return;
-      }
-
-      try {
-        const payload = {
-          name: name.trim(),
-          description: description.trim() || undefined,
-          isCashPayment,
-          position,
-          codeName: codeName.trim() || undefined,
-        };
-
-        if (isEdit) {
-          await updateMutation.mutateAsync({ id: Number(id), payload });
-        } else {
-          await createMutation.mutateAsync(payload);
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<PaymentTypeFormValues>({
+    resolver: zodResolver(paymentTypeFormSchema),
+    values: existing
+      ? {
+          name: existing.name ?? "",
+          description: existing.description ?? "",
+          isCashPayment: existing.isCashPayment,
+          position: existing.position,
+          codeName: existing.codeName ?? "",
         }
-        navigate("/payment-types");
-      } catch (err: unknown) {
-        const error = err as {
-          response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } };
-        };
-        const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save payment type.";
-        setMutationError(msg);
-      }
+      : undefined,
+    defaultValues: {
+      name: "",
+      description: "",
+      isCashPayment: false,
+      position: 0,
+      codeName: "",
     },
-    [name, description, isCashPayment, position, codeName, isEdit, id, createMutation, updateMutation, navigate],
+  });
+
+  const onSubmit = useCallback(
+    async (values: PaymentTypeFormValues) => {
+      const payload = {
+        name: values.name.trim(),
+        description: values.description?.trim() || undefined,
+        isCashPayment: values.isCashPayment,
+        position: values.position,
+        codeName: values.codeName?.trim() || undefined,
+      };
+
+      if (isEdit) {
+        await updateMutation.mutateAsync({ id: Number(id), payload });
+      } else {
+        await createMutation.mutateAsync(payload);
+      }
+      navigate("/payment-types");
+    },
+    [isEdit, id, createMutation, updateMutation, navigate],
   );
 
   if (isExistingLoading) {
     return (
-      <div className="p-6 max-w-2xl m-auto space-y-6 animate-pulse">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64" />
+      <div className="p-6 max-w-2xl m-auto space-y-6">
+        <Skeleton className="h-8 w-64" />
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 dark:bg-gray-700 rounded-md" />
+            <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
       </div>
     );
   }
 
-  if (isError) {
+  if (isExistingError) {
     return (
       <div className="p-6 max-w-2xl m-auto">
         <PageHeader
@@ -120,40 +122,61 @@ const PaymentTypeFormPage: React.FC = () => {
         }
       />
 
+      {(createMutation.isError || updateMutation.isError) && (
+        <ErrorState
+          title="Failed to save payment type"
+          message={
+            (createMutation.error ?? updateMutation.error) instanceof Error
+              ? (createMutation.error ?? updateMutation.error).message
+              : "An unexpected error occurred."
+          }
+          onRetry={() => {
+            createMutation.reset();
+            updateMutation.reset();
+          }}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{isEdit ? "Edit Payment Type" : "New Payment Type"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">
                 Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name")}
                 placeholder="Enter payment type name"
-                required
               />
+              {errors.name && (
+                <p className="text-xs text-red-500">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Input
                 id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...register("description")}
                 placeholder="Enter description"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <Checkbox
-                id="isCashPayment"
-                checked={isCashPayment}
-                onCheckedChange={(checked) => setIsCashPayment(checked === true)}
+              <Controller
+                name="isCashPayment"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isCashPayment"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                )}
               />
               <Label htmlFor="isCashPayment">Cash Payment</Label>
             </div>
@@ -163,8 +186,7 @@ const PaymentTypeFormPage: React.FC = () => {
               <Input
                 id="position"
                 type="number"
-                value={position}
-                onChange={(e) => setPosition(Number(e.target.value))}
+                {...register("position", { valueAsNumber: true })}
                 placeholder="0"
               />
             </div>
@@ -173,10 +195,9 @@ const PaymentTypeFormPage: React.FC = () => {
               <Label htmlFor="codeName">Code Name</Label>
               <Input
                 id="codeName"
-                value={codeName}
-                onChange={(e) => setCodeName(e.target.value)}
+                {...register("codeName")}
                 placeholder="Enter code name"
-                disabled={isEdit && isSystemDefined}
+                disabled={isEdit && (existing?.isSystemDefined ?? false)}
               />
             </div>
 
@@ -184,18 +205,12 @@ const PaymentTypeFormPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="isSystemDefined"
-                  checked={isSystemDefined}
+                  checked={existing?.isSystemDefined ?? false}
                   disabled
                 />
                 <Label htmlFor="isSystemDefined" className="text-gray-500">
                   System Defined
                 </Label>
-              </div>
-            )}
-
-            {mutationError && (
-              <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
-                {mutationError}
               </div>
             )}
 

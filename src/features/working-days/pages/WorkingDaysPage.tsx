@@ -1,4 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { type FC, useEffect, useCallback } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Save, Loader2, ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,63 +30,79 @@ function parseRruleDays(recurrence: string): Set<string> {
   return new Set(byDayMatch[1].split(","));
 }
 
-function buildRrule(selectedDays: Set<string>): string {
-  const days = DAYS.map((d) => d.value).filter((d) => selectedDays.has(d));
+function buildRrule(selectedDays: string[]): string {
+  const days = DAYS.map((d) => d.value).filter((d) => selectedDays.includes(d));
   if (days.length === 0) return "";
   return `FREQ=WEEKLY;BYDAY=${days.join(",")}`;
 }
 
-const WorkingDaysPage: React.FC = () => {
+const workingDaysSchema = z.object({
+  selectedDays: z.array(z.string()).min(1, "Select at least one working day"),
+  rescheduleTypeId: z.number({ required_error: "Repayment reschedule type is required" }),
+  extendTermDaily: z.boolean(),
+  extendTermHolidays: z.boolean(),
+});
+
+type WorkingDaysFormValues = z.infer<typeof workingDaysSchema>;
+
+const WorkingDaysPage: FC = () => {
   const { data: config, isLoading: isConfigLoading, isError: isConfigError, refetch: refetchConfig } = useWorkingDaysConfig();
   const { data: template, isLoading: isTemplateLoading } = useWorkingDaysTemplate();
   const updateMutation = useUpdateWorkingDays();
 
-  const [selectedDays, setSelectedDays] = useState<Set<string>>(new Set());
-  const [rescheduleTypeId, setRescheduleTypeId] = useState<number | null>(null);
-  const [extendTermDaily, setExtendTermDaily] = useState(false);
-  const [extendTermHolidays, setExtendTermHolidays] = useState(false);
-  const [mutationError, setMutationError] = useState<string | null>(null);
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm<WorkingDaysFormValues>({
+    resolver: zodResolver(workingDaysSchema),
+    defaultValues: {
+      selectedDays: [],
+      rescheduleTypeId: undefined,
+      extendTermDaily: false,
+      extendTermHolidays: false,
+    },
+  });
 
   useEffect(() => {
     if (!config) return;
-    setSelectedDays(parseRruleDays(config.recurrence));
-    setRescheduleTypeId(config.repaymentRescheduleType?.id ?? null);
-    setExtendTermDaily(config.extendTermForDailyRepayments);
-    setExtendTermHolidays(config.extendTermForRepaymentsOnHolidays);
-  }, [config]);
+    reset({
+      selectedDays: Array.from(parseRruleDays(config.recurrence)),
+      rescheduleTypeId: config.repaymentRescheduleType?.id ?? undefined,
+      extendTermDaily: config.extendTermForDailyRepayments,
+      extendTermHolidays: config.extendTermForRepaymentsOnHolidays,
+    });
+  }, [config, reset]);
+
+  const selectedDays = watch("selectedDays");
 
   const toggleDay = useCallback((day: string) => {
-    setSelectedDays((prev) => {
-      const next = new Set(prev);
-      if (next.has(day)) {
-        next.delete(day);
-      } else {
-        next.add(day);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    if (rescheduleTypeId == null) return;
-    setMutationError(null);
-    try {
-      await updateMutation.mutateAsync({
-        recurrence: buildRrule(selectedDays),
-        repaymentRescheduleType: rescheduleTypeId,
-        extendTermForDailyRepayments: extendTermDaily,
-        extendTermForRepaymentsOnHolidays: extendTermHolidays,
-      });
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg =
-        error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to update working days configuration.";
-      setMutationError(msg);
+    const current = getValues("selectedDays");
+    if (current.includes(day)) {
+      setValue("selectedDays", current.filter((d) => d !== day), { shouldValidate: true });
+    } else {
+      setValue("selectedDays", [...current, day], { shouldValidate: true });
     }
-  }, [selectedDays, rescheduleTypeId, extendTermDaily, extendTermHolidays, updateMutation]);
+  }, [getValues, setValue]);
 
   const isLoading = isConfigLoading || isTemplateLoading;
   const isSaving = updateMutation.isPending;
+
+  const onSubmit = useCallback(
+    async (values: WorkingDaysFormValues) => {
+      await updateMutation.mutateAsync({
+        recurrence: buildRrule(values.selectedDays),
+        repaymentRescheduleType: values.rescheduleTypeId,
+        extendTermForDailyRepayments: values.extendTermDaily,
+        extendTermForRepaymentsOnHolidays: values.extendTermHolidays,
+      });
+    },
+    [updateMutation],
+  );
 
   if (isConfigError) {
     return (
@@ -101,106 +120,130 @@ const WorkingDaysPage: React.FC = () => {
         description="Configure business working days and repayment rescheduling"
       />
 
-      {mutationError && (
-        <div className="mb-6">
-          <ErrorState message={mutationError} />
-        </div>
+      {updateMutation.isError && (
+        <ErrorState
+          title="Failed to update working days"
+          message={updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."}
+          onRetry={() => updateMutation.reset()}
+        />
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Working Days</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-4 w-48" />
-              <div className="flex flex-wrap gap-3">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-24" />
-                ))}
-              </div>
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-8 w-64" />
-            </div>
-          ) : (
-            <>
-              <div>
-                <Label className="mb-3 block">Select Working Days</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Working Days</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-4 w-48" />
                 <div className="flex flex-wrap gap-3">
-                  {DAYS.map((day) => (
-                    <Checkbox
-                      key={day.value}
-                      id={`day-${day.value}`}
-                      label={day.label}
-                      checked={selectedDays.has(day.value)}
-                      onCheckedChange={() => toggleDay(day.value)}
-                    />
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <Skeleton key={i} className="h-8 w-24" />
                   ))}
                 </div>
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-8 w-64" />
+                <Skeleton className="h-8 w-64" />
               </div>
-
-              <Separator />
-
-              <div>
-                <Label htmlFor="reschedule-type">Repayment Reschedule Type</Label>
-                <Select
-                  value={rescheduleTypeId != null ? String(rescheduleTypeId) : ""}
-                  onValueChange={(v) => setRescheduleTypeId(Number(v))}
-                >
-                  <SelectTrigger id="reschedule-type" className="mt-1">
-                    <SelectValue placeholder="Select reschedule type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(template?.repaymentRescheduleOptions ?? []).map((opt) => (
-                      <SelectItem key={opt.id} value={String(opt.id)}>
-                        {opt.value ?? opt.code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <Checkbox
-                  id="extend-daily"
-                  label="Extend term for daily repayments"
-                  checked={extendTermDaily}
-                  onCheckedChange={(checked) => setExtendTermDaily(checked === true)}
-                />
-                <Checkbox
-                  id="extend-holidays"
-                  label="Extend term for repayments on holidays"
-                  checked={extendTermHolidays}
-                  onCheckedChange={(checked) => setExtendTermHolidays(checked === true)}
-                />
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {!isLoading && (
-        <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => refetchConfig()}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Reset
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving || selectedDays.size === 0 || rescheduleTypeId == null}>
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
-              </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> Save Configuration
+                <div>
+                  <Label className="mb-3 block">Select Working Days</Label>
+                  <div className="flex flex-wrap gap-3">
+                    {DAYS.map((day) => (
+                      <Checkbox
+                        key={day.value}
+                        id={`day-${day.value}`}
+                        label={day.label}
+                        checked={selectedDays.includes(day.value)}
+                        onCheckedChange={() => toggleDay(day.value)}
+                      />
+                    ))}
+                  </div>
+                  {errors.selectedDays && <p className="text-xs text-red-500 mt-2">{errors.selectedDays.message}</p>}
+                </div>
+
+                <Separator />
+
+                <div>
+                  <Label htmlFor="reschedule-type">Repayment Reschedule Type</Label>
+                  <Controller
+                    name="rescheduleTypeId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value ? String(field.value) : ""}
+                        onValueChange={(v) => field.onChange(Number(v))}
+                      >
+                        <SelectTrigger id="reschedule-type" className="mt-1">
+                          <SelectValue placeholder="Select reschedule type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(template?.repaymentRescheduleOptions ?? []).map((opt) => (
+                            <SelectItem key={opt.id} value={String(opt.id)}>
+                              {opt.value ?? opt.code}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.rescheduleTypeId && <p className="text-xs text-red-500 mt-1">{errors.rescheduleTypeId.message}</p>}
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <Controller
+                    name="extendTermDaily"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="extend-daily"
+                        label="Extend term for daily repayments"
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="extendTermHolidays"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="extend-holidays"
+                        label="Extend term for repayments on holidays"
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                    )}
+                  />
+                </div>
               </>
             )}
-          </Button>
-        </div>
-      )}
+          </CardContent>
+        </Card>
+
+        {!isLoading && (
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => refetchConfig()}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Reset
+            </Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" /> Save Configuration
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+      </form>
     </div>
   );
 };

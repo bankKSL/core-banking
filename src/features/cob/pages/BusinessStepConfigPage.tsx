@@ -1,5 +1,6 @@
-import { type FC, useState, useEffect } from "react";
+import { type FC, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 import { ArrowLeft, Save, Loader2, GripVertical, ListOrdered, Plus, X, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,12 +16,21 @@ interface OrderedStep {
   order: number;
 }
 
+interface JobFormValues {
+  selectedJob: string;
+}
+
 const BusinessStepConfigPage: FC = () => {
   const navigate = useNavigate();
   const { data: jobNamesData } = useJobNames();
-  const [selectedJob, setSelectedJob] = useState<string>("LOAN_COB");
   const [orderedSteps, setOrderedSteps] = useState<OrderedStep[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+
+  const { control, watch } = useForm<JobFormValues>({
+    defaultValues: { selectedJob: "LOAN_COB" },
+  });
+
+  const selectedJob = watch("selectedJob");
 
   const { data: currentSteps, isLoading: stepsLoading } = useSteps(selectedJob || undefined);
   const { data: availableSteps, isLoading: availableLoading } = useAvailableSteps(selectedJob || undefined);
@@ -51,13 +61,13 @@ const BusinessStepConfigPage: FC = () => {
     setHasChanges(true);
   };
 
-  const addStep = () => {
+  const addStep = useCallback(() => {
     if (unusedSteps.length === 0) return;
     const stepName = unusedSteps[0].stepName;
     const steps = [...orderedSteps, { stepName, order: orderedSteps.length + 1 }];
     setOrderedSteps(steps);
     setHasChanges(true);
-  };
+  }, [orderedSteps, unusedSteps]);
 
   const removeStep = (stepName: string) => {
     const steps = orderedSteps.filter((s) => s.stepName !== stepName).map((s, i) => ({ ...s, order: i + 1 }));
@@ -101,18 +111,24 @@ const BusinessStepConfigPage: FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Select value={selectedJob} onValueChange={setSelectedJob}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select job" />
-              </SelectTrigger>
-              <SelectContent>
-                {(jobNamesData?.businessJobs ?? ["LOAN_COB"]).map((job) => (
-                  <SelectItem key={job} value={job}>
-                    {job}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              control={control}
+              name="selectedJob"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(jobNamesData?.businessJobs ?? ["LOAN_COB"]).map((job) => (
+                      <SelectItem key={job} value={job}>
+                        {job}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           {stepsLoading || availableLoading ? (
@@ -182,11 +198,7 @@ const BusinessStepConfigPage: FC = () => {
                   <button
                     key={step.stepName}
                     type="button"
-                    onClick={() => {
-                      const steps = [...orderedSteps, { stepName: step.stepName, order: orderedSteps.length + 1 }];
-                      setOrderedSteps(steps);
-                      setHasChanges(true);
-                    }}
+                    onClick={() => addStep()}
                     className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-dashed border-gray-300 hover:border-[#D32F2F]/50 hover:text-[#D32F2F] dark:border-gray-600"
                   >
                     <Plus className="h-3 w-3" />

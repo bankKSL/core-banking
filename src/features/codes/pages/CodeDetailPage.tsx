@@ -1,5 +1,8 @@
-import React, { useState, useCallback } from "react";
+import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ArrowLeft, Plus, Pencil, Trash2, Shield } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,13 +26,23 @@ import {
 } from "../hooks/useCodes";
 import type { CodeValue } from "../api/codes";
 
-const CodeDetailPage: React.FC = () => {
+const codeValueSchema = z.object({
+  name: z.string().min(1, "Value name is required"),
+  position: z.string().optional(),
+  description: z.string().optional(),
+  isActive: z.boolean(),
+  isMandatory: z.boolean(),
+});
+
+type CodeValueFormValues = z.infer<typeof codeValueSchema>;
+
+const CodeDetailPage: FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const codeId = id ? Number(id) : undefined;
 
-  const { data: code, isLoading: codeLoading, isError: codeError } = useCode(codeId);
-  const { data: values = [], isLoading: valuesLoading, refetch: refetchValues } = useCodeValues(codeId);
+  const { data: code, isLoading: codeLoading, isError: codeError, refetch: refetchCode } = useCode(codeId);
+  const { data: values = [], isLoading: valuesLoading } = useCodeValues(codeId);
 
   const createValueMutation = useCreateCodeValue(codeId);
   const updateValueMutation = useUpdateCodeValue(codeId);
@@ -39,57 +52,59 @@ const CodeDetailPage: React.FC = () => {
   const [valueDialog, setValueDialog] = useState<{ open: boolean; editValue?: CodeValue }>({ open: false });
   const [deleteTarget, setDeleteTarget] = useState<CodeValue | null>(null);
   const [showDeleteCodeDialog, setShowDeleteCodeDialog] = useState(false);
-  const [formName, setFormName] = useState("");
-  const [formPosition, setFormPosition] = useState("");
-  const [formDescription, setFormDescription] = useState("");
-  const [formActive, setFormActive] = useState(true);
-  const [formMandatory, setFormMandatory] = useState(false);
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CodeValueFormValues>({
+    resolver: zodResolver(codeValueSchema),
+    defaultValues: {
+      name: "",
+      position: "",
+      description: "",
+      isActive: true,
+      isMandatory: false,
+    },
+  });
 
   const openCreateDialog = useCallback(() => {
-    setFormName("");
-    setFormPosition("");
-    setFormDescription("");
-    setFormActive(true);
-    setFormMandatory(false);
+    reset({ name: "", position: "", description: "", isActive: true, isMandatory: false });
     setValueDialog({ open: true });
-  }, []);
+  }, [reset]);
 
   const openEditDialog = useCallback((value: CodeValue) => {
-    setFormName(value.name);
-    setFormPosition(String(value.position));
-    setFormDescription(value.description ?? "");
-    setFormActive(value.isActive);
-    setFormMandatory(value.isMandatory);
+    reset({
+      name: value.name,
+      position: String(value.position),
+      description: value.description ?? "",
+      isActive: value.isActive,
+      isMandatory: value.isMandatory,
+    });
     setValueDialog({ open: true, editValue: value });
-  }, []);
+  }, [reset]);
 
-  const handleValueSubmit = useCallback(async () => {
-    if (!codeId) return;
-    const payload = {
-      name: formName,
-      position: formPosition ? Number(formPosition) : undefined,
-      description: formDescription || undefined,
-      isActive: formActive,
-      isMandatory: formMandatory,
-    };
-
-    if (valueDialog.editValue) {
-      await updateValueMutation.mutateAsync({ valueId: valueDialog.editValue.id, payload });
-    } else {
-      await createValueMutation.mutateAsync(payload);
-    }
-    setValueDialog({ open: false });
-  }, [
-    codeId,
-    formName,
-    formPosition,
-    formDescription,
-    formActive,
-    formMandatory,
-    valueDialog.editValue,
-    createValueMutation,
-    updateValueMutation,
-  ]);
+  const onSubmit = useCallback(
+    async (data: CodeValueFormValues) => {
+      if (!codeId) return;
+      const payload = {
+        name: data.name,
+        position: data.position ? Number(data.position) : undefined,
+        description: data.description || undefined,
+        isActive: data.isActive,
+        isMandatory: data.isMandatory,
+      };
+      if (valueDialog.editValue) {
+        await updateValueMutation.mutateAsync({ valueId: valueDialog.editValue.id, payload });
+      } else {
+        await createValueMutation.mutateAsync(payload);
+      }
+      setValueDialog({ open: false });
+    },
+    [codeId, valueDialog.editValue, createValueMutation, updateValueMutation],
+  );
 
   const handleDeleteValue = useCallback(async () => {
     if (!codeId || !deleteTarget) return;
@@ -184,7 +199,11 @@ const CodeDetailPage: React.FC = () => {
             </Button>
           }
         />
-        <ErrorState message="Failed to load code." />
+        <ErrorState
+          title="Failed to load code"
+          message="An unexpected error occurred while loading the code."
+          onRetry={() => refetchCode()}
+        />
       </div>
     );
   }
@@ -237,60 +256,77 @@ const CodeDetailPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>{valueDialog.editValue ? "Edit Code Value" : "New Code Value"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="cvName">Value Name *</Label>
-              <Input
-                id="cvName"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="e.g. Male"
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {(createValueMutation.isError || updateValueMutation.isError) && (
+              <ErrorState
+                title="Failed to save code value"
+                message={
+                  (createValueMutation.error ?? updateValueMutation.error)?.message ??
+                  "An unexpected error occurred."
+                }
+                onRetry={() => {
+                  createValueMutation.reset();
+                  updateValueMutation.reset();
+                }}
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            )}
+            <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="cvPosition">Position</Label>
-                <Input
-                  id="cvPosition"
-                  type="number"
-                  min="0"
-                  value={formPosition}
-                  onChange={(e) => setFormPosition(e.target.value)}
-                  placeholder="0"
-                />
+                <Label htmlFor="cvName">Value Name *</Label>
+                <Input id="cvName" {...register("name")} placeholder="e.g. Male" />
+                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
               </div>
-              <div>
-                <Label htmlFor="cvDesc">Description</Label>
-                <Input
-                  id="cvDesc"
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Optional"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="cvPosition">Position</Label>
+                  <Input id="cvPosition" type="number" min="0" {...register("position")} placeholder="0" />
+                </div>
+                <div>
+                  <Label htmlFor="cvDesc">Description</Label>
+                  <Input id="cvDesc" {...register("description")} placeholder="Optional" />
+                </div>
+              </div>
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <Controller
+                    name="isActive"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                    )}
+                  />
+                  Active
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <Controller
+                    name="isMandatory"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                    )}
+                  />
+                  Mandatory
+                </label>
               </div>
             </div>
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={formActive} onCheckedChange={(c) => setFormActive(c === true)} />
-                Active
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox checked={formMandatory} onCheckedChange={(c) => setFormMandatory(c === true)} />
-                Mandatory
-              </label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setValueDialog({ open: false })}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleValueSubmit}
-              disabled={!formName.trim() || createValueMutation.isPending || updateValueMutation.isPending}
-            >
-              {createValueMutation.isPending || updateValueMutation.isPending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setValueDialog({ open: false })}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={createValueMutation.isPending || updateValueMutation.isPending}
+              >
+                {createValueMutation.isPending || updateValueMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
