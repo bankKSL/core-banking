@@ -29,7 +29,8 @@ import {
   RescheduleLoansPage,
   RescheduleLoanFormPage,
 } from "@/features/loans";
-import { GroupListPage, GroupFormPage } from "@/features/groups";
+import { GroupListPage, GroupFormPage, GroupDetailPage } from "@/features/groups";
+import { CenterListPage, CenterFormPage, CenterDetailPage } from "@/features/centers";
 import DepositAccountsPage from "./pages/DepositAccountsPage";
 import FixedDepositsPage from "./pages/FixedDepositsPage";
 import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
@@ -312,6 +313,12 @@ function App() {
                   <Route path="/groups" element={<GroupListPage />} />
                   <Route path="/groups/create" element={<GroupFormPage />} />
                   <Route path="/groups/edit/:id" element={<GroupFormPage />} />
+                  <Route path="/groups/:id" element={<GroupDetailPage />} />
+                  {/* Centers */}
+                  <Route path="/centers" element={<CenterListPage />} />
+                  <Route path="/centers/new" element={<CenterFormPage />} />
+                  <Route path="/centers/:id" element={<CenterDetailPage />} />
+                  <Route path="/centers/edit/:id" element={<CenterFormPage />} />
                   {/* Clients */}
                   <Route path="/clients" element={<ClientListPage />} />
                   <Route path="/clients/new" element={<CreateClientPage />} />

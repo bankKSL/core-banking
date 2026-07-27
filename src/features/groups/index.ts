@@ -10,6 +10,13 @@ export type {
   GroupUpdateRequest,
   GroupCommandRequest,
   GroupCommandResponse,
+  GroupCloseRequest,
+  GroupClientIdsPayload,
+  GroupAssignStaffPayload,
+  GroupAssignRolePayload,
+  GroupAccountSummary,
+  GroupRoleData,
+  GroupClosureReason,
 } from "./types/group";
 
 export {
@@ -25,17 +32,44 @@ export {
 export { createGroupSchema, updateGroupSchema, activateGroupSchema } from "./schemas/group.schema";
 export type { CreateGroupFormValues, UpdateGroupFormValues, ActivateGroupFormValues } from "./schemas/group.schema";
 
-export { fetchGroups, fetchGroup, createGroup, updateGroup, deleteGroup, activateGroup } from "./api/group";
+export {
+  fetchGroups,
+  fetchGroup,
+  createGroup,
+  updateGroup,
+  deleteGroup,
+  activateGroup,
+  closeGroup,
+  associateClients,
+  disassociateClients,
+  assignStaff,
+  unassignStaff,
+  assignRole,
+  unassignRole,
+  fetchGroupAccounts,
+} from "./api/group";
 
 export { useGroups, groupKeys } from "./hooks/useGroups";
 export { useGroup } from "./hooks/useGroup";
 export { useCreateGroup } from "./hooks/useCreateGroup";
 export { useUpdateGroup } from "./hooks/useUpdateGroup";
-export { useActivateGroup, useDeleteGroup } from "./hooks/useGroupCommands";
+export {
+  useActivateGroup,
+  useDeleteGroup,
+  useCloseGroup,
+  useAssociateClients,
+  useDisassociateClients,
+  useAssignStaff,
+  useUnassignStaff,
+  useAssignRole,
+  useUnassignRole,
+} from "./hooks/useGroupCommands";
+export { useGroupAccounts } from "./hooks/useGroupAccounts";
 
 // ─── Pages ───────────────────────────────────────────────────────
 export { default as GroupListPage } from "./pages/GroupListPage";
 export { default as GroupFormPage } from "./pages/GroupFormPage";
+export { default as GroupDetailPage } from "./pages/GroupDetailPage";
 
 // ─── Components ──────────────────────────────────────────────────
 export { default as GroupTable } from "./components/GroupTable";

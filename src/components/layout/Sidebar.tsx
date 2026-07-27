@@ -145,6 +145,7 @@ const sections: NavSectionConfig[] = [
     items: [
       { label: "Clients", path: "/clients", icon: Users },
       { label: "Groups", path: "/groups", icon: UsersRound },
+      { label: "Centers", path: "/centers", icon: Building2 },
       { label: "Score Grade", path: "/score-grades", icon: Shield },
     ],
   },

@@ -23,17 +23,45 @@ export interface Group {
 export interface GroupDetail {
   id?: number;
   name?: string;
+  accountNo?: string;
   officeId?: number;
   officeName?: string;
+  staffId?: number;
+  staffName?: string;
   externalId?: string;
   active?: boolean;
   hierarchy?: string;
+  activationDate?: string;
+  submittedDate?: string;
   status?: GroupStatus;
   timeline?: {
     submittedOnDate?: string;
     activatedOnDate?: string;
     closedOnDate?: string;
   };
+  clientMembers?: Array<{
+    id: number;
+    accountNo?: string;
+    displayName?: string;
+    officeId?: number;
+    officeName?: string;
+    status?: { id?: number; code?: string; description?: string; active?: boolean };
+  }>;
+  groupRoles?: GroupRoleData[];
+  collectionMeetingCalendar?: {
+    id: number;
+    title?: string;
+    description?: string;
+    startDate?: string;
+    frequency?: { id?: number; description?: string };
+    repeating?: boolean;
+    recurrences?: string[];
+    createdByUserId?: number;
+    createdByUsername?: string;
+    updatedByUserId?: number;
+    updatedByUsername?: string;
+  };
+  closureReasons?: GroupClosureReason[];
 }
 
 /** Paged list response (GET /groups?paged=true) */
@@ -86,6 +114,63 @@ export interface GroupCommandRequest {
   activationDate?: string;
   dateFormat?: string;
   locale?: string;
+}
+
+/** Commands that require only closureDate + closureReasonId */
+export interface GroupCloseRequest {
+  closureDate: string;
+  closureReasonId: number;
+  dateFormat?: string;
+  locale?: string;
+}
+
+/** Associates / disassociates clients from the group */
+export interface GroupClientIdsPayload {
+  clientIds: number[];
+}
+
+/** Assigns a staff member (or role) */
+export interface GroupAssignStaffPayload {
+  staffId: number;
+}
+
+export interface GroupAssignRolePayload {
+  clientId: number;
+  roleId: number;
+}
+
+/** A loan / savings summary returned by GET /groups/{id}/accounts */
+export interface GroupAccountSummary {
+  loanAccounts?: Array<{
+    id: number;
+    accountNo?: string;
+    productName?: string;
+    status?: { id?: number; code?: string; description?: string; active?: boolean; closed?: boolean };
+    accountBalance?: number;
+    currency?: { code?: string; name?: string; displaySymbol?: string };
+  }>;
+  savingsAccounts?: Array<{
+    id: number;
+    accountNo?: string;
+    productName?: string;
+    status?: { id?: number; code?: string; description?: string; active?: boolean; closed?: boolean };
+    accountBalance?: number;
+    currency?: { code?: string; name?: string; displaySymbol?: string };
+  }>;
+}
+
+/** A role assignment within the group */
+export interface GroupRoleData {
+  id: number;
+  clientId: number;
+  clientName?: string;
+  role?: { id: number; name?: string };
+}
+
+/** A closure reason returned by the Fineract template */
+export interface GroupClosureReason {
+  id: number;
+  name: string;
 }
 
 /** Fineract command/mutation response */
