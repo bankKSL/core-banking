@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Pencil, AlertTriangle, Building2, Percent, DollarSign } from "lucide-react";
+import { Plus, Search, Pencil, Eye, AlertTriangle, Building2, Percent, DollarSign } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,6 +61,9 @@ const SavingsProductsPage: React.FC = () => {
       header: "",
       cell: (r) => (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/deposits/products/view/${r.id}`)}>
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate(`/deposits/products/edit/${r.id}`)}>
             <Pencil className="h-4 w-4" />
           </Button>

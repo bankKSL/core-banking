@@ -41,6 +41,7 @@ import {
   CreditCard,
   ToggleLeft,
   Repeat,
+  Percent,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -92,6 +93,7 @@ const sections: NavSectionConfig[] = [
       { label: "Savings Accounts Products", path: "/deposits/products", icon: LayoutGrid },
       { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
       { label: "Recurring Deposit Products", path: "/deposits/recurring-products", icon: LayoutGrid },
+      { label: "Interest Rate Charts", path: "/interest-rate-charts", icon: Percent },
     ],
   },
   {

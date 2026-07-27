@@ -743,6 +743,11 @@ export async function updateFixedDepositProduct(
   return data;
 }
 
+export async function deleteFixedDepositProduct(productId: number): Promise<{ resourceId: number }> {
+  const { data } = await client.delete<{ resourceId: number }>(`/fixeddepositproducts/${productId}`);
+  return data;
+}
+
 // ─── Savings Charges (Section 5) ──────────────────────────────────
 
 export interface SavingsCharge {
@@ -1058,4 +1063,141 @@ export async function fetchSavingsTransactions(
     params: { offset: 0, limit: 100 },
   });
   return data;
+}
+
+// ─── Additional Savings Operations ────────────────────────────────
+
+/** DELETE /savingsproducts/{productId} */
+export async function deleteSavingsProduct(productId: number): Promise<void> {
+  await client.delete(`/savingsproducts/${productId}`);
+}
+
+/** POST /savingsaccounts/{accountId}?command=undoapproval */
+export async function undoApproveSavingsAccount(accountId: number): Promise<void> {
+  await client.post(`/savingsaccounts/${accountId}`, null, { params: { command: "undoapproval" } });
+}
+
+/** POST /savingsaccounts/{accountId}/transactions?command=force-withdrawal */
+export async function forceWithdrawalSavings(accountId: number, payload: Record<string, unknown>): Promise<void> {
+  await client.post(`/savingsaccounts/${accountId}/transactions`, {
+    ...payload,
+    dateFormat: "yyyy-MM-dd",
+    locale: "en",
+  }, { params: { command: "force-withdrawal" } });
+}
+
+/** POST /savingsaccounts/{accountId}?command=applyAnnualFees */
+export async function applyAnnualFeesSavings(accountId: number): Promise<void> {
+  await client.post(`/savingsaccounts/${accountId}`, null, { params: { command: "applyAnnualFees" } });
+}
+
+/** POST /savingsaccounts/{accountId}?command=assignSavingsOfficer */
+export async function assignSavingsOfficer(accountId: number, officerId: number): Promise<void> {
+  await client.post(`/savingsaccounts/${accountId}`, { savingsOfficerId: officerId }, { params: { command: "assignSavingsOfficer" } });
+}
+
+/** POST /savingsaccounts/{accountId}?command=unassignSavingsOfficer */
+export async function unassignSavingsOfficer(accountId: number): Promise<void> {
+  await client.post(`/savingsaccounts/${accountId}`, { unassignDate: new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" }, { params: { command: "unassignSavingsOfficer" } });
+}
+
+/** POST /savingsaccounts/{accountId}/transactions/{transactionId}?command=undo|reverse|modify */
+export async function adjustSavingsTransaction(accountId: number, transactionId: number, command: "undo" | "reverse" | "modify", payload?: Record<string, unknown>): Promise<void> {
+  await client.post(`/savingsaccounts/${accountId}/transactions/${transactionId}`, {
+    ...payload,
+    dateFormat: "yyyy-MM-dd",
+    locale: "en",
+  }, { params: { command } });
+}
+
+export interface TransactionSearchParams {
+  dateFrom?: string;
+  dateTo?: string;
+  transactionType?: string;
+  offset?: number;
+  limit?: number;
+}
+
+/** GET /savingsaccounts/{accountId}/transactions/search */
+export async function searchTransactions(accountId: number, params?: TransactionSearchParams): Promise<{ pageItems?: any[] }> {
+  const { data } = await client.get(`/savingsaccounts/${accountId}/transactions/search`, { params });
+  return data;
+}
+
+// ─── Interest Rate Charts ────────────────────────────────────────
+
+export interface InterestRateChart {
+  id: number;
+  name: string;
+  description: string;
+  fromDate: string;
+  endDate: string | null;
+  chartSlabs: InterestRateChartSlab[];
+}
+
+export interface InterestRateChartSlab {
+  id: number;
+  description: string;
+  periodType: { id: number; code: string; value: string };
+  fromPeriod: number;
+  toPeriod: number;
+  annualInterestRate: number;
+}
+
+export interface InterestRateChartTemplate {
+  periodTypeOptions: Array<{ id: number; code: string; value: string }>;
+}
+
+export async function fetchInterestRateCharts(productId?: number): Promise<InterestRateChart[]> {
+  const params = productId != null ? { productId } : undefined;
+  const { data } = await client.get<InterestRateChart[]>("/interestratecharts", { params });
+  return data;
+}
+
+export async function fetchInterestRateChart(chartId: number): Promise<InterestRateChart> {
+  const { data } = await client.get<InterestRateChart>(`/interestratecharts/${chartId}`);
+  return data;
+}
+
+export async function fetchInterestRateChartTemplate(): Promise<InterestRateChartTemplate> {
+  const { data } = await client.get<InterestRateChartTemplate>("/interestratecharts/template");
+  return data;
+}
+
+export async function createInterestRateChart(payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>("/interestratecharts", payload);
+  return data;
+}
+
+export async function updateInterestRateChart(chartId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(`/interestratecharts/${chartId}`, payload);
+  return data;
+}
+
+export async function deleteInterestRateChart(chartId: number): Promise<void> {
+  await client.delete(`/interestratecharts/${chartId}`);
+}
+
+export async function fetchChartSlabs(chartId: number): Promise<InterestRateChartSlab[]> {
+  const { data } = await client.get<InterestRateChartSlab[]>(`/interestratecharts/${chartId}/chartslabs`);
+  return data;
+}
+
+export async function fetchChartSlabTemplate(chartId: number): Promise<InterestRateChartTemplate> {
+  const { data } = await client.get<InterestRateChartTemplate>(`/interestratecharts/${chartId}/chartslabs/template`);
+  return data;
+}
+
+export async function createChartSlab(chartId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>(`/interestratecharts/${chartId}/chartslabs`, payload);
+  return data;
+}
+
+export async function updateChartSlab(chartId: number, slabId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(`/interestratecharts/${chartId}/chartslabs/${slabId}`, payload);
+  return data;
+}
+
+export async function deleteChartSlab(chartId: number, slabId: number): Promise<void> {
+  await client.delete(`/interestratecharts/${chartId}/chartslabs/${slabId}`);
 }

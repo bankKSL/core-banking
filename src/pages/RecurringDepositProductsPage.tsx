@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Search, Pencil, Eye, Trash2, Building2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,6 +67,9 @@ const RecurringDepositProductsPage: React.FC = () => {
       header: "",
       cell: (r) => (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/deposits/recurring-products/view/${r.id}`)}>
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate(`/deposits/recurring-products/edit/${r.id}`)}>
             <Pencil className="h-4 w-4" />
           </Button>

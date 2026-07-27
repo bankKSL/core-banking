@@ -19,6 +19,8 @@ import {
   XCircle,
   Loader2,
   Hash,
+  Trash2,
+  Search,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +40,12 @@ import {
   useApproveSavingsAccount,
   useActivateSavingsAccount,
   useCloseSavingsAccount,
+  useDeleteSavingsAccount,
+  useUndoApproveSavingsAccount,
+  useForceWithdrawalSavings,
+  useApplyAnnualFeesSavings,
+  useAssignSavingsOfficer,
+  useUnassignSavingsOfficer,
   SAVINGS_STATUS_CONFIG,
   calculateInterestSavings,
   postInterestSavings,
@@ -50,8 +58,11 @@ import {
   holdAmountSavings,
   releaseAmountSavings,
   fetchOnHoldTransactions,
+  searchTransactions,
 } from "@/features/deposits";
 import { useMakeDeposit, useMakeWithdrawal } from "@/features/deposits";
+import { useStaffList } from "@/features/staff";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SavingsCharges from "@/features/deposits/components/SavingsCharges";
 import DepositWithdrawDialog from "@/features/deposits/components/DepositWithdrawDialog";
 import SavingsTransactions from "@/features/deposits/components/SavingsTransactions";
@@ -100,6 +111,8 @@ const DepositAccountDetailPage: React.FC = () => {
   const approveMutation = useApproveSavingsAccount();
   const activateMutation = useActivateSavingsAccount();
   const closeMutation = useCloseSavingsAccount();
+  const deleteMutation = useDeleteSavingsAccount();
+  const undoApproveMutation = useUndoApproveSavingsAccount();
   const [activeTab, setActiveTab] = useState("general");
   const [txnDialog, setTxnDialog] = useState<"deposit" | "withdrawal" | null>(null);
   const [acting, setActing] = useState(false);
@@ -109,6 +122,21 @@ const DepositAccountDetailPage: React.FC = () => {
   const [holdDate, setHoldDate] = useState(new Date().toISOString().split("T")[0]);
   const [onHoldTxns, setOnHoldTxns] = useState<Array<{ id: number; amount: number; reasonForBlock?: string }>>([]);
   const [showOnHold, setShowOnHold] = useState(false);
+  const forceWithdrawalMutation = useForceWithdrawalSavings();
+  const applyAnnualFeesMutation = useApplyAnnualFeesSavings();
+  const assignOfficerMutation = useAssignSavingsOfficer();
+  const unassignOfficerMutation = useUnassignSavingsOfficer();
+  const [forceWithdrawalDialogOpen, setForceWithdrawalDialogOpen] = useState(false);
+  const [fwAmount, setFwAmount] = useState("");
+  const [fwDate, setFwDate] = useState(new Date().toISOString().split("T")[0]);
+  const [assignOfficerDialogOpen, setAssignOfficerDialogOpen] = useState(false);
+  const [selectedOfficerId, setSelectedOfficerId] = useState("");
+  const { data: staffList } = useStaffList({ loanOfficersOnly: true, status: "active" });
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [searchFrom, setSearchFrom] = useState("");
+  const [searchTo, setSearchTo] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
 
   const summary = (account as any)?.summary ?? {};
 
@@ -136,6 +164,7 @@ const DepositAccountDetailPage: React.FC = () => {
         else if (cmd === "reject") await rejectMutation.mutateAsync(account.id);
         else if (cmd === "withdraw") await withdrawMutation.mutateAsync(account.id);
         else if (cmd === "undoreject") await undoRejectMutation.mutateAsync(account.id);
+        else if (cmd === "undoapproval") await undoApproveMutation.mutateAsync(account.id);
         else if (cmd === "calculateInterest") await calculateInterestSavings(account.id);
         else if (cmd === "postInterest") await postInterestSavings(account.id);
         else if (cmd === "block") await blockSavingsAccount(account.id);
@@ -157,6 +186,7 @@ const DepositAccountDetailPage: React.FC = () => {
       rejectMutation,
       withdrawMutation,
       undoRejectMutation,
+      undoApproveMutation,
       refetch,
     ],
   );
@@ -223,6 +253,56 @@ const DepositAccountDetailPage: React.FC = () => {
     setShowOnHold(true);
   };
 
+  const handleForceWithdrawal = async () => {
+    if (!account) return;
+    const numAmount = parseFloat(fwAmount);
+    if (!numAmount || numAmount <= 0) return;
+    await forceWithdrawalMutation.mutateAsync({
+      accountId: account.id,
+      payload: { transactionDate: fwDate, transactionAmount: numAmount },
+    });
+    setForceWithdrawalDialogOpen(false);
+    setFwAmount("");
+    refetch();
+  };
+
+  const handleApplyAnnualFees = async () => {
+    if (!account) return;
+    await applyAnnualFeesMutation.mutateAsync(account.id);
+    refetch();
+  };
+
+  const handleAssignOfficer = async () => {
+    if (!account || !selectedOfficerId) return;
+    await assignOfficerMutation.mutateAsync({
+      accountId: account.id,
+      officerId: Number(selectedOfficerId),
+    });
+    setAssignOfficerDialogOpen(false);
+    setSelectedOfficerId("");
+    refetch();
+  };
+
+  const handleUnassignOfficer = async () => {
+    if (!account) return;
+    await unassignOfficerMutation.mutateAsync(account.id);
+    refetch();
+  };
+
+  const handleSearchTransactions = async () => {
+    if (!account) return;
+    setSearching(true);
+    try {
+      const result = await searchTransactions(account.id, {
+        dateFrom: searchFrom || undefined,
+        dateTo: searchTo || undefined,
+      });
+      setSearchResults(result?.pageItems ?? []);
+    } finally {
+      setSearching(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
@@ -271,20 +351,28 @@ const DepositAccountDetailPage: React.FC = () => {
                 >
                   Withdraw
                 </Button>
+                <Button variant="outline" size="sm" onClick={async () => { if (account) { await deleteMutation.mutateAsync(account.id); navigate("/deposits/saving-accounts"); } }} disabled={acting} className="text-red-600">
+                  <Trash2 className="mr-1 h-4 w-4" /> Delete
+                </Button>
               </>
             )}
             {isApproved && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCommand("activate")}
-                disabled={acting}
-                className="text-emerald-600"
-              >
-                {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                <CheckCircle2 className="mr-1 h-4 w-4" />
-                Activate
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("activate")}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
+                  {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                  Activate
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleCommand("undoapproval")} disabled={acting} className="text-amber-600">
+                  Undo Approval
+                </Button>
+              </>
             )}
             {isActive && (
               <>
@@ -323,6 +411,22 @@ const DepositAccountDetailPage: React.FC = () => {
                 <Button variant="outline" size="sm" onClick={loadOnHoldTransactions}>
                   On-Hold Funds
                 </Button>
+                <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
+                  Force Withdrawal
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleApplyAnnualFees} disabled={applyAnnualFeesMutation.isPending}>
+                  Apply Annual Fees
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setAssignOfficerDialogOpen(true)}>
+                  Assign Officer
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleUnassignOfficer} disabled={unassignOfficerMutation.isPending}>
+                  Unassign Officer
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setSearchDialogOpen(true)}>
+                  <Search className="mr-1 h-4 w-4" />
+                  Search Transactions
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -358,6 +462,12 @@ const DepositAccountDetailPage: React.FC = () => {
                   className="text-emerald-600"
                 >
                   Unblock
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleCommand("unblockCredit")} disabled={acting} className="text-emerald-600">
+                  Unblock Credit
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleCommand("unblockDebit")} disabled={acting} className="text-emerald-600">
+                  Unblock Debit
                 </Button>
                 <Button
                   variant="outline"
@@ -636,6 +746,110 @@ const DepositAccountDetailPage: React.FC = () => {
                   </Button>
                 </div>
               ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Force Withdrawal Dialog */}
+      <Dialog open={forceWithdrawalDialogOpen} onOpenChange={setForceWithdrawalDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Force Withdrawal</DialogTitle>
+            <DialogDescription>Force a withdrawal from this account.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="fwAmount">Amount *</Label>
+              <Input
+                id="fwAmount"
+                type="number"
+                step="0.01"
+                value={fwAmount}
+                onChange={(e) => setFwAmount(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="fwDate">Date *</Label>
+              <Input id="fwDate" type="date" value={fwDate} onChange={(e) => setFwDate(e.target.value)} />
+            </div>
+            <Button onClick={handleForceWithdrawal} disabled={!fwAmount || forceWithdrawalMutation.isPending}>
+              {forceWithdrawalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Force Withdraw
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Officer Dialog */}
+      <Dialog open={assignOfficerDialogOpen} onOpenChange={setAssignOfficerDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Savings Officer</DialogTitle>
+            <DialogDescription>Select an officer to assign to this account.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <Label>Officer *</Label>
+              <Select onValueChange={setSelectedOfficerId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select officer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {staffList?.map((o: any) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.displayName ?? o.firstname + " " + o.lastname}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleAssignOfficer} disabled={!selectedOfficerId || assignOfficerMutation.isPending}>
+              {assignOfficerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Assign
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Transactions Dialog */}
+      <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Search Transactions</DialogTitle>
+            <DialogDescription>Filter transactions by date range.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-1.5 flex-1">
+                <Label htmlFor="searchFrom">From Date</Label>
+                <Input id="searchFrom" type="date" value={searchFrom} onChange={(e) => setSearchFrom(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1.5 flex-1">
+                <Label htmlFor="searchTo">To Date</Label>
+                <Input id="searchTo" type="date" value={searchTo} onChange={(e) => setSearchTo(e.target.value)} />
+              </div>
+            </div>
+            <Button onClick={handleSearchTransactions} disabled={searching}>
+              {searching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Search className="mr-2 h-4 w-4" />
+              Search
+            </Button>
+            {searchResults.length > 0 && (
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {searchResults.map((txn: any, idx: number) => (
+                  <div key={txn.id ?? idx} className="flex items-center justify-between rounded-lg border p-3 text-sm">
+                    <div>
+                      <p className="font-medium">{formatCurrency(txn.amount, a.currency?.code)}</p>
+                      <p className="text-xs text-gray-500">{txn.type?.value ?? txn.transactionType?.value ?? "—"}</p>
+                    </div>
+                    <span className="text-xs text-gray-400">{txn.date ?? txn.transactionDate ?? "—"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {searchResults.length === 0 && !searching && searchFrom && (
+              <p className="text-sm text-gray-500">No transactions found.</p>
             )}
           </div>
         </DialogContent>

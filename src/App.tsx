@@ -36,11 +36,15 @@ import CreateFixedDepositPage from "./pages/CreateFixedDepositPage";
 import FixedDepositDetailPage from "./pages/FixedDepositDetailPage";
 import FixedDepositProductsPage from "./pages/FixedDepositProductsPage";
 import FixedDepositProductFormPage from "./pages/FixedDepositProductFormPage";
+import FixedDepositProductDetailPage from "./pages/FixedDepositProductDetailPage";
 import RecurringDepositsPage from "./pages/RecurringDepositsPage";
 import CreateRecurringDepositPage from "./pages/CreateRecurringDepositPage";
 import RecurringDepositDetailPage from "./pages/RecurringDepositDetailPage";
 import RecurringDepositProductsPage from "./pages/RecurringDepositProductsPage";
 import RecurringDepositProductFormPage from "./pages/RecurringDepositProductFormPage";
+import RecurringDepositProductDetailPage from "./pages/RecurringDepositProductDetailPage";
+import InterestRateChartListPage from "./pages/InterestRateChartListPage";
+import InterestRateChartFormPage from "./pages/InterestRateChartFormPage";
 import GLAccountsPage from "./pages/GLAccountsPage";
 import GLAccountFormPage from "./pages/GLAccountFormPage";
 import JournalEntriesPage from "./pages/JournalEntriesPage";
@@ -60,6 +64,7 @@ import ScoreGradePage from "./pages/ScoreGradePage";
 import CreateDepositAccountPage from "./pages/CreateDepositAccountPage";
 import SavingsProductsPage from "./pages/SavingsProductsPage";
 import SavingsProductFormPage from "./pages/SavingsProductFormPage";
+import SavingsProductDetailPage from "./pages/SavingsProductDetailPage";
 import AccountActionPage from "./pages/AccountActionPage";
 import SavingsTransactionFormPage from "./pages/SavingsTransactionFormPage";
 import LoginPage from "./pages/LoginPage";
@@ -238,6 +243,7 @@ function App() {
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
                   <Route path="/deposits/products/new" element={<SavingsProductFormPage />} />
                   <Route path="/deposits/products/edit/:id" element={<SavingsProductFormPage />} />
+                  <Route path="/deposits/products/view/:id" element={<SavingsProductDetailPage />} />
                   <Route path="/deposits/saving-accounts" element={<DepositAccountsPage />} />
                   <Route path="/deposits/saving-accounts/new" element={<CreateDepositAccountPage />} />
                   <Route path="/deposits/saving-accounts/edit/:id" element={<CreateDepositAccountPage />} />
@@ -252,9 +258,10 @@ function App() {
                   <Route path="/deposits/fixed/new" element={<CreateFixedDepositPage />} />
                   <Route path="/deposits/fixed/:id" element={<FixedDepositDetailPage />} />
                   <Route path="/deposits/fixed-products" element={<FixedDepositProductsPage />} />
-                  <Route path="/deposits/fixed/edit/:id" element={<CreateFixedDepositPage />} />
                   <Route path="/deposits/fixed-products/new" element={<FixedDepositProductFormPage />} />
                   <Route path="/deposits/fixed-products/edit/:id" element={<FixedDepositProductFormPage />} />
+                  <Route path="/deposits/fixed-products/view/:id" element={<FixedDepositProductDetailPage />} />
+                  <Route path="/deposits/fixed/edit/:id" element={<CreateFixedDepositPage />} />
                   {/* Recurring Deposits */}
                   <Route path="/deposits/recurring" element={<RecurringDepositsPage />} />
                   <Route path="/deposits/recurring/new" element={<CreateRecurringDepositPage />} />
@@ -263,6 +270,10 @@ function App() {
                   <Route path="/deposits/recurring-products" element={<RecurringDepositProductsPage />} />
                   <Route path="/deposits/recurring-products/new" element={<RecurringDepositProductFormPage />} />
                   <Route path="/deposits/recurring-products/edit/:id" element={<RecurringDepositProductFormPage />} />
+                  <Route path="/deposits/recurring-products/view/:id" element={<RecurringDepositProductDetailPage />} />
+                  <Route path="/interest-rate-charts" element={<InterestRateChartListPage />} />
+                  <Route path="/interest-rate-charts/new" element={<InterestRateChartFormPage />} />
+                  <Route path="/interest-rate-charts/:id" element={<InterestRateChartFormPage />} />
                   {/* Accounting */}
                   <Route path="/accounting/gl-accounts" element={<GLAccountsPage />} />
                   <Route path="/accounting/gl-accounts/new" element={<GLAccountFormPage />} />

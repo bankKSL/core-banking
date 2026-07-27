@@ -4,6 +4,7 @@ import {
   fetchFixedDepositProduct,
   createFixedDepositProduct,
   updateFixedDepositProduct,
+  deleteFixedDepositProduct,
 } from "../api/deposit";
 import { depositKeys } from "./useSavingsAccounts";
 import type { FixedDepositProductCreateRequest } from "../types/deposit";
@@ -40,6 +41,16 @@ export function useUpdateFixedDepositProduct() {
   return useMutation({
     mutationFn: ({ productId, payload }: { productId: number; payload: Partial<FixedDepositProductCreateRequest> }) =>
       updateFixedDepositProduct(productId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [...depositKeys.all, "fdProducts"] });
+    },
+  });
+}
+
+export function useDeleteFixedDepositProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => deleteFixedDepositProduct(productId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [...depositKeys.all, "fdProducts"] });
     },

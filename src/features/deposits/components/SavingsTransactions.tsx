@@ -1,7 +1,8 @@
 import { type FC } from "react";
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/DataTable";
 import type { SavingsTransaction } from "../api/deposit";
 import type { ColumnDef } from "@/components/shared/DataTable";
@@ -11,9 +12,10 @@ const formatCurrency = (currency?: string, n?: number) =>
 
 interface SavingsTransactionsProps {
   transactions: SavingsTransaction[];
+  onUndo?: (transactionId: number) => void;
 }
 
-const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions }) => {
+const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUndo }) => {
   const columns: ColumnDef<SavingsTransaction>[] = [
     { key: "id", header: "ID", accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
     {
@@ -52,6 +54,16 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions }) => 
             Active
           </Badge>
         ),
+    },
+    {
+      key: "actions",
+      header: "",
+      cell: (row: SavingsTransaction) =>
+        !row.reversed && onUndo ? (
+          <Button variant="ghost" size="sm" onClick={() => onUndo(row.id)}>
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        ) : null,
     },
   ];
 

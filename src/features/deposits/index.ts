@@ -113,6 +113,7 @@ export {
   fetchSavingsProduct,
   createSavingsProduct,
   updateSavingsProduct,
+  deleteSavingsProduct,
 } from "./api/deposit";
 
 export { useSavingsAccounts, useSavingsAccount, depositKeys } from "./hooks/useSavingsAccounts";
@@ -134,6 +135,7 @@ export {
   useFixedDepositProduct,
   useCreateFixedDepositProduct,
   useUpdateFixedDepositProduct,
+  useDeleteFixedDepositProduct,
 } from "./hooks/useFixedDepositProducts";
 
 export { useRecurringDepositAccounts, useRecurringDepositAccount } from "./hooks/useRecurringDeposits";
@@ -202,11 +204,21 @@ export {
   holdAmountSavings,
   releaseAmountSavings,
   fetchOnHoldTransactions,
+  undoApproveSavingsAccount,
+  forceWithdrawalSavings,
+  applyAnnualFeesSavings,
+  assignSavingsOfficer,
+  unassignSavingsOfficer,
 } from "./api/deposit";
 export type { OnHoldTransaction } from "./api/deposit";
 
 // API — Savings Transactions
-export { fetchSavingsTransactions } from "./api/deposit";
+export {
+  fetchSavingsTransactions,
+  adjustSavingsTransaction,
+  searchTransactions,
+} from "./api/deposit";
+export type { TransactionSearchParams } from "./api/deposit";
 
 // API — Fixed Deposit Transactions
 export {
@@ -253,10 +265,25 @@ export {
   useApproveSavingsAccount,
   useActivateSavingsAccount,
   useCloseSavingsAccount,
+  useDeleteSavingsAccount,
+  useUndoApproveSavingsAccount,
+  useDeleteSavingsProduct,
+  useForceWithdrawalSavings,
+  useApplyAnnualFeesSavings,
+  useAssignSavingsOfficer,
+  useUnassignSavingsOfficer,
+  useAdjustSavingsTransaction,
 } from "./hooks/useSavingsCommands";
 
 // Hooks — Savings Transactions
 export { savingsTransactionKeys } from "./hooks/useSavingsTransactions";
+
+// Hooks — Savings Transaction Undo
+export {
+  useUndoSavingsTransaction,
+  useReverseSavingsTransaction,
+  useModifySavingsTransaction,
+} from "./hooks/useSavingsTransactionUndo";
 
 // Hooks — Fixed Deposit Transactions
 export {
@@ -265,3 +292,38 @@ export {
   useMakeFixedDepositTransaction,
   fdTransactionKeys,
 } from "./hooks/useFixedDepositTransactions";
+
+// API — Interest Rate Charts
+export {
+  fetchInterestRateCharts,
+  fetchInterestRateChart,
+  fetchInterestRateChartTemplate,
+  createInterestRateChart,
+  updateInterestRateChart,
+  deleteInterestRateChart,
+  fetchChartSlabs,
+  fetchChartSlabTemplate,
+  createChartSlab,
+  updateChartSlab,
+  deleteChartSlab,
+} from "./api/deposit";
+export type {
+  InterestRateChart,
+  InterestRateChartSlab,
+  InterestRateChartTemplate,
+} from "./api/deposit";
+
+// Hooks — Interest Rate Charts
+export {
+  interestRateChartKeys,
+  useInterestRateCharts,
+  useInterestRateChart,
+  useInterestRateChartTemplate,
+  useCreateInterestRateChart,
+  useUpdateInterestRateChart,
+  useDeleteInterestRateChart,
+  useChartSlabs,
+  useCreateChartSlab,
+  useUpdateChartSlab,
+  useDeleteChartSlab,
+} from "./hooks/useInterestRateCharts";
