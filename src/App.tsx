@@ -141,6 +141,12 @@ import CodeFormPage from "@/features/codes/pages/CodeFormPage";
 import CodeDetailPage from "@/features/codes/pages/CodeDetailPage";
 import ChargeListPage from "@/features/charges/pages/ChargeListPage";
 import ChargeFormPage from "@/features/charges/pages/ChargeFormPage";
+import ShareProductListPage from "@/features/shares/pages/ShareProductListPage";
+import ShareProductFormPage from "@/features/shares/pages/ShareProductFormPage";
+import ShareAccountListPage from "@/features/shares/pages/ShareAccountListPage";
+import ShareAccountFormPage from "@/features/shares/pages/ShareAccountFormPage";
+import ShareAccountDetailPage from "@/features/shares/pages/ShareAccountDetailPage";
+import DividendListPage from "@/features/shares/pages/DividendListPage";
 import LoanReassignmentPage from "@/features/loans/pages/LoanReassignmentPage";
 
 /** Redirect authenticated users away from /login to dashboard */
@@ -274,6 +280,14 @@ function App() {
                   <Route path="/interest-rate-charts" element={<InterestRateChartListPage />} />
                   <Route path="/interest-rate-charts/new" element={<InterestRateChartFormPage />} />
                   <Route path="/interest-rate-charts/:id" element={<InterestRateChartFormPage />} />
+                  <Route path="/shares/products" element={<ShareProductListPage />} />
+                  <Route path="/shares/products/new" element={<ShareProductFormPage />} />
+                  <Route path="/shares/products/edit/:id" element={<ShareProductFormPage />} />
+                  <Route path="/shares/accounts" element={<ShareAccountListPage />} />
+                  <Route path="/shares/accounts/new" element={<ShareAccountFormPage />} />
+                  <Route path="/shares/accounts/:id" element={<ShareAccountDetailPage />} />
+                  <Route path="/shares/accounts/edit/:id" element={<ShareAccountFormPage />} />
+                  <Route path="/shares/dividends" element={<DividendListPage />} />
                   {/* Accounting */}
                   <Route path="/accounting/gl-accounts" element={<GLAccountsPage />} />
                   <Route path="/accounting/gl-accounts/new" element={<GLAccountFormPage />} />

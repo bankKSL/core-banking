@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Megaphone,
+  DollarSign,
   Tags,
   Filter,
   Calculator,
@@ -94,6 +95,16 @@ const sections: NavSectionConfig[] = [
       { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
       { label: "Recurring Deposit Products", path: "/deposits/recurring-products", icon: LayoutGrid },
       { label: "Interest Rate Charts", path: "/interest-rate-charts", icon: Percent },
+    ],
+  },
+  {
+    id: "shares",
+    title: "Shares",
+    defaultOpen: true,
+    items: [
+      { label: "Share Products", path: "/shares/products", icon: LayoutGrid },
+      { label: "Share Accounts", path: "/shares/accounts", icon: Users },
+      { label: "Dividends", path: "/shares/dividends", icon: DollarSign },
     ],
   },
   {
