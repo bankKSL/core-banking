@@ -131,6 +131,9 @@ import FundFormPage from "@/features/funds/pages/FundFormPage";
 import PaymentTypeListPage from "@/features/payment-types/pages/PaymentTypeListPage";
 import PaymentTypeFormPage from "@/features/payment-types/pages/PaymentTypeFormPage";
 import WorkingDaysPage from "@/features/working-days/pages/WorkingDaysPage";
+import CodeListPage from "@/features/codes/pages/CodeListPage";
+import CodeFormPage from "@/features/codes/pages/CodeFormPage";
+import CodeDetailPage from "@/features/codes/pages/CodeDetailPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -302,6 +305,10 @@ function App() {
                   <Route path="/payment-types/new" element={<PaymentTypeFormPage />} />
                   <Route path="/payment-types/edit/:id" element={<PaymentTypeFormPage />} />
                   <Route path="/working-days" element={<WorkingDaysPage />} />
+                  <Route path="/codes" element={<CodeListPage />} />
+                  <Route path="/codes/new" element={<CodeFormPage />} />
+                  <Route path="/codes/:id" element={<CodeDetailPage />} />
+                  <Route path="/codes/edit/:id" element={<CodeFormPage />} />
                   {/* Transfers */}
                   <Route path="/transfers/history" element={<TransferListPage />} />
                   <Route path="/transfers/new" element={<TransferFormPage />} />
