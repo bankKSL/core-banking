@@ -41,5 +41,3 @@ export const ACCOUNTING_RULE_TYPE_LABELS: Record<number, string> = {
 };
 
 export const ACCOUNTING_PAGE_SIZE = 20;
-
-export const ACCOUNTING_CURRENCIES = ["USD", "LAK", "THB", "CNY"];

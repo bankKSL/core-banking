@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { exchangeRates } from "@/mock/data";
 import type { ExchangeRate } from "@/types";
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const PAGE_SIZE = 8;
 
@@ -38,18 +39,11 @@ const sourceColors: Record<ExchangeRate["source"], string> = {
   manual: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
 };
 
-const CURRENCY_OPTIONS: Array<{ code: string; name: string; country: string; symbol: string }> = [
-  { code: "USD", name: "US Dollar", country: "United States", symbol: "$" },
-  { code: "LAK", name: "Lao Kip", country: "Laos", symbol: "₭" },
-  { code: "THB", name: "Thai Baht", country: "Thailand", symbol: "฿" },
-  { code: "CNY", name: "Chinese Yuan", country: "China", symbol: "¥" },
-];
-
 const emptyRate: Omit<ExchangeRate, "id" | "lastUpdated"> = {
   currencyCode: "USD",
   currencyName: "US Dollar",
-  country: "United States",
-  symbol: "$",
+  country: "",
+  symbol: "",
   buyRate: 0,
   sellRate: 0,
   midRate: 0,
@@ -320,33 +314,17 @@ const ExchangeRatePage: React.FC = () => {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2">
-              <label className="text-sm font-medium">Currency *</label>
-              <Select
+              <CurrencySelect
                 value={form.currencyCode}
-                onValueChange={(code) => {
-                  const opt = CURRENCY_OPTIONS.find((c) => c.code === code);
-                  if (opt) {
-                    setForm({
-                      ...form,
-                      currencyCode: opt.code,
-                      currencyName: opt.name,
-                      country: opt.country,
-                      symbol: opt.symbol,
-                    });
-                  }
-                }}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select a currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.code} — {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onCurrencyChange={(c) => setForm((prev) => ({
+                  ...prev,
+                  currencyCode: c.code,
+                  currencyName: c.name,
+                  country: "",
+                  symbol: c.displaySymbol,
+                }))}
+                placeholder="Select a currency"
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Country</label>

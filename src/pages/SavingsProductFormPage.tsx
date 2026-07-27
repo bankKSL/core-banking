@@ -9,12 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSavingsProducts, createSavingsProduct, updateSavingsProduct, useSavingsProduct } from "@/features/deposits";
 import type { SavingsProductCreateRequest } from "@/features/deposits";
-
-const CURRENCY_OPTIONS = ["LAK", "THB", "CNY", "USD"];
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -124,25 +122,11 @@ const SavingsProductFormPage: React.FC = () => {
               error={errors.shortName?.message}
               placeholder="No spaces (e.g. REGSAV01)"
             />
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Currency *</label>
-              <Select
-                value={watch("currencyCode")}
-                onValueChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.currencyCode && <p className="text-xs text-red-500 mt-1">{errors.currencyCode.message}</p>}
-            </div>
+            <CurrencySelect
+              value={watch("currencyCode")}
+              onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
+              error={errors.currencyCode?.message}
+            />
             <div className="col-span-2">
               <Textarea label="Description" placeholder="Brief product description" {...register("description")} />
             </div>

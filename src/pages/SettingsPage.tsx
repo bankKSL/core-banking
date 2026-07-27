@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-
-const CURRENCIES = ["USD", "LAK", "THB", "CNY"] as const;
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 const TIMEZONES = [
   "America/New_York (EST)",
   "America/Chicago (CST)",
@@ -58,21 +57,11 @@ const SettingsPage: React.FC = () => {
             <Input value={systemName} onChange={(e) => setSystemName(e.target.value)} placeholder="System name" />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Default Currency</label>
-            <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CurrencySelect
+            value={defaultCurrency}
+            onChange={setDefaultCurrency}
+            label="Default Currency"
+          />
 
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Time Zone</label>

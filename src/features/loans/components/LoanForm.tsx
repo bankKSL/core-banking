@@ -115,8 +115,8 @@ const LoanForm: FC<LoanFormProps> = ({
         <CardHeader>
           <CardTitle className="text-base">Client & Product</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="col-span-2">
+        <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-2">
+          <div className="col-span-1">
             <ClientSearch
               value={clientIdVal}
               onChange={handleClientChange}
@@ -126,7 +126,7 @@ const LoanForm: FC<LoanFormProps> = ({
           </div>
 
           {/* Row 2 (full width) — Product select + create button */}
-          <div className="col-span-2">
+          <div className="col-span-1">
             <ProductSearch
               products={products}
               value={productId}

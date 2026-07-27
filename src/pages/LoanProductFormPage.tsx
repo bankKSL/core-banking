@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createLoanProduct, updateLoanProduct, useLoanProduct, useFunds } from "@/features/loans";
 import type { LoanProductCreateRequest } from "@/features/loans";
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const AMORTIZATION_OPTIONS = [
   { id: 1, label: "Equal Installments" },
@@ -26,8 +27,6 @@ const REPAYMENT_FREQ_OPTIONS = [
   { id: 1, label: "Weeks" },
   { id: 2, label: "Months" },
 ];
-
-const CURRENCY_OPTIONS = ["LAK", "THB", "CNY", "USD"];
 
 const STRATEGY_OPTIONS = [
   { id: "mifos-standard-strategy", label: "Mifos Standard Strategy" },
@@ -235,25 +234,11 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Currency *</label>
-              <Select
-                value={watch("currencyCode")}
-                onValueChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCY_OPTIONS.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.currencyCode && <p className="text-xs text-red-500">{errors.currencyCode.message}</p>}
-            </div>
+            <CurrencySelect
+              value={watch("currencyCode")}
+              onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
+              error={errors.currencyCode?.message}
+            />
             {/* Row 5: Principal | Interest Rate */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Principal *</label>

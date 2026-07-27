@@ -94,7 +94,9 @@ const LoanReassignmentPage: FC = () => {
       {executeMutation.isError && (
         <ErrorState
           title="Failed to reassign loans"
-          message={executeMutation.error instanceof Error ? executeMutation.error.message : "An unexpected error occurred."}
+          message={
+            executeMutation.error instanceof Error ? executeMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => executeMutation.reset()}
         />
       )}
@@ -186,11 +188,7 @@ const LoanReassignmentPage: FC = () => {
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="loanIds">Loan IDs *</Label>
-              <Input
-                id="loanIds"
-                {...register("loanIds")}
-                placeholder="e.g. 1, 2, 3"
-              />
+              <Input id="loanIds" {...register("loanIds")} placeholder="e.g. 1, 2, 3" />
               {errors.loanIds && <p className="text-xs text-red-500">{errors.loanIds.message}</p>}
               <p className="text-xs text-gray-500 mt-1">Comma-separated list of loan IDs to reassign.</p>
             </div>

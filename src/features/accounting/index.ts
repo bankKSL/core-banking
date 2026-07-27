@@ -38,7 +38,6 @@ export {
   ACCOUNTING_RULE_TYPE,
   ACCOUNTING_RULE_TYPE_LABELS,
   ACCOUNTING_PAGE_SIZE,
-  ACCOUNTING_CURRENCIES,
 } from "./constants/accounting";
 
 export {

@@ -16,11 +16,10 @@ import {
   RECURRING_DEPOSIT_FREQUENCY_TYPES,
 } from "@/features/deposits";
 import type { RecurringDepositProductCreateRequest } from "@/features/deposits";
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 const DEFAULT_LOCALE = "en";
-
-const CURRENCIES = ["LAK", "THB", "CNY", "USD"];
 
 const DEPOSIT_TERM_TYPES = [
   { id: 0, label: "Days" },
@@ -224,22 +223,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
               placeholder="No spaces"
             />
           </div>
-          <div className="space-y-1.5">
-            <Label>Currency *</Label>
-            <Select value={form.currencyCode} onValueChange={(v) => updateForm("currencyCode", v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.currencyCode && <p className="text-xs text-red-500">{errors.currencyCode}</p>}
-          </div>
+          <CurrencySelect
+            value={form.currencyCode}
+            onChange={(v) => updateForm("currencyCode", v)}
+            error={errors.currencyCode}
+          />
           <div className="col-span-2 space-y-1.5">
             <Label>Description *</Label>
             <Textarea

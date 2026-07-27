@@ -12,8 +12,8 @@ import {
   useGLAccounts,
   useAccountingRules,
   useCreateJournalEntry,
-  ACCOUNTING_CURRENCIES,
 } from "@/features/accounting";
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 import { useOffices } from "@/hooks/useOffices";
 import { currentDate } from "@/lib/utils";
 
@@ -218,24 +218,10 @@ const JournalEntryFormPage: React.FC = () => {
             />
             {errors.transactionDate && <p className="text-xs text-red-500">{errors.transactionDate}</p>}
           </div>
-          <div className="space-y-1.5">
-            <Label>Currency *</Label>
-            <Select
-              value={header.currencyCode}
-              onValueChange={(v) => setHeader((h) => ({ ...h, currencyCode: v }))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ACCOUNTING_CURRENCIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CurrencySelect
+            value={header.currencyCode}
+            onChange={(v) => setHeader((h) => ({ ...h, currencyCode: v }))}
+          />
           <div className="space-y-1.5">
             <Label>Reference Number</Label>
             <Input
