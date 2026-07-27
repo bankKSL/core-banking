@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useMemo, useEffect } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,8 @@ import {
   RECURRING_DEPOSIT_FREQUENCY_TYPES,
   useRecurringDepositProducts,
   useCreateRecurringDepositAccount,
+  useUpdateRecurringDepositAccount,
+  useRecurringDepositAccount,
   fetchRecurringDepositAccountTemplate,
 } from "@/features/deposits";
 
@@ -97,10 +99,14 @@ type RDFormValues = z.infer<typeof rdSchema>;
 
 const CreateRecurringDepositPage: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const clientIdParam = searchParams.get("clientId");
+  const isEdit = !!id;
 
   const createMutation = useCreateRecurringDepositAccount();
+  const updateMutation = useUpdateRecurringDepositAccount();
+  const { data: existingAccount, isLoading: existingLoading } = useRecurringDepositAccount(id ? Number(id) : undefined);
 
   const {
     register,
@@ -200,11 +206,37 @@ const CreateRecurringDepositPage: React.FC = () => {
     }
     if (values.withHoldTax) payload.withHoldTax = true;
 
-    await createMutation.mutateAsync(payload);
+    if (isEdit) {
+      await updateMutation.mutateAsync({ accountId: Number(id), payload });
+    } else {
+      await createMutation.mutateAsync(payload);
+    }
     navigate("/deposits/recurring");
   };
 
-  if (isLoading)
+  useEffect(() => {
+    if (!existingAccount) return;
+    setValue("officeId", "");
+    setValue("clientId", String(existingAccount.clientId));
+    setValue("productId", String(existingAccount.depositProductId));
+    setValue("externalId", existingAccount.externalId ?? "");
+    setValue("mandatoryRecommendedDepositAmount", String(existingAccount.recurringDepositAmount ?? ""));
+    setValue("depositPeriod", String(existingAccount.depositPeriod ?? ""));
+    setValue("depositPeriodFrequencyId", String(existingAccount.depositPeriodFrequencyType?.id ?? "2"));
+    setValue("submittedOnDate", existingAccount.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0]);
+    setValue("nominalAnnualInterestRate", String(existingAccount.nominalAnnualInterestRate ?? ""));
+    setValue("interestCompoundingPeriodType", String(existingAccount.interestCompoundingPeriodType?.id ?? ""));
+    setValue("interestPostingPeriodType", String(existingAccount.interestPostingPeriodType?.id ?? ""));
+    setValue("interestCalculationType", String(existingAccount.interestCalculationType?.id ?? ""));
+    setValue("interestCalculationDaysInYearType", String(existingAccount.interestCalculationDaysInYearType?.id ?? ""));
+    setValue("preClosurePenalApplicable", existingAccount.preClosurePenalApplicable ?? false);
+    setValue("preClosurePenalInterest", String(existingAccount.preClosurePenalInterest ?? ""));
+    setValue("preClosurePenalInterestOnTypeId", String(existingAccount.preClosurePenalInterestOnType?.id ?? ""));
+    setValue("withHoldTax", existingAccount.withHoldTax ?? false);
+    setValue("fieldOfficerId", String(existingAccount.fieldOfficerId ?? ""));
+  }, [existingAccount, setValue]);
+
+  if (isLoading || existingLoading)
     return (
       <div className="max-w-4xl m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
@@ -215,8 +247,8 @@ const CreateRecurringDepositPage: React.FC = () => {
   return (
     <div className="max-w-4xl m-auto space-y-6 p-6">
       <PageHeader
-        title="New Recurring Deposit"
-        description="Open a recurring deposit account"
+        title={isEdit ? "Edit Recurring Deposit" : "New Recurring Deposit"}
+        description={isEdit ? "Update recurring deposit account" : "Open a recurring deposit account"}
         actions={
           <Button variant="outline" onClick={() => navigate("/deposits/recurring")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -463,7 +495,7 @@ const CreateRecurringDepositPage: React.FC = () => {
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            {isSubmitting ? "Creating..." : "Create RD"}
+            {isSubmitting ? "Saving..." : isEdit ? "Update RD" : "Create RD"}
           </Button>
         </div>
       </form>

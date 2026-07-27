@@ -743,6 +743,10 @@ export async function updateFixedDepositProduct(
   return data;
 }
 
+export async function deleteFixedDepositAccount(accountId: number): Promise<void> {
+  await client.delete(`/fixeddepositaccounts/${accountId}`);
+}
+
 export async function deleteFixedDepositProduct(productId: number): Promise<{ resourceId: number }> {
   const { data } = await client.delete<{ resourceId: number }>(`/fixeddepositproducts/${productId}`);
   return data;

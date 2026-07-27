@@ -18,6 +18,7 @@ import {
   Undo2,
   Calculator,
   PiggyBank,
+  Trash2,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   useFixedDepositAccount,
+  useDeleteFixedDepositAccount,
   FIXED_DEPOSIT_STATUS_CONFIG,
   approveFixedDeposit,
   activateFixedDeposit,
@@ -44,6 +46,7 @@ import {
   fixedDepositCommand,
 } from "@/features/deposits";
 import FixedDepositTransactions from "@/features/deposits/components/FixedDepositTransactions";
+import FixedDepositCharges from "@/features/deposits/components/FixedDepositCharges";
 import { useMakeFixedDepositTransaction } from "@/features/deposits";
 
 function Hash(props: React.SVGProps<SVGSVGElement>) {
@@ -99,6 +102,7 @@ const FixedDepositDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: fd, isLoading, isError, error, refetch } = useFixedDepositAccount(id);
   const makeTxnMutation = useMakeFixedDepositTransaction();
+  const deleteMutation = useDeleteFixedDepositAccount();
   const [actionLoading, setActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
 
@@ -279,6 +283,10 @@ const FixedDepositDetailPage: React.FC = () => {
                   <Ban className="mr-1 h-4 w-4" />
                   Withdraw
                 </Button>
+                <Button variant="outline" size="sm" onClick={async () => { await deleteMutation.mutateAsync(fd.id); navigate("/deposits/fixed"); }} disabled={actionLoading} className="text-red-600">
+                  <Trash2 className="mr-1 h-4 w-4" />
+                  Delete
+                </Button>
               </>
             )}
             {isApproved && (
@@ -371,6 +379,10 @@ const FixedDepositDetailPage: React.FC = () => {
           <TabsTrigger value="transactions">
             <ArrowLeftRight className="h-4 w-4 mr-1" />
             Transactions
+          </TabsTrigger>
+          <TabsTrigger value="charges">
+            <DollarSign className="h-4 w-4 mr-1" />
+            Charges
           </TabsTrigger>
         </TabsList>
         <Separator className="my-4" />
@@ -496,6 +508,9 @@ const FixedDepositDetailPage: React.FC = () => {
 
         <TabsContent value="transactions" className="mt-0">
           <FixedDepositTransactions accountId={fd.id} />
+        </TabsContent>
+        <TabsContent value="charges" className="mt-0">
+          <FixedDepositCharges accountId={fd.id} />
         </TabsContent>
       </Tabs>
 

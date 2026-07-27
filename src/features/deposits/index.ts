@@ -128,7 +128,7 @@ export { useUpdateSavingsAccount } from "./hooks/useUpdateSavingsAccount";
 
 export { useMakeDeposit, useMakeWithdrawal } from "./hooks/useDepositWithdraw";
 
-export { useFixedDepositAccounts, useFixedDepositAccount } from "./hooks/useFixedDeposits";
+export { useFixedDepositAccounts, useFixedDepositAccount, useDeleteFixedDepositAccount } from "./hooks/useFixedDeposits";
 
 export {
   useFixedDepositProducts,
