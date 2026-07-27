@@ -119,6 +119,8 @@ const sections: NavSectionConfig[] = [
       { label: "Closures", path: "/accounting/closures", icon: Lock },
       { label: "Periodic Accrual", path: "/accounting/periodic-accrual", icon: CalendarClock },
       { label: "Provisioning", path: "/accounting/provisioning-entries", icon: ShieldCheck },
+      { label: "Provisioning Categories", path: "/provisioning-categories", icon: LayoutGrid },
+      { label: "Provisioning Criteria", path: "/provisioning-criteria", icon: ListOrdered },
     ],
   },
   {
@@ -143,6 +145,7 @@ const sections: NavSectionConfig[] = [
     title: "CRM",
     defaultOpen: true,
     items: [
+      { label: "Global Search", path: "/search", icon: Search },
       { label: "Clients", path: "/clients", icon: Users },
       { label: "Groups", path: "/groups", icon: UsersRound },
       { label: "Centers", path: "/centers", icon: Building2 },
@@ -422,8 +425,9 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
         ))}
       </nav>
 
+      {/* TODO: Delete if do not need */}
       {/* Bottom: Settings */}
-      <div className="shrink-0 px-3 pb-4">
+      {/* <div className="shrink-0 px-3 pb-4">
         <Separator className="mb-3" />
         <TooltipProvider delayDuration={300} skipDelayDuration={0}>
           <ul className="flex flex-col gap-1">
@@ -432,7 +436,7 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
             ))}
           </ul>
         </TooltipProvider>
-      </div>
+      </div> */}
     </aside>
   );
 };

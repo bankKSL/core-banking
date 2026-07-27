@@ -56,6 +56,10 @@ import FinancialActivityMappingsPage from "./pages/FinancialActivityMappingsPage
 import AccountingClosuresPage from "./pages/AccountingClosuresPage";
 import PeriodicAccrualPage from "./pages/PeriodicAccrualPage";
 import ProvisioningEntriesPage from "./pages/ProvisioningEntriesPage";
+import ProvisioningCategoryListPage from "@/features/provisioning/pages/ProvisioningCategoryListPage";
+import ProvisioningCategoryFormPage from "@/features/provisioning/pages/ProvisioningCategoryFormPage";
+import ProvisioningCriteriaListPage from "@/features/provisioning/pages/ProvisioningCriteriaListPage";
+import ProvisioningCriteriaFormPage from "@/features/provisioning/pages/ProvisioningCriteriaFormPage";
 import ExchangeRatePage from "./pages/ExchangeRatePage";
 import ClientListPage from "@/features/clients/pages/ClientListPage";
 import CreateClientPage from "@/features/clients/pages/CreateClientPage";
@@ -76,6 +80,7 @@ import DepositAccountDetailPage from "./pages/DepositAccountDetailPage";
 import TransferListPage from "./pages/TransferListPage";
 import TransferFormPage from "./pages/TransferFormPage";
 import StandingInstructionListPage from "@/features/standing-instructions/pages/StandingInstructionListPage";
+import SearchPage from "@/features/search/pages/SearchPage";
 import StandingInstructionFormPage from "@/features/standing-instructions/pages/StandingInstructionFormPage";
 import StandingInstructionViewPage from "@/features/standing-instructions/pages/StandingInstructionViewPage";
 import StandingInstructionHistoryPage from "@/features/standing-instructions/pages/StandingInstructionHistoryPage";
@@ -305,9 +310,16 @@ function App() {
                   <Route path="/accounting/closures" element={<AccountingClosuresPage />} />
                   <Route path="/accounting/periodic-accrual" element={<PeriodicAccrualPage />} />
                   <Route path="/accounting/provisioning-entries" element={<ProvisioningEntriesPage />} />
+                  <Route path="/provisioning-categories" element={<ProvisioningCategoryListPage />} />
+                  <Route path="/provisioning-categories/new" element={<ProvisioningCategoryFormPage />} />
+                  <Route path="/provisioning-categories/edit/:id" element={<ProvisioningCategoryFormPage />} />
+                  <Route path="/provisioning-criteria" element={<ProvisioningCriteriaListPage />} />
+                  <Route path="/provisioning-criteria/new" element={<ProvisioningCriteriaFormPage />} />
+                  <Route path="/provisioning-criteria/edit/:id" element={<ProvisioningCriteriaFormPage />} />
                   {/* Exchange Rates */}
                   <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                   {/* CRM */}
+                  <Route path="/search" element={<SearchPage />} />
                   <Route path="/score-grades" element={<ScoreGradePage />} />
                   {/* Groups */}
                   <Route path="/groups" element={<GroupListPage />} />
