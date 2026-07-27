@@ -20,7 +20,11 @@ const TellerListPage: FC = () => {
   const navigate = useNavigate();
   const [officeFilter, setOfficeFilter] = useState<string>("all");
   const { data: offices = [] } = useOffices();
-  const { data: tellers = [], isLoading, refetch } = useTellers(officeFilter !== "all" ? Number(officeFilter) : undefined);
+  const {
+    data: tellers = [],
+    isLoading,
+    refetch,
+  } = useTellers(officeFilter !== "all" ? Number(officeFilter) : undefined);
   const deleteMutation = useDeleteTeller();
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Teller | null>(null);
@@ -34,23 +38,42 @@ const TellerListPage: FC = () => {
   const columns: ColumnDef<Teller>[] = [
     { key: "name", header: "Name", cell: (r) => <span className="font-medium">{r.name}</span> },
     { key: "officeName", header: "Office", cell: (r) => r.officeName ?? "—" },
-    { key: "status", header: "Status", cell: (r) => <Badge variant={r.status === 300 ? "success" : r.status === 600 ? "default" : "info"} size="sm">{STATUS_LABELS[r.status] ?? r.status}</Badge> },
-    { key: "startDate", header: "Start Date", cell: (r) => r.startDate ? new Date(r.startDate).toLocaleDateString() : "—" },
-    { key: "endDate", header: "End Date", cell: (r) => r.endDate ? new Date(r.endDate).toLocaleDateString() : "—" },
     {
-      key: "actions", header: "",
+      key: "status",
+      header: "Status",
+      cell: (r) => (
+        <Badge variant={r.status === 300 ? "success" : r.status === 600 ? "default" : "info"} size="sm">
+          {STATUS_LABELS[r.status] ?? r.status}
+        </Badge>
+      ),
+    },
+    {
+      key: "startDate",
+      header: "Start Date",
+      cell: (r) => (r.startDate ? new Date(r.startDate).toLocaleDateString() : "—"),
+    },
+    { key: "endDate", header: "End Date", cell: (r) => (r.endDate ? new Date(r.endDate).toLocaleDateString() : "—") },
+    {
+      key: "actions",
+      header: "",
       cell: (r) => (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/tellers/${r.id}`)}><Eye className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/tellers/edit/${r.id}`)}><Pencil className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(r)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/tellers/${r.id}`)}>
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/tellers/edit/${r.id}`)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(r)}>
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
         </div>
       ),
     },
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Tellers"
         description="Manage teller counters and cashier assignments"
@@ -66,26 +89,54 @@ const TellerListPage: FC = () => {
           <div className="flex items-center gap-3">
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search tellers..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+              <Input
+                placeholder="Search tellers..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
             </div>
             <Select value={officeFilter} onValueChange={setOfficeFilter}>
-              <SelectTrigger className="w-44"><SelectValue placeholder="All Offices" /></SelectTrigger>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="All Offices" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Offices</SelectItem>
-                {offices.map((o) => <SelectItem key={o.id} value={String(o.id)}>{o.name}</SelectItem>)}
+                {offices.map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
           ) : (
             <DataTable columns={columns} data={filtered} emptyState={{ message: "No tellers found." }} minWidth={700} />
           )}
         </CardContent>
       </Card>
-      <ConfirmDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} onConfirm={async () => { if (deleteTarget) { await deleteMutation.mutateAsync(deleteTarget.id); setDeleteTarget(null); } }} title="Delete Teller" description={`Delete "${deleteTarget?.name}"? Fails if cashiers are assigned.`} variant="destructive" confirmLabel="Delete" />
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+        onConfirm={async () => {
+          if (deleteTarget) {
+            await deleteMutation.mutateAsync(deleteTarget.id);
+            setDeleteTarget(null);
+          }
+        }}
+        title="Delete Teller"
+        description={`Delete "${deleteTarget?.name}"? Fails if cashiers are assigned.`}
+        variant="destructive"
+        confirmLabel="Delete"
+      />
     </div>
   );
 };

@@ -22,9 +22,7 @@ const AccountingRulesPage: React.FC = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return rules;
-    return rules.filter(
-      (r) => r.name.toLowerCase().includes(q) || (r.description ?? "").toLowerCase().includes(q),
-    );
+    return rules.filter((r) => r.name.toLowerCase().includes(q) || (r.description ?? "").toLowerCase().includes(q));
   }, [rules, search]);
 
   const columns: ColumnDef<AccountingRuleData>[] = [
@@ -54,9 +52,13 @@ const AccountingRulesPage: React.FC = () => {
       header: "Type",
       cell: (r) =>
         r.systemDefined ? (
-          <Badge variant="default" size="sm">System</Badge>
+          <Badge variant="default" size="sm">
+            System
+          </Badge>
         ) : (
-          <Badge variant="info" size="sm">Custom</Badge>
+          <Badge variant="info" size="sm">
+            Custom
+          </Badge>
         ),
     },
     {
@@ -84,7 +86,7 @@ const AccountingRulesPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader title="Accounting Rules" description="Manage accounting rules" />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
@@ -97,7 +99,7 @@ const AccountingRulesPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Accounting Rules"
         description="Predefined debit/credit templates for non-accountant users"
@@ -131,7 +133,12 @@ const AccountingRulesPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={filtered} emptyState={{ message: "No accounting rules found." }} minWidth={900} />
+            <DataTable
+              columns={columns}
+              data={filtered}
+              emptyState={{ message: "No accounting rules found." }}
+              minWidth={900}
+            />
           )}
         </CardContent>
       </Card>

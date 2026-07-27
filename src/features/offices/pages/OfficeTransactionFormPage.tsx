@@ -72,7 +72,7 @@ const OfficeTransactionFormPage: React.FC = () => {
           dateFormat: "yyyy-MM-dd",
           locale: "en",
         });
-        navigate("/offices/transactions");
+        navigate("/office-transactions");
       } catch (err: unknown) {
         const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
         const msg =
@@ -105,7 +105,7 @@ const OfficeTransactionFormPage: React.FC = () => {
         title="New Office Transaction"
         description="Create a money transfer between offices"
         actions={
-          <Button variant="outline" onClick={() => navigate("/offices/transactions")}>
+          <Button variant="outline" onClick={() => navigate("/office-transactions")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
         }
@@ -206,7 +206,7 @@ const OfficeTransactionFormPage: React.FC = () => {
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => navigate("/offices/transactions")}>
+              <Button type="button" variant="outline" onClick={() => navigate("/office-transactions")}>
                 Cancel
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>

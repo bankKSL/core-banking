@@ -276,8 +276,8 @@ function App() {
                   <Route path="/offices" element={<OfficeListPage />} />
                   <Route path="/offices/new" element={<OfficeFormPage />} />
                   <Route path="/offices/edit/:id" element={<OfficeFormPage />} />
-                  <Route path="/offices/transactions" element={<OfficeTransactionListPage />} />
-                  <Route path="/offices/transactions/new" element={<OfficeTransactionFormPage />} />
+                  <Route path="/office-transactions" element={<OfficeTransactionListPage />} />
+                  <Route path="/office-transactions/new" element={<OfficeTransactionFormPage />} />
                   {/* Transfers */}
                   <Route path="/transfers/history" element={<TransferListPage />} />
                   <Route path="/transfers/new" element={<TransferFormPage />} />
@@ -285,7 +285,7 @@ function App() {
                   <Route path="/transfers/standing-instructions/new" element={<StandingInstructionFormPage />} />
                   <Route path="/transfers/standing-instructions/:id" element={<StandingInstructionViewPage />} />
                   <Route path="/transfers/standing-instructions/edit/:id" element={<StandingInstructionFormPage />} />
-                  <Route path="/transfers/standing-instructions/history" element={<StandingInstructionHistoryPage />} />
+                  <Route path="/standing-instruction-history" element={<StandingInstructionHistoryPage />} />
                   {/* External Asset Owners (Investor Base) */}
                   <Route path="/external-asset-owners/owners" element={<ExternalAssetOwnerListPage />} />
                   <Route path="/external-asset-owners/new" element={<ExternalAssetOwnerFormPage />} />

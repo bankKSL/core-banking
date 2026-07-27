@@ -224,7 +224,7 @@ const CampaignListPage: FC = () => {
   const [tab, setTab] = useState("sms");
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Campaigns"
         description="Manage SMS and email marketing campaigns"

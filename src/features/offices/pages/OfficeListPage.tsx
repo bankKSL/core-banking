@@ -100,7 +100,7 @@ const OfficeListPage: React.FC = () => {
         description="Manage organizational hierarchy"
         actions={
           <>
-            <Button variant="outline" onClick={() => navigate("/offices/transactions")}>
+            <Button variant="outline" onClick={() => navigate("/office-transactions")}>
               <ArrowRightLeft className="mr-2 h-4 w-4" /> Transactions
             </Button>
             <Button onClick={() => navigate("/offices/new")}>

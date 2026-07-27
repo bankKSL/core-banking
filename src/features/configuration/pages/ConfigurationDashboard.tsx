@@ -1,14 +1,6 @@
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Settings,
-  Globe,
-  ShieldCheck,
-  Calendar,
-  Database,
-  Mail,
-  Zap,
-} from "lucide-react";
+import { Settings, Globe, ShieldCheck, Calendar, Database, Mail, Zap } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -76,7 +68,7 @@ const ConfigurationDashboard: FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Configuration & Admin"
         description="Manage global settings, external services, password policies, and system configuration"

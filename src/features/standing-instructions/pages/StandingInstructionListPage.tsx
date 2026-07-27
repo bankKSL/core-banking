@@ -60,7 +60,7 @@ const StandingInstructionListPage: React.FC = () => {
         description="Manage recurring transfer instructions"
         actions={
           <>
-            <Button variant="outline" onClick={() => navigate("/transfers/standing-instructions/history")}>
+            <Button variant="outline" onClick={() => navigate("/standing-instruction-history")}>
               View History
             </Button>
             <Button onClick={() => navigate("/transfers/standing-instructions/new")}>

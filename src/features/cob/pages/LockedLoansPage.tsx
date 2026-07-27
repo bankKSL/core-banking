@@ -26,11 +26,9 @@ const LockedLoansPage: FC = () => {
   const { data: lockedData, isLoading, refetch } = useLockedLoans(page, limit);
 
   const filtered = !search
-    ? lockedData?.content ?? []
+    ? (lockedData?.content ?? [])
     : (lockedData?.content ?? []).filter(
-        (l) =>
-          String(l.loanId).includes(search) ||
-          l.lockOwner.toLowerCase().includes(search.toLowerCase()),
+        (l) => String(l.loanId).includes(search) || l.lockOwner.toLowerCase().includes(search.toLowerCase()),
       );
 
   const columns: ColumnDef<LoanAccountLock>[] = [
@@ -77,12 +75,10 @@ const LockedLoansPage: FC = () => {
     },
   ];
 
-  const totalPages = lockedData
-    ? Math.ceil((lockedData.content?.length ?? 0) / limit) + page
-    : 0;
+  const totalPages = lockedData ? Math.ceil((lockedData.content?.length ?? 0) / limit) + page : 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Locked Loans"
         description="Loan accounts currently locked during COB processing"

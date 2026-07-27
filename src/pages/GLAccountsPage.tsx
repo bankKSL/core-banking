@@ -11,7 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGLAccounts, useDeleteGLAccount, GL_ACCOUNT_TYPE_LABELS, GL_ACCOUNT_USAGE_LABELS } from "@/features/accounting";
+import {
+  useGLAccounts,
+  useDeleteGLAccount,
+  GL_ACCOUNT_TYPE_LABELS,
+  GL_ACCOUNT_USAGE_LABELS,
+} from "@/features/accounting";
 import type { GLAccountData } from "@/features/accounting";
 
 const GLAccountsPage: React.FC = () => {
@@ -34,9 +39,7 @@ const GLAccountsPage: React.FC = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return accounts;
-    return accounts.filter(
-      (a) => a.name.toLowerCase().includes(q) || a.glCode.toLowerCase().includes(q),
-    );
+    return accounts.filter((a) => a.name.toLowerCase().includes(q) || a.glCode.toLowerCase().includes(q));
   }, [accounts, search]);
 
   const stats = useMemo(
@@ -79,9 +82,13 @@ const GLAccountsPage: React.FC = () => {
       header: "Manual Entries",
       cell: (r) =>
         r.manualEntriesAllowed ? (
-          <Badge variant="success" size="sm">Allowed</Badge>
+          <Badge variant="success" size="sm">
+            Allowed
+          </Badge>
         ) : (
-          <Badge variant="default" size="sm">No</Badge>
+          <Badge variant="default" size="sm">
+            No
+          </Badge>
         ),
     },
     {
@@ -89,9 +96,13 @@ const GLAccountsPage: React.FC = () => {
       header: "Status",
       cell: (r) =>
         r.disabled ? (
-          <Badge variant="error" size="sm">Disabled</Badge>
+          <Badge variant="error" size="sm">
+            Disabled
+          </Badge>
         ) : (
-          <Badge variant="success" size="sm">Active</Badge>
+          <Badge variant="success" size="sm">
+            Active
+          </Badge>
         ),
     },
     {
@@ -118,7 +129,7 @@ const GLAccountsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader title="Chart of Accounts" description="Manage GL accounts" />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
@@ -131,7 +142,7 @@ const GLAccountsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Chart of Accounts"
         description="Manage general ledger accounts"
@@ -206,7 +217,12 @@ const GLAccountsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={filtered} emptyState={{ message: "No GL accounts found." }} minWidth={900} />
+            <DataTable
+              columns={columns}
+              data={filtered}
+              emptyState={{ message: "No GL accounts found." }}
+              minWidth={900}
+            />
           )}
         </CardContent>
       </Card>

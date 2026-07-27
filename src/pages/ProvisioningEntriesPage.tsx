@@ -71,9 +71,13 @@ const ProvisioningEntriesPage: React.FC = () => {
       header: "Journal Entries",
       cell: (r) =>
         r.journalEntriesCreated ? (
-          <Badge variant="success" size="sm">Created</Badge>
+          <Badge variant="success" size="sm">
+            Created
+          </Badge>
         ) : (
-          <Badge variant="warning" size="sm">Pending</Badge>
+          <Badge variant="warning" size="sm">
+            Pending
+          </Badge>
         ),
     },
     {
@@ -99,7 +103,11 @@ const ProvisioningEntriesPage: React.FC = () => {
             disabled={actingId === r.id}
             onClick={() => runCommand(r.id, "recreateprovisioningentry")}
           >
-            {actingId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 text-amber-500" />}
+            {actingId === r.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 text-amber-500" />
+            )}
           </Button>
         </div>
       ),
@@ -107,7 +115,7 @@ const ProvisioningEntriesPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Provisioning Entries"
         description="Create and manage loan loss provisioning entries"
@@ -131,10 +139,7 @@ const ProvisioningEntriesPage: React.FC = () => {
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
             <label className="flex items-center gap-2 pb-2 text-sm">
-              <Checkbox
-                checked={createJournalEntries}
-                onCheckedChange={(c) => setCreateJournalEntries(c === true)}
-              />
+              <Checkbox checked={createJournalEntries} onCheckedChange={(c) => setCreateJournalEntries(c === true)} />
               Also create journal entries
             </label>
             <Button onClick={handleCreate} disabled={createMutation.isPending}>

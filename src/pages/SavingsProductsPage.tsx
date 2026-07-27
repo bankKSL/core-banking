@@ -71,7 +71,7 @@ const SavingsProductsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader
           title="Savings Products"
           description="Manage savings product definitions"
@@ -93,7 +93,7 @@ const SavingsProductsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Savings Products"
         description="Manage savings product definitions"

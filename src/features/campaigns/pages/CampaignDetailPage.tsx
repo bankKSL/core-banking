@@ -72,17 +72,18 @@ const CampaignDetailPage: FC = () => {
 
   const handleAction = async () => {
     if (!numericId || !actionDialog || !actionDate) return;
-    const payload = {
-      [actionDialog === "activate" ? "activationDate" : "closureDate"]: actionDate,
-      locale: "en",
-      dateFormat: "yyyy-MM-dd",
-    };
     if (isSms) {
-      if (actionDialog === "activate") await activateSms.mutateAsync({ id: numericId, payload });
-      else await closeSms.mutateAsync({ id: numericId, payload });
+      if (actionDialog === "activate") {
+        await activateSms.mutateAsync({ id: numericId, payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+      } else {
+        await closeSms.mutateAsync({ id: numericId, payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+      }
     } else {
-      if (actionDialog === "activate") await activateEmail.mutateAsync({ id: numericId, payload });
-      else await closeEmail.mutateAsync({ id: numericId, payload });
+      if (actionDialog === "activate") {
+        await activateEmail.mutateAsync({ id: numericId, payload: { activationDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+      } else {
+        await closeEmail.mutateAsync({ id: numericId, payload: { closureDate: actionDate, locale: "en", dateFormat: "yyyy-MM-dd" } });
+      }
     }
     setActionDialog(null);
     setActionDate("");

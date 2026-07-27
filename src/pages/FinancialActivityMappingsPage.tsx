@@ -60,7 +60,8 @@ const FinancialActivityMappingsPage: React.FC = () => {
       header: "GL Account",
       cell: (r) => (
         <span className="text-sm">
-          {r.glAccountData?.name ?? "—"} <code className="text-xs text-gray-400">({r.glAccountData?.glCode ?? ""})</code>
+          {r.glAccountData?.name ?? "—"}{" "}
+          <code className="text-xs text-gray-400">({r.glAccountData?.glCode ?? ""})</code>
         </span>
       ),
     },
@@ -84,7 +85,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader title="Financial Activity Mappings" description="Map financial activities to GL accounts" />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
@@ -97,7 +98,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Financial Activity Mappings"
         description="Map financial activities (e.g. Fund Source) to GL accounts"
@@ -170,7 +171,12 @@ const FinancialActivityMappingsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={mappings} emptyState={{ message: "No mappings found." }} minWidth={700} />
+            <DataTable
+              columns={columns}
+              data={mappings}
+              emptyState={{ message: "No mappings found." }}
+              minWidth={700}
+            />
           )}
         </CardContent>
       </Card>

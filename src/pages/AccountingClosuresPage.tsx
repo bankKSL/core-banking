@@ -19,12 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  useGLClosures,
-  useCreateGLClosure,
-  useUpdateGLClosure,
-  useDeleteGLClosure,
-} from "@/features/accounting";
+import { useGLClosures, useCreateGLClosure, useUpdateGLClosure, useDeleteGLClosure } from "@/features/accounting";
 import type { GLClosureData } from "@/features/accounting";
 import { useOffices } from "@/hooks/useOffices";
 import { currentDate } from "@/lib/utils";
@@ -97,12 +92,20 @@ const AccountingClosuresPage: React.FC = () => {
       header: "Status",
       cell: (r) =>
         r.deleted ? (
-          <Badge variant="error" size="sm">Deleted</Badge>
+          <Badge variant="error" size="sm">
+            Deleted
+          </Badge>
         ) : (
-          <Badge variant="success" size="sm">Locked</Badge>
+          <Badge variant="success" size="sm">
+            Locked
+          </Badge>
         ),
     },
-    { key: "createdByUsername", header: "Created By", cell: (r) => <span className="text-sm text-gray-500">{r.createdByUsername ?? "—"}</span> },
+    {
+      key: "createdByUsername",
+      header: "Created By",
+      cell: (r) => <span className="text-sm text-gray-500">{r.createdByUsername ?? "—"}</span>,
+    },
     {
       key: "actions",
       header: "",
@@ -129,7 +132,7 @@ const AccountingClosuresPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader title="Accounting Closures" description="Lock journal entry posting per office" />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
@@ -142,7 +145,7 @@ const AccountingClosuresPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Accounting Closures"
         description="Lock journal entry posting before a given date per office"
@@ -182,7 +185,12 @@ const AccountingClosuresPage: React.FC = () => {
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label>Comments</Label>
-              <Textarea value={comments} onChange={(e) => setComments(e.target.value)} rows={2} placeholder="e.g. Month-end closure" />
+              <Textarea
+                value={comments}
+                onChange={(e) => setComments(e.target.value)}
+                rows={2}
+                placeholder="e.g. Month-end closure"
+              />
             </div>
             {formError && <p className="col-span-2 text-sm text-red-500">{formError}</p>}
             <div className="col-span-2 flex justify-end gap-2">
@@ -223,7 +231,12 @@ const AccountingClosuresPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={closures} emptyState={{ message: "No closures found." }} minWidth={800} />
+            <DataTable
+              columns={columns}
+              data={closures}
+              emptyState={{ message: "No closures found." }}
+              minWidth={800}
+            />
           )}
         </CardContent>
       </Card>

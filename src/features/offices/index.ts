@@ -7,6 +7,6 @@ export type { Office, OfficeCreateRequest, OfficeUpdateRequest } from "@/types";
 export { officeCreateSchema, officeUpdateSchema } from "@/lib/validations/office";
 export type { OfficeCreateFormData, OfficeUpdateFormData } from "@/lib/validations/office";
 
-export { OfficeTree } from "@/components/organization/OfficeTree";
-export { OfficeBreadcrumb } from "@/components/organization/OfficeBreadcrumb";
-export { OfficeDrawer } from "@/components/organization/OfficeDrawer";
+export { default as OfficeTree } from "@/components/organization/OfficeTree";
+export { default as OfficeBreadcrumb } from "@/components/organization/OfficeBreadcrumb";
+export { default as OfficeDrawer } from "@/components/organization/OfficeDrawer";

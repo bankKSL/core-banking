@@ -92,18 +92,20 @@ const JournalEntriesPage: React.FC = () => {
     {
       key: "amount",
       header: "Amount",
-      cell: (r) => (
-        <span className="font-mono text-sm">{formatCurrency(r.amount, r.currency?.code)}</span>
-      ),
+      cell: (r) => <span className="font-mono text-sm">{formatCurrency(r.amount, r.currency?.code)}</span>,
     },
     {
       key: "manualEntry",
       header: "Source",
       cell: (r) =>
         r.manualEntry ? (
-          <Badge variant="warning" size="sm">Manual</Badge>
+          <Badge variant="warning" size="sm">
+            Manual
+          </Badge>
         ) : (
-          <Badge variant="default" size="sm">System</Badge>
+          <Badge variant="default" size="sm">
+            System
+          </Badge>
         ),
     },
     {
@@ -111,9 +113,13 @@ const JournalEntriesPage: React.FC = () => {
       header: "Status",
       cell: (r) =>
         r.reversed ? (
-          <Badge variant="error" size="sm">Reversed</Badge>
+          <Badge variant="error" size="sm">
+            Reversed
+          </Badge>
         ) : (
-          <Badge variant="success" size="sm">Posted</Badge>
+          <Badge variant="success" size="sm">
+            Posted
+          </Badge>
         ),
     },
     {
@@ -147,7 +153,7 @@ const JournalEntriesPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Journal Entries"
         description="View and create manual journal entries"
@@ -164,7 +170,13 @@ const JournalEntriesPage: React.FC = () => {
           <div className="flex items-end gap-3">
             <div className="space-y-1">
               <Label className="text-xs">Office</Label>
-              <Select value={officeFilter} onValueChange={(v) => { setOfficeFilter(v); setPage(1); }}>
+              <Select
+                value={officeFilter}
+                onValueChange={(v) => {
+                  setOfficeFilter(v);
+                  setPage(1);
+                }}
+              >
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="All Offices" />
                 </SelectTrigger>
@@ -180,15 +192,37 @@ const JournalEntriesPage: React.FC = () => {
             </div>
             <div className="space-y-1">
               <Label className="text-xs">From</Label>
-              <Input type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value); setPage(1); }} className="w-36" />
+              <Input
+                type="date"
+                value={fromDate}
+                onChange={(e) => {
+                  setFromDate(e.target.value);
+                  setPage(1);
+                }}
+                className="w-36"
+              />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">To</Label>
-              <Input type="date" value={toDate} onChange={(e) => { setToDate(e.target.value); setPage(1); }} className="w-36" />
+              <Input
+                type="date"
+                value={toDate}
+                onChange={(e) => {
+                  setToDate(e.target.value);
+                  setPage(1);
+                }}
+                className="w-36"
+              />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Source</Label>
-              <Select value={manualOnly} onValueChange={(v) => { setManualOnly(v); setPage(1); }}>
+              <Select
+                value={manualOnly}
+                onValueChange={(v) => {
+                  setManualOnly(v);
+                  setPage(1);
+                }}
+              >
                 <SelectTrigger className="w-28">
                   <SelectValue />
                 </SelectTrigger>
@@ -216,7 +250,12 @@ const JournalEntriesPage: React.FC = () => {
             </div>
           ) : (
             <>
-              <DataTable columns={columns} data={entries} emptyState={{ message: "No journal entries found." }} minWidth={1100} />
+              <DataTable
+                columns={columns}
+                data={entries}
+                emptyState={{ message: "No journal entries found." }}
+                minWidth={1100}
+              />
               {totalRecords > ACCOUNTING_PAGE_SIZE && (
                 <Pagination
                   currentPage={page}

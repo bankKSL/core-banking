@@ -86,12 +86,15 @@ const RecurringDepositProductsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <PageHeader
           title="Recurring Deposit Products"
           description="Manage recurring deposit product definitions"
           actions={
-            <Button onClick={() => navigate("/deposits/recurring-products/new")} className="bg-[#D32F2F] hover:bg-red-700">
+            <Button
+              onClick={() => navigate("/deposits/recurring-products/new")}
+              className="bg-[#D32F2F] hover:bg-red-700"
+            >
               <Plus className="mr-2 h-4 w-4" /> Create Product
             </Button>
           }
@@ -107,12 +110,15 @@ const RecurringDepositProductsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Recurring Deposit Products"
         description="Manage recurring deposit product definitions"
         actions={
-          <Button onClick={() => navigate("/deposits/recurring-products/new")} className="bg-[#D32F2F] hover:bg-red-700">
+          <Button
+            onClick={() => navigate("/deposits/recurring-products/new")}
+            className="bg-[#D32F2F] hover:bg-red-700"
+          >
             <Plus className="mr-2 h-4 w-4" /> Create Product
           </Button>
         }

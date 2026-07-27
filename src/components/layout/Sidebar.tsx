@@ -120,7 +120,7 @@ const sections: NavSectionConfig[] = [
       { label: "Transfer History", path: "/transfers/history", icon: ArrowRightLeft },
       { label: "New Transfer", path: "/transfers/new", icon: ArrowRightLeft },
       { label: "Standing Instructions", path: "/transfers/standing-instructions", icon: FileText },
-      { label: "SI History", path: "/transfers/standing-instructions/history", icon: Repeat },
+      { label: "SI History", path: "/standing-instruction-history", icon: Repeat },
     ],
   },
   {
@@ -139,7 +139,7 @@ const sections: NavSectionConfig[] = [
     defaultOpen: true,
     items: [
       { label: "Branches (Offices)", path: "/offices", icon: Building2 },
-      { label: "Office Transactions", path: "/offices/transactions", icon: ArrowRightLeft },
+      { label: "Office Transactions", path: "/office-transactions", icon: ArrowRightLeft },
     ],
   },
   {

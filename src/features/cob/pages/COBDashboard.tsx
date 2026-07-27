@@ -1,16 +1,6 @@
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Activity,
-  ListOrdered,
-  Play,
-  Lock,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Loader2,
-  AlertTriangle,
-} from "lucide-react";
+import { Activity, ListOrdered, Play, Lock, CheckCircle2, XCircle, Clock, Loader2, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +39,7 @@ const COBDashboard: FC = () => {
   const { data: catchUpStatus, isLoading: catchUpLoading } = useIsCatchUpRunning();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Close of Business"
         description="Daily end-of-day batch processing for loan accounts — configure business steps, trigger catch-up, and monitor locks"
@@ -65,9 +55,7 @@ const COBDashboard: FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{jobNames?.businessJobs?.length ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-1">
-              {jobNames?.businessJobs?.join(", ") || "No jobs configured"}
-            </p>
+            <p className="text-xs text-gray-500 mt-1">{jobNames?.businessJobs?.join(", ") || "No jobs configured"}</p>
           </CardContent>
         </Card>
 
@@ -84,9 +72,7 @@ const COBDashboard: FC = () => {
             ) : oldestCob ? (
               <div>
                 <p className="text-sm font-medium">{oldestCob.cobBusinessDate}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {oldestCob.loanIds.length} loan(s) behind
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{oldestCob.loanIds.length} loan(s) behind</p>
               </div>
             ) : (
               <div className="flex items-center gap-2 text-sm text-emerald-600">
@@ -120,9 +106,7 @@ const COBDashboard: FC = () => {
                   Running
                 </Badge>
                 {catchUpStatus.processingDate && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Processing: {catchUpStatus.processingDate}
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Processing: {catchUpStatus.processingDate}</p>
                 )}
               </div>
             ) : (

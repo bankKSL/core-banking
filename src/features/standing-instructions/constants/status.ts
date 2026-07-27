@@ -1,4 +1,4 @@
-import type { StatusBadgeVariant } from "@/components/shared/StatusBadge";
+type StatusBadgeVariant = "success" | "warning" | "error" | "info" | "default";
 
 export const STANDING_INSTRUCTION_STATUS_CONFIG: Record<number, { variant: StatusBadgeVariant; label: string }> = {
   1: { variant: "success", label: "Active" },

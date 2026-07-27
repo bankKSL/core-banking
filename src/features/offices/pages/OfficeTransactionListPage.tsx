@@ -100,7 +100,10 @@ const OfficeTransactionListPage: React.FC = () => {
             <Button variant="outline" onClick={() => navigate("/offices")}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Offices
             </Button>
-            <Button onClick={() => navigate("/offices/transactions/new")}>
+            <Button variant="outline" onClick={() => navigate("/office-transactions/new")}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Offices
+            </Button>
+            <Button onClick={() => navigate("/office-transactions/new")}>
               <Plus className="mr-2 h-4 w-4" /> New Transaction
             </Button>
           </>
@@ -123,7 +126,9 @@ const OfficeTransactionListPage: React.FC = () => {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
         title="Delete Transaction"
         description="Are you sure you want to delete this office transaction?"
         confirmLabel="Delete"

@@ -66,7 +66,7 @@ const InteropDashboard: FC = () => {
   const { data: health, isLoading: healthLoading } = useHealthCheck();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Interoperation"
         description="Mojaloop-compatible digital financial services — party management, quotes, transfers, and loan operations"

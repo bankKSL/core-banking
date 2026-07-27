@@ -48,17 +48,24 @@ const PermissionsPage: FC = () => {
     await updateMutation.mutateAsync(selected);
   };
 
-  if (isLoading) return <div className="p-6"><Skeleton className="h-10 w-48 mb-6" /><Skeleton className="h-96 w-full rounded-xl" /></div>;
+  if (isLoading)
+    return (
+      <div className="p-6">
+        <Skeleton className="h-10 w-48 mb-6" />
+        <Skeleton className="h-96 w-full rounded-xl" />
+      </div>
+    );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Maker-Checker Permissions"
         description="Enable or disable maker-checker workflow for each permission"
         actions={
           <Button onClick={handleSave} disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
             {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <Save className="mr-2 h-4 w-4" />Save Configuration
+            <Save className="mr-2 h-4 w-4" />
+            Save Configuration
           </Button>
         }
       />
@@ -67,7 +74,12 @@ const PermissionsPage: FC = () => {
           <CardTitle>Maker-Checker Permissions</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+            <Input
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -76,7 +88,10 @@ const PermissionsPage: FC = () => {
               <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-2">{group}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {perms?.map((p) => (
-                  <label key={p.code} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 text-sm">
+                  <label
+                    key={p.code}
+                    className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 text-sm"
+                  >
                     <Checkbox
                       checked={selected[p.code] ?? false}
                       onCheckedChange={(checked) => setSelected((prev) => ({ ...prev, [p.code]: checked === true }))}
@@ -88,7 +103,9 @@ const PermissionsPage: FC = () => {
               <Separator className="mt-4" />
             </div>
           ))}
-          {Object.keys(filteredGroups).length === 0 && <p className="text-sm text-gray-500">No maker-checker permissions available.</p>}
+          {Object.keys(filteredGroups).length === 0 && (
+            <p className="text-sm text-gray-500">No maker-checker permissions available.</p>
+          )}
         </CardContent>
       </Card>
     </div>

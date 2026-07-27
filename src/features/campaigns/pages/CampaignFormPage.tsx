@@ -279,7 +279,7 @@ const CampaignFormPage: FC = () => {
                 rows={3}
               />
               {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message.message}</p>}
-              <p className="text-xs text-gray-500 mt-1">Max 480 characters. Use {{paramName}} placeholders.</p>
+              <p className="text-xs text-gray-500 mt-1">Max 480 characters. Use {`{paramName}`} placeholders.</p>
             </div>
           </CardContent>
         </Card>

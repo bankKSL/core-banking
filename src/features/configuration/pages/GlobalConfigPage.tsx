@@ -124,7 +124,7 @@ const GlobalConfigPage: FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Global Configuration"
         description="Manage system-wide settings, feature flags, and configuration values"

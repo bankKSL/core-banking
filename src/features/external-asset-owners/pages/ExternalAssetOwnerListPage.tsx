@@ -18,9 +18,7 @@ const ExternalAssetOwnerListPage: FC = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return owners;
-    return owners.filter(
-      (o) => o.externalId.toLowerCase().includes(q) || String(o.id).includes(q),
-    );
+    return owners.filter((o) => o.externalId.toLowerCase().includes(q) || String(o.id).includes(q));
   }, [owners, search]);
 
   const columns: ColumnDef<ExternalAssetOwner>[] = [
@@ -28,20 +26,14 @@ const ExternalAssetOwnerListPage: FC = () => {
     {
       key: "externalId",
       header: "External ID",
-      cell: (r) => (
-        <span className="font-mono text-sm">{r.externalId}</span>
-      ),
+      cell: (r) => <span className="font-mono text-sm">{r.externalId}</span>,
     },
     {
       key: "actions",
       header: "",
       cell: (r) => (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/external-asset-owners/transfers")}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate("/external-asset-owners/transfers")}>
             <ExternalLink className="h-4 w-4" />
           </Button>
         </div>
@@ -50,15 +42,12 @@ const ExternalAssetOwnerListPage: FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="External Asset Owners"
         description="Manage external investors who purchase loans from the bank"
         actions={
-          <Button
-            onClick={() => navigate("/external-asset-owners/new")}
-            className="bg-[#D32F2F] hover:bg-red-700"
-          >
+          <Button onClick={() => navigate("/external-asset-owners/new")} className="bg-[#D32F2F] hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" /> Create Owner
           </Button>
         }
