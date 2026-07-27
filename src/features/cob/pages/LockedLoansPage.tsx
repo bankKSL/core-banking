@@ -61,7 +61,7 @@ const LockedLoansPage: FC = () => {
       header: "Error",
       cell: (r) =>
         r.error ? (
-          <span className="text-red-600 text-xs max-w-[200px] truncate block" title={r.error}>
+          <span className="text-red-600 text-xs max-w-50 truncate block" title={r.error}>
             {r.error}
           </span>
         ) : (

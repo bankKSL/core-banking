@@ -38,6 +38,7 @@ import {
   Eye,
   Search,
   ListOrdered,
+  CreditCard,
   ToggleLeft,
   Repeat,
 } from "lucide-react";
@@ -140,15 +141,19 @@ const sections: NavSectionConfig[] = [
     items: [
       { label: "Branches (Offices)", path: "/offices", icon: Building2 },
       { label: "Office Transactions", path: "/office-transactions", icon: ArrowRightLeft },
+      { label: "Staff", path: "/staff", icon: Users },
+      { label: "Holidays", path: "/holidays", icon: Calendar },
+      { label: "Currencies", path: "/currencies", icon: Wallet },
+      { label: "Funds", path: "/funds", icon: Banknote },
+      { label: "Payment Types", path: "/payment-types", icon: CreditCard },
+      { label: "Working Days", path: "/working-days", icon: CalendarClock },
     ],
   },
   {
     id: "marketing",
     title: "Marketing",
     defaultOpen: true,
-    items: [
-      { label: "Campaigns", path: "/campaigns", icon: Megaphone },
-    ],
+    items: [{ label: "Campaigns", path: "/campaigns", icon: Megaphone }],
   },
   {
     id: "configuration",
@@ -185,21 +190,24 @@ const sections: NavSectionConfig[] = [
       { label: "Account Details", path: "/interop/account", icon: Eye },
     ],
   },
-  {
-    id: "formula-engine",
-    title: "Formula Engine",
-    defaultOpen: true,
-    items: [
-      { label: "Campaign", path: "/campaign", icon: Megaphone },
-      { label: "Category", path: "/category", icon: Tags },
-      { label: "Conditions", path: "/conditions", icon: Filter },
-      { label: "Formula Builder", path: "/formula-builder", icon: Calculator },
-      { label: "Actions", path: "/actions", icon: Play },
-      { label: "Simulation", path: "/simulation", icon: FlaskConical },
-      { label: "Execution Logs", path: "/execution-logs", icon: FileText },
-      { label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
-    ],
-  },
+  // // TODO: remove all the items below if not needed
+  // // TODO: remove all the components related
+  // // because they are not yet implemented with api
+  // {
+  //   id: "formula-engine",
+  //   title: "Formula Engine",
+  //   defaultOpen: true,
+  //   items: [
+  //     { label: "Campaign", path: "/campaign", icon: Megaphone },
+  //     { label: "Category", path: "/category", icon: Tags },
+  //     { label: "Conditions", path: "/conditions", icon: Filter },
+  //     { label: "Formula Builder", path: "/formula-builder", icon: Calculator },
+  //     { label: "Actions", path: "/actions", icon: Play },
+  //     { label: "Simulation", path: "/simulation", icon: FlaskConical },
+  //     { label: "Execution Logs", path: "/execution-logs", icon: FileText },
+  //     { label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
+  //   ],
+  // },
   {
     id: "administration",
     title: "Administration",

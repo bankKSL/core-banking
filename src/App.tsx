@@ -121,6 +121,16 @@ import OfficeListPage from "@/features/offices/pages/OfficeListPage";
 import OfficeFormPage from "@/features/offices/pages/OfficeFormPage";
 import OfficeTransactionListPage from "@/features/offices/pages/OfficeTransactionListPage";
 import OfficeTransactionFormPage from "@/features/offices/pages/OfficeTransactionFormPage";
+import StaffListPage from "@/features/staff/pages/StaffListPage";
+import StaffFormPage from "@/features/staff/pages/StaffFormPage";
+import HolidayListPage from "@/features/holidays/pages/HolidayListPage";
+import HolidayFormPage from "@/features/holidays/pages/HolidayFormPage";
+import CurrenciesPage from "@/features/currencies/pages/CurrenciesPage";
+import FundListPage from "@/features/funds/pages/FundListPage";
+import FundFormPage from "@/features/funds/pages/FundFormPage";
+import PaymentTypeListPage from "@/features/payment-types/pages/PaymentTypeListPage";
+import PaymentTypeFormPage from "@/features/payment-types/pages/PaymentTypeFormPage";
+import WorkingDaysPage from "@/features/working-days/pages/WorkingDaysPage";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -278,6 +288,20 @@ function App() {
                   <Route path="/offices/edit/:id" element={<OfficeFormPage />} />
                   <Route path="/office-transactions" element={<OfficeTransactionListPage />} />
                   <Route path="/office-transactions/new" element={<OfficeTransactionFormPage />} />
+                  <Route path="/staff" element={<StaffListPage />} />
+                  <Route path="/staff/new" element={<StaffFormPage />} />
+                  <Route path="/staff/edit/:id" element={<StaffFormPage />} />
+                  <Route path="/holidays" element={<HolidayListPage />} />
+                  <Route path="/holidays/new" element={<HolidayFormPage />} />
+                  <Route path="/holidays/edit/:id" element={<HolidayFormPage />} />
+                  <Route path="/currencies" element={<CurrenciesPage />} />
+                  <Route path="/funds" element={<FundListPage />} />
+                  <Route path="/funds/new" element={<FundFormPage />} />
+                  <Route path="/funds/edit/:id" element={<FundFormPage />} />
+                  <Route path="/payment-types" element={<PaymentTypeListPage />} />
+                  <Route path="/payment-types/new" element={<PaymentTypeFormPage />} />
+                  <Route path="/payment-types/edit/:id" element={<PaymentTypeFormPage />} />
+                  <Route path="/working-days" element={<WorkingDaysPage />} />
                   {/* Transfers */}
                   <Route path="/transfers/history" element={<TransferListPage />} />
                   <Route path="/transfers/new" element={<TransferFormPage />} />
