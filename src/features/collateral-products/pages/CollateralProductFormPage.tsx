@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -107,49 +106,44 @@ const CollateralProductFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Name *</Label>
-                <Input id="name" {...register("name")} placeholder="e.g. Gold Jewelry" />
-                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Name *</label>
+                <Input {...register("name")} placeholder="e.g. Gold Jewelry" error={errors.name?.message} />
               </div>
-              <div>
-                <Label htmlFor="quality">Quality *</Label>
-                <Input id="quality" {...register("quality")} placeholder="e.g. 24K" />
-                {errors.quality && <p className="text-xs text-red-500 mt-1">{errors.quality.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Quality *</label>
+                <Input {...register("quality")} placeholder="e.g. 24K" error={errors.quality?.message} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="basePrice">Base Price *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Base Price *</label>
                 <Input
-                  id="basePrice"
                   type="number"
                   step="0.01"
                   {...register("basePrice", { valueAsNumber: true })}
                   placeholder="e.g. 75000"
+                  error={errors.basePrice?.message}
                 />
-                {errors.basePrice && <p className="text-xs text-red-500 mt-1">{errors.basePrice.message}</p>}
               </div>
-              <div>
-                <Label htmlFor="pctToBase">Pct to Base (%) *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Pct to Base (%) *</label>
                 <Input
-                  id="pctToBase"
                   type="number"
                   step="0.01"
                   {...register("pctToBase", { valueAsNumber: true })}
                   placeholder="e.g. 80"
+                  error={errors.pctToBase?.message}
                 />
-                {errors.pctToBase && <p className="text-xs text-red-500 mt-1">{errors.pctToBase.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="unitType">Unit Type *</Label>
-                <Input id="unitType" {...register("unitType")} placeholder="e.g. gram" />
-                {errors.unitType && <p className="text-xs text-red-500 mt-1">{errors.unitType.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Unit Type *</label>
+                <Input {...register("unitType")} placeholder="e.g. gram" error={errors.unitType?.message} />
               </div>
-              <div>
-                <Label>Currency *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Currency *</label>
                 <Select
                   value={selectedCurrency}
                   onValueChange={(v) => setValue("currency", v, { shouldValidate: true })}

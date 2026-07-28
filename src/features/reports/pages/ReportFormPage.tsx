@@ -10,7 +10,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -177,20 +176,19 @@ const ReportFormPage: FC = () => {
             <CardTitle>Report Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="reportName">Report Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Report Name *</label>
               <Input
-                id="reportName"
                 {...register("reportName")}
                 placeholder="e.g. Client Loan Summary"
                 disabled={isLoaded}
+                error={errors.reportName?.message}
               />
-              {errors.reportName && <p className="text-xs text-red-500">{errors.reportName.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Report Type</Label>
+                <label className="block text-sm font-medium">Report Type</label>
                 <Controller
                   name="reportType"
                   control={control}
@@ -212,7 +210,7 @@ const ReportFormPage: FC = () => {
               </div>
 
               <div>
-                <Label>Report Sub Type</Label>
+                <label className="block text-sm font-medium">Report Sub Type</label>
                 <Controller
                   name="reportSubType"
                   control={control}
@@ -234,7 +232,7 @@ const ReportFormPage: FC = () => {
               </div>
 
               <div>
-                <Label>Report Category</Label>
+                <label className="block text-sm font-medium">Report Category</label>
                 <Controller
                   name="reportCategory"
                   control={control}
@@ -256,20 +254,18 @@ const ReportFormPage: FC = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description</label>
               <Input
-                id="description"
                 {...register("description")}
                 placeholder="Brief description of the report"
                 disabled={isLoaded}
               />
             </div>
 
-            <div>
-              <Label htmlFor="reportSql">Report SQL</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Report SQL</label>
               <Textarea
-                id="reportSql"
                 {...register("reportSql")}
                 placeholder="SELECT ..."
                 rows={6}
@@ -285,7 +281,7 @@ const ReportFormPage: FC = () => {
                   <Checkbox id="useReport" checked={field.value} onCheckedChange={field.onChange} disabled={isLoaded} />
                 )}
               />
-              <Label htmlFor="useReport">Active</Label>
+              <label className="block text-sm font-medium">Active</label>
             </div>
           </CardContent>
         </Card>
@@ -313,8 +309,8 @@ const ReportFormPage: FC = () => {
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-start gap-3 p-3 border rounded-md">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div>
-                    <Label>Parameter Name</Label>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Parameter Name</label>
                     <Input
                       {...register(`parameters.${index}.parameterName`)}
                       disabled={isLoaded}
@@ -322,7 +318,7 @@ const ReportFormPage: FC = () => {
                     />
                   </div>
                   <div>
-                    <Label>Parameter Type</Label>
+                    <label className="block text-sm font-medium">Parameter Type</label>
                     <Controller
                       name={`parameters.${index}.parameterType`}
                       control={control}
@@ -346,8 +342,8 @@ const ReportFormPage: FC = () => {
                       )}
                     />
                   </div>
-                  <div>
-                    <Label>Report Param Name</Label>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Report Param Name</label>
                     <Input
                       {...register(`parameters.${index}.reportParameterName`)}
                       disabled={isLoaded}
@@ -368,7 +364,7 @@ const ReportFormPage: FC = () => {
                           />
                         )}
                       />
-                      <Label htmlFor={`selectOne-${index}`}>Select One</Label>
+                      <label className="block text-sm font-medium">Select One</label>
                     </div>
                     {!isLoaded && (
                       <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>

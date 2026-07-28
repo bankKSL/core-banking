@@ -232,15 +232,13 @@ const ShareProductFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Name *</Label>
-                <Input id="name" {...register("name")} placeholder="e.g. Ordinary Shares" />
-                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Name *</label>
+                <Input {...register("name")} placeholder="e.g. Ordinary Shares" error={errors.name?.message} />
               </div>
-              <div>
-                <Label htmlFor="shortName">Short Name * (max 4 chars)</Label>
-                <Input id="shortName" {...register("shortName")} placeholder="e.g. ORD" maxLength={4} />
-                {errors.shortName && <p className="text-xs text-red-500 mt-1">{errors.shortName.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Short Name * (max 4 chars)</label>
+                <Input {...register("shortName")} placeholder="e.g. ORD" maxLength={4} error={errors.shortName?.message} />
               </div>
             </div>
             <div>
@@ -275,13 +273,13 @@ const ShareProductFormPage: FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="digitsAfterDecimal">Digits After Decimal</Label>
-                <Input id="digitsAfterDecimal" type="number" {...register("digitsAfterDecimal")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Digits After Decimal</label>
+                <Input type="number" {...register("digitsAfterDecimal")} />
               </div>
-              <div>
-                <Label htmlFor="inMultiplesOf">In Multiples Of</Label>
-                <Input id="inMultiplesOf" type="number" {...register("inMultiplesOf")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">In Multiples Of</label>
+                <Input type="number" {...register("inMultiplesOf")} />
               </div>
             </div>
           </CardContent>
@@ -293,34 +291,31 @@ const ShareProductFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="totalShares">Total Shares *</Label>
-                <Input id="totalShares" type="number" {...register("totalShares")} />
-                {errors.totalShares && <p className="text-xs text-red-500 mt-1">{errors.totalShares.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Total Shares *</label>
+                <Input type="number" {...register("totalShares")} error={errors.totalShares?.message} />
               </div>
-              <div>
-                <Label htmlFor="sharesIssued">Shares Issued</Label>
-                <Input id="sharesIssued" type="number" {...register("sharesIssued")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Shares Issued</label>
+                <Input type="number" {...register("sharesIssued")} />
               </div>
-              <div>
-                <Label htmlFor="unitPrice">Unit Price *</Label>
-                <Input id="unitPrice" type="number" step="0.01" {...register("unitPrice")} />
-                {errors.unitPrice && <p className="text-xs text-red-500 mt-1">{errors.unitPrice.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Unit Price *</label>
+                <Input type="number" step="0.01" {...register("unitPrice")} error={errors.unitPrice?.message} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="minimumShares">Minimum Shares</Label>
-                <Input id="minimumShares" type="number" {...register("minimumShares")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Minimum Shares</label>
+                <Input type="number" {...register("minimumShares")} />
               </div>
-              <div>
-                <Label htmlFor="nominalShares">Nominal Shares *</Label>
-                <Input id="nominalShares" type="number" {...register("nominalShares")} />
-                {errors.nominalShares && <p className="text-xs text-red-500 mt-1">{errors.nominalShares.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Nominal Shares *</label>
+                <Input type="number" {...register("nominalShares")} error={errors.nominalShares?.message} />
               </div>
-              <div>
-                <Label htmlFor="maximumShares">Maximum Shares</Label>
-                <Input id="maximumShares" type="number" {...register("maximumShares")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Maximum Shares</label>
+                <Input type="number" {...register("maximumShares")} />
               </div>
             </div>
           </CardContent>
@@ -332,9 +327,9 @@ const ShareProductFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="lockinPeriodFrequency">Lock-in Period Frequency</Label>
-                <Input id="lockinPeriodFrequency" type="number" {...register("lockinPeriodFrequency")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Lock-in Period Frequency</label>
+                <Input type="number" {...register("lockinPeriodFrequency")} />
               </div>
               <div>
                 <Label>Lock-in Period Type</Label>
@@ -354,10 +349,9 @@ const ShareProductFormPage: FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="minimumActivePeriodForDividends">Minimum Active Period (Days)</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Minimum Active Period (Days)</label>
                 <Input
-                  id="minimumActivePeriodForDividends"
                   type="number"
                   {...register("minimumActivePeriodForDividends")}
                 />
@@ -400,21 +394,21 @@ const ShareProductFormPage: FC = () => {
 
             {showGLAccounts && (
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-md">
-                <div>
-                  <Label htmlFor="shareReferenceId">Share Reference GL</Label>
-                  <Input id="shareReferenceId" type="number" {...register("shareReferenceId")} />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Share Reference GL</label>
+                  <Input type="number" {...register("shareReferenceId")} />
                 </div>
-                <div>
-                  <Label htmlFor="shareSuspenseId">Share Suspense GL</Label>
-                  <Input id="shareSuspenseId" type="number" {...register("shareSuspenseId")} />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Share Suspense GL</label>
+                  <Input type="number" {...register("shareSuspenseId")} />
                 </div>
-                <div>
-                  <Label htmlFor="shareEquityId">Share Equity GL</Label>
-                  <Input id="shareEquityId" type="number" {...register("shareEquityId")} />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Share Equity GL</label>
+                  <Input type="number" {...register("shareEquityId")} />
                 </div>
-                <div>
-                  <Label htmlFor="incomeFromFeeAccountId">Income from Fee GL</Label>
-                  <Input id="incomeFromFeeAccountId" type="number" {...register("incomeFromFeeAccountId")} />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Income from Fee GL</label>
+                  <Input type="number" {...register("incomeFromFeeAccountId")} />
                 </div>
               </div>
             )}
@@ -429,18 +423,16 @@ const ShareProductFormPage: FC = () => {
             {fields.length === 0 && <p className="text-sm text-gray-500">No market price periods defined.</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-4">
-                <div className="flex-1">
-                  <Label htmlFor={`marketPricePeriods.${index}.fromDate`}>From Date</Label>
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-sm font-medium">From Date</label>
                   <Input
-                    id={`marketPricePeriods.${index}.fromDate`}
                     type="date"
                     {...register(`marketPricePeriods.${index}.fromDate`)}
                   />
                 </div>
-                <div className="flex-1">
-                  <Label htmlFor={`marketPricePeriods.${index}.shareValue`}>Share Value</Label>
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-sm font-medium">Share Value</label>
                   <Input
-                    id={`marketPricePeriods.${index}.shareValue`}
                     type="number"
                     step="0.01"
                     {...register(`marketPricePeriods.${index}.shareValue`)}

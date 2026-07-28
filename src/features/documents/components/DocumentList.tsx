@@ -212,10 +212,9 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name">Name *</Label>
-              <Input id="name" {...register("name")} />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
+              <Input {...register("name")} error={errors.name?.message} />
             </div>
             {!editingDoc && (
               <div className="flex flex-col gap-1.5">

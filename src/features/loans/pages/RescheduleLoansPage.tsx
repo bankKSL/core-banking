@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRescheduleRequests, useRescheduleRequestCommand } from "../hooks/useRescheduleLoans";
 import { RESCHEDULE_STATUS_CONFIG, RESCHEDULE_STATUS_ID_MAP } from "../constants/transactions";
 import type { LoanRescheduleRequest } from "../types/loan";
@@ -195,9 +194,9 @@ const RescheduleLoansPage: FC = () => {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAction} className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="actionDate">{action?.command === "approve" ? "Approved On" : "Rejected On"}</Label>
-              <Input id="actionDate" type="date" {...register("actionDate")} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{action?.command === "approve" ? "Approved On" : "Rejected On"}</label>
+              <Input type="date" {...register("actionDate")} />
             </div>
 
             {commandMutation.isError && (

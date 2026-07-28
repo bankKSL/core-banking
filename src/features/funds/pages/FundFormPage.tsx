@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFund, useCreateFund, useUpdateFund } from "../hooks/useFunds";
 
@@ -88,14 +87,13 @@ const FundFormPage: FC = () => {
             <CardTitle className="text-base">Fund Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name *</Label>
-              <Input id="name" {...register("name")} placeholder="e.g. Mortgage Fund 2026" />
-              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
+              <Input {...register("name")} placeholder="e.g. Mortgage Fund 2026" error={errors.name?.message} />
             </div>
-            <div>
-              <Label htmlFor="externalId">External ID</Label>
-              <Input id="externalId" {...register("externalId")} placeholder="Optional external identifier" />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">External ID</label>
+              <Input {...register("externalId")} placeholder="Optional external identifier" />
             </div>
           </CardContent>
         </Card>

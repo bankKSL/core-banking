@@ -77,10 +77,9 @@ const PartySearchPage: FC = () => {
                 </Select>
                 {errors.idType && <p className="text-xs text-red-500 mt-1">{errors.idType.message}</p>}
               </div>
-              <div>
-                <Label htmlFor="idValue">Identifier Value *</Label>
-                <Input id="idValue" {...register("idValue")} placeholder="e.g. 254700111222" />
-                {errors.idValue && <p className="text-xs text-red-500 mt-1">{errors.idValue.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Identifier Value *</label>
+                <Input {...register("idValue")} placeholder="e.g. 254700111222" error={errors.idValue?.message} />
               </div>
               <div className="flex items-end">
                 <Button type="submit" className="bg-[#D32F2F] hover:bg-red-700 w-full">

@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCalendarTemplate, useCreateCalendar, useUpdateCalendar } from "../hooks/useCalendars";
@@ -86,12 +85,12 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
           <DialogTitle>{isEdit ? "Edit Calendar" : "New Calendar"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label>Title *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Title *</label>
             <Input {...register("title")} placeholder="e.g. Weekly Collection" error={errors.title?.message as string} />
           </div>
-          <div>
-            <Label>Type *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Type *</label>
             <Select value={watchTypeId ? String(watchTypeId) : ""} onValueChange={(v) => setValue("typeId", Number(v))}>
               <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
               <SelectContent>
@@ -101,32 +100,32 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label>Description</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Description</label>
             <Input {...register("description")} placeholder="Optional" />
           </div>
-          <div>
-            <Label>Location</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Location</label>
             <Input {...register("location")} placeholder="Optional" />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Start Date *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Start Date *</label>
               <Input type="date" {...register("startDate")} error={errors.startDate?.message as string} />
             </div>
-            <div>
-              <Label>End Date</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">End Date</label>
               <Input type="date" {...register("endDate")} />
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox checked={repeating} onCheckedChange={(c) => setValue("repeating", c === true)} />
-            <Label className="mb-0">Repeating</Label>
+            <label className="block text-sm font-medium mb-0">Repeating</label>
           </div>
           {repeating && (
             <div className="grid grid-cols-3 gap-4 pl-6">
-              <div>
-                <Label>Frequency</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Frequency</label>
                   <Select value={String(watch("frequency") ?? "")} onValueChange={(v) => setValue("frequency", Number(v) as any)}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
@@ -136,12 +135,12 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Interval</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Interval</label>
                 <Input type="number" min="1" {...register("interval", { valueAsNumber: true })} placeholder="1" />
               </div>
-              <div>
-                <Label>Repeats On</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Repeats On</label>
                 <Select value={String(watch("repeatsOnDay") ?? "")} onValueChange={(v) => setValue("repeatsOnDay", Number(v) as any)}>
                   <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
                   <SelectContent>

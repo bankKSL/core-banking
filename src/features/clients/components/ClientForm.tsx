@@ -200,20 +200,19 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="accountNo">Account No</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Account No</label>
             <Input
-              id="accountNo"
               {...register("accountNo")}
               disabled={isSubmitting}
               placeholder="Auto-generated if empty"
               maxLength={20}
+              error={errors.accountNo?.message}
             />
-            {errors.accountNo && <p className="text-xs text-red-500">{errors.accountNo.message}</p>}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="externalId">External ID</Label>
-            <Input id="externalId" {...register("externalId")} disabled={isSubmitting} maxLength={100} />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">External ID</label>
+            <Input {...register("externalId")} disabled={isSubmitting} maxLength={100} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Client Type</Label>
@@ -264,42 +263,36 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {isPerson ? (
             <>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="firstname">First Name *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">First Name *</label>
                 <Input
-                  id="firstname"
                   {...register("firstname")}
                   disabled={isSubmitting}
-                  className={errors.firstname ? "border-red-300" : ""}
+                  error={errors.firstname?.message}
                 />
-                {errors.firstname && <p className="text-xs text-red-500">{errors.firstname.message}</p>}
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="middlename">Middle Name</Label>
-                <Input id="middlename" {...register("middlename")} disabled={isSubmitting} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Middle Name</label>
+                <Input {...register("middlename")} disabled={isSubmitting} />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="lastname">Last Name *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Last Name *</label>
                 <Input
-                  id="lastname"
                   {...register("lastname")}
                   disabled={isSubmitting}
-                  className={errors.lastname ? "border-red-300" : ""}
+                  error={errors.lastname?.message}
                 />
-                {errors.lastname && <p className="text-xs text-red-500">{errors.lastname.message}</p>}
               </div>
             </>
           ) : (
-            <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-3">
-              <Label htmlFor="fullname">Full Name *</Label>
+            <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+              <label className="block text-sm font-medium">Full Name *</label>
               <Input
-                id="fullname"
                 {...register("fullname")}
                 disabled={isSubmitting}
-                className={errors.fullname ? "border-red-300" : ""}
                 placeholder="Organization name"
+                error={errors.fullname?.message}
               />
-              {errors.fullname && <p className="text-xs text-red-500">{errors.fullname.message}</p>}
             </div>
           )}
         </CardContent>
@@ -311,25 +304,23 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
           <CardTitle className="text-base">Contact</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="mobileNo">Mobile No</Label>
-            <Input id="mobileNo" {...register("mobileNo")} disabled={isSubmitting} placeholder="+1234567890" />
-            {errors.mobileNo && <p className="text-xs text-red-500">{errors.mobileNo.message}</p>}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Mobile No</label>
+            <Input {...register("mobileNo")} disabled={isSubmitting} placeholder="+1234567890" error={errors.mobileNo?.message} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="emailAddress">Email Address</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Email Address</label>
             <Input
-              id="emailAddress"
               type="email"
               {...register("emailAddress")}
               disabled={isSubmitting}
               placeholder="client@example.com"
+              error={errors.emailAddress?.message}
             />
-            {errors.emailAddress && <p className="text-xs text-red-500">{errors.emailAddress.message}</p>}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-            <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} disabled={isSubmitting} />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Date of Birth</label>
+            <Input type="date" {...register("dateOfBirth")} disabled={isSubmitting} />
           </div>
         </CardContent>
       </Card>
@@ -388,21 +379,19 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {mode === "create" && (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="submittedOnDate">Submitted On Date</Label>
-                <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Submitted On Date</label>
+                <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
               </div>
             )}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="activationDate">Activation Date {active ? "*" : ""}</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Activation Date {active ? "*" : ""}</label>
               <Input
-                id="activationDate"
                 type="date"
                 {...register("activationDate")}
                 disabled={isSubmitting}
-                className={errors.activationDate ? "border-red-300" : ""}
+                error={errors.activationDate?.message}
               />
-              {errors.activationDate && <p className="text-xs text-red-500">{errors.activationDate.message}</p>}
             </div>
           </div>
         </CardContent>
@@ -434,9 +423,9 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="incorpNumber">Incorporation Number</Label>
-              <Input id="incorpNumber" {...register("clientNonPersonDetails.incorpNumber")} disabled={isSubmitting} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Incorporation Number</label>
+              <Input {...register("clientNonPersonDetails.incorpNumber")} disabled={isSubmitting} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Main Business Line</Label>
@@ -457,14 +446,13 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1.5 lg:col-span-2">
-              <Label htmlFor="remarks">Remarks</Label>
-              <Input id="remarks" {...register("clientNonPersonDetails.remarks")} disabled={isSubmitting} />
+            <div className="space-y-1.5 lg:col-span-2">
+              <label className="block text-sm font-medium">Remarks</label>
+              <Input {...register("clientNonPersonDetails.remarks")} disabled={isSubmitting} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="incorpValidityTillDate">Incorporation Validity Till</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Incorporation Validity Till</label>
               <Input
-                id="incorpValidityTillDate"
                 type="date"
                 {...register("clientNonPersonDetails.incorpValidityTillDate")}
                 disabled={isSubmitting}
@@ -510,10 +498,9 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
           <CardTitle className="text-base">Group</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-1.5 max-w-xs">
-            <Label htmlFor="groupId">Group ID</Label>
+          <div className="space-y-1.5 max-w-xs">
+            <label className="block text-sm font-medium">Group ID</label>
             <Input
-              id="groupId"
               type="number"
               {...register("groupId", { valueAsNumber: true })}
               disabled={isSubmitting}

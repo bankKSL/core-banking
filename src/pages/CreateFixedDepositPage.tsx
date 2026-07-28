@@ -9,7 +9,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -235,7 +234,7 @@ const CreateFixedDepositPage: React.FC = () => {
               error={errors.officeId?.message}
             />
             <div>
-              <Label>Client *</Label>
+              <label className="block text-sm font-medium">Client *</label>
               <Select
                 value={clientId}
                 onValueChange={(v) => setValue("clientId", v, { shouldValidate: true })}
@@ -264,7 +263,7 @@ const CreateFixedDepositPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4">
             <div>
-              <Label>Product *</Label>
+              <label className="block text-sm font-medium">Product *</label>
               <Select value={productId} onValueChange={(v) => setValue("productId", v, { shouldValidate: true })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select product" />
@@ -298,22 +297,20 @@ const CreateFixedDepositPage: React.FC = () => {
             <CardTitle>Deposit Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="externalId">External ID</Label>
-              <Input id="externalId" {...register("externalId")} placeholder="Optional external reference" />
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">External ID</label>
+              <Input {...register("externalId")} placeholder="Optional external reference" error={errors.externalId?.message} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Deposit Amount *</label>
+              <Input type="number" {...register("depositAmount")} error={errors.depositAmount?.message} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Period Length *</label>
+              <Input type="number" {...register("depositPeriod")} error={errors.depositPeriod?.message} />
             </div>
             <div>
-              <Label>Deposit Amount *</Label>
-              <Input type="number" {...register("depositAmount")} />
-              {errors.depositAmount && <p className="text-sm text-red-500 mt-1">{errors.depositAmount.message}</p>}
-            </div>
-            <div>
-              <Label>Period Length *</Label>
-              <Input type="number" {...register("depositPeriod")} />
-              {errors.depositPeriod && <p className="text-sm text-red-500 mt-1">{errors.depositPeriod.message}</p>}
-            </div>
-            <div>
-              <Label>Frequency *</Label>
+              <label className="block text-sm font-medium">Frequency *</label>
               <Select
                 value={watch("depositPeriodFrequencyId")}
                 onValueChange={(v) => setValue("depositPeriodFrequencyId", v)}
@@ -330,10 +327,9 @@ const CreateFixedDepositPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Submitted Date *</Label>
-              <Input type="date" {...register("submittedOnDate")} />
-              {errors.submittedOnDate && <p className="text-sm text-red-500 mt-1">{errors.submittedOnDate.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Submitted Date *</label>
+              <Input type="date" {...register("submittedOnDate")} error={errors.submittedOnDate?.message} />
             </div>
           </CardContent>
         </Card>
@@ -345,17 +341,18 @@ const CreateFixedDepositPage: React.FC = () => {
               <CardTitle>Interest Configuration</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Nominal Annual Interest Rate (%)</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Nominal Annual Interest Rate (%)</label>
                 <Input
                   type="number"
                   step="0.01"
                   {...register("nominalAnnualInterestRate")}
                   placeholder={String(template.nominalAnnualInterestRate ?? "")}
+                  error={errors.nominalAnnualInterestRate?.message}
                 />
               </div>
               <div>
-                <Label>Compounding Period</Label>
+                <label className="block text-sm font-medium">Compounding Period</label>
                 <Select
                   value={watch("interestCompoundingPeriodType")}
                   onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}
@@ -373,7 +370,7 @@ const CreateFixedDepositPage: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Posting Period</Label>
+                <label className="block text-sm font-medium">Posting Period</label>
                 <Select
                   value={watch("interestPostingPeriodType")}
                   onValueChange={(v) => setValue("interestPostingPeriodType", v)}
@@ -391,7 +388,7 @@ const CreateFixedDepositPage: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Calculation Type</Label>
+                <label className="block text-sm font-medium">Calculation Type</label>
                 <Select
                   value={watch("interestCalculationType")}
                   onValueChange={(v) => setValue("interestCalculationType", v)}
@@ -409,7 +406,7 @@ const CreateFixedDepositPage: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Days in Year</Label>
+                <label className="block text-sm font-medium">Days in Year</label>
                 <Select
                   value={watch("interestCalculationDaysInYearType")}
                   onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}
@@ -437,7 +434,7 @@ const CreateFixedDepositPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Maturity Instruction</Label>
+              <label className="block text-sm font-medium">Maturity Instruction</label>
               <Select value={maturityInstructionId} onValueChange={(v) => setValue("maturityInstructionId", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select instruction" />
@@ -453,9 +450,9 @@ const CreateFixedDepositPage: React.FC = () => {
             </div>
 
             {maturityInstructionId === "200" && (
-              <div>
-                <Label>Transfer to Savings Account ID</Label>
-                <Input type="number" {...register("linkedAccount")} placeholder="Savings account ID" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Transfer to Savings Account ID</label>
+                <Input type="number" {...register("linkedAccount")} placeholder="Savings account ID" error={errors.linkedAccount?.message} />
               </div>
             )}
 
@@ -465,22 +462,23 @@ const CreateFixedDepositPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("preClosurePenalApplicable", v)}
                 defaultChecked={template?.preClosurePenalApplicable ?? false}
               />
-              <Label htmlFor="preClosurePenalApplicable">Apply Pre-closure Penalty</Label>
+              <label className="block text-sm font-medium" htmlFor="preClosurePenalApplicable">Apply Pre-closure Penalty</label>
             </div>
 
             {preClosurePenalApplicable && (
               <>
-                <div>
-                  <Label>Penalty Interest Rate (%)</Label>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Penalty Interest Rate (%)</label>
                   <Input
                     type="number"
                     step="0.01"
                     {...register("preClosurePenalInterest")}
                     placeholder={String(template?.preClosurePenalInterest ?? "")}
+                    error={errors.preClosurePenalInterest?.message}
                   />
                 </div>
                 <div>
-                  <Label>Penalty Applied On</Label>
+                  <label className="block text-sm font-medium">Penalty Applied On</label>
                   <Select
                     value={watch("preClosurePenalInterestOnTypeId")}
                     onValueChange={(v) => setValue("preClosurePenalInterestOnTypeId", v)}
@@ -505,19 +503,19 @@ const CreateFixedDepositPage: React.FC = () => {
                 id="transferInterestToSavings"
                 onCheckedChange={(v) => setValue("transferInterestToSavings", v)}
               />
-              <Label htmlFor="transferInterestToSavings">Transfer Interest to Savings</Label>
+              <label className="block text-sm font-medium" htmlFor="transferInterestToSavings">Transfer Interest to Savings</label>
             </div>
 
             {transferInterestToSavings && (
-              <div>
-                <Label>Linked Savings Account ID</Label>
-                <Input type="number" {...register("linkedAccount")} placeholder="Linked account ID" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Linked Savings Account ID</label>
+                <Input type="number" {...register("linkedAccount")} placeholder="Linked account ID" error={errors.linkedAccount?.message} />
               </div>
             )}
 
             <div className="flex items-center gap-3 pt-2">
               <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
-              <Label htmlFor="withHoldTax">Withhold Tax</Label>
+              <label className="block text-sm font-medium" htmlFor="withHoldTax">Withhold Tax</label>
             </div>
           </CardContent>
         </Card>

@@ -161,12 +161,14 @@ const CreateCampaign: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Campaign Name *"
-                {...register("name")}
-                error={errors.name?.message}
-                placeholder="e.g. Summer Savings Promotion"
-              />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Campaign Name *</label>
+                <Input
+                  {...register("name")}
+                  error={errors.name?.message}
+                  placeholder="e.g. Summer Savings Promotion"
+                />
+              </div>
               <div>
                 <label className="text-sm font-medium">Category *</label>
                 <Select
@@ -194,12 +196,12 @@ const CreateCampaign: React.FC = () => {
               error={errors.description?.message}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Start Date *</label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Start Date *</label>
                 <Input type="date" {...register("startDate")} error={errors.startDate?.message} />
               </div>
-              <div>
-                <label className="text-sm font-medium">End Date *</label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">End Date *</label>
                 <Input type="date" {...register("endDate")} error={errors.endDate?.message} />
               </div>
             </div>
@@ -231,7 +233,10 @@ const CreateCampaign: React.FC = () => {
                   <option value="completed">Completed</option>
                 </select>
               </div>
-              <Input label="Version" type="number" {...register("version")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Version</label>
+                <Input type="number" {...register("version")} error={errors.version?.message} />
+              </div>
             </div>
           </div>
         );

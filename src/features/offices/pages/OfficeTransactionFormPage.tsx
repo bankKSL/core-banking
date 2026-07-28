@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { useOfficeTransactionTemplate, useCreateOfficeTransaction } from "../hooks/useOfficeTransactions";
@@ -119,8 +118,8 @@ const OfficeTransactionFormPage: React.FC = () => {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>From Office</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">From Office</label>
                 <Select
                   value={fromOfficeId}
                   onValueChange={(v) => setValue("fromOfficeId", v)}
@@ -138,8 +137,8 @@ const OfficeTransactionFormPage: React.FC = () => {
                 </Select>
               </div>
 
-              <div>
-                <Label>To Office</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">To Office</label>
                 <Select
                   value={toOfficeId}
                   onValueChange={(v) => setValue("toOfficeId", v)}
@@ -158,14 +157,14 @@ const OfficeTransactionFormPage: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="txnDate">Transaction Date *</Label>
-              <Input id="txnDate" type="date" {...register("transactionDate")} error={errors.transactionDate?.message} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Transaction Date *</label>
+              <Input type="date" {...register("transactionDate")} error={errors.transactionDate?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Currency *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Currency *</label>
                 <Select
                   value={watch("currencyCode")}
                   onValueChange={(v) => setValue("currencyCode", v)}
@@ -186,10 +185,9 @@ const OfficeTransactionFormPage: React.FC = () => {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="txnAmount">Amount *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Amount *</label>
                 <Input
-                  id="txnAmount"
                   type="number"
                   step="0.01"
                   min="0"
@@ -200,9 +198,9 @@ const OfficeTransactionFormPage: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="txnDesc">Description</Label>
-              <Input id="txnDesc" placeholder="Optional description" {...register("description")} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description</label>
+              <Input placeholder="Optional description" {...register("description")} />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

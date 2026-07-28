@@ -536,11 +536,8 @@ const GroupDetailPage: FC = () => {
           <form onSubmit={closeForm.handleSubmit(onCloseSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <Label>Closure Date</Label>
-                <Input type="date" {...closeForm.register("closureDate")} />
-                {closeForm.formState.errors.closureDate && (
-                  <p className="text-xs text-red-500">{closeForm.formState.errors.closureDate.message}</p>
-                )}
+                <label className="block text-sm font-medium">Closure Date</label>
+                <Input type="date" {...closeForm.register("closureDate")} error={closeForm.formState.errors.closureDate?.message} />
               </div>
               <div className="space-y-1.5">
                 <Label>Closure Reason</Label>
@@ -653,15 +650,13 @@ const GroupDetailPage: FC = () => {
           <form onSubmit={assignStaffForm.handleSubmit(onAssignStaffSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <Label>Staff ID</Label>
+                <label className="block text-sm font-medium">Staff ID</label>
                 <Input
                   type="number"
                   placeholder="Enter staff ID"
                   {...assignStaffForm.register("staffId")}
+                  error={assignStaffForm.formState.errors.staffId?.message}
                 />
-                {assignStaffForm.formState.errors.staffId && (
-                  <p className="text-xs text-red-500">{assignStaffForm.formState.errors.staffId.message}</p>
-                )}
               </div>
             </div>
             <DialogFooter>
@@ -714,15 +709,13 @@ const GroupDetailPage: FC = () => {
                 )}
               </div>
               <div className="space-y-1.5">
-                <Label>Role ID</Label>
+                <label className="block text-sm font-medium">Role ID</label>
                 <Input
                   type="number"
                   placeholder="Enter role ID"
                   {...assignRoleForm.register("roleId")}
+                  error={assignRoleForm.formState.errors.roleId?.message}
                 />
-                {assignRoleForm.formState.errors.roleId && (
-                  <p className="text-xs text-red-500">{assignRoleForm.formState.errors.roleId.message}</p>
-                )}
               </div>
             </div>
             <DialogFooter>

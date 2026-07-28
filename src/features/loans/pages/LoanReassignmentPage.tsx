@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useReassignmentTemplate, useExecuteReassignment } from "../hooks/useLoanReassignment";
@@ -115,8 +114,8 @@ const LoanReassignmentPage: FC = () => {
             />
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="fromLoanOfficer">From Loan Officer (optional)</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">From Loan Officer (optional)</label>
                 <Controller
                   name="fromLoanOfficerId"
                   control={control}
@@ -140,8 +139,8 @@ const LoanReassignmentPage: FC = () => {
                   )}
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="toLoanOfficer">To Loan Officer *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">To Loan Officer *</label>
                 <Controller
                   name="toLoanOfficerId"
                   control={control}
@@ -167,10 +166,9 @@ const LoanReassignmentPage: FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="loanIds">Loan IDs *</Label>
-              <Input id="loanIds" {...register("loanIds")} placeholder="e.g. 1, 2, 3" />
-              {errors.loanIds && <p className="text-xs text-red-500">{errors.loanIds.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Loan IDs *</label>
+              <Input {...register("loanIds")} placeholder="e.g. 1, 2, 3" error={errors.loanIds?.message} />
               <p className="text-xs text-gray-500 mt-1">Comma-separated list of loan IDs to reassign.</p>
             </div>
 

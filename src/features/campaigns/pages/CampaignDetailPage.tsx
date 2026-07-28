@@ -10,7 +10,6 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -248,10 +247,9 @@ const CampaignDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="actionDate">{actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}</Label>
-                <Input id="actionDate" type="date" {...register("actionDate")} />
-                {errors.actionDate && <p className="text-xs text-red-500">{errors.actionDate.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">{actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}</label>
+                <Input type="date" {...register("actionDate")} error={errors.actionDate?.message} />
               </div>
               <div className="flex justify-end gap-3">
                 <Button variant="outline" type="button" onClick={() => setActionDialog(null)}>

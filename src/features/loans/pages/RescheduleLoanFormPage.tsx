@@ -8,7 +8,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRescheduleTemplate, useCreateRescheduleRequest } from "../hooks/useRescheduleLoans";
 import { createRescheduleRequestSchema, type CreateRescheduleRequestFormValues } from "../schemas/loan.schema";
@@ -94,18 +93,17 @@ const RescheduleLoanFormPage: FC = () => {
             <CardTitle className="text-base">Reschedule Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="loanId">Loan ID *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Loan ID *</label>
               <Input
-                id="loanId"
                 type="number"
                 {...register("loanId", { valueAsNumber: true })}
                 disabled={isSubmitting || !!loanIdParam}
+                error={errors.loanId?.message}
               />
-              {errors.loanId && <p className="text-xs text-red-500">{errors.loanId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Reason *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Reason *</label>
               <Select
                 value={watch("rescheduleReasonId") ? String(watch("rescheduleReasonId")) : ""}
                 onValueChange={(v) => setValue("rescheduleReasonId", Number(v), { shouldValidate: true })}
@@ -124,19 +122,17 @@ const RescheduleLoanFormPage: FC = () => {
               </Select>
               {errors.rescheduleReasonId && <p className="text-xs text-red-500">{errors.rescheduleReasonId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="rescheduleFromDate">Reschedule From Date *</Label>
-              <Input id="rescheduleFromDate" type="date" {...register("rescheduleFromDate")} disabled={isSubmitting} />
-              {errors.rescheduleFromDate && <p className="text-xs text-red-500">{errors.rescheduleFromDate.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Reschedule From Date *</label>
+              <Input type="date" {...register("rescheduleFromDate")} disabled={isSubmitting} error={errors.rescheduleFromDate?.message} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="submittedOnDate">Submitted On Date *</Label>
-              <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
-              {errors.submittedOnDate && <p className="text-xs text-red-500">{errors.submittedOnDate.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Submitted On Date *</label>
+              <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} error={errors.submittedOnDate?.message} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="adjustedDueDate">Adjusted Due Date</Label>
-              <Input id="adjustedDueDate" type="date" {...register("adjustedDueDate")} disabled={isSubmitting} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Adjusted Due Date</label>
+              <Input type="date" {...register("adjustedDueDate")} disabled={isSubmitting} />
             </div>
           </CardContent>
         </Card>
@@ -146,37 +142,33 @@ const RescheduleLoanFormPage: FC = () => {
             <CardTitle className="text-base">Adjustments</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="graceOnPrincipal">Grace on Principal</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Grace on Principal</label>
               <Input
-                id="graceOnPrincipal"
                 type="number"
                 {...register("graceOnPrincipal", { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="graceOnInterest">Grace on Interest</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Grace on Interest</label>
               <Input
-                id="graceOnInterest"
                 type="number"
                 {...register("graceOnInterest", { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="extraTerms">Extra Terms</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Extra Terms</label>
               <Input
-                id="extraTerms"
                 type="number"
                 {...register("extraTerms", { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="newInterestRate">New Interest Rate (%)</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">New Interest Rate (%)</label>
               <Input
-                id="newInterestRate"
                 type="number"
                 step="0.01"
                 {...register("newInterestRate", { valueAsNumber: true })}

@@ -217,15 +217,13 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input id="firstName" {...register("firstName")} />
-                {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">First Name *</label>
+                <Input {...register("firstName")} error={errors.firstName?.message} />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="lastName">Last Name *</Label>
-                <Input id="lastName" {...register("lastName")} />
-                {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Last Name *</label>
+                <Input {...register("lastName")} error={errors.lastName?.message} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -263,13 +261,13 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Date of Birth</label>
+                <Input type="date" {...register("dateOfBirth")} />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="mobileNumber">Mobile Number</Label>
-                <Input id="mobileNumber" {...register("mobileNumber")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Mobile Number</label>
+                <Input {...register("mobileNumber")} />
               </div>
             </div>
             <div className="flex items-center gap-2">

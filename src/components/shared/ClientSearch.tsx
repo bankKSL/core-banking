@@ -80,9 +80,9 @@ export function ClientSearch({
       ) : (
         <div className="relative">
           {isLoading && !selected ? (
-            <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 animate-spin" />
+            <Loader2 className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400 animate-spin" />
           ) : (
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
           )}
 
           <Input
@@ -94,6 +94,7 @@ export function ClientSearch({
             onFocus={() => query.length >= 0 && setOpen(true)}
             disabled={disabled}
             onFocusCapture={() => setOpen((prev) => !prev)}
+            error={error}
           />
         </div>
       )}
@@ -123,8 +124,6 @@ export function ClientSearch({
           No clients found
         </div>
       )}
-
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
 
       <Button
         type="button"

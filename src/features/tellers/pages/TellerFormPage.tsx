@@ -116,10 +116,9 @@ const TellerFormPage: FC = () => {
               onChange={(v) => setValue("officeId", v, { shouldValidate: true })}
               error={errors.officeId?.message}
             />
-            <div>
-              <Label htmlFor="name">Teller Name *</Label>
-              <Input id="name" {...register("name")} placeholder="e.g. Main Branch Teller 1" />
-              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Teller Name *</label>
+              <Input {...register("name")} placeholder="e.g. Main Branch Teller 1" error={errors.name?.message} />
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
@@ -141,14 +140,13 @@ const TellerFormPage: FC = () => {
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date *</Label>
-                <Input id="startDate" type="date" {...register("startDate")} />
-                {errors.startDate && <p className="text-xs text-red-500 mt-1">{errors.startDate.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Start Date *</label>
+                <Input type="date" {...register("startDate")} error={errors.startDate?.message} />
               </div>
-              <div>
-                <Label htmlFor="endDate">End Date</Label>
-                <Input id="endDate" type="date" {...register("endDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">End Date</label>
+                <Input type="date" {...register("endDate")} />
               </div>
             </div>
           </CardContent>

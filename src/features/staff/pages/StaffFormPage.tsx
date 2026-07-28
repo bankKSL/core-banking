@@ -177,19 +177,13 @@ const StaffFormPage: FC = () => {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstname">First Name *</Label>
-                <Input id="firstname" {...register("firstname")} placeholder="Enter first name" />
-                {errors.firstname && (
-                  <p className="text-xs text-red-500 mt-1">{errors.firstname.message}</p>
-                )}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">First Name *</label>
+                <Input {...register("firstname")} placeholder="Enter first name" error={errors.firstname?.message} />
               </div>
-              <div>
-                <Label htmlFor="lastname">Last Name *</Label>
-                <Input id="lastname" {...register("lastname")} placeholder="Enter last name" />
-                {errors.lastname && (
-                  <p className="text-xs text-red-500 mt-1">{errors.lastname.message}</p>
-                )}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Last Name *</label>
+                <Input {...register("lastname")} placeholder="Enter last name" error={errors.lastname?.message} />
               </div>
             </div>
 
@@ -217,34 +211,31 @@ const StaffFormPage: FC = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="joiningDate">Joining Date</Label>
-              <Input id="joiningDate" type="date" {...register("joiningDate")} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Joining Date</label>
+              <Input type="date" {...register("joiningDate")} />
             </div>
 
-            <div>
-              <Label htmlFor="mobileNo">Mobile No</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Mobile No</label>
               <Input
-                id="mobileNo"
                 {...register("mobileNo")}
                 placeholder="Enter mobile number"
               />
             </div>
 
-            <div>
-              <Label htmlFor="emailAddress">Email Address</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Email Address</label>
               <Input
-                id="emailAddress"
                 type="email"
                 {...register("emailAddress")}
                 placeholder="Enter email address"
               />
             </div>
 
-            <div>
-              <Label htmlFor="externalId">External ID</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">External ID</label>
               <Input
-                id="externalId"
                 {...register("externalId")}
                 placeholder="Optional external identifier"
               />

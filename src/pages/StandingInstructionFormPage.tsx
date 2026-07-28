@@ -9,7 +9,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   fetchOffices,
@@ -252,7 +251,7 @@ const StandingInstructionFormPage: React.FC = () => {
     return (
       <div className="space-y-4">
         <div>
-          <Label>Office *</Label>
+          <label className="block text-sm font-medium">Office *</label>
           <Select
             value={state.officeId ? String(state.officeId) : ""}
             onValueChange={(v) => updateSide(side, "officeId", Number(v))}
@@ -270,7 +269,7 @@ const StandingInstructionFormPage: React.FC = () => {
           </Select>
         </div>
         <div>
-          <Label>Client *</Label>
+          <label className="block text-sm font-medium">Client *</label>
           <Select
             value={state.clientId ? String(state.clientId) : ""}
             onValueChange={(v) => updateSide(side, "clientId", Number(v))}
@@ -289,7 +288,7 @@ const StandingInstructionFormPage: React.FC = () => {
           </Select>
         </div>
         <div>
-          <Label>Account Type *</Label>
+          <label className="block text-sm font-medium">Account Type *</label>
           <Select
             value={state.accountType ? String(state.accountType) : ""}
             onValueChange={(v) => updateSide(side, "accountType", Number(v))}
@@ -308,7 +307,7 @@ const StandingInstructionFormPage: React.FC = () => {
           </Select>
         </div>
         <div>
-          <Label>Account *</Label>
+          <label className="block text-sm font-medium">Account *</label>
           <Select
             value={state.accountId ? String(state.accountId) : ""}
             onValueChange={(v) => updateSide(side, "accountId", Number(v))}
@@ -349,10 +348,9 @@ const StandingInstructionFormPage: React.FC = () => {
             <CardTitle>Instruction Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="siName">Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
               <Input
-                id="siName"
                 {...register("name")}
                 placeholder="e.g. Monthly savings transfer"
                 error={errors.name?.message}
@@ -361,7 +359,7 @@ const StandingInstructionFormPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Transfer Type</Label>
+                <label className="block text-sm font-medium">Transfer Type</label>
                 <Select value={String(transferType)} onValueChange={(v) => setTransferType(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -376,7 +374,7 @@ const StandingInstructionFormPage: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Instruction Type</Label>
+                <label className="block text-sm font-medium">Instruction Type</label>
                 <Select value={String(instructionType)} onValueChange={(v) => setInstructionType(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -393,10 +391,9 @@ const StandingInstructionFormPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="siAmount">Amount *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Amount *</label>
                 <Input
-                  id="siAmount"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
@@ -405,7 +402,7 @@ const StandingInstructionFormPage: React.FC = () => {
                 />
               </div>
               <div>
-                <Label>Priority</Label>
+                <label className="block text-sm font-medium">Priority</label>
                 <Select value={String(priority)} onValueChange={(v) => setPriority(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -423,7 +420,7 @@ const StandingInstructionFormPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Recurrence Type</Label>
+                <label className="block text-sm font-medium">Recurrence Type</label>
                 <Select value={String(recurrenceType)} onValueChange={(v) => setRecurrenceType(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -438,7 +435,7 @@ const StandingInstructionFormPage: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label>Status</Label>
+                <label className="block text-sm font-medium">Status</label>
                 <Select value={String(status)} onValueChange={(v) => setStatus(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -455,15 +452,13 @@ const StandingInstructionFormPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="siValidFrom">
-                  Valid From <span className="text-red-500">*</span>
-                </Label>
-                <Input id="siValidFrom" type="date" {...register("validFrom")} error={errors.validFrom?.message} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Valid From <span className="text-red-500">*</span></label>
+                <Input type="date" {...register("validFrom")} error={errors.validFrom?.message} />
               </div>
-              <div>
-                <Label htmlFor="siValidTill">Valid Till</Label>
-                <Input id="siValidTill" type="date" {...register("validTill")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Valid Till</label>
+                <Input type="date" {...register("validTill")} error={errors.validTill?.message} />
               </div>
             </div>
           </CardContent>

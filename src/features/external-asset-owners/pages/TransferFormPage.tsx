@@ -136,51 +136,36 @@ const TransferFormPage: FC = () => {
 
             {isSale && (
               <>
-                <div>
-                  <Label htmlFor="ownerExternalId">Owner External ID *</Label>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Owner External ID *</label>
                   <Input
-                    id="ownerExternalId"
                     {...register("ownerExternalId")}
                     placeholder="e.g. 36efeb06-d835-48a1-99eb-09bd1d348c1e"
+                    error={errors.ownerExternalId?.message}
                   />
-                  {errors.ownerExternalId && (
-                    <p className="text-xs text-red-500 mt-1">{errors.ownerExternalId.message}</p>
-                  )}
                 </div>
 
-                <div>
-                  <Label htmlFor="purchasePriceRatio">Purchase Price Ratio *</Label>
-                  <Input id="purchasePriceRatio" {...register("purchasePriceRatio")} placeholder="e.g. 1.23456789" />
-                  {errors.purchasePriceRatio && (
-                    <p className="text-xs text-red-500 mt-1">{errors.purchasePriceRatio.message}</p>
-                  )}
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Purchase Price Ratio *</label>
+                  <Input {...register("purchasePriceRatio")} placeholder="e.g. 1.23456789" error={errors.purchasePriceRatio?.message} />
                 </div>
 
-                <div>
-                  <Label htmlFor="transferExternalGroupId">Transfer External Group ID</Label>
-                  <Input
-                    id="transferExternalGroupId"
-                    {...register("transferExternalGroupId")}
-                    placeholder="Optional group identifier"
-                  />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Transfer External Group ID</label>
+                  <Input {...register("transferExternalGroupId")} placeholder="Optional group identifier" />
                 </div>
               </>
             )}
 
-            <div>
-              <Label htmlFor="settlementDate">Settlement Date *</Label>
-              <Input id="settlementDate" type="date" {...register("settlementDate")} />
-              {errors.settlementDate && <p className="text-xs text-red-500 mt-1">{errors.settlementDate.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Settlement Date *</label>
+              <Input type="date" {...register("settlementDate")} error={errors.settlementDate?.message} />
             </div>
 
-            <div>
-              <Label htmlFor="transferExternalId">Transfer External ID</Label>
-              <Input
-                id="transferExternalId"
-                {...register("transferExternalId")}
-                placeholder="Auto-generated if empty"
-              />
-              <p className="text-xs text-gray-500 mt-1">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Transfer External ID</label>
+              <Input {...register("transferExternalId")} placeholder="Auto-generated if empty" />
+              <p className="text-xs text-gray-500">
                 Optional. A unique external ID will be generated if not provided.
               </p>
             </div>

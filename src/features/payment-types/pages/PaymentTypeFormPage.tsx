@@ -9,7 +9,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaymentType, useCreatePaymentType, useUpdatePaymentType } from "../hooks/usePaymentTypes";
@@ -141,24 +140,20 @@ const PaymentTypeFormPage: FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">
                 Name <span className="text-red-500">*</span>
-              </Label>
+              </label>
               <Input
-                id="name"
                 {...register("name")}
                 placeholder="Enter payment type name"
+                error={errors.name?.message}
               />
-              {errors.name && (
-                <p className="text-xs text-red-500">{errors.name.message}</p>
-              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description</label>
               <Input
-                id="description"
                 {...register("description")}
                 placeholder="Enter description"
               />
@@ -176,23 +171,21 @@ const PaymentTypeFormPage: FC = () => {
                   />
                 )}
               />
-              <Label htmlFor="isCashPayment">Cash Payment</Label>
+              <label className="block text-sm font-medium">Cash Payment</label>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="position">Position</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Position</label>
               <Input
-                id="position"
                 type="number"
                 {...register("position", { valueAsNumber: true })}
                 placeholder="0"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="codeName">Code Name</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Code Name</label>
               <Input
-                id="codeName"
                 {...register("codeName")}
                 placeholder="Enter code name"
                 disabled={isEdit && (existing?.isSystemDefined ?? false)}
@@ -206,9 +199,9 @@ const PaymentTypeFormPage: FC = () => {
                   checked={existing?.isSystemDefined ?? false}
                   disabled
                 />
-                <Label htmlFor="isSystemDefined" className="text-gray-500">
+                <label className="block text-sm font-medium text-gray-500">
                   System Defined
-                </Label>
+                </label>
               </div>
             )}
 

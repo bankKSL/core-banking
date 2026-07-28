@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -103,12 +102,12 @@ const AccountActionPage: FC = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="actionDate">Action Date *</Label>
-                <Input id="actionDate" type="date" {...register("actionDate")} error={errors.actionDate?.message} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Action Date *</label>
+                <Input type="date" {...register("actionDate")} error={errors.actionDate?.message} />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="note">Note {commandKey !== "activate" ? "(optional)" : ""}</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Note {commandKey !== "activate" ? "(optional)" : ""}</label>
                 {commandKey !== "activate" && (
                   <Textarea id="note" rows={4} {...register("note")} placeholder="Optional note..." />
                 )}

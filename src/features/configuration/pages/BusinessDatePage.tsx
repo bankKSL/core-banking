@@ -9,7 +9,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBusinessDates, useUpdateBusinessDate } from "../hooks/useConfiguration";
@@ -122,10 +121,9 @@ const BusinessDatePage: FC = () => {
               <CardTitle className="text-base">Update {editType}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="editBusinessDate">Date</Label>
-                <Input id="editBusinessDate" type="date" {...register("editDate")} />
-                {errors.editDate && <p className="text-xs text-red-500 mt-1">{errors.editDate.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Date</label>
+                <Input type="date" {...register("editDate")} error={errors.editDate?.message} />
               </div>
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={() => { setEditType(null); reset({ editDate: "" }); }}>

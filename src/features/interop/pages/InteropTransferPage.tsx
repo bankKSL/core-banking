@@ -122,27 +122,27 @@ const InteropTransferPage: FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="transactionCode">Transaction Code *</Label>
-                  <Input id="transactionCode" {...register("transactionCode")} placeholder="e.g. tx-001" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Transaction Code *</label>
+                  <Input {...register("transactionCode")} placeholder="e.g. tx-001" />
                 </div>
-                <div>
-                  <Label htmlFor="transferCode">Transfer Code *</Label>
-                  <Input id="transferCode" {...register("transferCode")} placeholder="e.g. tr-001" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Transfer Code *</label>
+                  <Input {...register("transferCode")} placeholder="e.g. tr-001" />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="accountId">Account External ID *</Label>
-                <Input id="accountId" {...register("accountId")} placeholder="e.g. ext-payer-account" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Account External ID *</label>
+                <Input {...register("accountId")} placeholder="e.g. ext-payer-account" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="amount">Amount *</Label>
-                  <Input id="amount" {...register("amount")} placeholder="e.g. 100.00" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Amount *</label>
+                  <Input {...register("amount")} placeholder="e.g. 100.00" />
                 </div>
-                <div>
-                  <Label htmlFor="currency">Currency *</Label>
-                  <Input id="currency" {...register("currency")} placeholder="e.g. USD" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Currency *</label>
+                  <Input {...register("currency")} placeholder="e.g. USD" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -202,9 +202,9 @@ const InteropTransferPage: FC = () => {
                   </Select>
                 </div>
               </div>
-              <div>
-                <Label htmlFor="note">Note</Label>
-                <Input id="note" {...register("note")} placeholder="Optional note" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Note</label>
+                <Input {...register("note")} placeholder="Optional note" />
               </div>
             </CardContent>
           </Card>

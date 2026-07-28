@@ -10,7 +10,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
@@ -189,7 +188,7 @@ const EntityDatatableCheckListPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="checkEntity">Entity</Label>
+              <label className="block text-sm font-medium">Entity</label>
               <Controller
                 control={control}
                 name="entity"
@@ -211,7 +210,7 @@ const EntityDatatableCheckListPage: FC = () => {
             </div>
 
             <div>
-              <Label htmlFor="checkDatatable">Datatable</Label>
+              <label className="block text-sm font-medium">Datatable</label>
               <Controller
                 control={control}
                 name="datatableName"
@@ -233,7 +232,7 @@ const EntityDatatableCheckListPage: FC = () => {
             </div>
 
             <div>
-              <Label htmlFor="checkStatus">Status</Label>
+              <label className="block text-sm font-medium">Status</label>
               <Controller
                 control={control}
                 name="status"
@@ -254,10 +253,9 @@ const EntityDatatableCheckListPage: FC = () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="checkProductId">Product ID (optional)</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Product ID (optional)</label>
               <Input
-                id="checkProductId"
                 type="number"
                 min="0"
                 {...register("productId")}

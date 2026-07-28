@@ -137,10 +137,9 @@ const EmailCampaignFormPage: FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="campaignName">Campaign Name *</Label>
-              <Input id="campaignName" {...register("campaignName")} placeholder="e.g. Monthly Statement" />
-              {errors.campaignName && <p className="text-xs text-red-500 mt-1">{errors.campaignName.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Campaign Name *</label>
+              <Input {...register("campaignName")} placeholder="e.g. Monthly Statement" error={errors.campaignName?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -184,16 +183,14 @@ const EmailCampaignFormPage: FC = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="paramValue">Param Value (JSON) *</Label>
-              <Input id="paramValue" {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
-              {errors.paramValue && <p className="text-xs text-red-500 mt-1">{errors.paramValue.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Param Value (JSON) *</label>
+              <Input {...register("paramValue")} placeholder='e.g. {"officeId":1}' error={errors.paramValue?.message} />
             </div>
 
-            <div>
-              <Label htmlFor="emailSubject">Subject *</Label>
-              <Input id="emailSubject" {...register("emailSubject")} placeholder="e.g. Your Monthly Statement" />
-              {errors.emailSubject && <p className="text-xs text-red-500 mt-1">{errors.emailSubject.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Subject *</label>
+              <Input {...register("emailSubject")} placeholder="e.g. Your Monthly Statement" error={errors.emailSubject?.message} />
             </div>
 
             <div>
@@ -234,14 +231,14 @@ const EmailCampaignFormPage: FC = () => {
               <CardTitle className="text-base">Schedule</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="recurrence">Recurrence Rule *</Label>
-                <Input id="recurrence" {...register("recurrence")} placeholder="e.g. FREQ=MONTHLY;INTERVAL=1" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Recurrence Rule *</label>
+                <Input {...register("recurrence")} placeholder="e.g. FREQ=MONTHLY;INTERVAL=1" />
                 <p className="text-xs text-gray-500 mt-1">RFC 5545 recurrence rule format.</p>
               </div>
-              <div>
-                <Label htmlFor="recurrenceStartDate">Recurrence Start Date *</Label>
-                <Input id="recurrenceStartDate" type="date" {...register("recurrenceStartDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Recurrence Start Date *</label>
+                <Input type="date" {...register("recurrenceStartDate")} />
               </div>
             </CardContent>
           </Card>

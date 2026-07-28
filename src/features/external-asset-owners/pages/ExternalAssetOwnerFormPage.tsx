@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createOwnerSchema, type CreateOwnerFormValues } from "../schemas/externalAssetOwner.schema";
 import { useCreateExternalAssetOwner } from "../hooks/useExternalAssetOwners";
 
@@ -52,15 +51,14 @@ const ExternalAssetOwnerFormPage: FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="ownerExternalId">Owner External ID *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Owner External ID *</label>
               <Input
-                id="ownerExternalId"
                 {...register("ownerExternalId")}
                 placeholder="e.g. 36efeb06-d835-48a1-99eb-09bd1d348c1e"
+                error={errors.ownerExternalId?.message}
               />
-              {errors.ownerExternalId && <p className="text-xs text-red-500 mt-1">{errors.ownerExternalId.message}</p>}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500">
                 A unique identifier for the external investor. This cannot be changed after creation.
               </p>
             </div>

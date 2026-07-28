@@ -64,7 +64,7 @@ const DividendListPage: FC = () => {
     register,
     handleSubmit,
     reset,
-    formState: { isValid },
+    formState: { errors, isValid },
   } = useForm<CreateDividendFormValues>({
     resolver: zodResolver(createDividendSchema),
     defaultValues: { dividendPeriodStartDate: "", dividendPeriodEndDate: "", amount: "" },
@@ -235,17 +235,17 @@ const DividendListPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onCreateSubmit)}>
             <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="periodStart">Period Start Date</Label>
-                <Input id="periodStart" type="date" {...register("dividendPeriodStartDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Period Start Date</label>
+                <Input type="date" {...register("dividendPeriodStartDate")} error={errors.dividendPeriodStartDate?.message} />
               </div>
-              <div>
-                <Label htmlFor="periodEnd">Period End Date</Label>
-                <Input id="periodEnd" type="date" {...register("dividendPeriodEndDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Period End Date</label>
+                <Input type="date" {...register("dividendPeriodEndDate")} error={errors.dividendPeriodEndDate?.message} />
               </div>
-              <div>
-                <Label htmlFor="amount">Amount</Label>
-                <Input id="amount" type="number" step="0.01" {...register("amount")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Amount</label>
+                <Input type="number" step="0.01" {...register("amount")} error={errors.amount?.message} />
               </div>
             </div>
             <DialogFooter>

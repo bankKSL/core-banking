@@ -150,10 +150,9 @@ const CampaignFormPage: FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="campaignName">Campaign Name *</Label>
-              <Input id="campaignName" {...register("campaignName")} placeholder="e.g. Loan Arrears Reminder" />
-              {errors.campaignName && <p className="text-xs text-red-500 mt-1">{errors.campaignName.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Campaign Name *</label>
+              <Input {...register("campaignName")} placeholder="e.g. Loan Arrears Reminder" error={errors.campaignName?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -240,11 +239,11 @@ const CampaignFormPage: FC = () => {
             </div>
 
             {isDirectOrSchedule && (
-              <div>
-                <Label htmlFor="paramValue">Param Value (JSON)</Label>
-                <Input id="paramValue" {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
-                <p className="text-xs text-gray-500 mt-1">JSON key-value pairs matching report parameters.</p>
-              </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Param Value (JSON)</label>
+              <Input {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
+              <p className="text-xs text-gray-500 mt-1">JSON key-value pairs matching report parameters.</p>
+            </div>
             )}
 
             <div>
@@ -283,9 +282,9 @@ const CampaignFormPage: FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="interval">Interval *</Label>
-                  <Input id="interval" {...register("interval")} placeholder="e.g. 1" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Interval *</label>
+                  <Input {...register("interval")} placeholder="e.g. 1" />
                 </div>
               </div>
               {watch("frequency") === "2" && (
@@ -305,9 +304,9 @@ const CampaignFormPage: FC = () => {
                   </Select>
                 </div>
               )}
-              <div>
-                <Label htmlFor="recurrenceStartDate">Recurrence Start Date *</Label>
-                <Input id="recurrenceStartDate" type="datetime-local" {...register("recurrenceStartDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Recurrence Start Date *</label>
+                <Input type="datetime-local" {...register("recurrenceStartDate")} />
               </div>
             </CardContent>
           </Card>

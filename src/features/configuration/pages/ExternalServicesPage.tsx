@@ -7,7 +7,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useExternalService, useUpdateExternalService } from "../hooks/useConfiguration";
@@ -93,8 +92,8 @@ const ExternalServicesPage: FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Service</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Service</label>
               <Select value={selectedService} onValueChange={setSelectedService}>
                 <SelectTrigger>
                   <SelectValue />
@@ -124,13 +123,12 @@ const ExternalServicesPage: FC = () => {
                   const sensitive = isSensitive(p.name);
                   const visible = visibleFields.has(p.name);
                   return (
-                    <div key={p.name}>
-                      <Label htmlFor={`field-${p.name}`}>
+                    <div key={p.name} className="space-y-1.5">
+                      <label className="block text-sm font-medium">
                         {p.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                      </Label>
+                      </label>
                       <div className="relative">
                         <Input
-                          id={`field-${p.name}`}
                           type={sensitive && !visible ? "password" : "text"}
                           {...register(p.name)}
                         />

@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
@@ -152,41 +151,38 @@ const LoanForm: FC<LoanFormProps> = ({
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Row 3: Principal | Loan Term Frequency */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="principal">Principal *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Principal *</label>
             <Input
-              id="principal"
               type="number"
               step="0.01"
               {...register("principal", { valueAsNumber: true })}
               disabled={isSubmitting}
+              error={errors.principal?.message}
             />
-            {errors.principal && <p className="text-xs text-red-500">{errors.principal.message}</p>}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="loanTermFrequency">Loan Term Frequency</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Loan Term Frequency</label>
             <Input
-              id="loanTermFrequency"
               type="number"
               {...register("loanTermFrequency", { valueAsNumber: true })}
               disabled={isSubmitting}
+              error={errors.loanTermFrequency?.message}
             />
-            {errors.loanTermFrequency && <p className="text-xs text-red-500">{errors.loanTermFrequency.message}</p>}
           </div>
 
           {/* Row 4: # Repayments | Repayment Frequency Type */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="numberOfRepayments">Number of Repayments *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Number of Repayments *</label>
             <Input
-              id="numberOfRepayments"
               type="number"
               {...register("numberOfRepayments", { valueAsNumber: true })}
               disabled={isSubmitting}
+              error={errors.numberOfRepayments?.message}
             />
-            {errors.numberOfRepayments && <p className="text-xs text-red-500">{errors.numberOfRepayments.message}</p>}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Repayment Frequency Type *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Repayment Frequency Type *</label>
             <Select
               value={String(watch("repaymentFrequencyType"))}
               onValueChange={(v) => setValue("repaymentFrequencyType", Number(v))}
@@ -207,8 +203,8 @@ const LoanForm: FC<LoanFormProps> = ({
           </div>
 
           {/* Row 5: Interest Type | Interest Calculation Period Type */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Interest Type *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Interest Type *</label>
             <Select
               value={String(watch("interestType") ?? 0)}
               onValueChange={(v) => setValue("interestType", Number(v) as any)}
@@ -223,8 +219,8 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Interest Calculation Period Type *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Interest Calculation Period Type *</label>
             <Select
               value={String(watch("interestCalculationPeriodType") ?? 0)}
               onValueChange={(v) => setValue("interestCalculationPeriodType", Number(v) as any)}
@@ -241,19 +237,17 @@ const LoanForm: FC<LoanFormProps> = ({
           </div>
 
           {/* Row 6: Grace on Interest | In Arrears Tolerance */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="graceOnInterestPayment">Grace on Interest Payment</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Grace on Interest Payment</label>
             <Input
-              id="graceOnInterestPayment"
               type="number"
               {...register("graceOnInterestPayment", { valueAsNumber: true })}
               disabled={isSubmitting}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="inArrearsTolerance">In Arrears Tolerance</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">In Arrears Tolerance</label>
             <Input
-              id="inArrearsTolerance"
               type="number"
               step="0.01"
               {...register("inArrearsTolerance", { valueAsNumber: true })}
@@ -262,29 +256,24 @@ const LoanForm: FC<LoanFormProps> = ({
           </div>
 
           {/* Row 7: Submitted On Date | Expected Disbursement Date */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="submittedOnDate">Submitted On Date *</Label>
-            <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
-            {errors.submittedOnDate && <p className="text-xs text-red-500">{errors.submittedOnDate.message}</p>}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Submitted On Date *</label>
+            <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} error={errors.submittedOnDate?.message} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="expectedDisbursementDate">Expected Disbursement Date *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Expected Disbursement Date *</label>
             <Input
-              id="expectedDisbursementDate"
               type="date"
               {...register("expectedDisbursementDate")}
               disabled={isSubmitting}
+              error={errors.expectedDisbursementDate?.message}
             />
-            {errors.expectedDisbursementDate && (
-              <p className="text-xs text-red-500">{errors.expectedDisbursementDate.message}</p>
-            )}
           </div>
 
           {/* Row 8: Repayments Starting From Date (span full width) */}
-          <div className="col-span-2 flex flex-col gap-1.5">
-            <Label htmlFor="repaymentsStartingFromDate">Repayments Starting From Date</Label>
+          <div className="col-span-2 space-y-1.5">
+            <label className="block text-sm font-medium">Repayments Starting From Date</label>
             <Input
-              id="repaymentsStartingFromDate"
               type="date"
               {...register("repaymentsStartingFromDate")}
               disabled={isSubmitting}

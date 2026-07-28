@@ -273,10 +273,9 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             <CardTitle>Instruction Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="siName">Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
               <Input
-                id="siName"
                 {...register("name")}
                 placeholder="e.g. Monthly savings transfer"
                 error={errors.name?.message}
@@ -311,12 +310,11 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="siAmount">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">
                   Amount {instructionType === 1 && <span className="text-red-500">*</span>}
-                </Label>
+                </label>
                 <Input
-                  id="siAmount"
                   type="number"
                   step="0.01"
                   placeholder={instructionType === 2 ? "Auto-calculated from dues" : "0.00"}
@@ -366,10 +364,9 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="siRecInterval">Recurrence Interval *</Label>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Recurrence Interval *</label>
                   <Input
-                    id="siRecInterval"
                     type="number"
                     min="1"
                     placeholder="e.g. 1"
@@ -378,10 +375,9 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
                   />
                 </div>
                 {(recurrenceFrequency === 2 || recurrenceFrequency === 3) && (
-                  <div>
-                    <Label htmlFor="siRecOnDay">Recurrence On Day</Label>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Recurrence On Day</label>
                     <Input
-                      id="siRecOnDay"
                       type="number"
                       min="1"
                       max="31"
@@ -394,15 +390,15 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="siValidFrom">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">
                   Valid From <span className="text-red-500">*</span>
-                </Label>
-                <Input id="siValidFrom" type="date" {...register("validFrom")} error={errors.validFrom?.message} />
+                </label>
+                <Input type="date" {...register("validFrom")} error={errors.validFrom?.message} />
               </div>
-              <div>
-                <Label htmlFor="siValidTill">Valid Till</Label>
-                <Input id="siValidTill" type="date" {...register("validTill")} error={errors.validTill?.message} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Valid Till</label>
+                <Input type="date" {...register("validTill")} error={errors.validTill?.message} />
               </div>
             </div>
           </CardContent>

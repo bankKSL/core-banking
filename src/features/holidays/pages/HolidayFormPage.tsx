@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -186,48 +185,44 @@ const HolidayFormPage: FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="holidayName">Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
               <Input
-                id="holidayName"
                 {...register("name")}
                 placeholder="e.g. New Year's Day"
+                error={errors.name?.message}
               />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
             </div>
 
-            <div>
-              <Label htmlFor="holidayDescription">Description</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description</label>
               <Textarea
-                id="holidayDescription"
                 {...register("description")}
                 placeholder="Optional description"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="holidayFromDate">From Date *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">From Date *</label>
                 <Input
-                  id="holidayFromDate"
                   type="date"
                   {...register("fromDate")}
+                  error={errors.fromDate?.message}
                 />
-                {errors.fromDate && <p className="text-xs text-red-500">{errors.fromDate.message}</p>}
               </div>
-              <div>
-                <Label htmlFor="holidayToDate">To Date *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">To Date *</label>
                 <Input
-                  id="holidayToDate"
                   type="date"
                   {...register("toDate")}
+                  error={errors.toDate?.message}
                 />
-                {errors.toDate && <p className="text-xs text-red-500">{errors.toDate.message}</p>}
               </div>
             </div>
 
             <div>
-              <Label>Rescheduling Type *</Label>
+              <label className="block text-sm font-medium">Rescheduling Type *</label>
               <Controller
                 name="reschedulingType"
                 control={control}
@@ -253,12 +248,11 @@ const HolidayFormPage: FC = () => {
             </div>
 
             {isSpecificDate && (
-              <div>
-                <Label htmlFor="holidayRepaymentsRescheduledTo">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">
                   Repayments Rescheduled To
-                </Label>
+                </label>
                 <Input
-                  id="holidayRepaymentsRescheduledTo"
                   type="date"
                   {...register("repaymentsRescheduledTo")}
                 />
@@ -266,7 +260,7 @@ const HolidayFormPage: FC = () => {
             )}
 
             <div>
-              <Label>Offices *</Label>
+              <label className="block text-sm font-medium">Offices *</label>
               <Controller
                 name="selectedOfficeIds"
                 control={control}

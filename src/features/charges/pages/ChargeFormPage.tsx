@@ -9,7 +9,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -263,15 +262,14 @@ const ChargeFormPage: FC = () => {
             <CardTitle>Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="chName">Name *</Label>
-              <Input id="chName" {...register("name")} placeholder="e.g. Processing Fee" />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
+              <Input {...register("name")} placeholder="e.g. Processing Fee" error={errors.name?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Charge Applies To *</Label>
+                <label className="block text-sm font-medium">Charge Applies To *</label>
                 <Controller
                   name="chargeAppliesTo"
                   control={control}
@@ -302,7 +300,7 @@ const ChargeFormPage: FC = () => {
               </div>
 
               <div>
-                <Label>Currency *</Label>
+                <label className="block text-sm font-medium">Currency *</label>
                 <Controller
                   name="currencyCode"
                   control={control}
@@ -327,7 +325,7 @@ const ChargeFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Time Type *</Label>
+                <label className="block text-sm font-medium">Time Type *</label>
                 <Controller
                   name="chargeTimeType"
                   control={control}
@@ -352,7 +350,7 @@ const ChargeFormPage: FC = () => {
               </div>
 
               <div>
-                <Label>Calculation Type *</Label>
+                <label className="block text-sm font-medium">Calculation Type *</label>
                 <Controller
                   name="chargeCalculationType"
                   control={control}
@@ -378,21 +376,20 @@ const ChargeFormPage: FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="chAmount">Amount *</Label>
-                <Input id="chAmount" type="number" step="0.01" min="0" {...register("amount")} placeholder="0.00" />
-                {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Amount *</label>
+                <Input type="number" step="0.01" min="0" {...register("amount")} placeholder="0.00" error={errors.amount?.message} />
               </div>
 
               {isPercentage && (
                 <>
-                  <div>
-                    <Label htmlFor="chMinCap">Min Cap</Label>
-                    <Input id="chMinCap" type="number" step="0.01" min="0" {...register("minCap")} placeholder="Optional" />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Min Cap</label>
+                    <Input type="number" step="0.01" min="0" {...register("minCap")} placeholder="Optional" />
                   </div>
-                  <div>
-                    <Label htmlFor="chMaxCap">Max Cap</Label>
-                    <Input id="chMaxCap" type="number" step="0.01" min="0" {...register("maxCap")} placeholder="Optional" />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Max Cap</label>
+                    <Input type="number" step="0.01" min="0" {...register("maxCap")} placeholder="Optional" />
                   </div>
                 </>
               )}
@@ -400,7 +397,7 @@ const ChargeFormPage: FC = () => {
 
             {isLoan && (
               <div>
-                <Label>Payment Mode *</Label>
+                <label className="block text-sm font-medium">Payment Mode *</label>
                 <Controller
                   name="chargePaymentMode"
                   control={control}
@@ -463,7 +460,7 @@ const ChargeFormPage: FC = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label>Fee Frequency</Label>
+                  <label className="block text-sm font-medium">Fee Frequency</label>
                   <Controller
                     name="feeFrequency"
                     control={control}
@@ -489,13 +486,13 @@ const ChargeFormPage: FC = () => {
 
                 {isMonthlyOrAnnual && (
                   <>
-                    <div>
-                      <Label htmlFor="chInterval">Fee Interval (months)</Label>
-                      <Input id="chInterval" type="number" min="1" max="12" {...register("feeInterval")} placeholder="e.g. 1" />
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">Fee Interval (months)</label>
+                      <Input type="number" min="1" max="12" {...register("feeInterval")} placeholder="e.g. 1" />
                     </div>
-                    <div>
-                      <Label htmlFor="chMonthDay">Day of Month</Label>
-                      <Input id="chMonthDay" type="number" min="1" max="31" {...register("feeOnMonthDay")} placeholder="DD" />
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">Day of Month</label>
+                      <Input type="number" min="1" max="31" {...register("feeOnMonthDay")} placeholder="DD" />
                     </div>
                   </>
                 )}
@@ -511,7 +508,7 @@ const ChargeFormPage: FC = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>GL Income Account</Label>
+                <label className="block text-sm font-medium">GL Income Account</label>
                 <Controller
                   name="incomeAccountId"
                   control={control}
@@ -536,7 +533,7 @@ const ChargeFormPage: FC = () => {
               </div>
 
               <div>
-                <Label>Tax Group</Label>
+                <label className="block text-sm font-medium">Tax Group</label>
                 <Controller
                   name="taxGroupId"
                   control={control}
@@ -571,11 +568,11 @@ const ChargeFormPage: FC = () => {
                       <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />
                     )}
                   />
-                  <Label className="mb-0">Restrict to Payment Type</Label>
+                  <label className="block text-sm font-medium mb-0">Restrict to Payment Type</label>
                 </div>
                 {watch("enablePaymentType") && (
                   <div>
-                    <Label>Payment Type</Label>
+                    <label className="block text-sm font-medium">Payment Type</label>
                     <Controller
                       name="paymentTypeId"
                       control={control}
@@ -608,18 +605,17 @@ const ChargeFormPage: FC = () => {
                       <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />
                     )}
                   />
-                  <Label className="mb-0">Enable Free Withdrawal</Label>
+                  <label className="block text-sm font-medium mb-0">Enable Free Withdrawal</label>
                 </div>
                 {watch("enableFreeWithdrawalCharge") && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="chFreeWf">Free Withdrawal Frequency</Label>
+                      <label className="block text-sm font-medium">Free Withdrawal Frequency</label>
                       <Controller
                         name="freeWithdrawalFrequency"
                         control={control}
                         render={({ field }) => (
                           <Input
-                            id="chFreeWf"
                             type="number"
                             min="0"
                             value={field.value ?? ""}

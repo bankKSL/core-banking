@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -120,13 +119,10 @@ const ForgotPasswordPage: FC = () => {
               </p>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="reset-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email address
-                  </Label>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Email address</label>
                   <div className="relative">
                     <Input
-                      id="reset-email"
                       {...register("email")}
                       type="email"
                       placeholder="you@corebank.com"

@@ -86,7 +86,7 @@ export function LoanProductSearch({
         </div>
       ) : (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
             id={name ?? "productSearch"}
             placeholder={placeholder}
@@ -96,6 +96,7 @@ export function LoanProductSearch({
             onFocus={() => query.length >= 0 && setOpen(true)}
             onFocusCapture={() => setOpen((prev) => !prev)}
             disabled={disabled}
+            error={error}
           />
         </div>
       )}
@@ -125,14 +126,6 @@ export function LoanProductSearch({
           })}
         </div>
       )}
-
-      {open && !selected && query.length >= 2 && filtered.length === 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No products found
-        </div>
-      )}
-
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
 
       <Button
         type="button"

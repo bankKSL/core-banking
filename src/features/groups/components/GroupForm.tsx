@@ -97,17 +97,14 @@ const GroupForm: FC<GroupFormProps> = ({
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Group Name — the only field editable in edit mode */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="name">
-              Group Name <span className="text-red-500">*</span>
-            </Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Group Name *</label>
             <Input
-              id="name"
               {...register("name", { required: "Group name is required" })}
               disabled={isSubmitting}
               placeholder="e.g. Sunrise Self-Help Group"
+              error={errors.name?.message}
             />
-            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
           </div>
 
           <OfficeSelect
@@ -119,10 +116,9 @@ const GroupForm: FC<GroupFormProps> = ({
 
           {/* External ID — create mode only */}
           {!isEditMode && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="externalId">External ID</Label>
-              <Input id="externalId" {...register("externalId")} disabled={isSubmitting} placeholder="Optional" />
-              {errors.externalId && <p className="text-xs text-red-500">{errors.externalId.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">External ID</label>
+              <Input {...register("externalId")} disabled={isSubmitting} placeholder="Optional" error={errors.externalId?.message} />
             </div>
           )}
 
@@ -141,12 +137,9 @@ const GroupForm: FC<GroupFormProps> = ({
 
           {/* Activation Date — create: shown, required when active; edit: only for the Activate action on pending groups */}
           {((!isEditMode && active) || showActivate) && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="activationDate">
-                Activation Date <span className="text-red-500">*</span>
-              </Label>
-              <Input id="activationDate" type="date" {...register("activationDate")} disabled={isSubmitting} />
-              {errors.activationDate && <p className="text-xs text-red-500">{errors.activationDate.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Activation Date *</label>
+              <Input type="date" {...register("activationDate")} disabled={isSubmitting} error={errors.activationDate?.message} />
             </div>
           )}
         </CardContent>

@@ -233,16 +233,13 @@ const ShareAccountFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="requestedShares">Requested Shares *</Label>
-                <Input id="requestedShares" type="number" {...register("requestedShares")} />
-                {errors.requestedShares && (
-                  <p className="text-xs text-red-500 mt-1">{errors.requestedShares.message}</p>
-                )}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Requested Shares *</label>
+                <Input type="number" {...register("requestedShares")} error={errors.requestedShares?.message} />
               </div>
-              <div>
-                <Label htmlFor="applicationDate">Application Date</Label>
-                <Input id="applicationDate" type="date" {...register("applicationDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Application Date</label>
+                <Input type="date" {...register("applicationDate")} />
               </div>
             </div>
 
@@ -262,9 +259,9 @@ const ShareAccountFormPage: FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="submittedDate">Submitted Date</Label>
-                <Input id="submittedDate" type="date" {...register("submittedDate")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Submitted Date</label>
+                <Input type="date" {...register("submittedDate")} />
               </div>
             </div>
           </CardContent>
@@ -276,13 +273,13 @@ const ShareAccountFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="minimumActivePeriod">Minimum Active Period (Days)</Label>
-                <Input id="minimumActivePeriod" type="number" {...register("minimumActivePeriod")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Minimum Active Period (Days)</label>
+                <Input type="number" {...register("minimumActivePeriod")} />
               </div>
-              <div>
-                <Label htmlFor="lockinPeriodFrequency">Lock-in Period Frequency</Label>
-                <Input id="lockinPeriodFrequency" type="number" {...register("lockinPeriodFrequency")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Lock-in Period Frequency</label>
+                <Input type="number" {...register("lockinPeriodFrequency")} />
               </div>
               <div>
                 <Label>Lock-in Period Type</Label>
@@ -311,10 +308,10 @@ const ShareAccountFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("allowDividendCalculationForInactiveClients", v === true)}
               />
             </div>
-            <div>
-              <Label htmlFor="externalId">External ID</Label>
-              <Input id="externalId" {...register("externalId")} placeholder="Optional external identifier" />
-            </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">External ID</label>
+                <Input {...register("externalId")} placeholder="Optional external identifier" />
+              </div>
           </CardContent>
         </Card>
 
@@ -344,10 +341,9 @@ const ShareAccountFormPage: FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex-1">
-                  <Label htmlFor={`charges.${index}.amount`}>Amount</Label>
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-sm font-medium">Amount</label>
                   <Input
-                    id={`charges.${index}.amount`}
                     type="number"
                     step="0.01"
                     {...register(`charges.${index}.amount`)}

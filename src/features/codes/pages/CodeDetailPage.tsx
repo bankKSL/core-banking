@@ -14,7 +14,6 @@ import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   useCode,
@@ -271,19 +270,18 @@ const CodeDetailPage: FC = () => {
               />
             )}
             <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="cvName">Value Name *</Label>
-                <Input id="cvName" {...register("name")} placeholder="e.g. Male" />
-                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Value Name *</label>
+                <Input {...register("name")} placeholder="e.g. Male" error={errors.name?.message} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="cvPosition">Position</Label>
-                  <Input id="cvPosition" type="number" min="0" {...register("position")} placeholder="0" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Position</label>
+                  <Input type="number" min="0" {...register("position")} placeholder="0" />
                 </div>
-                <div>
-                  <Label htmlFor="cvDesc">Description</Label>
-                  <Input id="cvDesc" {...register("description")} placeholder="Optional" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Description</label>
+                  <Input {...register("description")} placeholder="Optional" />
                 </div>
               </div>
               <div className="flex items-center gap-6">

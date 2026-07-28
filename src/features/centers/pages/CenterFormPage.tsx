@@ -165,12 +165,9 @@ const CenterFormPage: FC = () => {
             <CardTitle>{isEditMode ? "Center Details" : "New Center"}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="name">
-                Name <span className="text-red-500">*</span>
-              </Label>
-              <Input id="name" {...register("name")} disabled={isSubmitting} placeholder="e.g. Downtown Center" />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
+              <Input {...register("name")} disabled={isSubmitting} placeholder="e.g. Downtown Center" error={errors.name?.message} />
             </div>
 
             <OfficeSelect
@@ -201,9 +198,9 @@ const CenterFormPage: FC = () => {
             </div>
 
             {!isEditMode && (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="externalId">External ID</Label>
-                <Input id="externalId" {...register("externalId")} disabled={isSubmitting} placeholder="Optional" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">External ID</label>
+                <Input {...register("externalId")} disabled={isSubmitting} placeholder="Optional" />
               </div>
             )}
 
@@ -222,19 +219,16 @@ const CenterFormPage: FC = () => {
             )}
 
             {!isEditMode && active && (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="activationDate">
-                  Activation Date <span className="text-red-500">*</span>
-                </Label>
-                <Input id="activationDate" type="date" {...register("activationDate")} disabled={isSubmitting} />
-                {errors.activationDate && <p className="text-xs text-red-500">{errors.activationDate.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Activation Date *</label>
+                <Input type="date" {...register("activationDate")} disabled={isSubmitting} error={errors.activationDate?.message} />
               </div>
             )}
 
             {!isEditMode && (
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="submittedOnDate">Submitted On Date</Label>
-                <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Submitted On Date</label>
+                <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
               </div>
             )}
           </CardContent>

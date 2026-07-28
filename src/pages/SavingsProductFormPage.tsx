@@ -113,15 +113,18 @@ const SavingsProductFormPage: React.FC = () => {
             <CardTitle className="text-base">Product Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Input label="Product Name *" {...register("name")} error={errors.name?.message} />
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">Product Name *</label>
+              <Input {...register("name")} error={errors.name?.message} />
             </div>
-            <Input
-              label="Short Name *"
-              {...register("shortName")}
-              error={errors.shortName?.message}
-              placeholder="No spaces (e.g. REGSAV01)"
-            />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Short Name *</label>
+              <Input
+                {...register("shortName")}
+                error={errors.shortName?.message}
+                placeholder="No spaces (e.g. REGSAV01)"
+              />
+            </div>
             <CurrencySelect
               value={watch("currencyCode")}
               onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
@@ -130,19 +133,23 @@ const SavingsProductFormPage: React.FC = () => {
             <div className="col-span-2">
               <Textarea label="Description" placeholder="Brief product description" {...register("description")} />
             </div>
-            <Input
-              label="Decimal Places *"
-              type="number"
-              {...register("digitsAfterDecimal")}
-              error={errors.digitsAfterDecimal?.message}
-            />
-            <Input
-              label="Nominal Annual Rate (%) *"
-              type="number"
-              step="0.01"
-              {...register("nominalAnnualInterestRate")}
-              error={errors.nominalAnnualInterestRate?.message}
-            />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Decimal Places *</label>
+              <Input
+                type="number"
+                {...register("digitsAfterDecimal")}
+                error={errors.digitsAfterDecimal?.message}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Nominal Annual Rate (%) *</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("nominalAnnualInterestRate")}
+                error={errors.nominalAnnualInterestRate?.message}
+              />
+            </div>
           </CardContent>
         </Card>
         <div className="flex justify-end gap-3">

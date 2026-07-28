@@ -206,10 +206,9 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
               </Select>
               {errors.collateralId && <p className="text-xs text-red-500">{errors.collateralId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="quantity">Quantity *</Label>
-              <Input id="quantity" type="number" step="0.01" {...register("quantity", { valueAsNumber: true })} />
-              {errors.quantity && <p className="text-xs text-red-500">{errors.quantity.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Quantity *</label>
+              <Input type="number" step="0.01" {...register("quantity", { valueAsNumber: true })} error={errors.quantity?.message} />
             </div>
             <Button
               type="submit"

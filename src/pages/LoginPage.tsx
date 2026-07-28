@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginFormValues, useLogin } from "@/features/authentication";
 
 /** Merge a manual ref with a React Hook Form register ref. */
@@ -101,25 +100,23 @@ const LoginPage: FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <Label htmlFor="username" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Username
-              </Label>
+              <label className="block text-sm font-medium">Username</label>
               <Input
-                id="username"
                 type="text"
                 placeholder="Enter your username"
                 autoComplete="username"
                 disabled={isSubmitting}
                 className={cn("h-11", displayError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700")}
                 {...form.register("username")}
+                error={form.formState.errors.username?.message}
               />
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Password
-                </Label>
+                </label>
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
@@ -133,13 +130,13 @@ const LoginPage: FC = () => {
                   const passwordRegister = form.register("password");
                   return (
                     <Input
-                      id="password"
                       {...passwordRegister}
                       ref={mergeRefs(passwordInputRef, passwordRegister.ref)}
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       autoComplete="current-password"
                       disabled={isSubmitting}
+                      error={form.formState.errors.password?.message}
                       className={cn(
                         "h-11 pr-10",
                         displayError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700",

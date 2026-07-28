@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { ClientSearch } from "@/components/shared/ClientSearch";
@@ -129,16 +128,15 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
               disabled={isMutating}
               error={errors.clientId?.message}
             />
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="guarantorAmount">Guaranteed Amount *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Guaranteed Amount *</label>
               <Input
-                id="guarantorAmount"
                 type="number"
                 step="0.01"
                 {...register("amount", { valueAsNumber: true })}
                 disabled={isMutating}
+                error={errors.amount?.message}
               />
-              {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={isMutating}>
@@ -161,9 +159,9 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
             <DialogDescription>Update guaranteed amount for {editTarget ? displayName(editTarget) : ""}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="editGuarantorAmount">Guaranteed Amount</Label>
-              <Input id="editGuarantorAmount" type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Guaranteed Amount</label>
+              <Input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditTarget(null)} disabled={updateMutation.isPending}>

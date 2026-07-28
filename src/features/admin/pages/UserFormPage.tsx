@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -152,25 +151,21 @@ const UserFormPage: FC = () => {
             <CardTitle className="text-base">Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="username">Username *</Label>
-              <Input id="username" {...register("username")} />
-              {errors.username && <p className="text-xs text-red-500 mt-1">{errors.username.message}</p>}
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">Username *</label>
+              <Input {...register("username")} error={errors.username?.message} />
             </div>
-            <div>
-              <Label htmlFor="firstname">First Name *</Label>
-              <Input id="firstname" {...register("firstname")} />
-              {errors.firstname && <p className="text-xs text-red-500 mt-1">{errors.firstname.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">First Name *</label>
+              <Input {...register("firstname")} error={errors.firstname?.message} />
             </div>
-            <div>
-              <Label htmlFor="lastname">Last Name *</Label>
-              <Input id="lastname" {...register("lastname")} />
-              {errors.lastname && <p className="text-xs text-red-500 mt-1">{errors.lastname.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Last Name *</label>
+              <Input {...register("lastname")} error={errors.lastname?.message} />
             </div>
-            <div className="col-span-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email")} placeholder="user@example.com" />
-              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">Email</label>
+              <Input type="email" {...register("email")} placeholder="user@example.com" error={errors.email?.message} />
             </div>
           </CardContent>
         </Card>
@@ -180,8 +175,8 @@ const UserFormPage: FC = () => {
             <CardTitle className="text-base">Organization</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Office *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Office *</label>
               <Select
                 value={watch("officeId")}
                 onValueChange={(v) => setValue("officeId", v, { shouldValidate: true })}
@@ -199,9 +194,9 @@ const UserFormPage: FC = () => {
               </Select>
               {errors.officeId && <p className="text-xs text-red-500 mt-1">{errors.officeId.message}</p>}
             </div>
-            <div>
-              <Label htmlFor="staffId">Staff ID</Label>
-              <Input id="staffId" type="number" {...register("staffId")} placeholder="Optional" />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Staff ID</label>
+              <Input type="number" {...register("staffId")} placeholder="Optional" />
             </div>
           </CardContent>
         </Card>
@@ -237,17 +232,17 @@ const UserFormPage: FC = () => {
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex items-center gap-3">
                 <Switch id="sendPasswordToEmail" onCheckedChange={(v) => setValue("sendPasswordToEmail", v)} />
-                <Label htmlFor="sendPasswordToEmail">Send password via email</Label>
+                <label className="block text-sm font-medium" htmlFor="sendPasswordToEmail">Send password via email</label>
               </div>
               {!sendPasswordToEmail && (
                 <>
-                  <div>
-                    <Label htmlFor="password">Password *</Label>
-                    <Input id="password" type="password" {...register("password")} />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Password *</label>
+                    <Input type="password" {...register("password")} />
                   </div>
-                  <div>
-                    <Label htmlFor="repeatPassword">Repeat Password *</Label>
-                    <Input id="repeatPassword" type="password" {...register("repeatPassword")} />
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Repeat Password *</label>
+                    <Input type="password" {...register("repeatPassword")} />
                   </div>
                 </>
               )}
@@ -266,7 +261,7 @@ const UserFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("passwordNeverExpires", v)}
                 defaultChecked={user?.passwordNeverExpires ?? false}
               />
-              <Label htmlFor="passwordNeverExpires">Password never expires</Label>
+              <label className="block text-sm font-medium" htmlFor="passwordNeverExpires">Password never expires</label>
             </div>
             <div className="flex items-center gap-3">
               <Switch
@@ -274,7 +269,7 @@ const UserFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("isLoginRetriesEnabled", v)}
                 defaultChecked={user?.isLoginRetriesEnabled ?? true}
               />
-              <Label htmlFor="isLoginRetriesEnabled">Enable login retry locking</Label>
+              <label className="block text-sm font-medium" htmlFor="isLoginRetriesEnabled">Enable login retry locking</label>
             </div>
             <div className="flex items-center gap-3">
               <Switch
@@ -282,7 +277,7 @@ const UserFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("isPasswordResetAllowed", v)}
                 defaultChecked={user?.isPasswordResetAllowed ?? true}
               />
-              <Label htmlFor="isPasswordResetAllowed">Allow password reset</Label>
+              <label className="block text-sm font-medium" htmlFor="isPasswordResetAllowed">Allow password reset</label>
             </div>
           </CardContent>
         </Card>

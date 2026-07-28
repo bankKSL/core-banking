@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -283,18 +282,17 @@ const CreateDepositAccountPage: React.FC = () => {
             <CardTitle className="text-base">Account Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="externalId">External ID</Label>
-              <Input id="externalId" {...register("externalId")} placeholder="Optional external reference" />
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">External ID</label>
+              <Input {...register("externalId")} placeholder="Optional external reference" error={errors.externalId?.message} />
             </div>
-            <div>
-              <Label htmlFor="submittedOnDate">Submitted On Date *</Label>
-              <Input id="submittedOnDate" type="date" {...register("submittedOnDate")} />
-              {errors.submittedOnDate && <p className="mt-1 text-xs text-red-500">{errors.submittedOnDate.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Submitted On Date *</label>
+              <Input type="date" {...register("submittedOnDate")} error={errors.submittedOnDate?.message} />
             </div>
-            <div>
-              <Label htmlFor="fieldOfficerId">Field Officer ID</Label>
-              <Input id="fieldOfficerId" type="number" {...register("fieldOfficerId")} placeholder="Optional" />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Field Officer ID</label>
+              <Input type="number" {...register("fieldOfficerId")} placeholder="Optional" error={errors.fieldOfficerId?.message} />
             </div>
           </CardContent>
         </Card>
@@ -305,10 +303,9 @@ const CreateDepositAccountPage: React.FC = () => {
             <CardTitle className="text-base">Interest Configuration</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="nominalAnnualInterestRate">Interest Rate (% annual)</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Interest Rate (% annual)</label>
               <Input
-                id="nominalAnnualInterestRate"
                 type="number"
                 step="0.01"
                 {...register("nominalAnnualInterestRate")}
@@ -317,10 +314,11 @@ const CreateDepositAccountPage: React.FC = () => {
                     ? String(template.nominalAnnualInterestRate)
                     : "From product"
                 }
+                error={errors.nominalAnnualInterestRate?.message}
               />
             </div>
             <div>
-              <Label>Compounding Period</Label>
+              <label className="block text-sm font-medium">Compounding Period</label>
               <Select
                 value={watch("interestCompoundingPeriodType")}
                 onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}
@@ -338,7 +336,7 @@ const CreateDepositAccountPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Posting Period</Label>
+              <label className="block text-sm font-medium">Posting Period</label>
               <Select
                 value={watch("interestPostingPeriodType")}
                 onValueChange={(v) => setValue("interestPostingPeriodType", v)}
@@ -356,7 +354,7 @@ const CreateDepositAccountPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Calculation Type</Label>
+              <label className="block text-sm font-medium">Calculation Type</label>
               <Select
                 value={watch("interestCalculationType")}
                 onValueChange={(v) => setValue("interestCalculationType", v)}
@@ -374,7 +372,7 @@ const CreateDepositAccountPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Days in Year</Label>
+              <label className="block text-sm font-medium">Days in Year</label>
               <Select
                 value={watch("interestCalculationDaysInYearType")}
                 onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}
@@ -400,19 +398,19 @@ const CreateDepositAccountPage: React.FC = () => {
             <CardTitle className="text-base">Balance & Lock-in</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="minRequiredOpeningBalance">Min Opening Balance</Label>
-              <Input id="minRequiredOpeningBalance" type="number" {...register("minRequiredOpeningBalance")} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Min Opening Balance</label>
+              <Input type="number" {...register("minRequiredOpeningBalance")} error={errors.minRequiredOpeningBalance?.message} />
             </div>
-            <div>
-              <Label htmlFor="lockinPeriodFrequency">Lock-in Period</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Lock-in Period</label>
               <div className="flex gap-2">
                 <Input
-                  id="lockinPeriodFrequency"
                   type="number"
                   {...register("lockinPeriodFrequency")}
                   placeholder="Period"
                   className="flex-1"
+                  error={errors.lockinPeriodFrequency?.message}
                 />
                 <Select
                   value={watch("lockinPeriodFrequencyType")}
@@ -437,19 +435,19 @@ const CreateDepositAccountPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("withdrawalFeeForTransfers", v)}
                 defaultChecked={template?.withdrawalFeeForTransfers ?? false}
               />
-              <Label htmlFor="withdrawalFeeForTransfers">Withdrawal Fee for Transfers</Label>
+              <label className="block text-sm font-medium" htmlFor="withdrawalFeeForTransfers">Withdrawal Fee for Transfers</label>
             </div>
             <div className="flex items-center gap-3 pt-2">
               <Switch
                 id="enforceMinRequiredBalance"
                 onCheckedChange={(v) => setValue("enforceMinRequiredBalance", v)}
               />
-              <Label htmlFor="enforceMinRequiredBalance">Enforce Min Balance</Label>
+              <label className="block text-sm font-medium" htmlFor="enforceMinRequiredBalance">Enforce Min Balance</label>
             </div>
             {enforceMinRequiredBalance && (
-              <div>
-                <Label htmlFor="minRequiredBalance">Min Required Balance</Label>
-                <Input id="minRequiredBalance" type="number" {...register("minRequiredBalance")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Min Required Balance</label>
+                <Input type="number" {...register("minRequiredBalance")} error={errors.minRequiredBalance?.message} />
               </div>
             )}
           </CardContent>
@@ -463,12 +461,12 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="allowOverdraft" onCheckedChange={(v) => setValue("allowOverdraft", v)} />
-              <Label htmlFor="allowOverdraft">Allow Overdraft</Label>
+              <label className="block text-sm font-medium" htmlFor="allowOverdraft">Allow Overdraft</label>
             </div>
             {allowOverdraft && (
-              <div>
-                <Label htmlFor="overdraftLimit">Overdraft Limit</Label>
-                <Input id="overdraftLimit" type="number" {...register("overdraftLimit")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Overdraft Limit</label>
+                <Input type="number" {...register("overdraftLimit")} error={errors.overdraftLimit?.message} />
               </div>
             )}
           </CardContent>
@@ -482,17 +480,17 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="lienAllowed" onCheckedChange={(v) => setValue("lienAllowed", v)} />
-              <Label htmlFor="lienAllowed">Allow Lien</Label>
+              <label className="block text-sm font-medium" htmlFor="lienAllowed">Allow Lien</label>
             </div>
             {lienAllowed && (
-              <div>
-                <Label htmlFor="maxAllowedLienLimit">Max Lien Limit</Label>
-                <Input id="maxAllowedLienLimit" type="number" {...register("maxAllowedLienLimit")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Max Lien Limit</label>
+                <Input type="number" {...register("maxAllowedLienLimit")} error={errors.maxAllowedLienLimit?.message} />
               </div>
             )}
             <div className="flex items-center gap-3 pt-2">
               <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
-              <Label htmlFor="withHoldTax">Withhold Tax</Label>
+              <label className="block text-sm font-medium" htmlFor="withHoldTax">Withhold Tax</label>
             </div>
           </CardContent>
         </Card>

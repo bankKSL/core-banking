@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -144,8 +143,8 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label>Collateral Type *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Collateral Type *</label>
               <Select
                 value={selectedTypeId ? String(selectedTypeId) : ""}
                 onValueChange={(v) => setValue("collateralTypeId", Number(v), { shouldValidate: true })}
@@ -163,20 +162,19 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
               </Select>
               {errors.collateralTypeId && <p className="text-xs text-red-500">{errors.collateralTypeId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="collateralValue">Value *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Value *</label>
               <Input
-                id="collateralValue"
                 type="number"
                 step="0.01"
                 {...register("value", { valueAsNumber: true })}
                 disabled={isMutating}
+                error={errors.value?.message}
               />
-              {errors.value && <p className="text-xs text-red-500">{errors.value.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="collateralDescription">Description</Label>
-              <Input id="collateralDescription" {...register("description")} disabled={isMutating} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description</label>
+              <Input {...register("description")} disabled={isMutating} />
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={isMutating}>

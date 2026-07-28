@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -186,8 +185,8 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
             <DialogDescription>Apply a new fee or penalty to this loan.</DialogDescription>
           </DialogHeader>
           <form onSubmit={onAddSubmit} className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label>Charge *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Charge *</label>
               <Select value={selectedChargeId ? String(selectedChargeId) : ""} onValueChange={(v) => handleChargeSelect(Number(v))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select charge" />
@@ -202,20 +201,19 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
               </Select>
               {errors.chargeId && <p className="text-xs text-red-500">{errors.chargeId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="chargeAmount">Amount *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Amount *</label>
               <Input
-                id="chargeAmount"
                 type="number"
                 step="0.01"
                 {...register("amount", { valueAsNumber: true })}
                 disabled={isMutating}
+                error={errors.amount?.message}
               />
-              {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="chargeDueDate">Due Date</Label>
-              <Input id="chargeDueDate" type="date" {...register("dueDate")} disabled={isMutating} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Due Date</label>
+              <Input type="date" {...register("dueDate")} disabled={isMutating} />
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)} disabled={isMutating}>
@@ -238,13 +236,13 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
             <DialogDescription>Update amount for {editTarget?.name}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="editChargeAmount">Amount</Label>
-              <Input id="editChargeAmount" type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Amount</label>
+              <Input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="editChargeDueDate">Due Date</Label>
-              <Input id="editChargeDueDate" type="date" value={editDueDate} onChange={(e) => setEditDueDate(e.target.value)} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Due Date</label>
+              <Input type="date" value={editDueDate} onChange={(e) => setEditDueDate(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditTarget(null)} disabled={updateMutation.isPending}>
@@ -280,9 +278,9 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="payChargeDate">Transaction Date</Label>
-              <Input id="payChargeDate" type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Transaction Date</label>
+              <Input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setPayTarget(null)} disabled={isMutating}>

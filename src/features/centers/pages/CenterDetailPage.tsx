@@ -355,17 +355,14 @@ const CenterDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={closeForm.handleSubmit(onCloseSubmit)}>
             <div className="space-y-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="closeReason">Closure Reason ID</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Closure Reason ID</label>
                 <Input
-                  id="closeReason"
                   type="number"
                   placeholder="Enter closure reason ID"
                   {...closeForm.register("closureReasonId")}
+                  error={closeForm.formState.errors.closureReasonId?.message}
                 />
-                {closeForm.formState.errors.closureReasonId && (
-                  <p className="text-xs text-red-500">{closeForm.formState.errors.closureReasonId.message}</p>
-                )}
               </div>
             </div>
             <DialogFooter>

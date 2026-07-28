@@ -80,23 +80,21 @@ const PartyRegisterPage: FC = () => {
                 </Select>
                 {errors.idType && <p className="text-xs text-red-500 mt-1">{errors.idType.message}</p>}
               </div>
-              <div>
-                <Label htmlFor="idValue">Identifier Value *</Label>
-                <Input id="idValue" {...register("idValue")} placeholder="e.g. 254700111222" />
-                {errors.idValue && <p className="text-xs text-red-500 mt-1">{errors.idValue.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Identifier Value *</label>
+                <Input {...register("idValue")} placeholder="e.g. 254700111222" error={errors.idValue?.message} />
               </div>
             </div>
-            <div>
-              <Label htmlFor="accountId">Account External ID *</Label>
-              <Input id="accountId" {...register("accountId")} placeholder="e.g. ext-uuid-account-id" />
-              {errors.accountId && <p className="text-xs text-red-500 mt-1">{errors.accountId.message}</p>}
-              <p className="text-xs text-gray-500 mt-1">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Account External ID *</label>
+              <Input {...register("accountId")} placeholder="e.g. ext-uuid-account-id" error={errors.accountId?.message} />
+              <p className="text-xs text-gray-500">
                 The external ID of the savings account to link this identifier to.
               </p>
             </div>
-            <div>
-              <Label htmlFor="subIdOrType">Sub Type (Optional)</Label>
-              <Input id="subIdOrType" {...register("subIdOrType")} placeholder="Optional sub-type" />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Sub Type (Optional)</label>
+              <Input {...register("subIdOrType")} placeholder="Optional sub-type" />
             </div>
           </CardContent>
         </Card>

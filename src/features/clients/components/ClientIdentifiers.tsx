@@ -202,14 +202,13 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
               </Select>
               {errors.documentTypeId && <p className="text-xs text-red-500">{errors.documentTypeId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="documentKey">Document Key</Label>
-              <Input id="documentKey" {...register("documentKey")} placeholder="e.g. passport number" />
-              {errors.documentKey && <p className="text-xs text-red-500">{errors.documentKey.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Document Key</label>
+              <Input {...register("documentKey")} placeholder="e.g. passport number" error={errors.documentKey?.message} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="description">Description</Label>
-              <Input id="description" {...register("description")} placeholder="Optional notes" />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description</label>
+              <Input {...register("description")} placeholder="Optional notes" />
             </div>
             <Button
               type="submit"

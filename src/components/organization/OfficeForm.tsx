@@ -41,10 +41,9 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Name */}
-      <div>
-        <label className="text-sm font-medium">Office Name *</label>
-        <Input className="mt-1" placeholder="e.g. Head Office" {...register("name")} />
-        {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium">Office Name *</label>
+        <Input placeholder="e.g. Head Office" {...register("name")} error={errors.name?.message} />
       </div>
 
       <OfficeSelect
@@ -56,17 +55,15 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
       />
 
       {/* Opening Date */}
-      <div>
-        <label className="text-sm font-medium">Opening Date *</label>
-        <Input className="mt-1" type="date" {...register("openingDate")} />
-        {errors.openingDate && <p className="mt-1 text-xs text-red-500">{errors.openingDate.message}</p>}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium">Opening Date *</label>
+        <Input type="date" {...register("openingDate")} error={errors.openingDate?.message} />
       </div>
 
       {/* External ID */}
-      <div>
-        <label className="text-sm font-medium">External ID</label>
-        <Input className="mt-1" placeholder="e.g. EXT-001" {...register("externalId")} />
-        {errors.externalId && <p className="mt-1 text-xs text-red-500">{errors.externalId.message}</p>}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium">External ID</label>
+        <Input placeholder="e.g. EXT-001" {...register("externalId")} error={errors.externalId?.message} />
       </div>
 
       {/* Actions */}

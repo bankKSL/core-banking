@@ -10,7 +10,6 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAdhocQuery, useCreateAdhocQuery, useUpdateAdhocQuery } from "../hooks/useReports";
@@ -146,43 +145,39 @@ const AdhocQueryFormPage: FC = () => {
             <CardTitle>Query Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
               <Input
-                id="name"
                 {...register("name")}
                 placeholder="e.g. Active Loans Report"
                 disabled={isLoaded}
+                error={errors.name?.message}
               />
-              {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
             </div>
 
-            <div>
-              <Label htmlFor="query">Query *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Query *</label>
               <Textarea
-                id="query"
                 {...register("query")}
                 placeholder="SELECT ..."
                 rows={6}
                 disabled={isLoaded}
+                error={errors.query?.message}
               />
-              {errors.query && <p className="text-xs text-red-500">{errors.query.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="tableName">Table Name</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Table Name</label>
                 <Input
-                  id="tableName"
                   {...register("tableName")}
                   placeholder="e.g. m_loan"
                   disabled={isLoaded}
                 />
               </div>
-              <div>
-                <Label htmlFor="tableFields">Table Fields</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Table Fields</label>
                 <Input
-                  id="tableFields"
                   {...register("tableFields")}
                   placeholder="e.g. id, display_name"
                   disabled={isLoaded}
@@ -190,10 +185,9 @@ const AdhocQueryFormPage: FC = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Email</label>
               <Input
-                id="email"
                 type="email"
                 {...register("email")}
                 placeholder="recipient@example.com"
@@ -209,7 +203,7 @@ const AdhocQueryFormPage: FC = () => {
                   <Checkbox id="isActive" checked={field.value} onCheckedChange={field.onChange} disabled={isLoaded} />
                 )}
               />
-              <Label htmlFor="isActive">Active</Label>
+              <label className="block text-sm font-medium">Active</label>
             </div>
           </CardContent>
         </Card>

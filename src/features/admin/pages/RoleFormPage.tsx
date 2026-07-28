@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRole, useCreateRole, useUpdateRole } from "../hooks/useRoles";
 
@@ -78,15 +78,13 @@ const RoleFormPage: FC = () => {
             <CardTitle className="text-base">Role Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">Role Name *</Label>
-              <Input id="name" {...register("name")} placeholder="e.g. Loan Officer" />
-              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Role Name *</label>
+              <Input {...register("name")} placeholder="e.g. Loan Officer" error={errors.name?.message} />
             </div>
-            <div>
-              <Label htmlFor="description">Description *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Description *</label>
               <Textarea
-                id="description"
                 {...register("description")}
                 placeholder="Describe this role's purpose"
                 rows={3}

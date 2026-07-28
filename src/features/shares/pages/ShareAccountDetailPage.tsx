@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -454,15 +453,13 @@ const ShareAccountDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmitDialog)}>
             <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="reqDate">Requested Date</Label>
-                <Input id="reqDate" type="date" {...register("requestedDate")} />
-                {errors.requestedDate && <p className="text-xs text-red-500">{errors.requestedDate.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Requested Date</label>
+                <Input type="date" {...register("requestedDate")} error={errors.requestedDate?.message} />
               </div>
-              <div>
-                <Label htmlFor="reqShares">Requested Shares</Label>
-                <Input id="reqShares" type="number" {...register("requestedShares", { valueAsNumber: true })} />
-                {errors.requestedShares && <p className="text-xs text-red-500">{errors.requestedShares.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Requested Shares</label>
+                <Input type="number" {...register("requestedShares", { valueAsNumber: true })} error={errors.requestedShares?.message} />
               </div>
             </div>
             <DialogFooter>
@@ -487,15 +484,13 @@ const ShareAccountDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmitDialog)}>
             <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="redeemDate">Requested Date</Label>
-                <Input id="redeemDate" type="date" {...register("requestedDate")} />
-                {errors.requestedDate && <p className="text-xs text-red-500">{errors.requestedDate.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Requested Date</label>
+                <Input type="date" {...register("requestedDate")} error={errors.requestedDate?.message} />
               </div>
-              <div>
-                <Label htmlFor="redeemShares">Requested Shares</Label>
-                <Input id="redeemShares" type="number" {...register("requestedShares", { valueAsNumber: true })} />
-                {errors.requestedShares && <p className="text-xs text-red-500">{errors.requestedShares.message}</p>}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Requested Shares</label>
+                <Input type="number" {...register("requestedShares", { valueAsNumber: true })} error={errors.requestedShares?.message} />
               </div>
             </div>
             <DialogFooter>

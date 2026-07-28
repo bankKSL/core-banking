@@ -233,14 +233,13 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
               </Select>
               {errors.chargeId && <p className="text-xs text-red-500">{errors.chargeId.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="amount">Amount *</Label>
-              <Input id="amount" type="number" step="0.01" {...register("amount", { valueAsNumber: true })} />
-              {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Amount *</label>
+              <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} error={errors.amount?.message} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input id="dueDate" type="date" {...register("dueDate")} />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Due Date</label>
+              <Input type="date" {...register("dueDate")} />
             </div>
             <Button type="submit" disabled={createMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
               {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Apply

@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,16 +95,15 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {needsDate && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="transactionDate">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">
                 {transactionType === "approve"
                   ? "Approval Date"
                   : transactionType === "disburse" || transactionType === "disburseToSavings"
                     ? "Disbursement Date"
                     : "Transaction Date"}
-              </Label>
+              </label>
               <Input
-                id="transactionDate"
                 type="date"
                 {...register(
                   transactionType === "approve"
@@ -119,10 +117,9 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
             </div>
           )}
           {needsAmount && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="transactionAmount">Amount</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Amount</label>
               <Input
-                id="transactionAmount"
                 type="number"
                 step="0.01"
                 {...register("transactionAmount", { valueAsNumber: true })}
@@ -131,8 +128,8 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
             </div>
           )}
           {needsPaymentType && (
-            <div className="flex flex-col gap-1.5">
-              <Label>Payment Type</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Payment Type</label>
               <Select
                 value={watch("paymentTypeId") ? String(watch("paymentTypeId")) : ""}
                 onValueChange={(v) => setValue("paymentTypeId", Number(v))}
@@ -159,20 +156,20 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
             <CardTitle className="text-base">Payment Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label>Receipt Number</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Receipt Number</label>
               <Input {...register("receiptNumber")} disabled={isSubmitting} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Bank Number</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Bank Number</label>
               <Input {...register("bankNumber")} disabled={isSubmitting} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Check Number</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Check Number</label>
               <Input {...register("checkNumber")} disabled={isSubmitting} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Routing Code</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Routing Code</label>
               <Input {...register("routingCode")} disabled={isSubmitting} />
             </div>
           </CardContent>

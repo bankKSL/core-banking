@@ -160,8 +160,8 @@ const LoanProductAttributesPage: FC = () => {
                     </Select>
                     {errors.attributeKey && <p className="text-xs text-red-500 mt-1">{errors.attributeKey.message}</p>}
                   </div>
-                  <div>
-                    <Label htmlFor="attributeValue">Attribute Value *</Label>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Attribute Value *</label>
                     {watch("attributeKey") === "settlementModel" ? (
                       <Select
                         value={watch("attributeValue")}
@@ -195,10 +195,7 @@ const LoanProductAttributesPage: FC = () => {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Input id="attributeValue" {...register("attributeValue")} placeholder="Enter value" />
-                    )}
-                    {errors.attributeValue && (
-                      <p className="text-xs text-red-500 mt-1">{errors.attributeValue.message}</p>
+                      <Input {...register("attributeValue")} placeholder="Enter value" error={errors.attributeValue?.message} />
                     )}
                   </div>
                   <div className="flex justify-end gap-3 pt-2">

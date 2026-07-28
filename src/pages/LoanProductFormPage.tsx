@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { createLoanProduct, updateLoanProduct, useLoanProduct, useFunds } from "@/features/loans";
 import type { LoanProductCreateRequest } from "@/features/loans";
@@ -203,7 +203,7 @@ const LoanProductFormPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Short Name</label>
-              <Input {...register("shortName")} />
+              <Input {...register("shortName")} error={errors.shortName?.message} />
             </div>
             {/* Row 2 FULL: Description */}
             <div className="space-y-1.5 col-span-2">
@@ -213,7 +213,7 @@ const LoanProductFormPage: React.FC = () => {
             {/* Row 3 FULL: External ID */}
             <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} />
+              <Input {...register("externalId")} error={errors.externalId?.message} />
             </div>
             {/* Row 4: Fund | Currency Code */}
             <div className="space-y-1.5">
@@ -393,9 +393,9 @@ const LoanProductFormPage: React.FC = () => {
                 checked={!!watch("isInterestRecalculationEnabled")}
                 onCheckedChange={(v) => setValue("isInterestRecalculationEnabled", v === true)}
               />
-              <Label htmlFor="isInterestRecalculationEnabled" className="text-sm font-normal cursor-pointer">
+              <label htmlFor="isInterestRecalculationEnabled" className="block text-sm font-medium">
                 Interest Recalculation Enabled
-              </Label>
+              </label>
             </div>
             {/* Row 12 Progressive only: Payment Credit Allocation Editor */}
             {isProgressive && (

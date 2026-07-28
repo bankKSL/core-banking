@@ -219,25 +219,25 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="street">Street</Label>
-                <Input id="street" {...register("street")} placeholder="Street address" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Street</label>
+                <Input {...register("street")} placeholder="Street address" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addressLine1">Address Line 1</Label>
-                <Input id="addressLine1" {...register("addressLine1")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Address Line 1</label>
+                <Input {...register("addressLine1")} />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addressLine2">Address Line 2</Label>
-                <Input id="addressLine2" {...register("addressLine2")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Address Line 2</label>
+                <Input {...register("addressLine2")} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="city">City</Label>
-                <Input id="city" {...register("city")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">City</label>
+                <Input {...register("city")} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>State/Province</Label>
@@ -271,9 +271,9 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="postalCode">Postal Code</Label>
-                <Input id="postalCode" {...register("postalCode")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Postal Code</label>
+                <Input {...register("postalCode")} />
               </div>
             </div>
             <Button

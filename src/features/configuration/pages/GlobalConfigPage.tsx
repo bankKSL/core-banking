@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { useConfigurations, useUpdateConfiguration } from "../hooks/useConfiguration";
 import type { GlobalConfiguration } from "../types/configuration";
 
@@ -219,19 +218,19 @@ const GlobalConfigPage: FC = () => {
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   )}
                 />
-                <Label>Enabled</Label>
+                <label className="block text-sm font-medium">Enabled</label>
               </div>
-              <div>
-                <Label htmlFor="editValue">Value</Label>
-                <Input id="editValue" type="number" min="0" {...register("value")} placeholder="Numeric value" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Value</label>
+                <Input type="number" min="0" {...register("value")} placeholder="Numeric value" />
               </div>
-              <div>
-                <Label htmlFor="editStringValue">String Value</Label>
-                <Input id="editStringValue" {...register("stringValue")} placeholder="Text value" />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">String Value</label>
+                <Input {...register("stringValue")} placeholder="Text value" />
               </div>
-              <div>
-                <Label htmlFor="editDateValue">Date Value</Label>
-                <Input id="editDateValue" type="date" {...register("dateValue")} />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Date Value</label>
+                <Input type="date" {...register("dateValue")} />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <Button variant="outline" type="button" onClick={() => setEditConfig(null)}>

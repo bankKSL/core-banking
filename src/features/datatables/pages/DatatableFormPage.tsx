@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -128,20 +127,17 @@ const DatatableFormPage: FC = () => {
             <CardTitle>Datatable Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="datatableName">Datatable Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Datatable Name *</label>
               <Input
-                id="datatableName"
                 {...register("datatableName")}
                 placeholder="e.g. extra_client_details"
+                error={errors.datatableName?.message}
               />
-              {errors.datatableName && (
-                <p className="text-xs text-red-500">{errors.datatableName.message}</p>
-              )}
             </div>
 
             <div>
-              <Label htmlFor="apptableName">App Table *</Label>
+              <label className="block text-sm font-medium">App Table *</label>
               <Controller
                 control={control}
                 name="apptableName"
@@ -177,7 +173,7 @@ const DatatableFormPage: FC = () => {
                   />
                 )}
               />
-              <Label htmlFor="multiRow" className="cursor-pointer">Allow multiple rows per entity</Label>
+              <label className="block text-sm font-medium cursor-pointer">Allow multiple rows per entity</label>
             </div>
           </CardContent>
         </Card>
@@ -207,19 +203,17 @@ const DatatableFormPage: FC = () => {
                   <X className="h-4 w-4" />
                 </Button>
 
-                <div className="flex-1 space-y-1">
-                  <Label className="text-xs">Name *</Label>
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-sm font-medium">Name *</label>
                   <Input
                     {...register(`columns.${index}.name`)}
                     placeholder={`Column ${index + 1}`}
+                    error={errors.columns?.[index]?.name?.message}
                   />
-                  {errors.columns?.[index]?.name && (
-                    <p className="text-xs text-red-500">{errors.columns[index]!.name?.message}</p>
-                  )}
                 </div>
 
-                <div className="w-40 space-y-1">
-                  <Label className="text-xs">Type</Label>
+                <div className="w-40 space-y-1.5">
+                  <label className="block text-sm font-medium">Type</label>
                   <Controller
                     control={control}
                     name={`columns.${index}.type`}
@@ -241,8 +235,8 @@ const DatatableFormPage: FC = () => {
                 </div>
 
                 {columnsWatch?.[index]?.type !== "Text" && columnsWatch?.[index]?.type !== "Dropdown" && (
-                  <div className="w-24 space-y-1">
-                    <Label className="text-xs">Length</Label>
+                  <div className="w-24 space-y-1.5">
+                    <label className="block text-sm font-medium">Length</label>
                     <Input
                       type="number"
                       min="0"
@@ -264,7 +258,7 @@ const DatatableFormPage: FC = () => {
                       />
                     )}
                   />
-                  <Label htmlFor={`mandatory-${field.name}`} className="text-xs cursor-pointer">Mandatory</Label>
+                  <label className="block text-sm font-medium cursor-pointer">Mandatory</label>
                 </div>
               </div>
             ))}

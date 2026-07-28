@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -182,15 +181,13 @@ const UserDetailPage: FC = () => {
             <DialogDescription>Set a new password for {user.username}.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input id="newPassword" type="password" {...register("newPassword")} />
-              {errors.newPassword && <p className="text-xs text-red-500">{errors.newPassword.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">New Password</label>
+              <Input type="password" {...register("newPassword")} error={errors.newPassword?.message} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="repeatPassword">Repeat Password</Label>
-              <Input id="repeatPassword" type="password" {...register("repeatPassword")} />
-              {errors.repeatPassword && <p className="text-xs text-red-500">{errors.repeatPassword.message}</p>}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Repeat Password</label>
+              <Input type="password" {...register("repeatPassword")} error={errors.repeatPassword?.message} />
             </div>
             <Button type="submit" disabled={changePwdMutation.isPending}>
               {changePwdMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Badge } from "@/components/ui/badge";
 import { useCode, useCreateCode, useUpdateCode } from "../hooks/useCodes";
@@ -98,10 +97,9 @@ const CodeFormPage: React.FC = () => {
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="codeName">Code Name *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Code Name *</label>
               <Input
-                id="codeName"
                 {...register("name")}
                 placeholder="e.g. Marital Status"
                 disabled={isSystemDefined}
