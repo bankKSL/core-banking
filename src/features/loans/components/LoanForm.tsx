@@ -1,5 +1,6 @@
 import { type FC, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import { LoanProductSearch } from "@/components/shared/LoanProductSearch";
-import { type CreateLoanFormValues } from "../schemas/loan.schema";
+import { createLoanSchema, type CreateLoanFormValues } from "../schemas/loan.schema";
 import type { LoanProduct, Loan } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
@@ -52,6 +53,7 @@ const LoanForm: FC<LoanFormProps> = ({
     getValues,
     formState: { errors },
   } = useForm<FormFields>({
+    resolver: zodResolver(createLoanSchema) as any,
     defaultValues: {
       clientId: loan?.clientId ?? clientId ?? 0,
       productId: loan?.loanProductId ?? 0,
@@ -80,6 +82,11 @@ const LoanForm: FC<LoanFormProps> = ({
 
   // ── Product select handler ───────────────────────────────────────
   const handleProductSelect = (id: number) => {
+    if (id === 0) {
+      setValue("productId", 0, { shouldValidate: true });
+      return;
+    }
+
     const prod = products.find((p) => p.id === id);
     if (!prod) return;
     setValue("productId", prod.id);

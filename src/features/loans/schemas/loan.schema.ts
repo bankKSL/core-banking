@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const createLoanSchema = z.object({
-  clientId: z.number({ message: "Client is required" }).int(),
-  productId: z.number({ message: "Loan product is required" }).int(),
+  clientId: z.number({ message: "Client is required" }).int().positive("Client is required"),
+  productId: z.number({ message: "Loan product is required" }).int().positive("Loan product is required"),
   principal: z.number({ message: "Principal amount is required" }).positive("Principal must be greater than 0"),
   loanTermFrequency: z.number({ message: "Term is required" }).int().positive(),
   loanTermFrequencyType: z.number().int().min(0).max(3),
