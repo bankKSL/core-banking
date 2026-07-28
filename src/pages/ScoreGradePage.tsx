@@ -49,7 +49,7 @@ const ScoreInput: React.FC<{
   );
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <Label htmlFor="credit-score-input" className="text-sm font-medium">
         Enter Credit Score
       </Label>

@@ -14,6 +14,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
+import { AccountingRuleSelect } from "@/components/shared/AccountingRuleSelect";
 import {
   useShareProductTemplate,
   useShareProduct,
@@ -64,6 +66,8 @@ const ShareProductFormPage: FC = () => {
   const createMutation = useCreateShareProduct();
   const updateMutation = useUpdateShareProduct();
   const [mutationError, setMutationError] = useState<string | null>(null);
+
+  console.log(template);
 
   const {
     register,
@@ -141,9 +145,6 @@ const ShareProductFormPage: FC = () => {
 
   const selectedCharges = watch("chargesSelected") ?? [];
 
-  const currencyOptions = template?.currencyOptions ?? [];
-  const selectedCurrency = currencyOptions.find((c) => c.code === watch("currencyCode"));
-
   const onSubmit = async (values: ShareProductFormValues) => {
     setMutationError(null);
     try {
@@ -204,7 +205,7 @@ const ShareProductFormPage: FC = () => {
 
   if ((isEdit && productLoading) || templateLoading) {
     return (
-      <div className="p-6  m-auto">
+      <div className="max-w-4xl p-6  m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -212,7 +213,7 @@ const ShareProductFormPage: FC = () => {
   }
 
   return (
-    <div className=" m-auto space-y-6">
+    <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Share Product" : "New Share Product"}
         description={isEdit ? `Editing product #${id}` : "Create a new share product"}
@@ -238,7 +239,12 @@ const ShareProductFormPage: FC = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Short Name * (max 4 chars)</label>
-                <Input {...register("shortName")} placeholder="e.g. ORD" maxLength={4} error={errors.shortName?.message} />
+                <Input
+                  {...register("shortName")}
+                  placeholder="e.g. ORD"
+                  maxLength={4}
+                  error={errors.shortName?.message}
+                />
               </div>
             </div>
             <div>
@@ -255,24 +261,11 @@ const ShareProductFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label>Currency *</Label>
-                <Select
-                  value={watch("currencyCode")}
-                  onValueChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencyOptions.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>
-                        {c.name} ({c.displaySymbol})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <CurrencySelect
+                value={watch("currencyCode")}
+                onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
+                error={errors.currencyCode?.message}
+              />
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Digits After Decimal</label>
                 <Input type="number" {...register("digitsAfterDecimal")} />
@@ -351,10 +344,7 @@ const ShareProductFormPage: FC = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Minimum Active Period (Days)</label>
-                <Input
-                  type="number"
-                  {...register("minimumActivePeriodForDividends")}
-                />
+                <Input type="number" {...register("minimumActivePeriodForDividends")} />
               </div>
             </div>
             <div>
@@ -373,24 +363,11 @@ const ShareProductFormPage: FC = () => {
             <CardTitle className="text-base">Accounting</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Accounting Rule *</Label>
-              <Select
-                value={watch("accountingRule")}
-                onValueChange={(v) => setValue("accountingRule", v, { shouldValidate: true })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select accounting rule" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(template?.accountingRuleOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.value}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <AccountingRuleSelect
+              value={watch("accountingRule")}
+              onChange={(v) => setValue("accountingRule", v, { shouldValidate: true })}
+              error={errors.accountingRule?.message}
+            />
 
             {showGLAccounts && (
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-md">
@@ -425,18 +402,11 @@ const ShareProductFormPage: FC = () => {
               <div key={field.id} className="flex items-end gap-4">
                 <div className="flex-1 space-y-1.5">
                   <label className="block text-sm font-medium">From Date</label>
-                  <Input
-                    type="date"
-                    {...register(`marketPricePeriods.${index}.fromDate`)}
-                  />
+                  <Input type="date" {...register(`marketPricePeriods.${index}.fromDate`)} />
                 </div>
                 <div className="flex-1 space-y-1.5">
                   <label className="block text-sm font-medium">Share Value</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...register(`marketPricePeriods.${index}.shareValue`)}
-                  />
+                  <Input type="number" step="0.01" {...register(`marketPricePeriods.${index}.shareValue`)} />
                 </div>
                 <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                   <Trash2 className="h-4 w-4 text-red-500" />

@@ -311,6 +311,7 @@ export interface LoanListParams {
   externalId?: string;
   status?: string;
   loanStatus?: number;
+  searchByParam?: string;
 }
 
 // ─── Loan Template ───────────────────────────────────────────────

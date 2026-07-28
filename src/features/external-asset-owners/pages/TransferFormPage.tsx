@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, ArrowRightLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { LoanSearch } from "@/components/shared/LoanSearch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,15 +125,10 @@ const TransferFormPage: FC = () => {
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="loanId">Loan ID *</Label>
-              <Input
-                id="loanId"
-                value={loanId}
-                onChange={(e) => setLoanId(e.target.value)}
-                placeholder="Enter loan ID"
-              />
-            </div>
+            <LoanSearch
+              value={Number(loanId) || 0}
+              onChange={(id) => setLoanId(String(id))}
+            />
 
             {isSale && (
               <>

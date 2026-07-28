@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { LoanSearch } from "@/components/shared/LoanSearch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,15 +94,12 @@ const RescheduleLoanFormPage: FC = () => {
             <CardTitle className="text-base">Reschedule Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Loan ID *</label>
-              <Input
-                type="number"
-                {...register("loanId", { valueAsNumber: true })}
-                disabled={isSubmitting || !!loanIdParam}
-                error={errors.loanId?.message}
-              />
-            </div>
+            <LoanSearch
+              value={watch("loanId")}
+              onChange={(id) => setValue("loanId", id, { shouldValidate: true })}
+              disabled={isSubmitting || !!loanIdParam}
+              error={errors.loanId?.message}
+            />
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Reason *</label>
               <Select

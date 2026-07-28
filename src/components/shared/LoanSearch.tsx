@@ -2,57 +2,52 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCurrencies } from "@/features/currencies";
-import type { CurrencyData } from "@/features/currencies";
+import { useLoans, type LoanListParams } from "@/features/loans";
 
-export interface CurrencySelectProps {
-  value: string;
-  onChange?: (value: string) => void;
-  onCurrencyChange?: (currency: CurrencyData) => void;
+export interface LoanSearchProps {
+  value: number;
+  onChange: (loanId: number) => void;
+  onBlur?: () => void;
+  disabled?: boolean;
   error?: string;
   label?: string;
   placeholder?: string;
-  disabled?: boolean;
+  name?: string;
 }
 
-export function CurrencySelect({
+export function LoanSearch({
   value,
   onChange,
-  onCurrencyChange,
-  error,
-  label = "Currency *",
-  placeholder = "Search currency…",
+  onBlur,
   disabled,
-}: CurrencySelectProps) {
+  error,
+  label = "Loan ID *",
+  placeholder = "Search loan by ID or account no…",
+  name,
+}: LoanSearchProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [focused, setFocused] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const { data, isLoading } = useCurrencies();
-  const currencyOptions = data?.selectedCurrencyOptions ?? [];
+  const params: LoanListParams =
+    query.length >= 2 ? { limit: 20, offset: 0, searchByParam: query } : { limit: 50 };
 
-  const selected = currencyOptions.find((c) => c.code === value);
+  const { data, isLoading } = useLoans(params);
+
+  const loans = data?.pageItems ?? [];
+  const selected = loans.find((l) => l.id === value);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
+        onBlur?.();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const filtered = query
-    ? currencyOptions.filter(
-        (c) =>
-          c.code.toLowerCase().includes(query.toLowerCase()) ||
-          c.name.toLowerCase().includes(query.toLowerCase()) ||
-          c.displayLabel.toLowerCase().includes(query.toLowerCase()),
-      )
-    : currencyOptions;
+  }, [onBlur]);
 
   const handleSearch = useCallback((val: string) => {
     setQuery(val);
@@ -61,17 +56,25 @@ export function CurrencySelect({
   }, []);
 
   return (
-    <div ref={ref} className={`relative space-y-1.5 transition-transform duration-200 ${focused ? 'scale-[1.02]' : ''}`}>
-      <label className="block text-sm font-medium">{label}</label>
+    <div ref={ref} className="relative">
+      <Label htmlFor={name ?? "loanSearch"}>{label}</Label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
-          <span className="flex-1 text-sm">{selected.displayLabel}</span>
+          <span className="flex-1 text-sm">
+            Loan #{selected.id}
+            {selected.accountNo && (
+              <span className="ml-1 text-gray-400">({selected.accountNo})</span>
+            )}
+            {selected.clientName && (
+              <span className="ml-1 text-gray-500">- {selected.clientName}</span>
+            )}
+          </span>
           {!disabled && (
             <button
               type="button"
               onClick={() => {
-                onChange?.("");
+                onChange(0);
                 setQuery("");
                 setOpen(false);
               }}
@@ -90,43 +93,42 @@ export function CurrencySelect({
           )}
 
           <Input
+            id={name ?? "loanSearch"}
             placeholder={placeholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => { setOpen(true); setFocused(true); }}
-            onBlur={() => setFocused(false)}
+            onFocus={() => query.length >= 0 && setOpen(true)}
             disabled={disabled}
             error={error}
           />
         </div>
       )}
 
-      {open && !selected && filtered.length > 0 && (
+      {open && !selected && loans.length > 0 && (
         <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          {filtered.map((c) => (
+          {loans.map((l) => (
             <button
-              key={c.code}
+              key={l.id}
               type="button"
               className="flex w-full items-center px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
               onClick={() => {
-                onChange?.(c.code);
-                onCurrencyChange?.(c);
+                onChange(l.id);
                 setOpen(false);
                 setQuery("");
               }}
             >
-              <span className="font-medium">{c.code}</span>
-              <span className="ml-2 text-gray-500">{c.name}</span>
-              {c.displaySymbol && <span className="ml-auto text-xs text-gray-400">{c.displaySymbol}</span>}
+              <span className="font-medium">#{l.id}</span>
+              {l.accountNo && <span className="ml-2 text-xs text-gray-400">{l.accountNo}</span>}
+              {l.clientName && <span className="ml-2 text-xs text-gray-500">{l.clientName}</span>}
             </button>
           ))}
         </div>
       )}
 
-      {open && !selected && query.length >= 1 && filtered.length === 0 && !isLoading && (
+      {open && !selected && query.length >= 2 && loans.length === 0 && !isLoading && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No currencies found
+          No loans found
         </div>
       )}
     </div>

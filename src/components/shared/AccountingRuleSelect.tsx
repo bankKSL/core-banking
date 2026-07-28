@@ -1,39 +1,41 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useCurrencies } from "@/features/currencies";
-import type { CurrencyData } from "@/features/currencies";
+import { useAccountingRules } from "@/features/accounting";
 
-export interface CurrencySelectProps {
+export interface AccountingRuleSelectProps {
   value: string;
-  onChange?: (value: string) => void;
-  onCurrencyChange?: (currency: CurrencyData) => void;
+  onChange: (value: string) => void;
   error?: string;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
 }
 
-export function CurrencySelect({
+export function AccountingRuleSelect({
   value,
   onChange,
-  onCurrencyChange,
   error,
-  label = "Currency *",
-  placeholder = "Search currency…",
+  label = "Accounting Rule *",
+  placeholder = "Search accounting rule…",
   disabled,
-}: CurrencySelectProps) {
+}: AccountingRuleSelectProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [focused, setFocused] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const { data, isLoading } = useCurrencies();
-  const currencyOptions = data?.selectedCurrencyOptions ?? [];
+  const { data: rules = [], isLoading } = useAccountingRules();
 
-  const selected = currencyOptions.find((c) => c.code === value);
+  const filtered = query
+    ? rules.filter(
+        (r) =>
+          r.name.toLowerCase().includes(query.toLowerCase()) ||
+          r.description.toLowerCase().includes(query.toLowerCase()),
+      )
+    : rules;
+
+  const selected = rules.find((r) => String(r.id) === value);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -45,15 +47,6 @@ export function CurrencySelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filtered = query
-    ? currencyOptions.filter(
-        (c) =>
-          c.code.toLowerCase().includes(query.toLowerCase()) ||
-          c.name.toLowerCase().includes(query.toLowerCase()) ||
-          c.displayLabel.toLowerCase().includes(query.toLowerCase()),
-      )
-    : currencyOptions;
-
   const handleSearch = useCallback((val: string) => {
     setQuery(val);
     clearTimeout(debounceRef.current!);
@@ -61,17 +54,17 @@ export function CurrencySelect({
   }, []);
 
   return (
-    <div ref={ref} className={`relative space-y-1.5 transition-transform duration-200 ${focused ? 'scale-[1.02]' : ''}`}>
+    <div ref={ref} className="relative space-y-1.5">
       <label className="block text-sm font-medium">{label}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
-          <span className="flex-1 text-sm">{selected.displayLabel}</span>
+          <span className="flex-1 text-sm">{selected.name}</span>
           {!disabled && (
             <button
               type="button"
               onClick={() => {
-                onChange?.("");
+                onChange("");
                 setQuery("");
                 setOpen(false);
               }}
@@ -94,8 +87,7 @@ export function CurrencySelect({
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => { setOpen(true); setFocused(true); }}
-            onBlur={() => setFocused(false)}
+            onFocus={() => setOpen(true)}
             disabled={disabled}
             error={error}
           />
@@ -104,21 +96,19 @@ export function CurrencySelect({
 
       {open && !selected && filtered.length > 0 && (
         <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          {filtered.map((c) => (
+          {filtered.map((r) => (
             <button
-              key={c.code}
+              key={r.id}
               type="button"
               className="flex w-full items-center px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
               onClick={() => {
-                onChange?.(c.code);
-                onCurrencyChange?.(c);
+                onChange(String(r.id));
                 setOpen(false);
                 setQuery("");
               }}
             >
-              <span className="font-medium">{c.code}</span>
-              <span className="ml-2 text-gray-500">{c.name}</span>
-              {c.displaySymbol && <span className="ml-auto text-xs text-gray-400">{c.displaySymbol}</span>}
+              <span className="font-medium">{r.name}</span>
+              <span className="ml-2 text-xs text-gray-400">{r.description}</span>
             </button>
           ))}
         </div>
@@ -126,7 +116,7 @@ export function CurrencySelect({
 
       {open && !selected && query.length >= 1 && filtered.length === 0 && !isLoading && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No currencies found
+          No accounting rules found
         </div>
       )}
     </div>
