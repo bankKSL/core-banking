@@ -41,11 +41,33 @@ export interface ShareAccount {
   productId: number;
   productName: string;
   savingsAccountId: number;
-  status: { id: number; code: string; value: string; submittedAndPendingApproval: boolean; approved: boolean; active: boolean; rejected: boolean; closed: boolean };
-  timeline: { submittedOnDate: string; approvedDate: string | null; activatedDate: string | null; closedDate: string | null };
+  status: {
+    id: number;
+    code: string;
+    value: string;
+    submittedAndPendingApproval: boolean;
+    approved: boolean;
+    active: boolean;
+    rejected: boolean;
+    closed: boolean;
+  };
+  timeline: {
+    submittedOnDate: string;
+    approvedDate: string | null;
+    activatedDate: string | null;
+    closedDate: string | null;
+  };
   currency: { code: string; name: string; displaySymbol: string };
   summary: { totalApprovedShares: number; totalPendingShares: number; totalShares: number };
-  purchasedShares: Array<{ id: number; transactionDate: string; totalShares: number; unitPrice: number; amount: number; status: { id: number; value: string }; type: { id: number; value: string } }>;
+  purchasedShares: Array<{
+    id: number;
+    transactionDate: string;
+    totalShares: number;
+    unitPrice: number;
+    amount: number;
+    status: { id: number; value: string };
+    type: { id: number; value: string };
+  }>;
   charges: Array<{ id: number; name: string; amount: number; amountPaid: number; amountOutstanding: number }>;
   currentMarketPrice: number;
   lockinPeriod: number | null;
@@ -73,9 +95,14 @@ export interface Dividend {
   status: { id: number; code: string; value: string; initiated: boolean; approved: boolean };
 }
 
-export async function fetchShareProducts(): Promise<ShareProduct[]> {
-  const { data } = await client.get<ShareProduct[]>("/products/share");
-  return Array.isArray(data) ? data : [];
+export interface ShareProductListResponse {
+  totalFilteredRecords: number;
+  pageItems: ShareProduct[];
+}
+
+export async function fetchShareProducts(params?: { offset?: number; limit?: number }): Promise<ShareProductListResponse> {
+  const { data } = await client.get<ShareProductListResponse>("/products/share", { params });
+  return data;
 }
 
 export async function fetchShareProduct(id: number): Promise<ShareProduct> {
@@ -93,7 +120,10 @@ export async function createShareProduct(payload: Record<string, unknown>): Prom
   return data;
 }
 
-export async function updateShareProduct(id: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+export async function updateShareProduct(
+  id: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
   const { data } = await client.put<{ resourceId: number }>(`/products/share/${id}`, payload);
   return data;
 }
@@ -121,7 +151,10 @@ export async function createShareAccount(payload: Record<string, unknown>): Prom
   return data;
 }
 
-export async function updateShareAccount(id: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+export async function updateShareAccount(
+  id: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
   const { data } = await client.put<{ resourceId: number }>(`/accounts/share/${id}`, payload);
   return data;
 }
@@ -139,7 +172,10 @@ export async function fetchDividends(productId: number): Promise<Dividend[]> {
   return Array.isArray(data) ? data : [];
 }
 
-export async function createDividend(productId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+export async function createDividend(
+  productId: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
   const { data } = await client.post<{ resourceId: number }>(`/shareproduct/${productId}/dividend`, payload);
   return data;
 }

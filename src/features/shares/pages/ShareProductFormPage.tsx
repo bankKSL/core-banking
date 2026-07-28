@@ -67,8 +67,6 @@ const ShareProductFormPage: FC = () => {
   const updateMutation = useUpdateShareProduct();
   const [mutationError, setMutationError] = useState<string | null>(null);
 
-  console.log(template);
-
   const {
     register,
     handleSubmit,
@@ -177,8 +175,8 @@ const ShareProductFormPage: FC = () => {
             shareValue: Number(p.shareValue),
           })),
         chargesSelected: (values.chargesSelected ?? []).map((c) => ({ id: Number(c) })),
-        dateFormat: "dd MMMM yyyy",
         locale: "en",
+        minimumactiveperiodFrequencyType: 0,
       };
 
       if (showGLAccounts) {

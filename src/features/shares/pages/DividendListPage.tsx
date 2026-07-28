@@ -15,7 +15,13 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useShareProducts, useDividends, useCreateDividend, useApproveDividend, useDeleteDividend } from "../hooks/useShares";
+import {
+  useShareProducts,
+  useDividends,
+  useCreateDividend,
+  useApproveDividend,
+  useDeleteDividend,
+} from "../hooks/useShares";
 import type { Dividend } from "../api/shares";
 
 const createDividendSchema = z.object({
@@ -46,7 +52,8 @@ function formatDate(dateStr?: string | null): string {
 
 const DividendListPage: FC = () => {
   const navigate = useNavigate();
-  const { data: products } = useShareProducts();
+  const { data: productsData } = useShareProducts();
+  const products = productsData?.pageItems ?? [];
   const [selectedProductId, setSelectedProductId] = useState<string>("");
 
   const productIdNum = selectedProductId ? Number(selectedProductId) : undefined;
@@ -196,7 +203,12 @@ const DividendListPage: FC = () => {
               </Select>
             </div>
             {selectedProductId && (
-              <Button onClick={() => { setShowCreateDialog(true); reset(); }}>
+              <Button
+                onClick={() => {
+                  setShowCreateDialog(true);
+                  reset();
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" /> Create Dividend
               </Button>
             )}
@@ -237,11 +249,19 @@ const DividendListPage: FC = () => {
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Period Start Date</label>
-                <Input type="date" {...register("dividendPeriodStartDate")} error={errors.dividendPeriodStartDate?.message} />
+                <Input
+                  type="date"
+                  {...register("dividendPeriodStartDate")}
+                  error={errors.dividendPeriodStartDate?.message}
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Period End Date</label>
-                <Input type="date" {...register("dividendPeriodEndDate")} error={errors.dividendPeriodEndDate?.message} />
+                <Input
+                  type="date"
+                  {...register("dividendPeriodEndDate")}
+                  error={errors.dividendPeriodEndDate?.message}
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Amount</label>
@@ -262,7 +282,9 @@ const DividendListPage: FC = () => {
 
       <ConfirmDialog
         open={!!approveTarget}
-        onOpenChange={(open) => { if (!open) setApproveTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setApproveTarget(null);
+        }}
         title="Approve Dividend"
         description="Are you sure you want to approve this dividend?"
         confirmLabel="Approve"
@@ -272,7 +294,9 @@ const DividendListPage: FC = () => {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
         title="Delete Dividend"
         description="Are you sure you want to delete this dividend?"
         confirmLabel="Delete"

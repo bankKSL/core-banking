@@ -16,10 +16,12 @@ import {
   approveDividend,
   deleteDividend,
 } from "../api/shares";
+import { SHARES_PAGE_SIZE } from "../constants";
 
 export const shareKeys = {
   all: ["shares"] as const,
-  productList: () => [...shareKeys.all, "product", "list"] as const,
+  productList: (params?: { offset?: number; limit?: number }) =>
+    [...shareKeys.all, "product", "list", params] as const,
   productDetail: (id: number) => [...shareKeys.all, "product", "detail", id] as const,
   productTemplate: () => [...shareKeys.all, "product", "template"] as const,
   accountList: () => [...shareKeys.all, "account", "list"] as const,
@@ -28,10 +30,11 @@ export const shareKeys = {
   dividendList: (productId: number) => [...shareKeys.all, "dividend", productId] as const,
 };
 
-export function useShareProducts() {
+export function useShareProducts(params?: { offset?: number; limit?: number }) {
+  const resolvedParams = { limit: SHARES_PAGE_SIZE, offset: 0, ...params };
   return useQuery({
-    queryKey: shareKeys.productList(),
-    queryFn: fetchShareProducts,
+    queryKey: shareKeys.productList(resolvedParams),
+    queryFn: () => fetchShareProducts(resolvedParams),
     placeholderData: (prev) => prev,
   });
 }

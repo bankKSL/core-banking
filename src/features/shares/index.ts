@@ -1,10 +1,13 @@
 export type {
   ShareProduct,
   ShareProductTemplate,
+  ShareProductListResponse,
   ShareAccount,
   ShareAccountTemplate,
   Dividend,
 } from "./api/shares";
+
+export { SHARES_PAGE_SIZE } from "./constants";
 
 export {
   fetchShareProducts,

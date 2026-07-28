@@ -1,20 +1,24 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
+import { Pagination } from "@/components/shared/Pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { Badge } from "@/components/ui/badge";
-import { useShareProducts } from "../hooks/useShares";
+import { useShareProducts, SHARES_PAGE_SIZE } from "../";
 import type { ShareProduct } from "../api/shares";
 
 const ShareProductListPage = () => {
   const navigate = useNavigate();
-  const { data, isLoading, isError, refetch } = useShareProducts();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError, refetch } = useShareProducts({ offset: (page - 1) * SHARES_PAGE_SIZE, limit: SHARES_PAGE_SIZE });
 
-  const products = useMemo(() => data ?? [], [data]);
+  const products = useMemo(() => data?.pageItems ?? [], [data]);
+  const totalFilteredRecords = data?.totalFilteredRecords ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalFilteredRecords / SHARES_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
 
   const columns: ColumnDef<ShareProduct>[] = useMemo(
     () => [
@@ -51,11 +55,7 @@ const ShareProductListPage = () => {
         className: "w-[80px]",
         cell: (row) => (
           <div onClick={(e) => e.stopPropagation()}>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/shares/products/edit/${row.id}`)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate(`/shares/products/edit/${row.id}`)}>
               <Pencil className="h-4 w-4" />
             </Button>
           </div>
@@ -113,6 +113,15 @@ const ShareProductListPage = () => {
             loading={isLoading}
             emptyState={{ message: "No share products found." }}
           />
+          {totalFilteredRecords > 0 && (
+            <Pagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              onPageChange={(p) => setPage(p)}
+              totalItems={totalFilteredRecords}
+              pageSize={SHARES_PAGE_SIZE}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
