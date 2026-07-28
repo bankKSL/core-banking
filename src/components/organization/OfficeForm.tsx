@@ -4,11 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { officeCreateSchema, type OfficeCreateFormData } from "@/lib/validations/office";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Office } from "@/types";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 
 interface OfficeFormProps {
-  offices: Office[]; // for parent office dropdown
   defaultValues?: Partial<OfficeCreateFormData>;
   onSubmit: (data: OfficeCreateFormData) => void;
   onCancel: () => void;
@@ -16,7 +14,6 @@ interface OfficeFormProps {
 }
 
 const OfficeForm: React.FC<OfficeFormProps> = ({
-  offices,
   defaultValues,
   onSubmit,
   onCancel,
@@ -50,26 +47,13 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
         {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
       </div>
 
-      {/* Parent Office */}
-      <div>
-        <label className="text-sm font-medium">Parent Office</label>
-        <Select
-          value={parentId?.toString() ?? ""}
-          onValueChange={(v) => setValue("parentId", v ? Number(v) : undefined, { shouldValidate: true })}
-        >
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="None (root office)" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">None (root office)</SelectItem>
-            {offices.map((o) => (
-              <SelectItem key={o.id} value={o.id.toString()}>
-                {o.nameDecorated || o.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <OfficeSelect
+        value={parentId?.toString() ?? ""}
+        onChange={(v) => setValue("parentId", v ? Number(v) : undefined, { shouldValidate: true })}
+        includeNone="None (root office)"
+        label="Parent Office"
+        disabled={isSubmitting}
+      />
 
       {/* Opening Date */}
       <div>

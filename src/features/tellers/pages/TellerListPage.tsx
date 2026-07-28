@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useTellers, useDeleteTeller, TELLER_STATUS_OPTIONS } from "../index";
 import type { Teller } from "../types/teller";
 
@@ -19,7 +19,6 @@ const STATUS_LABELS: Record<number, string> = { 100: "Pending", 300: "Active", 4
 const TellerListPage: FC = () => {
   const navigate = useNavigate();
   const [officeFilter, setOfficeFilter] = useState<string>("all");
-  const { data: offices = [] } = useOffices();
   const {
     data: tellers = [],
     isLoading,
@@ -96,19 +95,11 @@ const TellerListPage: FC = () => {
                 className="pl-10"
               />
             </div>
-            <Select value={officeFilter} onValueChange={setOfficeFilter}>
-              <SelectTrigger className="w-44">
-                <SelectValue placeholder="All Offices" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Offices</SelectItem>
-                {offices.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <OfficeSelect
+              value={officeFilter}
+              onChange={setOfficeFilter}
+              includeAll="All Offices"
+            />
           </div>
         </CardHeader>
         <CardContent>

@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useCenter, useCenterTemplate, useCreateCenter, useUpdateCenter } from "../hooks/useCenters";
 import { currentDate } from "@/lib/utils";
 
@@ -44,13 +44,12 @@ const CenterFormPage: FC = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  const { data: offices = [], isLoading: officesLoading } = useOffices();
   const { data: template } = useCenterTemplate();
   const { data: center, isLoading: centerLoading } = useCenter(id ? Number(id) : undefined);
   const createMutation = useCreateCenter();
   const updateMutation = useUpdateCenter();
 
-  const isLoading = officesLoading || (isEditMode && centerLoading);
+  const isLoading = isEditMode && centerLoading;
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const {
@@ -174,28 +173,12 @@ const CenterFormPage: FC = () => {
               {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="officeId">
-                Office <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={officeId ? String(officeId) : ""}
-                onValueChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
-                disabled={isEditMode || isSubmitting}
-              >
-                <SelectTrigger id="officeId">
-                  <SelectValue placeholder="Select an office" />
-                </SelectTrigger>
-                <SelectContent>
-                  {offices.map((office) => (
-                    <SelectItem key={office.id} value={String(office.id)}>
-                      {office.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.officeId && <p className="text-xs text-red-500">{errors.officeId.message}</p>}
-            </div>
+            <OfficeSelect
+              value={officeId ? String(officeId) : ""}
+              onChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
+              disabled={isEditMode || isSubmitting}
+              error={errors.officeId?.message}
+            />
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="staffId">Staff</Label>

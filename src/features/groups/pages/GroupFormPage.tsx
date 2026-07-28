@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useOffices } from "@/hooks/useOffices";
 import { useGroup } from "../hooks/useGroup";
 import { useCreateGroup } from "../hooks/useCreateGroup";
 import { useUpdateGroup } from "../hooks/useUpdateGroup";
@@ -18,7 +17,6 @@ const GroupFormPage: FC = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  const { data: offices = [], isLoading: officesLoading } = useOffices();
   const { data: group, isLoading: groupLoading } = useGroup(id);
   const createMutation = useCreateGroup();
   const updateMutation = useUpdateGroup();
@@ -29,7 +27,7 @@ const GroupFormPage: FC = () => {
   const [activatedInPlace, setActivatedInPlace] = useState(false);
   const originalActive = activatedInPlace || (group?.active ?? false);
 
-  const isLoading = officesLoading || (isEditMode && groupLoading);
+  const isLoading = isEditMode && groupLoading;
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = useCallback(
@@ -108,7 +106,6 @@ const GroupFormPage: FC = () => {
         </div>
       )}
       <GroupForm
-        offices={offices}
         group={group}
         originalActive={originalActive}
         mode={isEditMode ? "edit" : "create"}

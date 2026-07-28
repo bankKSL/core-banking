@@ -10,16 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useStaff, useCreateStaff, useUpdateStaff } from "../hooks/useStaff";
 import { currentDate } from "@/lib/utils";
 
@@ -42,7 +35,6 @@ const StaffFormPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
 
-  const { data: offices = [], isLoading: officesLoading } = useOffices();
   const { data: staffMember, isLoading: staffLoading, isError: staffError } = useStaff(
     id ? Number(id) : undefined,
   );
@@ -118,7 +110,7 @@ const StaffFormPage: FC = () => {
     navigate("/staff");
   };
 
-  const loading = (isEdit && staffLoading) || officesLoading;
+  const loading = isEdit && staffLoading;
 
   if (loading) {
     return (
@@ -177,28 +169,12 @@ const StaffFormPage: FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="officeId">Office *</Label>
-              <Select
-                value={watch("officeId") ? String(watch("officeId")) : ""}
-                onValueChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
-                disabled={isEdit}
-              >
-                <SelectTrigger id="officeId">
-                  <SelectValue placeholder="Select an office" />
-                </SelectTrigger>
-                <SelectContent>
-                  {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.officeId && (
-                <p className="text-xs text-red-500 mt-1">{errors.officeId.message}</p>
-              )}
-            </div>
+            <OfficeSelect
+              value={watch("officeId") ? String(watch("officeId")) : ""}
+              onChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
+              disabled={isEdit}
+              error={errors.officeId?.message}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

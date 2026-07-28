@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useReassignmentTemplate, useExecuteReassignment } from "../hooks/useLoanReassignment";
 
 const loanReassignmentSchema = z.object({
@@ -26,7 +26,6 @@ type LoanReassignmentFormValues = z.infer<typeof loanReassignmentSchema>;
 
 const LoanReassignmentPage: FC = () => {
   const navigate = useNavigate();
-  const { data: offices = [] } = useOffices();
   const { data: template, isLoading } = useReassignmentTemplate();
   const executeMutation = useExecuteReassignment();
 
@@ -34,6 +33,8 @@ const LoanReassignmentPage: FC = () => {
     control,
     handleSubmit,
     register,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<LoanReassignmentFormValues>({
     resolver: zodResolver(loanReassignmentSchema),
@@ -107,31 +108,11 @@ const LoanReassignmentPage: FC = () => {
             <CardTitle>Reassignment Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="office">Office *</Label>
-              <Controller
-                name="officeId"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    value={field.value ? String(field.value) : ""}
-                    onValueChange={(v) => field.onChange(Number(v))}
-                  >
-                    <SelectTrigger id="office">
-                      <SelectValue placeholder="Select office" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {offices.map((o) => (
-                        <SelectItem key={o.id} value={String(o.id)}>
-                          {o.nameDecorated || o.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.officeId && <p className="text-xs text-red-500">{errors.officeId.message}</p>}
-            </div>
+            <OfficeSelect
+              value={watch("officeId") ? String(watch("officeId")) : ""}
+              onChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
+              error={errors.officeId?.message}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">

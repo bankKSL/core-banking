@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useTeller, useCreateTeller, useUpdateTeller, TELLER_STATUS_OPTIONS } from "../index";
 
 const tellerSchema = z.object({
@@ -31,7 +31,6 @@ const TellerFormPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const { data: teller, isLoading: tellerLoading } = useTeller(id);
-  const { data: offices = [], isLoading: officesLoading } = useOffices();
   const createMutation = useCreateTeller();
   const updateMutation = useUpdateTeller();
 
@@ -85,7 +84,7 @@ const TellerFormPage: FC = () => {
     navigate("/tellers");
   };
 
-  if ((isEdit && tellerLoading) || officesLoading) {
+  if (isEdit && tellerLoading) {
     return (
       <div className="p-6 max-w-lg m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
@@ -112,25 +111,11 @@ const TellerFormPage: FC = () => {
             <CardTitle className="text-base">Teller Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Office *</Label>
-              <Select
-                value={watch("officeId")}
-                onValueChange={(v) => setValue("officeId", v, { shouldValidate: true })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
-                </SelectTrigger>
-                <SelectContent>
-                  {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.officeId && <p className="text-xs text-red-500 mt-1">{errors.officeId.message}</p>}
-            </div>
+            <OfficeSelect
+              value={watch("officeId")}
+              onChange={(v) => setValue("officeId", v, { shouldValidate: true })}
+              error={errors.officeId?.message}
+            />
             <div>
               <Label htmlFor="name">Teller Name *</Label>
               <Input id="name" {...register("name")} placeholder="e.g. Main Branch Teller 1" />

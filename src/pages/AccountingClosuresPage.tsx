@@ -21,12 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { useGLClosures, useCreateGLClosure, useUpdateGLClosure, useDeleteGLClosure } from "@/features/accounting";
 import type { GLClosureData } from "@/features/accounting";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { currentDate } from "@/lib/utils";
 
 const AccountingClosuresPage: React.FC = () => {
   const [officeFilter, setOfficeFilter] = useState<string>("all");
-  const { data: offices = [] } = useOffices();
   const {
     data: closures = [],
     isLoading,
@@ -164,21 +163,10 @@ const AccountingClosuresPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Office *</Label>
-              <Select value={officeId ? String(officeId) : ""} onValueChange={(v) => setOfficeId(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
-                </SelectTrigger>
-                <SelectContent>
-                  {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <OfficeSelect
+              value={officeId ? String(officeId) : ""}
+              onChange={(v) => setOfficeId(Number(v))}
+            />
             <div className="space-y-1.5">
               <Label>Closing Date *</Label>
               <Input type="date" value={closingDate} onChange={(e) => setClosingDate(e.target.value)} />
@@ -209,19 +197,11 @@ const AccountingClosuresPage: React.FC = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Closures</CardTitle>
-          <Select value={officeFilter} onValueChange={setOfficeFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="All Offices" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Offices</SelectItem>
-              {offices.map((o) => (
-                <SelectItem key={o.id} value={String(o.id)}>
-                  {o.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <OfficeSelect
+            value={officeFilter}
+            onChange={setOfficeFilter}
+            includeAll="All Offices"
+          />
         </CardHeader>
         <CardContent>
           {isLoading ? (

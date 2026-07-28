@@ -6,15 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Office } from "@/types";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { createGroupSchema, type CreateGroupFormValues } from "../schemas/group.schema";
 import type { GroupDetail } from "../types/group";
 import { currentDate } from "@/lib/utils";
 
 interface GroupFormProps {
-  offices: Office[];
   group?: GroupDetail;
   /** Persisted `active` flag read from the raw server response */
   originalActive: boolean;
@@ -33,7 +31,6 @@ interface GroupFormProps {
  *  - activate → separate action, rendered when editing a pending group
  */
 const GroupForm: FC<GroupFormProps> = ({
-  offices,
   group,
   originalActive,
   mode,
@@ -113,29 +110,12 @@ const GroupForm: FC<GroupFormProps> = ({
             {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
           </div>
 
-          {/* Office — disabled in edit mode (a group's office cannot change) */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="officeId">
-              Office <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={officeId ? String(officeId) : ""}
-              onValueChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
-              disabled={isEditMode || isSubmitting}
-            >
-              <SelectTrigger id="officeId">
-                <SelectValue placeholder="Select an office" />
-              </SelectTrigger>
-              <SelectContent>
-                {offices.map((office) => (
-                  <SelectItem key={office.id} value={String(office.id)}>
-                    {office.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.officeId && <p className="text-xs text-red-500">{errors.officeId.message}</p>}
-          </div>
+          <OfficeSelect
+            value={officeId ? String(officeId) : ""}
+            onChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
+            disabled={isEditMode || isSubmitting}
+            error={errors.officeId?.message}
+          />
 
           {/* External ID — create mode only */}
           {!isEditMode && (

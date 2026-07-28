@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useClients } from "@/features/clients";
 import {
   createFixedDepositAccount,
@@ -133,7 +133,6 @@ const CreateFixedDepositPage: React.FC = () => {
   const maturityInstructionId = watch("maturityInstructionId");
   const transferInterestToSavings = watch("transferInterestToSavings");
 
-  const { data: offices = [], isLoading: officesLoading } = useOffices();
   const clientsQuery = useMemo(
     () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
     [officeId],
@@ -152,7 +151,7 @@ const CreateFixedDepositPage: React.FC = () => {
     staleTime: 60_000,
   });
 
-  const isLoading = officesLoading || clientsLoading || productsLoading;
+  const isLoading = clientsLoading || productsLoading;
   const clients = clientsData?.pageItems ?? [];
 
   const onSubmit = async (values: FixedDepositFormValues) => {
@@ -227,28 +226,14 @@ const CreateFixedDepositPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Office *</Label>
-              <Select
-                value={officeId}
-                onValueChange={(v) => {
-                  setValue("officeId", v, { shouldValidate: true });
-                  setValue("clientId", "");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
-                </SelectTrigger>
-                <SelectContent>
-                  {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.officeId && <p className="text-sm text-red-500 mt-1">{errors.officeId.message}</p>}
-            </div>
+            <OfficeSelect
+              value={officeId}
+              onChange={(v) => {
+                setValue("officeId", v, { shouldValidate: true });
+                setValue("clientId", "");
+              }}
+              error={errors.officeId?.message}
+            />
             <div>
               <Label>Client *</Label>
               <Select

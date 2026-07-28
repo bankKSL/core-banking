@@ -99,11 +99,10 @@ const OfficeFormPage: React.FC = () => {
       <Card>
         <CardContent className="pt-6">
           <OfficeForm
-            offices={offices.filter((o) => !isEdit || o.id !== Number(id))}
             defaultValues={defaultValues}
-            onSubmit={handleSubmit}
+            onSubmit={handleCreate}
             onCancel={() => navigate("/offices")}
-            isSubmitting={isSubmitting}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
           />
         </CardContent>
       </Card>

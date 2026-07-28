@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,13 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOffices } from "@/hooks/useOffices";
-import { useClients } from "@/features/clients";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
+import { ClientSearch } from "@/components/shared/ClientSearch";
+import { ProductSelect } from "@/components/shared/ProductSelect";
 import {
   useCreateSavingsAccount,
   useUpdateSavingsAccount,
   useSavingsAccount,
-  useSavingsProducts,
   useSavingsTemplate,
 } from "@/features/deposits";
 
@@ -142,13 +142,6 @@ const CreateDepositAccountPage: React.FC = () => {
   const withdrawalFeeForTransfers = watch("withdrawalFeeForTransfers");
   const lockinPeriodFrequency = watch("lockinPeriodFrequency");
 
-  const { data: offices = [], isLoading: officesLoading } = useOffices();
-  const clientsQuery = useMemo(
-    () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
-    [officeId],
-  );
-  const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
-  const { data: products = [], isLoading: productsLoading } = useSavingsProducts();
   const { data: template, isLoading: templateLoading } = useSavingsTemplate(
     clientId || undefined,
     productId || undefined,
@@ -176,8 +169,7 @@ const CreateDepositAccountPage: React.FC = () => {
   }, [existingAccount, reset]);
 
   const isLoading =
-    officesLoading || clientsLoading || productsLoading || (isEditMode && accountLoading) || templateLoading;
-  const clients = clientsData?.pageItems ?? [];
+    (isEditMode && accountLoading) || templateLoading;
 
   const onSubmit = async (values: SavingsAccountFormValues) => {
     const payload: Record<string, unknown> = {
@@ -254,48 +246,21 @@ const CreateDepositAccountPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Office *</Label>
-              <Select
-                value={officeId}
-                onValueChange={(v) => {
-                  setValue("officeId", v, { shouldValidate: true });
-                  setValue("clientId", 0);
-                }}
-                disabled={isEditMode}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
-                </SelectTrigger>
-                <SelectContent>
-                  {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Client *</Label>
-              <Select
-                value={clientId ? String(clientId) : ""}
-                onValueChange={(v) => setValue("clientId", Number(v), { shouldValidate: true })}
-                disabled={isEditMode || !officeId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!officeId ? "Select office first" : "Select client"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>
-                      {c.displayName ?? `#${c.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.clientId && <p className="mt-1 text-xs text-red-500">{errors.clientId.message}</p>}
-            </div>
+            <OfficeSelect
+              value={officeId}
+              onChange={(v) => {
+                setValue("officeId", v, { shouldValidate: true });
+                setValue("clientId", 0);
+              }}
+              disabled={isEditMode}
+            />
+            <ClientSearch
+              value={clientId}
+              onChange={(v) => setValue("clientId", v, { shouldValidate: true })}
+              disabled={isEditMode || !officeId}
+              placeholder={!officeId ? "Select office first" : "Search client by name\u2026"}
+              error={errors.clientId?.message}
+            />
           </CardContent>
         </Card>
 
@@ -305,35 +270,11 @@ const CreateDepositAccountPage: React.FC = () => {
             <CardTitle className="text-base">Savings Product</CardTitle>
           </CardHeader>
           <CardContent>
-            <div>
-              <Label>Savings Product *</Label>
-              <Select
-                value={productId ? String(productId) : ""}
-                onValueChange={(v) => setValue("productId", Number(v), { shouldValidate: true })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a savings product" />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.productId && <p className="mt-1 text-xs text-red-500">{errors.productId.message}</p>}
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                className="h-auto p-0 text-xs mt-1"
-                onClick={() => window.open("/deposits/products", "_blank")}
-              >
-                <ExternalLink className="mr-1 h-3 w-3" />
-                Create New Product
-              </Button>
-            </div>
+            <ProductSelect
+              value={productId}
+              onChange={(v) => setValue("productId", v, { shouldValidate: true })}
+              error={errors.productId?.message}
+            />
           </CardContent>
         </Card>
 

@@ -14,7 +14,7 @@ import {
   useCreateJournalEntry,
 } from "@/features/accounting";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { currentDate } from "@/lib/utils";
 
 interface EntryRow {
@@ -27,7 +27,6 @@ const formatCurrency = (n: number, code = "USD") =>
 
 const JournalEntryFormPage: React.FC = () => {
   const navigate = useNavigate();
-  const { data: offices = [] } = useOffices();
   const { data: glAccounts = [] } = useGLAccounts({ usage: 1, manualEntriesAllowed: true });
   const { data: rules = [] } = useAccountingRules();
   const createMutation = useCreateJournalEntry();
@@ -190,25 +189,11 @@ const JournalEntryFormPage: React.FC = () => {
           <CardTitle className="text-base">Entry Details</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Office *</Label>
-            <Select
-              value={header.officeId ? String(header.officeId) : ""}
-              onValueChange={(v) => setHeader((h) => ({ ...h, officeId: Number(v) }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select office" />
-              </SelectTrigger>
-              <SelectContent>
-                {offices.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.officeId && <p className="text-xs text-red-500">{errors.officeId}</p>}
-          </div>
+          <OfficeSelect
+            value={header.officeId ? String(header.officeId) : ""}
+            onChange={(v) => setHeader((h) => ({ ...h, officeId: Number(v) }))}
+            error={errors.officeId}
+          />
           <div className="space-y-1.5">
             <Label>Transaction Date *</Label>
             <Input

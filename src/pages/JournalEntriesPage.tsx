@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJournalEntries, useReverseJournalEntry, ACCOUNTING_PAGE_SIZE } from "@/features/accounting";
 import type { JournalEntryData } from "@/features/accounting";
-import { useOffices } from "@/hooks/useOffices";
+import { OfficeSelect } from "@/components/shared/OfficeSelect";
 
 const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(n);
@@ -27,7 +27,6 @@ const JournalEntriesPage: React.FC = () => {
   const [manualOnly, setManualOnly] = useState<string>("all");
   const [reversingId, setReversingId] = useState<string | null>(null);
 
-  const { data: offices = [] } = useOffices();
   const reverseMutation = useReverseJournalEntry();
 
   const params = useMemo(() => {
@@ -170,25 +169,14 @@ const JournalEntriesPage: React.FC = () => {
           <div className="flex items-end gap-3">
             <div className="space-y-1">
               <Label className="text-xs">Office</Label>
-              <Select
+              <OfficeSelect
                 value={officeFilter}
-                onValueChange={(v) => {
+                onChange={(v) => {
                   setOfficeFilter(v);
                   setPage(1);
                 }}
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All Offices" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Offices</SelectItem>
-                  {offices.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                includeAll="All Offices"
+              />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">From</Label>
