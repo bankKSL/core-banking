@@ -80,7 +80,13 @@ export interface ShareAccount {
 export interface ShareAccountTemplate {
   productOptions: Array<{ id: number; name: string; currency: { code: string } }>;
   chargeOptions: Array<{ id: number; name: string; amount: number; chargeTimeType: { id: number } }>;
-  clientSavingsAccounts: Array<{ id: number; accountNo: string }>;
+  clientSavingsAccounts: Array<{
+    id: number;
+    accountNo: string;
+    savingsProductName?: string;
+    currency?: { code: string; displaySymbol?: string; name?: string };
+    summary?: { accountBalance?: number };
+  }>;
   lockinPeriodFrequencyTypeOptions: Array<{ id: number; code: string; value: string }>;
   minimumActivePeriodFrequencyTypeOptions: Array<{ id: number; code: string; value: string }>;
   currentMarketPrice: number;
@@ -100,7 +106,10 @@ export interface ShareProductListResponse {
   pageItems: ShareProduct[];
 }
 
-export async function fetchShareProducts(params?: { offset?: number; limit?: number }): Promise<ShareProductListResponse> {
+export async function fetchShareProducts(params?: {
+  offset?: number;
+  limit?: number;
+}): Promise<ShareProductListResponse> {
   const { data } = await client.get<ShareProductListResponse>("/products/share", { params });
   return data;
 }

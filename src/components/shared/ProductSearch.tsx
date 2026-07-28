@@ -1,54 +1,58 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useFormContext } from "react-hook-form";
-import { Search, X, BadgeCheck, ExternalLink, Loader2 } from "lucide-react";
+import { Search, X, BadgeCheck, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { useClients } from "@/features/clients";
 
-export interface ClientSearchProps {
-  value: number;
-  onChange: (clientId: number) => void;
-  onBlur?: () => void;
+export interface ProductItem {
+  id: number;
+  name: string;
+  shortName?: string;
+  currency?: { code: string };
+}
+
+export interface ProductSearchProps {
+  value: string;
+  onChange: (productId: string) => void;
+  products: ProductItem[];
   disabled?: boolean;
   error?: string;
   label?: string;
   placeholder?: string;
-  name?: string;
 }
 
-export function ClientSearch({
+export function ProductSearch({
   value,
   onChange,
-  onBlur,
+  products,
   disabled,
   error,
-  label = "Client *",
-  placeholder = "Search client by name…",
-  name,
-}: ClientSearchProps) {
+  label = "Product *",
+  placeholder = "Search product by name…",
+}: ProductSearchProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const { data, isLoading } = useClients(
-    query.length >= 2 ? { limit: 20, offset: 0, displayName: query } : { limit: 100 },
-  );
+  const filtered = query
+    ? products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          (p.shortName ?? "").toLowerCase().includes(query.toLowerCase()),
+      )
+    : products;
 
-  const clients = data?.pageItems ?? [];
-  const selected = clients.find((c) => c.id === value);
+  const selected = products.find((p) => String(p.id) === value);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
-        onBlur?.();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [onBlur]);
+  }, []);
 
   const handleSearch = useCallback((val: string) => {
     setQuery(val);
@@ -58,16 +62,19 @@ export function ClientSearch({
 
   return (
     <div ref={ref} className="relative space-y-1.5">
-      <label className="block text-sm font-medium">{label}</label>
+      <Label>{label}</Label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
-          <span className="flex-1 text-sm">{selected.displayName ?? `Client #${selected.id}`}</span>
+          <span className="flex-1 text-sm">
+            {selected.name}
+            {selected.currency?.code && <span className="ml-1 text-gray-400">({selected.currency.code})</span>}
+          </span>
           {!disabled && (
             <button
               type="button"
               onClick={() => {
-                onChange(0);
+                onChange("");
                 setQuery("");
                 setOpen(false);
               }}
@@ -79,62 +86,48 @@ export function ClientSearch({
         </div>
       ) : (
         <div className="relative">
-          {isLoading && !selected ? (
-            <Loader2 className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400 animate-spin" />
-          ) : (
-            <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          )}
-
+          <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
-            id={name ?? "clientSearch"}
             placeholder={placeholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => query.length >= 0 && setOpen(true)}
+            onFocus={() => setOpen(true)}
             disabled={disabled}
-            onFocusCapture={() => setOpen((prev) => !prev)}
             error={error}
           />
         </div>
       )}
 
-      {open && !selected && clients.length > 0 && (
+      {open && !selected && filtered.length > 0 && (
         <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          {clients.map((c) => (
+          {filtered.map((p) => (
             <button
-              key={c.id}
+              key={p.id}
               type="button"
               className="flex w-full items-center px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
               onClick={() => {
-                onChange(c.id);
+                onChange(String(p.id));
                 setOpen(false);
                 setQuery("");
               }}
             >
-              <span>{c.displayName ?? `Client #${c.id}`}</span>
-              {c.accountNo && <span className="ml-2 text-xs text-gray-400">#{c.accountNo}</span>}
+              <Package className="mr-2 h-4 w-4 shrink-0 text-gray-400" />
+              <div className="flex-1">
+                <span className="font-medium">{p.name}</span>
+                {p.shortName && <span className="ml-2 text-xs text-gray-400">({p.shortName})</span>}
+              </div>
+              {p.currency?.code && <span className="text-xs text-gray-400">{p.currency.code}</span>}
             </button>
           ))}
         </div>
       )}
 
-      {open && !selected && query.length >= 2 && clients.length === 0 && !isLoading && (
+      {open && !selected && query.length >= 1 && filtered.length === 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No clients found
+          No products found
         </div>
       )}
-
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="mt-1 h-auto p-0 text-xs"
-        onClick={() => window.open("/clients/new", "_blank")}
-      >
-        <ExternalLink className="mr-1 h-3 w-3" />
-        Create New Client
-      </Button>
     </div>
   );
 }

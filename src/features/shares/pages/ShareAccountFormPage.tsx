@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ClientSearch } from "@/components/shared/ClientSearch";
+import { ProductSearch } from "@/components/shared/ProductSearch";
+import { SavingsAccountSearch } from "@/components/shared/SavingsAccountSearch";
 import {
   useShareAccountTemplate,
   useShareAccount,
@@ -30,12 +32,13 @@ const shareAccountFormSchema = z.object({
   clientId: z.number().min(1, "Client is required"),
   productId: z.string().min(1, "Product is required"),
   requestedShares: z.string().min(1, "Requested shares is required"),
-  applicationDate: z.string().optional(),
-  savingsAccountId: z.string().optional(),
-  submittedDate: z.string().optional(),
-  minimumActivePeriod: z.string().optional(),
-  lockinPeriodFrequency: z.string().optional(),
-  lockinPeriodFrequencyType: z.string().optional(),
+  applicationDate: z.string().min(1, "Application date is required"),
+  savingsAccountId: z.string().min(1, "Savings account is required"),
+  submittedDate: z.string().min(1, "Submitted date is required"),
+  minimumActivePeriod: z.string().min(1, "Minimum active period is required"),
+  minimumActivePeriodFrequencyType: z.string().min(1, "Minimum active period frequency type is required"),
+  lockinPeriodFrequency: z.string().min(1, "Lockin period frequency is required"),
+  lockinPeriodFrequencyType: z.string().min(1, "Lockin period frequency type is required"),
   allowDividendCalculationForInactiveClients: z.boolean().optional(),
   externalId: z.string().optional(),
   charges: z.array(chargeSchema).optional().default([]),
@@ -50,6 +53,9 @@ const ShareAccountFormPage: FC = () => {
 
   const [selectedClientId, setSelectedClientId] = useState<number>(0);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
+  const [cachedProductOptions, setCachedProductOptions] = useState<
+    Array<{ id: number; name: string; currency: { code: string } }>
+  >([]);
 
   const { data: template, isLoading: templateLoading } = useShareAccountTemplate(
     selectedClientId || undefined,
@@ -78,6 +84,7 @@ const ShareAccountFormPage: FC = () => {
       savingsAccountId: "",
       submittedDate: "",
       minimumActivePeriod: "",
+      minimumActivePeriodFrequencyType: "",
       lockinPeriodFrequency: "",
       lockinPeriodFrequencyType: "",
       allowDividendCalculationForInactiveClients: false,
@@ -98,6 +105,7 @@ const ShareAccountFormPage: FC = () => {
       savingsAccountId: String(account.savingsAccountId ?? ""),
       submittedDate: account.timeline?.submittedOnDate ?? "",
       minimumActivePeriod: String(account.minimumActivePeriod ?? ""),
+      minimumActivePeriodFrequencyType: String(account.minimumActivePeriodTypeEnum?.id ?? ""),
       lockinPeriodFrequency: String(account.lockinPeriod ?? ""),
       lockinPeriodFrequencyType: String(account.lockPeriodTypeEnum?.id ?? ""),
       allowDividendCalculationForInactiveClients: account.allowDividendCalculationForInactiveClients ?? false,
@@ -109,11 +117,18 @@ const ShareAccountFormPage: FC = () => {
     });
   }, [account, reset]);
 
+  useEffect(() => {
+    if (template?.productOptions && template.productOptions.length > 0) {
+      setCachedProductOptions(template.productOptions);
+    }
+  }, [template?.productOptions]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "charges",
   });
 
+  const productOptions = cachedProductOptions;
   const clientSavingsAccounts = template?.clientSavingsAccounts ?? [];
   const chargeOptions = template?.chargeOptions ?? [];
 
@@ -124,6 +139,8 @@ const ShareAccountFormPage: FC = () => {
       if (!isEdit) {
         setSelectedProductId("");
         setValue("productId", "");
+        setValue("savingsAccountId", "");
+        setCachedProductOptions([]);
       }
     },
     [setValue, isEdit],
@@ -140,6 +157,9 @@ const ShareAccountFormPage: FC = () => {
         savingsAccountId: values.savingsAccountId ? Number(values.savingsAccountId) : undefined,
         submittedDate: values.submittedDate || undefined,
         minimumActivePeriod: values.minimumActivePeriod ? Number(values.minimumActivePeriod) : undefined,
+        minimumActivePeriodFrequencyType: values.minimumActivePeriodFrequencyType
+          ? Number(values.minimumActivePeriodFrequencyType)
+          : undefined,
         lockinPeriodFrequency: values.lockinPeriodFrequency ? Number(values.lockinPeriodFrequency) : undefined,
         lockinPeriodFrequencyType: values.lockinPeriodFrequencyType
           ? Number(values.lockinPeriodFrequencyType)
@@ -149,7 +169,7 @@ const ShareAccountFormPage: FC = () => {
         charges: (values.charges ?? [])
           .filter((c) => c.chargeId && c.amount)
           .map((c) => ({ chargeId: Number(c.chargeId), amount: Number(c.amount) })),
-        dateFormat: "dd MMMM yyyy",
+        dateFormat: "yyyy-MM-dd",
         locale: "en",
       };
 
@@ -166,9 +186,9 @@ const ShareAccountFormPage: FC = () => {
     }
   };
 
-  if ((isEdit && accountLoading) || templateLoading) {
+  if (isEdit && accountLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="max-w-4xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -194,7 +214,7 @@ const ShareAccountFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base">Client & Product</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ClientSearch
               value={watch("clientId")}
               onChange={handleClientChange}
@@ -202,28 +222,16 @@ const ShareAccountFormPage: FC = () => {
               error={errors.clientId?.message}
             />
 
-            <div>
-              <Label>Product *</Label>
-              <Select
-                value={watch("productId")}
-                onValueChange={(v) => {
-                  setSelectedProductId(v);
-                  setValue("productId", v, { shouldValidate: true });
-                }}
-                disabled={isEdit}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select product" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(template?.productOptions ?? []).map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name} ({p.currency?.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <ProductSearch
+              value={watch("productId")}
+              onChange={(v) => {
+                setSelectedProductId(v);
+                setValue("productId", v, { shouldValidate: true });
+              }}
+              products={productOptions}
+              disabled={isEdit}
+              error={errors.productId?.message}
+            />
           </CardContent>
         </Card>
 
@@ -239,29 +247,21 @@ const ShareAccountFormPage: FC = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Application Date</label>
-                <Input type="date" {...register("applicationDate")} />
+                <Input type="date" {...register("applicationDate")} error={errors.applicationDate?.message} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Savings Account</Label>
-                <Select value={watch("savingsAccountId")} onValueChange={(v) => setValue("savingsAccountId", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select savings account" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clientSavingsAccounts.map((a) => (
-                      <SelectItem key={a.id} value={String(a.id)}>
-                        {a.accountNo}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <SavingsAccountSearch
+                value={watch("savingsAccountId") ?? ""}
+                onChange={(v) => setValue("savingsAccountId", v)}
+                accounts={clientSavingsAccounts}
+                disabled={!selectedProductId}
+                error={errors.savingsAccountId?.message}
+              />
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Submitted Date</label>
-                <Input type="date" {...register("submittedDate")} />
+                <Input type="date" {...register("submittedDate")} error={errors.submittedDate?.message} />
               </div>
             </div>
           </CardContent>
@@ -272,22 +272,49 @@ const ShareAccountFormPage: FC = () => {
             <CardTitle className="text-base">Restrictions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Minimum Active Period (Days)</label>
-                <Input type="number" {...register("minimumActivePeriod")} />
+                <label className="block text-sm font-medium">Minimum Active Period</label>
+                <Input type="number" {...register("minimumActivePeriod")} error={errors.minimumActivePeriod?.message} />
               </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Minimum Active Period Type</label>
+                <Select
+                  value={watch("minimumActivePeriodFrequencyType")}
+                  onValueChange={(v) => setValue("minimumActivePeriodFrequencyType", v, { shouldValidate: true })}
+                >
+                  <SelectTrigger className={errors.minimumActivePeriodFrequencyType?.message ? "border-red-500" : ""}>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(template?.minimumActivePeriodFrequencyTypeOptions ?? []).map((o) => (
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.minimumActivePeriodFrequencyType?.message && (
+                  <p className="text-sm text-red-500">{errors.minimumActivePeriodFrequencyType.message}</p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Lock-in Period Frequency</label>
-                <Input type="number" {...register("lockinPeriodFrequency")} />
+                <Input
+                  type="number"
+                  {...register("lockinPeriodFrequency")}
+                  error={errors.lockinPeriodFrequency?.message}
+                />
               </div>
-              <div>
-                <Label>Lock-in Period Type</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Lock-in Period Type</label>
                 <Select
                   value={watch("lockinPeriodFrequencyType")}
-                  onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}
+                  onValueChange={(v) => setValue("lockinPeriodFrequencyType", v, { shouldValidate: true })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.lockinPeriodFrequencyType?.message ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -298,6 +325,9 @@ const ShareAccountFormPage: FC = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.lockinPeriodFrequencyType?.message && (
+                  <p className="text-sm text-red-500">{errors.lockinPeriodFrequencyType.message}</p>
+                )}
               </div>
             </div>
             <div>
@@ -308,10 +338,10 @@ const ShareAccountFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("allowDividendCalculationForInactiveClients", v === true)}
               />
             </div>
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium">External ID</label>
-                <Input {...register("externalId")} placeholder="Optional external identifier" />
-              </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">External ID</label>
+              <Input {...register("externalId")} placeholder="Optional external identifier" />
+            </div>
           </CardContent>
         </Card>
 
@@ -322,9 +352,9 @@ const ShareAccountFormPage: FC = () => {
           <CardContent className="space-y-4">
             {fields.length === 0 && <p className="text-sm text-gray-500">No charges applied.</p>}
             {fields.map((field, index) => (
-              <div key={field.id} className="flex items-end gap-4">
-                <div className="flex-1">
-                  <Label>Charge</Label>
+              <div key={field.id} className="flex items-end justify-center gap-4">
+                <div className="flex-1 space-y-1.5">
+                  <label className="block text-sm font-medium">Charge</label>
                   <Select
                     value={watch(`charges.${index}.chargeId`)}
                     onValueChange={(v) => setValue(`charges.${index}.chargeId`, v)}
@@ -343,13 +373,9 @@ const ShareAccountFormPage: FC = () => {
                 </div>
                 <div className="flex-1 space-y-1.5">
                   <label className="block text-sm font-medium">Amount</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...register(`charges.${index}.amount`)}
-                  />
+                  <Input className="mb-1.5" type="number" step="0.01" {...register(`charges.${index}.amount`)} />
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                <Button className="mb-1.5" type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
