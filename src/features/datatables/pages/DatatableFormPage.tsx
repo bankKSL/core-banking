@@ -49,7 +49,7 @@ const datatableFormSchema = z.object({
   columns: z.array(columnSchema).min(1, "At least one column is required"),
 });
 
-type DatatableFormValues = z.infer<typeof datatableFormSchema>;
+type DatatableFormValues = z.input<typeof datatableFormSchema>;
 
 const DatatableFormPage: FC = () => {
   const navigate = useNavigate();
@@ -87,8 +87,8 @@ const DatatableFormPage: FC = () => {
         columns: values.columns.map((c) => ({
           name: c.name.trim(),
           type: c.type,
-          length: c.length,
-          mandatory: c.mandatory,
+          length: c.length ?? 0,
+          mandatory: c.mandatory ?? false,
         })),
       });
       navigate("/datatables");

@@ -111,6 +111,8 @@ const PaymentTypeFormPage: FC = () => {
     );
   }
 
+  const saveError = createMutation.error ?? updateMutation.error;
+
   return (
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
@@ -125,11 +127,7 @@ const PaymentTypeFormPage: FC = () => {
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
           title="Failed to save payment type"
-          message={
-            (createMutation.error ?? updateMutation.error) instanceof Error
-              ? (createMutation.error ?? updateMutation.error).message
-              : "An unexpected error occurred."
-          }
+          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();

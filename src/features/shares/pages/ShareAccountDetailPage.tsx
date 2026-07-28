@@ -38,9 +38,9 @@ function formatDate(dateStr?: string | null): string {
 
 const shareActionSchema = z.object({
   requestedDate: z.string().min(1, "Date is required"),
-  requestedShares: z.coerce.number({ invalid_type_error: "Must be a number" }).positive("Must be positive"),
+  requestedShares: z.coerce.number({ message: "Must be a number" }).positive("Must be positive"),
 });
-type ShareActionFormValues = z.infer<typeof shareActionSchema>;
+type ShareActionFormValues = z.input<typeof shareActionSchema>;
 
 const DetailRow: FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
   <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">

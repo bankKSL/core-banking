@@ -134,6 +134,9 @@ const CampaignDetailPage: FC = () => {
     );
   }
 
+  const activateError = isSms ? activateSms.error : activateEmail.error;
+  const closeError = isSms ? closeSms.error : closeEmail.error;
+
   return (
     <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
@@ -150,11 +153,7 @@ const CampaignDetailPage: FC = () => {
       {actionDialog === "activate" && (isSms ? activateSms.isError : activateEmail.isError) && (
         <ErrorState
           title="Failed to activate campaign"
-          message={
-            (isSms ? activateSms.error : activateEmail.error) instanceof Error
-              ? (isSms ? activateSms.error : activateEmail.error).message
-              : "An unexpected error occurred."
-          }
+          message={activateError instanceof Error ? activateError.message : "An unexpected error occurred."}
           onRetry={() => (isSms ? activateSms : activateEmail).reset()}
         />
       )}
@@ -162,11 +161,7 @@ const CampaignDetailPage: FC = () => {
       {actionDialog === "close" && (isSms ? closeSms.isError : closeEmail.isError) && (
         <ErrorState
           title="Failed to close campaign"
-          message={
-            (isSms ? closeSms.error : closeEmail.error) instanceof Error
-              ? (isSms ? closeSms.error : closeEmail.error).message
-              : "An unexpected error occurred."
-          }
+          message={closeError instanceof Error ? closeError.message : "An unexpected error occurred."}
           onRetry={() => (isSms ? closeSms : closeEmail).reset()}
         />
       )}

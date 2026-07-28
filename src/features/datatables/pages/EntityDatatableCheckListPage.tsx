@@ -24,7 +24,7 @@ import type { EntityDatatableCheck } from "../api/datatables";
 const createCheckSchema = z.object({
   entity: z.string().min(1, "Entity is required"),
   datatableName: z.string().min(1, "Datatable is required"),
-  status: z.number({ invalid_type_error: "Status is required" }),
+  status: z.number({ message: "Status is required" }),
   productId: z.string().optional(),
 });
 

@@ -16,9 +16,9 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useReassignmentTemplate, useExecuteReassignment } from "../hooks/useLoanReassignment";
 
 const loanReassignmentSchema = z.object({
-  officeId: z.number({ required_error: "Office is required" }),
+  officeId: z.number({ message: "Office is required" }),
   fromLoanOfficerId: z.number().nullable().optional(),
-  toLoanOfficerId: z.number({ required_error: "To Loan Officer is required" }),
+  toLoanOfficerId: z.number({ message: "To Loan Officer is required" }),
   loanIds: z.string().min(1, "At least one loan ID is required"),
 });
 

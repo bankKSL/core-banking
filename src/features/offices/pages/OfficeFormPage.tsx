@@ -100,7 +100,7 @@ const OfficeFormPage: React.FC = () => {
         <CardContent className="pt-6">
           <OfficeForm
             defaultValues={defaultValues}
-            onSubmit={handleCreate}
+            onSubmit={handleSubmit}
             onCancel={() => navigate("/offices")}
             isSubmitting={createMutation.isPending || updateMutation.isPending}
           />

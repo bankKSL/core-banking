@@ -39,14 +39,14 @@ const cashierSchema = z.object({
   isFullDay: z.boolean(),
   cashierDescription: z.string().optional(),
 });
-type CashierFormValues = z.infer<typeof cashierSchema>;
+type CashierFormValues = z.input<typeof cashierSchema>;
 
 const cashTxnSchema = z.object({
-  txnAmount: z.coerce.number({ invalid_type_error: "Amount is required" }).positive("Must be positive"),
+  txnAmount: z.coerce.number({ message: "Amount is required" }).positive("Must be positive"),
   txnDate: z.string().min(1, "Date is required"),
   txnNote: z.string().min(1, "Note is required"),
 });
-type CashTxnFormValues = z.infer<typeof cashTxnSchema>;
+type CashTxnFormValues = z.input<typeof cashTxnSchema>;
 
 const TellerDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -126,7 +126,7 @@ const TellerDetailPage: FC = () => {
       if (!id || !cashTxnDialog) return;
       const payload = {
         txnDate: values.txnDate,
-        txnAmount: values.txnAmount,
+        txnAmount: Number(values.txnAmount),
         currencyCode: "USD",
         txnNote: values.txnNote,
         locale: "en",
@@ -205,6 +205,8 @@ const TellerDetailPage: FC = () => {
       </div>
     );
 
+  const cashTxnError = allocateMutation.error ?? settleMutation.error;
+
   return (
     <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
@@ -242,11 +244,7 @@ const TellerDetailPage: FC = () => {
       {(allocateMutation.isError || settleMutation.isError) && (
         <ErrorState
           title={`Failed to ${cashTxnDialog?.type === "allocate" ? "allocate" : "settle"} cash`}
-          message={
-            (allocateMutation.error ?? settleMutation.error) instanceof Error
-              ? (allocateMutation.error ?? settleMutation.error).message
-              : "An unexpected error occurred."
-          }
+          message={cashTxnError instanceof Error ? cashTxnError.message : "An unexpected error occurred."}
           onRetry={() => { allocateMutation.reset(); settleMutation.reset(); }}
         />
       )}

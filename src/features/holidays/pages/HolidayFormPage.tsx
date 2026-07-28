@@ -40,7 +40,7 @@ const holidayFormSchema = z.object({
   selectedOfficeIds: z.array(z.number()).min(1, "At least one office must be selected"),
 });
 
-type HolidayFormValues = z.infer<typeof holidayFormSchema>;
+type HolidayFormValues = z.input<typeof holidayFormSchema>;
 
 const HolidayFormPage: FC = () => {
   const navigate = useNavigate();
@@ -152,6 +152,8 @@ const HolidayFormPage: FC = () => {
     );
   }
 
+  const saveError = createMutation.isError ? createMutation.error : updateMutation.error;
+
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
       <PageHeader
@@ -167,11 +169,7 @@ const HolidayFormPage: FC = () => {
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
           title="Failed to save holiday"
-          message={
-            (createMutation.isError ? createMutation.error : updateMutation.error) instanceof Error
-              ? (createMutation.isError ? createMutation.error : updateMutation.error).message
-              : "An unexpected error occurred."
-          }
+          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();

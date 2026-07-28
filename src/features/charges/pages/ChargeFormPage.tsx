@@ -42,7 +42,7 @@ const chargeFormSchema = z.object({
   freeWithdrawalFrequency: z.number().int().nullable().default(null),
 });
 
-type ChargeFormValues = z.infer<typeof chargeFormSchema>;
+type ChargeFormValues = z.input<typeof chargeFormSchema>;
 
 const ChargeFormPage: FC = () => {
   const navigate = useNavigate();
@@ -232,6 +232,8 @@ const ChargeFormPage: FC = () => {
     );
   }
 
+  const saveError = createMutation.error ?? updateMutation.error;
+
   return (
     <div className="p-6 max-w-3xl m-auto space-y-6">
       <PageHeader
@@ -247,11 +249,7 @@ const ChargeFormPage: FC = () => {
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
           title="Failed to save charge"
-          message={
-            (createMutation.error ?? updateMutation.error) instanceof Error
-              ? (createMutation.error ?? updateMutation.error).message
-              : "An unexpected error occurred."
-          }
+          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();

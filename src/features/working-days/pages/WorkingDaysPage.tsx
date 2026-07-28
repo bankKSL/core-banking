@@ -38,7 +38,7 @@ function buildRrule(selectedDays: string[]): string {
 
 const workingDaysSchema = z.object({
   selectedDays: z.array(z.string()).min(1, "Select at least one working day"),
-  rescheduleTypeId: z.number({ required_error: "Repayment reschedule type is required" }),
+  rescheduleTypeId: z.number({ message: "Repayment reschedule type is required" }),
   extendTermDaily: z.boolean(),
   extendTermHolidays: z.boolean(),
 });
