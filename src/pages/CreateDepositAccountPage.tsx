@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { ClientSearch } from "@/components/shared/ClientSearch";
-import { ProductSelect } from "@/components/shared/ProductSelect";
+import { SavingProductSelect } from "@/components/shared/SavingProductSelect";
 import {
   useCreateSavingsAccount,
   useUpdateSavingsAccount,
@@ -168,8 +168,7 @@ const CreateDepositAccountPage: React.FC = () => {
     }
   }, [existingAccount, reset]);
 
-  const isLoading =
-    (isEditMode && accountLoading) || templateLoading;
+  const isLoading = isEditMode && accountLoading;
 
   const onSubmit = async (values: SavingsAccountFormValues) => {
     const payload: Record<string, unknown> = {
@@ -270,7 +269,7 @@ const CreateDepositAccountPage: React.FC = () => {
             <CardTitle className="text-base">Savings Product</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProductSelect
+            <SavingProductSelect
               value={productId}
               onChange={(v) => setValue("productId", v, { shouldValidate: true })}
               error={errors.productId?.message}

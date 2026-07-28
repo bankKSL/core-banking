@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSavingsProducts } from "@/features/deposits";
 
-export interface ProductSelectProps {
+export interface SavingProductSelectProps {
   value: number;
   onChange: (value: number) => void;
   error?: string;
@@ -14,14 +14,14 @@ export interface ProductSelectProps {
   disabled?: boolean;
 }
 
-export function ProductSelect({
+export function SavingProductSelect({
   value,
   onChange,
   error,
   label = "Savings Product *",
   placeholder = "Search product by name\u2026",
   disabled,
-}: ProductSelectProps) {
+}: SavingProductSelectProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -29,9 +29,7 @@ export function ProductSelect({
 
   const { data: products, isLoading } = useSavingsProducts();
 
-  const filtered = (products ?? []).filter(
-    (p) => !query || p.name.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filtered = (products ?? []).filter((p) => !query || p.name.toLowerCase().includes(query.toLowerCase()));
   const selected = (products ?? []).find((p) => p.id === value);
 
   useEffect(() => {
@@ -73,7 +71,12 @@ export function ProductSelect({
         </div>
       ) : (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          {isLoading && !selected ? (
+            <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 animate-spin" />
+          ) : (
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          )}
+
           <Input
             placeholder={placeholder}
             className="pl-9"
@@ -82,12 +85,6 @@ export function ProductSelect({
             onFocus={() => setOpen(true)}
             disabled={disabled}
           />
-        </div>
-      )}
-
-      {isLoading && !selected && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          <Loader2 className="mx-auto h-5 w-5 animate-spin" />
         </div>
       )}
 

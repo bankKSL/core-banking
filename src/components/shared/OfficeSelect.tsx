@@ -32,9 +32,7 @@ export function OfficeSelect({
 
   const { data: offices, isLoading } = useOffices();
 
-  const filtered = (offices ?? []).filter(
-    (o) => !query || o.name.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filtered = (offices ?? []).filter((o) => !query || o.name.toLowerCase().includes(query.toLowerCase()));
   const selected = (offices ?? []).find((o) => String(o.id) === value);
 
   const isSpecialValue = (includeAll && value === "all") || (includeNone && value === "");
@@ -91,7 +89,12 @@ export function OfficeSelect({
         </div>
       ) : (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          {isLoading && !selected && !isSpecialValue ? (
+            <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 animate-spin" />
+          ) : (
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          )}
+
           <Input
             placeholder={placeholder}
             className="pl-9"
@@ -100,12 +103,6 @@ export function OfficeSelect({
             onFocus={() => setOpen(true)}
             disabled={disabled}
           />
-        </div>
-      )}
-
-      {isLoading && !selected && !isSpecialValue && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          <Loader2 className="mx-auto h-5 w-5 animate-spin" />
         </div>
       )}
 
@@ -142,11 +139,18 @@ export function OfficeSelect({
         </div>
       )}
 
-      {open && !selected && !isSpecialValue && !isLoading && query && filtered.length === 0 && !includeAll && !includeNone && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No offices found
-        </div>
-      )}
+      {open &&
+        !selected &&
+        !isSpecialValue &&
+        !isLoading &&
+        query &&
+        filtered.length === 0 &&
+        !includeAll &&
+        !includeNone && (
+          <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            No offices found
+          </div>
+        )}
 
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
