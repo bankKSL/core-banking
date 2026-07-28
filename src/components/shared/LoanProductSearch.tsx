@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { LoanProduct } from "@/features/loans";
 
-export interface ProductSearchProps {
+export interface LoanProductSearchProps {
   products: LoanProduct[];
   value: number;
   onChange: (productId: number) => void;
@@ -17,7 +17,7 @@ export interface ProductSearchProps {
   name?: string;
 }
 
-export function ProductSearch({
+export function LoanProductSearch({
   products,
   value,
   onChange,
@@ -26,7 +26,7 @@ export function ProductSearch({
   label = "Loan Product *",
   placeholder = "Search product by name…",
   name,
-}: ProductSearchProps) {
+}: LoanProductSearchProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

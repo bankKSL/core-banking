@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
-import { ProductSearch } from "@/components/shared/ProductSearch";
+import { LoanProductSearch } from "@/components/shared/LoanProductSearch";
 import { type CreateLoanFormValues } from "../schemas/loan.schema";
 import type { LoanProduct, Loan } from "../types/loan";
 import { currentDate } from "@/lib/utils";
@@ -127,7 +127,7 @@ const LoanForm: FC<LoanFormProps> = ({
 
           {/* Row 2 (full width) — Product select + create button */}
           <div className="col-span-1">
-            <ProductSearch
+            <LoanProductSearch
               products={products}
               value={productId}
               onChange={handleProductSelect}
