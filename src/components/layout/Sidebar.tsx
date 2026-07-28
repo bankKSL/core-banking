@@ -53,6 +53,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  exact?: boolean;
 }
 
 interface NavSectionConfig {
@@ -74,7 +75,7 @@ const sections: NavSectionConfig[] = [
     title: "Lending",
     defaultOpen: true,
     items: [
-      { label: "Loans", path: "/loans", icon: Banknote },
+      { label: "Loans", path: "/loans", icon: Banknote, exact: true },
       { label: "Loan Products", path: "/lending/products", icon: Briefcase },
       { label: "Collateral Products", path: "/collateral-products", icon: Gem },
       { label: "External Asset Owners", path: "/external-asset-owners/owners", icon: UsersRound },
@@ -121,6 +122,8 @@ const sections: NavSectionConfig[] = [
       { label: "Provisioning", path: "/accounting/provisioning-entries", icon: ShieldCheck },
       { label: "Provisioning Categories", path: "/provisioning-categories", icon: LayoutGrid },
       { label: "Provisioning Criteria", path: "/provisioning-criteria", icon: ListOrdered },
+      { label: "Tax Components", path: "/taxes/components", icon: Percent },
+      { label: "Tax Groups", path: "/taxes/groups", icon: LayoutGrid },
     ],
   },
   {
@@ -251,18 +254,24 @@ const sections: NavSectionConfig[] = [
       { label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal },
     ],
   },
+  {
+    id: "logs",
+    title: "Logs",
+    defaultOpen: true,
+    items: [{ label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck }],
+  },
 ];
 
 // ─── NavItemLink sub-component ─────────────────────────────────
 interface NavItemLinkProps {
   item: NavItem;
   collapsed: boolean;
-  isActive: (path: string) => boolean;
+  isActive: (path: string, exact?: boolean) => boolean;
 }
 
 const NavItemLink: FC<NavItemLinkProps> = ({ item, collapsed, isActive }) => {
   const Icon = item.icon;
-  const active = isActive(item.path);
+  const active = isActive(item.path, item.exact);
 
   const link = (
     <NavLink
@@ -304,7 +313,7 @@ const NavItemLink: FC<NavItemLinkProps> = ({ item, collapsed, isActive }) => {
 interface NavSectionProps {
   section: NavSectionConfig;
   collapsed: boolean;
-  isActive: (path: string) => boolean;
+  isActive: (path: string, exact?: boolean) => boolean;
 }
 
 const NavSection: FC<NavSectionProps> = ({ section, collapsed, isActive }) => {
@@ -371,8 +380,9 @@ const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) =
   const location = useLocation();
 
   const isActive = useCallback(
-    (path: string) => {
+    (path: string, exact?: boolean) => {
       if (path === "/") return location.pathname === "/";
+      if (exact) return location.pathname === path;
       // Exact match or next char is "/" to avoid prefix collisions
       // e.g. /deposits/fixed should NOT match /deposits/fixed-products
       return location.pathname === path || location.pathname.startsWith(path + "/");

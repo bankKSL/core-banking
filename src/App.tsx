@@ -60,6 +60,10 @@ import ProvisioningCategoryListPage from "@/features/provisioning/pages/Provisio
 import ProvisioningCategoryFormPage from "@/features/provisioning/pages/ProvisioningCategoryFormPage";
 import ProvisioningCriteriaListPage from "@/features/provisioning/pages/ProvisioningCriteriaListPage";
 import ProvisioningCriteriaFormPage from "@/features/provisioning/pages/ProvisioningCriteriaFormPage";
+import TaxComponentListPage from "@/features/taxes/pages/TaxComponentListPage";
+import TaxComponentFormPage from "@/features/taxes/pages/TaxComponentFormPage";
+import TaxGroupListPage from "@/features/taxes/pages/TaxGroupListPage";
+import TaxGroupFormPage from "@/features/taxes/pages/TaxGroupFormPage";
 import ReportListPage from "@/features/reports/pages/ReportListPage";
 import ReportFormPage from "@/features/reports/pages/ReportFormPage";
 import AdhocQueryListPage from "@/features/reports/pages/AdhocQueryListPage";
@@ -332,6 +336,12 @@ function App() {
                   <Route path="/datatables" element={<DatatableListPage />} />
                   <Route path="/datatables/new" element={<DatatableFormPage />} />
                   <Route path="/entity-datatable-checks" element={<EntityDatatableCheckListPage />} />
+                  <Route path="/taxes/components" element={<TaxComponentListPage />} />
+                  <Route path="/taxes/components/new" element={<TaxComponentFormPage />} />
+                  <Route path="/taxes/components/edit/:id" element={<TaxComponentFormPage />} />
+                  <Route path="/taxes/groups" element={<TaxGroupListPage />} />
+                  <Route path="/taxes/groups/new" element={<TaxGroupFormPage />} />
+                  <Route path="/taxes/groups/edit/:id" element={<TaxGroupFormPage />} />
                   {/* Exchange Rates */}
                   <Route path="/exchange-rates" element={<ExchangeRatePage />} />
                   {/* CRM */}
