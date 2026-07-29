@@ -11,14 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   createCollateralProductSchema,
+  updateCollateralProductSchema,
   type CreateCollateralProductFormValues,
+  type UpdateCollateralProductFormValues,
 } from "../schemas/collateralProduct.schema";
+
+type FormValues = CreateCollateralProductFormValues | UpdateCollateralProductFormValues;
 import {
   useCollateralProduct,
   useCollateralProductTemplate,
   useCreateCollateralProduct,
   useUpdateCollateralProduct,
 } from "../hooks/useCollateralProducts";
+import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const CollateralProductFormPage: FC = () => {
   const navigate = useNavigate();
@@ -36,8 +41,8 @@ const CollateralProductFormPage: FC = () => {
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CreateCollateralProductFormValues>({
-    resolver: zodResolver(createCollateralProductSchema),
+  } = useForm<FormValues>({
+    resolver: zodResolver(isEdit ? updateCollateralProductSchema : createCollateralProductSchema),
     defaultValues: {
       name: "",
       quality: "",
@@ -62,15 +67,19 @@ const CollateralProductFormPage: FC = () => {
     });
   }, [product, reset]);
 
-  const onSubmit = async (values: CreateCollateralProductFormValues) => {
-    const payload = {
-      ...values,
-      locale: "en",
-    };
+  const onSubmit = async (values: FormValues) => {
     if (isEdit) {
-      await updateMutation.mutateAsync({ id: id!, payload });
+      const changed: Record<string, unknown> = {};
+      const orig = product as Record<string, unknown>;
+      for (const [key, val] of Object.entries(values)) {
+        if (val !== orig[key] && val !== undefined) {
+          changed[key] = val;
+        }
+      }
+      changed.locale = "en";
+      await updateMutation.mutateAsync({ id: id!, payload: changed });
     } else {
-      await createMutation.mutateAsync(payload);
+      await createMutation.mutateAsync({ ...values, locale: "en" });
     }
     navigate("/collateral-products");
   };
@@ -142,25 +151,12 @@ const CollateralProductFormPage: FC = () => {
                 <label className="block text-sm font-medium">Unit Type *</label>
                 <Input {...register("unitType")} placeholder="e.g. gram" error={errors.unitType?.message} />
               </div>
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Currency *</label>
-                <Select
-                  value={selectedCurrency}
-                  onValueChange={(v) => setValue("currency", v, { shouldValidate: true })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(template?.currencies ?? []).map((c) => (
-                      <SelectItem key={c.code} value={c.code}>
-                        {c.name} ({c.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.currency && <p className="text-xs text-red-500 mt-1">{errors.currency.message}</p>}
-              </div>
+
+              <CurrencySelect
+                value={selectedCurrency ?? ""}
+                onChange={(v) => setValue("currency", v, { shouldValidate: true })}
+                error={errors.currency?.message}
+              />
             </div>
           </CardContent>
         </Card>

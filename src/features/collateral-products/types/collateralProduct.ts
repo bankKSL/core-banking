@@ -22,8 +22,16 @@ export type CollateralProductUpdateRequest = Partial<CollateralProductCreateRequ
 
 export interface CollateralProductCommandResponse {
   resourceId: number;
+  changes?: Record<string, unknown>;
 }
 
 export interface CollateralProductTemplate {
-  currencies: Array<{ code: string; name: string }>;
+  currencies: Array<{
+    code: string;
+    name: string;
+    decimalPlaces?: number;
+    inMultiplesOf?: number;
+    displaySymbol?: string;
+    nameCode?: string;
+  }>;
 }
