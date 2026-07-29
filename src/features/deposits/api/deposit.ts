@@ -463,6 +463,23 @@ export async function deleteRecurringDepositProduct(productId: number): Promise<
   return data;
 }
 
+export interface RecurringDepositProductTemplate {
+  currencyOptions?: Array<{ code: string; name: string; decimalPlaces: number; inMultiplesOf?: number; displaySymbol?: string }>;
+  interestCompoundingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestPostingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestCalculationTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestCalculationDaysInYearTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  lockinPeriodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  accountingRuleOptions?: Array<{ id: number; code: string; value: string }>;
+  chargeOptions?: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number }; chargeCalculationType?: { id: number } }>;
+  taxGroupOptions?: Array<{ id: number; name: string }>;
+}
+
+export async function fetchRecurringDepositProductTemplate(): Promise<RecurringDepositProductTemplate> {
+  const { data } = await client.get<RecurringDepositProductTemplate>("/recurringdepositproducts/template");
+  return data;
+}
+
 // ─── Recurring Deposit Transactions ──────────────────────────────
 
 export interface RecurringDepositTransaction {

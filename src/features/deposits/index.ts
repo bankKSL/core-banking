@@ -95,6 +95,7 @@ export {
   updateRecurringDepositAccount,
   deleteRecurringDepositAccount,
   fetchRecurringDepositAccountTemplate,
+  fetchRecurringDepositProductTemplate,
   recurringDepositCommand,
   approveRecurringDeposit,
   activateRecurringDeposit,
@@ -246,6 +247,7 @@ export type {
   CalculateFDInterestQuery,
   CalculateFDInterestResponse,
   FixedDepositCharge,
+  RecurringDepositProductTemplate,
 } from "./api/deposit";
 
 // Hooks — Savings Charges

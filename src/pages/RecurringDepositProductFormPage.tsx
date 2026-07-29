@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,15 +16,50 @@ import {
   useRecurringDepositProduct,
   useCreateRecurringDepositProduct,
   useUpdateRecurringDepositProduct,
+  fetchRecurringDepositProductTemplate,
   RECURRING_DEPOSIT_FREQUENCY_TYPES,
 } from "@/features/deposits";
-import type { RecurringDepositProductCreateRequest } from "@/features/deposits";
+import type { RecurringDepositProductCreateRequest, RecurringDepositProductTemplate } from "@/features/deposits";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
-const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-const DEFAULT_LOCALE = "en";
+const INTEREST_COMPOUNDING_OPTIONS = [
+  { id: 1, label: "Daily" },
+  { id: 4, label: "Monthly" },
+  { id: 5, label: "Quarterly" },
+  { id: 6, label: "Semi-Annual" },
+  { id: 7, label: "Annual" },
+];
 
-const DEPOSIT_TERM_TYPES = [
+const INTEREST_POSTING_OPTIONS = [
+  { id: 1, label: "Daily" },
+  { id: 4, label: "Monthly" },
+  { id: 5, label: "Quarterly" },
+  { id: 6, label: "Semi-Annual" },
+  { id: 7, label: "Annual" },
+  { id: 8, label: "Anniversary Monthly" },
+  { id: 9, label: "Anniversary Quarterly" },
+  { id: 10, label: "Anniversary Bi-Annual" },
+  { id: 11, label: "Anniversary Annual" },
+];
+
+const INTEREST_CALCULATION_OPTIONS = [
+  { id: 1, label: "Daily Balance" },
+  { id: 2, label: "Average Daily Balance" },
+];
+
+const DAYS_IN_YEAR_OPTIONS = [
+  { id: 360, label: "360" },
+  { id: 365, label: "365" },
+];
+
+const LOCKIN_PERIOD_TYPE_OPTIONS = [
+  { id: 0, label: "Days" },
+  { id: 1, label: "Weeks" },
+  { id: 2, label: "Months" },
+  { id: 3, label: "Years" },
+];
+
+const PERIOD_FREQUENCIES = [
   { id: 0, label: "Days" },
   { id: 1, label: "Weeks" },
   { id: 2, label: "Months" },
@@ -38,10 +76,60 @@ const CHART_PERIOD_TYPES = [
 const ACCOUNTING_OPTIONS = [
   { id: 1, label: "None" },
   { id: 2, label: "Cash" },
-  { id: 3, label: "Accrual (periodic)" },
+  { id: 3, label: "Accrual" },
 ];
 
-function enumId(v: any, fallback = 2): number {
+const PRE_CLOSURE_PENALTY_ON_OPTIONS = [
+  { id: 1, label: "Whole Term" },
+  { id: 2, label: "Till Premature Withdrawal" },
+];
+
+const rdProductSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  shortName: z.string().min(1, "Short name is required").max(4, "Max 4 characters"),
+  description: z.string().min(1, "Description is required"),
+  currencyCode: z.string().min(1, "Currency is required"),
+  digitsAfterDecimal: z.coerce.number().int().min(0).max(6),
+  inMultiplesOf: z.coerce.number().int().min(0).optional().or(z.literal("")),
+  nominalAnnualInterestRate: z.coerce.number().min(0).optional().or(z.literal("")),
+  interestCompoundingPeriodType: z.coerce.number(),
+  interestPostingPeriodType: z.coerce.number(),
+  interestCalculationType: z.coerce.number(),
+  interestCalculationDaysInYearType: z.coerce.number(),
+  minBalanceForInterestCalculation: z.coerce.number().min(0).optional().or(z.literal("")),
+  lockinPeriodFrequency: z.coerce.number().int().min(0).optional().or(z.literal("")),
+  lockinPeriodFrequencyType: z.coerce.number().optional().or(z.literal("")),
+  minDepositTerm: z.coerce.number().int().positive("Must be > 0"),
+  minDepositTermTypeId: z.coerce.number(),
+  maxDepositTerm: z.coerce.number().int().positive().optional().or(z.literal("")),
+  maxDepositTermTypeId: z.coerce.number().optional().or(z.literal("")),
+  inMultiplesOfDepositTerm: z.coerce.number().int().positive().optional().or(z.literal("")),
+  inMultiplesOfDepositTermTypeId: z.coerce.number().optional().or(z.literal("")),
+  depositAmount: z.coerce.number().positive("Must be > 0"),
+  minDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
+  maxDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
+  recurringDepositFrequency: z.coerce.number().int().positive(),
+  recurringDepositFrequencyType: z.coerce.number(),
+  isMandatoryDeposit: z.boolean().optional(),
+  allowWithdrawal: z.boolean().optional(),
+  adjustAdvanceTowardsFuturePayments: z.boolean().optional(),
+  preClosurePenalApplicable: z.boolean().optional(),
+  preClosurePenalInterest: z.coerce.number().min(0).optional().or(z.literal("")),
+  preClosurePenalInterestOnTypeId: z.coerce.number().optional().or(z.literal("")),
+  withHoldTax: z.boolean().optional(),
+  taxGroupId: z.coerce.number().int().positive().optional().or(z.literal("")),
+  accountingRule: z.coerce.number(),
+});
+
+type FormValues = z.infer<typeof rdProductSchema>;
+
+interface Slab {
+  periodType: number;
+  fromPeriod: number;
+  annualInterestRate: number;
+}
+
+function enumId(v: any, fallback: number | undefined = 2): number | undefined {
   if (v == null) return fallback;
   if (typeof v === "object") return v.id ?? fallback;
   return Number(v);
@@ -55,61 +143,124 @@ const RecurringDepositProductFormPage: React.FC = () => {
   const createMutation = useCreateRecurringDepositProduct();
   const updateMutation = useUpdateRecurringDepositProduct();
 
-  const [saving, setSaving] = useState(false);
-  const [slabs, setSlabs] = useState<
-    Array<{
-      periodType: number;
-      fromPeriod: number;
-      annualInterestRate: number;
-    }>
-  >([{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
-
-  const [form, setForm] = useState({
-    name: "",
-    shortName: "",
-    description: "",
-    currencyCode: "USD",
-    digitsAfterDecimal: 2,
-    depositAmount: 1000,
-    minDepositTerm: 1,
-    minDepositTermTypeId: 2,
-    recurringDepositFrequency: 1,
-    recurringDepositFrequencyType: 2,
-    accountingRule: 1,
+  const { data: template } = useQuery({
+    queryKey: ["recurringdepositproducts", "template"],
+    queryFn: fetchRecurringDepositProductTemplate,
+    staleTime: 10 * 60_000,
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [slabs, setSlabs] = React.useState<Slab[]>([{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(rdProductSchema) as any,
+    defaultValues: {
+      name: "",
+      shortName: "",
+      description: "",
+      currencyCode: "USD",
+      digitsAfterDecimal: 2,
+      inMultiplesOf: "" as any,
+      nominalAnnualInterestRate: "" as any,
+      interestCompoundingPeriodType: 1,
+      interestPostingPeriodType: 4,
+      interestCalculationType: 1,
+      interestCalculationDaysInYearType: 365,
+      minBalanceForInterestCalculation: "" as any,
+      lockinPeriodFrequency: "" as any,
+      lockinPeriodFrequencyType: "" as any,
+      minDepositTerm: 1,
+      minDepositTermTypeId: 2,
+      maxDepositTerm: "" as any,
+      maxDepositTermTypeId: "" as any,
+      inMultiplesOfDepositTerm: "" as any,
+      inMultiplesOfDepositTermTypeId: "" as any,
+      depositAmount: 1000,
+      minDepositAmount: "" as any,
+      maxDepositAmount: "" as any,
+      recurringDepositFrequency: 1,
+      recurringDepositFrequencyType: 2,
+      isMandatoryDeposit: false,
+      allowWithdrawal: false,
+      adjustAdvanceTowardsFuturePayments: false,
+      preClosurePenalApplicable: false,
+      preClosurePenalInterest: "" as any,
+      preClosurePenalInterestOnTypeId: "" as any,
+      withHoldTax: false,
+      taxGroupId: "" as any,
+      accountingRule: 1,
+    },
+  });
+
+  const preClosurePenalApplicable = watch("preClosurePenalApplicable");
+  const withHoldTax = watch("withHoldTax");
+
+  // Apply template defaults on create (not edit)
+  useEffect(() => {
+    if (!template || isEdit || existingProduct) return;
+    const currencies = template.currencyOptions;
+    if (currencies?.length === 1) {
+      setValue("currencyCode", currencies[0].code);
+    }
+  }, [template, isEdit, existingProduct, setValue]);
 
   useEffect(() => {
     if (!existingProduct) return;
     const p = existingProduct as any;
-    setForm({
+    reset({
       name: p.name ?? "",
       shortName: p.shortName ?? "",
       description: p.description ?? "",
       currencyCode: p.currency?.code ?? "USD",
       digitsAfterDecimal: p.currency?.decimalPlaces ?? 2,
-      depositAmount: p.depositAmount ?? 1000,
+      inMultiplesOf: p.currency?.inMultiplesOf ?? ("" as any),
+      nominalAnnualInterestRate: p.nominalAnnualInterestRate ?? ("" as any),
+      interestCompoundingPeriodType: enumId(p.interestCompoundingPeriodType, 1) ?? 1,
+      interestPostingPeriodType: enumId(p.interestPostingPeriodType, 4) ?? 4,
+      interestCalculationType: enumId(p.interestCalculationType, 1) ?? 1,
+      interestCalculationDaysInYearType: enumId(p.interestCalculationDaysInYearType, 365) ?? 365,
+      minBalanceForInterestCalculation: p.minBalanceForInterestCalculation ?? ("" as any),
+      lockinPeriodFrequency: p.lockinPeriodFrequency ?? ("" as any),
+      lockinPeriodFrequencyType: enumId(p.lockinPeriodFrequencyType, undefined) ?? ("" as any),
       minDepositTerm: p.minDepositTerm ?? 1,
-      minDepositTermTypeId: enumId(p.minDepositTermType, 2),
+      minDepositTermTypeId: enumId(p.minDepositTermType, 2) ?? 2,
+      maxDepositTerm: p.maxDepositTerm ?? ("" as any),
+      maxDepositTermTypeId: enumId(p.maxDepositTermType, undefined) ?? ("" as any),
+      inMultiplesOfDepositTerm: p.inMultiplesOfDepositTerm ?? ("" as any),
+      inMultiplesOfDepositTermTypeId: enumId(p.inMultiplesOfDepositTermType, undefined) ?? ("" as any),
+      depositAmount: p.depositAmount ?? 1000,
+      minDepositAmount: p.minDepositAmount ?? ("" as any),
+      maxDepositAmount: p.maxDepositAmount ?? ("" as any),
       recurringDepositFrequency: p.recurringDepositFrequency ?? 1,
-      recurringDepositFrequencyType: enumId(p.recurringDepositFrequencyType, 2),
-      accountingRule: enumId(p.accountingRule, 1),
+      recurringDepositFrequencyType: enumId(p.recurringDepositFrequencyType, 2) ?? 2,
+      isMandatoryDeposit: !!p.isMandatoryDeposit,
+      allowWithdrawal: !!p.allowWithdrawal,
+      adjustAdvanceTowardsFuturePayments: !!p.adjustAdvanceTowardsFuturePayments,
+      preClosurePenalApplicable: !!p.preClosurePenalApplicable,
+      preClosurePenalInterest: p.preClosurePenalInterest ?? ("" as any),
+      preClosurePenalInterestOnTypeId: enumId(p.preClosurePenalInterestOnType, undefined) ?? ("" as any),
+      withHoldTax: !!p.withHoldTax,
+      taxGroupId: p.taxGroupId ?? ("" as any),
+      accountingRule: enumId(p.accountingRule, 1) ?? 1,
     });
     if (p.activeChart?.chartSlabs?.length) {
       setSlabs(
         p.activeChart.chartSlabs.map((s: any) => ({
-          periodType: enumId(s.periodType, 2),
+          periodType: enumId(s.periodType, 2) ?? 2,
           fromPeriod: s.fromPeriod ?? 0,
           annualInterestRate: s.annualInterestRate ?? 0,
         })),
       );
     }
-  }, [existingProduct]);
+  }, [existingProduct, reset]);
 
-  const updateForm = (field: string, value: any) => setForm((f) => ({ ...f, [field]: value }));
-
-  const updateSlab = (i: number, field: string, value: any) => {
+  const updateSlab = (i: number, field: keyof Slab, value: any) => {
     setSlabs((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)));
   };
 
@@ -121,67 +272,62 @@ const RecurringDepositProductFormPage: React.FC = () => {
     setSlabs((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  const validate = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.shortName.trim()) e.shortName = "Short name is required";
-    if (!form.currencyCode) e.currencyCode = "Currency is required";
-    if (form.depositAmount <= 0) e.depositAmount = "Deposit amount must be > 0";
-    if (form.minDepositTerm <= 0) e.minDepositTerm = "Min deposit term must be > 0";
-    if (!form.description) e.description = "Description is required";
-    slabs.forEach((slab, i) => {
-      if (slab.annualInterestRate <= 0) e[`slab_${i}_rate`] = "Rate must be > 0";
-    });
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+  const onSubmit = async (values: Record<string, any>) => {
+    const payload: RecurringDepositProductCreateRequest = {
+      name: values.name,
+      shortName: values.shortName,
+      description: values.description,
+      currencyCode: values.currencyCode,
+      digitsAfterDecimal: values.digitsAfterDecimal,
+      minDepositTerm: values.minDepositTerm,
+      minDepositTermTypeId: values.minDepositTermTypeId,
+      depositAmount: values.depositAmount,
+      recurringDepositFrequency: values.recurringDepositFrequency,
+      recurringDepositFrequencyType: values.recurringDepositFrequencyType,
+      accountingRule: values.accountingRule,
+      nominalAnnualInterestRate: values.nominalAnnualInterestRate || undefined,
+      inMultiplesOf: values.inMultiplesOf ? Number(values.inMultiplesOf) : undefined,
+      interestCompoundingPeriodType: values.interestCompoundingPeriodType,
+      interestPostingPeriodType: values.interestPostingPeriodType,
+      interestCalculationType: values.interestCalculationType,
+      interestCalculationDaysInYearType: values.interestCalculationDaysInYearType,
+      maxDepositTerm: values.maxDepositTerm ? Number(values.maxDepositTerm) : undefined,
+      maxDepositTermTypeId: values.maxDepositTermTypeId ? Number(values.maxDepositTermTypeId) : undefined,
+      lockinPeriodFrequency: values.lockinPeriodFrequency ? Number(values.lockinPeriodFrequency) : undefined,
+      lockinPeriodFrequencyType: values.lockinPeriodFrequencyType
+        ? Number(values.lockinPeriodFrequencyType)
+        : undefined,
+      preClosurePenalApplicable: !!values.preClosurePenalApplicable,
+      preClosurePenalInterest: values.preClosurePenalInterest ? Number(values.preClosurePenalInterest) : undefined,
+      preClosurePenalInterestOnTypeId: values.preClosurePenalInterestOnTypeId
+        ? Number(values.preClosurePenalInterestOnTypeId)
+        : undefined,
+      isMandatoryDeposit: !!values.isMandatoryDeposit,
+      allowWithdrawal: !!values.allowWithdrawal,
+      adjustAdvanceTowardsFuturePayments: !!values.adjustAdvanceTowardsFuturePayments,
+      withHoldTax: !!values.withHoldTax,
+      taxGroupId: values.taxGroupId ? Number(values.taxGroupId) : undefined,
+      locale: "en",
+      charts: [
+        {
+          fromDate: new Date().toISOString().split("T")[0],
+          dateFormat: "yyyy-MM-dd",
+          locale: "en",
+          chartSlabs: slabs.map((s) => ({
+            periodType: s.periodType,
+            fromPeriod: s.fromPeriod,
+            annualInterestRate: s.annualInterestRate,
+          })),
+        },
+      ],
+    };
 
-  const handleSave = async () => {
-    if (!validate()) return;
-    setSaving(true);
-    try {
-      const payload: RecurringDepositProductCreateRequest = {
-        name: form.name,
-        shortName: form.shortName,
-        description: form.description || undefined,
-        currencyCode: form.currencyCode,
-        digitsAfterDecimal: form.digitsAfterDecimal,
-        depositAmount: form.depositAmount,
-        minDepositTerm: form.minDepositTerm,
-        minDepositTermTypeId: form.minDepositTermTypeId,
-        recurringDepositFrequency: form.recurringDepositFrequency,
-        recurringDepositFrequencyType: form.recurringDepositFrequencyType,
-        accountingRule: form.accountingRule,
-        interestCompoundingPeriodType: 4,
-        interestPostingPeriodType: 4,
-        interestCalculationType: 1,
-        interestCalculationDaysInYearType: "365",
-        locale: DEFAULT_LOCALE,
-        charts: [
-          {
-            fromDate: new Date().toISOString().split("T")[0],
-            dateFormat: DEFAULT_DATE_FORMAT,
-            locale: DEFAULT_LOCALE,
-            chartSlabs: slabs.map((s) => ({
-              periodType: s.periodType,
-              fromPeriod: s.fromPeriod,
-              annualInterestRate: s.annualInterestRate,
-            })),
-          },
-        ],
-      };
-
-      if (isEdit) {
-        await updateMutation.mutateAsync({ productId: Number(id), payload });
-      } else {
-        await createMutation.mutateAsync(payload);
-      }
-      navigate("/deposits/recurring-products");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
+    if (isEdit) {
+      await updateMutation.mutateAsync({ productId: Number(id), payload });
+    } else {
+      await createMutation.mutateAsync(payload);
     }
+    navigate("/deposits/recurring-products");
   };
 
   if (isEdit && productLoading) {
@@ -205,230 +351,518 @@ const RecurringDepositProductFormPage: React.FC = () => {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Product Details</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="col-span-2 space-y-1.5">
-            <Label>Name *</Label>
-            <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Short Name *</Label>
-            <Input
-              value={form.shortName}
-              onChange={(e) => updateForm("shortName", e.target.value)}
-              error={errors.shortName}
-              placeholder="No spaces"
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Product Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">Name *</label>
+              <Input {...register("name")} error={errors.name?.message} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Short Name *</label>
+              <Input
+                {...register("shortName")}
+                error={errors.shortName?.message}
+                maxLength={4}
+                placeholder="No spaces"
+              />
+            </div>
+            <CurrencySelect
+              value={watch("currencyCode")}
+              onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
+              error={errors.currencyCode?.message}
             />
-          </div>
-          <CurrencySelect
-            value={form.currencyCode}
-            onChange={(v) => updateForm("currencyCode", v)}
-            error={errors.currencyCode}
-          />
-          <div className="col-span-2 space-y-1.5">
-            <Label>Description *</Label>
-            <Textarea
-              value={form.description}
-              onChange={(e) => updateForm("description", e.target.value)}
-              rows={3}
-              placeholder="Brief product description"
-              error={errors.description}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Decimal Places</Label>
-            <Input
-              type="number"
-              value={form.digitsAfterDecimal}
-              onChange={(e) => updateForm("digitsAfterDecimal", Number(e.target.value))}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="col-span-2 space-y-1.5">
+              <label className="block text-sm font-medium">Description *</label>
+              <Textarea
+                {...register("description")}
+                rows={3}
+                placeholder="Brief product description"
+                error={errors.description?.message}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Decimal Places</label>
+              <Input type="number" {...register("digitsAfterDecimal", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">In Multiples Of</label>
+              <Input
+                type="number"
+                {...register("inMultiplesOf", { valueAsNumber: true })}
+                placeholder="Rounding denomination"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Deposit Terms</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Recurring Deposit Amount *</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={form.depositAmount}
-              onChange={(e) => updateForm("depositAmount", Number(e.target.value))}
-              error={errors.depositAmount}
-            />
-          </div>
-          <div />
-          <div className="space-y-1.5">
-            <Label>Min Deposit Term *</Label>
-            <Input
-              type="number"
-              value={form.minDepositTerm}
-              onChange={(e) => updateForm("minDepositTerm", Number(e.target.value))}
-              error={errors.minDepositTerm}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Min Term Type</Label>
-            <Select
-              value={String(form.minDepositTermTypeId)}
-              onValueChange={(v) => updateForm("minDepositTermTypeId", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DEPOSIT_TERM_TYPES.map((f) => (
-                  <SelectItem key={f.id} value={String(f.id)}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Interest Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Compounding Period *</label>
+              <Select
+                value={String(watch("interestCompoundingPeriodType"))}
+                onValueChange={(v) => setValue("interestCompoundingPeriodType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Posting Period *</label>
+              <Select
+                value={String(watch("interestPostingPeriodType"))}
+                onValueChange={(v) => setValue("interestPostingPeriodType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_POSTING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Calculation Type *</label>
+              <Select
+                value={String(watch("interestCalculationType"))}
+                onValueChange={(v) => setValue("interestCalculationType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTEREST_CALCULATION_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Days In Year *</label>
+              <Select
+                value={String(watch("interestCalculationDaysInYearType"))}
+                onValueChange={(v) => setValue("interestCalculationDaysInYearType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DAYS_IN_YEAR_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Min Balance for Interest Calc</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("minBalanceForInterestCalculation", { valueAsNumber: true })}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recurring Frequency</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Deposit Every</Label>
-            <Input
-              type="number"
-              value={form.recurringDepositFrequency}
-              onChange={(e) => updateForm("recurringDepositFrequency", Number(e.target.value))}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Frequency Type</Label>
-            <Select
-              value={String(form.recurringDepositFrequencyType)}
-              onValueChange={(v) => updateForm("recurringDepositFrequencyType", Number(v))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
-                  <SelectItem key={f.id} value={String(f.id)}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Lock-in Period</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Lock-in Frequency</label>
+              <Input type="number" {...register("lockinPeriodFrequency", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Lock-in Type</label>
+              <Select
+                value={watch("lockinPeriodFrequencyType") ? String(watch("lockinPeriodFrequencyType")) : ""}
+                onValueChange={(v) => setValue("lockinPeriodFrequencyType", v ? Number(v) : ("" as any))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Accounting Rule</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Select value={String(form.accountingRule)} onValueChange={(v) => updateForm("accountingRule", Number(v))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ACCOUNTING_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={String(o.id)}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Deposit Terms</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Recurring Deposit Amount *</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("depositAmount", { valueAsNumber: true })}
+                error={errors.depositAmount?.message}
+              />
+            </div>
+            <div />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Min Deposit Term *</label>
+              <Input
+                type="number"
+                {...register("minDepositTerm", { valueAsNumber: true })}
+                error={errors.minDepositTerm?.message}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Min Term Type</label>
+              <Select
+                value={String(watch("minDepositTermTypeId"))}
+                onValueChange={(v) => setValue("minDepositTermTypeId", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PERIOD_FREQUENCIES.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Max Deposit Term</label>
+              <Input type="number" {...register("maxDepositTerm", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Max Term Type</label>
+              <Select
+                value={watch("maxDepositTermTypeId") ? String(watch("maxDepositTermTypeId")) : ""}
+                onValueChange={(v) => setValue("maxDepositTermTypeId", v ? Number(v) : ("" as any))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PERIOD_FREQUENCIES.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Min Deposit Amount</label>
+              <Input type="number" step="0.01" {...register("minDepositAmount", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Max Deposit Amount</label>
+              <Input type="number" step="0.01" {...register("maxDepositAmount", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">In Multiples Of Deposit Term</label>
+              <Input type="number" {...register("inMultiplesOfDepositTerm", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Multiples Term Type</label>
+              <Select
+                value={watch("inMultiplesOfDepositTermTypeId") ? String(watch("inMultiplesOfDepositTermTypeId")) : ""}
+                onValueChange={(v) => setValue("inMultiplesOfDepositTermTypeId", v ? Number(v) : ("" as any))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PERIOD_FREQUENCIES.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Interest Rate Chart (Slabs)</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={addSlab}>
-              <Plus className="mr-1 h-4 w-4" /> Add Slab
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {slabs.map((slab, i) => (
-            <div key={i} className="rounded-lg border border-gray-200 p-4 space-y-3 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Slab #{i + 1}</span>
-                {slabs.length > 1 && (
-                  <button type="button" onClick={() => removeSlab(i)} className="text-gray-400 hover:text-red-500">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">Period Type</label>
-                  <Select value={String(slab.periodType)} onValueChange={(v) => updateSlab(i, "periodType", Number(v))}>
-                    <SelectTrigger className="mt-0.5">
-                      <SelectValue />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Recurring Frequency</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Deposit Every *</label>
+              <Input type="number" {...register("recurringDepositFrequency", { valueAsNumber: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Frequency Type</label>
+              <Select
+                value={String(watch("recurringDepositFrequencyType"))}
+                onValueChange={(v) => setValue("recurringDepositFrequencyType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Recurring Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="isMandatoryDeposit"
+                checked={!!watch("isMandatoryDeposit")}
+                onChange={(e) => setValue("isMandatoryDeposit", e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="isMandatoryDeposit" className="text-sm font-medium">
+                Mandatory Deposit
+              </label>
+            </div>
+            <div className="col-span-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="allowWithdrawal"
+                checked={!!watch("allowWithdrawal")}
+                onChange={(e) => setValue("allowWithdrawal", e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="allowWithdrawal" className="text-sm font-medium">
+                Allow Withdrawal
+              </label>
+            </div>
+            <div className="col-span-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="adjustAdvanceTowardsFuturePayments"
+                checked={!!watch("adjustAdvanceTowardsFuturePayments")}
+                onChange={(e) => setValue("adjustAdvanceTowardsFuturePayments", e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="adjustAdvanceTowardsFuturePayments" className="text-sm font-medium">
+                Adjust Advance Towards Future Payments
+              </label>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Pre-closure &amp; Tax</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="preClosurePenalApplicable"
+                checked={!!preClosurePenalApplicable}
+                onChange={(e) => setValue("preClosurePenalApplicable", e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="preClosurePenalApplicable" className="text-sm font-medium">
+                Apply Pre-closure Penalty
+              </label>
+            </div>
+            {preClosurePenalApplicable && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Penalty Interest (%)</label>
+                  <Input type="number" step="0.01" {...register("preClosurePenalInterest", { valueAsNumber: true })} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Penalty Type</label>
+                  <Select
+                    value={
+                      watch("preClosurePenalInterestOnTypeId") ? String(watch("preClosurePenalInterestOnTypeId")) : ""
+                    }
+                    onValueChange={(v) => setValue("preClosurePenalInterestOnTypeId", v ? Number(v) : ("" as any))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CHART_PERIOD_TYPES.map((pt) => (
-                        <SelectItem key={pt.id} value={String(pt.id)}>
-                          {pt.label}
+                      {PRE_CLOSURE_PENALTY_ON_OPTIONS.map((o) => (
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">Annual Rate (%)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="e.g. 4.5"
-                    value={slab.annualInterestRate || ""}
-                    onChange={(e) => updateSlab(i, "annualInterestRate", parseFloat(e.target.value) || 0)}
-                  />
-                  {errors[`slab_${i}_rate`] && <p className="text-xs text-red-500">{errors[`slab_${i}_rate`]}</p>}
+              </>
+            )}
+            <div className="col-span-2 flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="withHoldTax"
+                checked={!!withHoldTax}
+                onChange={(e) => setValue("withHoldTax", e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="withHoldTax" className="text-sm font-medium">
+                Withhold Tax
+              </label>
+            </div>
+            {withHoldTax && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Tax Group ID</label>
+                <Input
+                  type="number"
+                  {...register("taxGroupId", { valueAsNumber: true })}
+                  placeholder="Required when withholding tax"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Accounting Rule</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Select
+                value={String(watch("accountingRule"))}
+                onValueChange={(v) => setValue("accountingRule", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACCOUNTING_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Interest Rate Chart (Slabs)</CardTitle>
+              <Button type="button" variant="outline" size="sm" onClick={addSlab}>
+                <Plus className="mr-1 h-4 w-4" /> Add Slab
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {slabs.map((slab, i) => (
+              <div key={i} className="rounded-lg border border-gray-200 p-4 space-y-3 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Slab #{i + 1}</span>
+                  {slabs.length > 1 && (
+                    <button type="button" onClick={() => removeSlab(i)} className="text-gray-400 hover:text-red-500">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">From Period</label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 0"
-                    value={slab.fromPeriod ?? ""}
-                    onChange={(e) => updateSlab(i, "fromPeriod", parseInt(e.target.value) || 0)}
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium">Period Type</label>
+                    <Select
+                      value={String(slab.periodType)}
+                      onValueChange={(v) => updateSlab(i, "periodType", Number(v))}
+                    >
+                      <SelectTrigger className="mt-0.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CHART_PERIOD_TYPES.map((pt) => (
+                          <SelectItem key={pt.id} value={String(pt.id)}>
+                            {pt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium">Annual Rate (%)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="e.g. 4.5"
+                      value={slab.annualInterestRate || ""}
+                      onChange={(e) => updateSlab(i, "annualInterestRate", parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium">From Period</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 0"
+                      value={slab.fromPeriod ?? ""}
+                      onChange={(e) => updateSlab(i, "fromPeriod", parseInt(e.target.value) || 0)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
 
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" type="button" onClick={() => navigate("/deposits/recurring-products")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
-        </Button>
-        <Button onClick={handleSave} disabled={saving} className="bg-[#D32F2F] hover:bg-red-700">
-          {saving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Product"}
-            </>
-          )}
-        </Button>
-      </div>
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" type="button" onClick={() => navigate("/deposits/recurring-products")}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Product"}
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
