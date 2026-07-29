@@ -34,8 +34,8 @@ const LoginPage: FC = () => {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "mifos",
-      password: "password",
+      username: "",
+      password: "",
     },
   });
 
@@ -114,9 +114,7 @@ const LoginPage: FC = () => {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
