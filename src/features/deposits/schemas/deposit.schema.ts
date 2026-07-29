@@ -36,7 +36,7 @@ export type DepositTransactionFormValues = z.infer<typeof depositTransactionSche
 /** Schema for savings product creation — matches Finfact POST /savingsproducts */
 export const createSavingsProductSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
-  shortName: z.string().min(1, "Short name is required").max(20).regex(/^\S+$/, "No spaces allowed"),
+  shortName: z.string().min(1, "Short name is required").max(4, "Max 4 characters").regex(/^\S+$/, "No spaces allowed"),
   description: z.string().max(500).optional(),
   currencyCode: z.string().min(1, "Currency is required"),
   digitsAfterDecimal: z.number().int().min(0).max(6).default(2),
@@ -85,7 +85,7 @@ export type CreateRecurringDepositAccountFormValues = z.infer<typeof createRecur
 /** Schema for recurring deposit product creation — matches Fineract POST /recurringdepositproducts */
 export const createRecurringDepositProductSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
-  shortName: z.string().min(1, "Short name is required").max(20).regex(/^\S+$/, "No spaces allowed"),
+  shortName: z.string().min(1, "Short name is required").max(4, "Max 4 characters").regex(/^\S+$/, "No spaces allowed"),
   description: z.string().max(500).optional(),
   currencyCode: z.string().min(1, "Currency is required"),
   digitsAfterDecimal: z.number().int().min(0).max(6).default(2),
