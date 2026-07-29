@@ -14,7 +14,7 @@ const FundListPage: FC = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useFunds();
 
-  const funds = useMemo(() => data?.pageItems ?? [], [data]);
+  const funds = useMemo(() => data ?? [], [data]);
 
   const columns: ColumnDef<Fund>[] = [
     { key: "name", header: "Name", cell: (r) => <span className="font-medium">{r.name}</span> },

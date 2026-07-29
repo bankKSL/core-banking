@@ -1149,7 +1149,7 @@ export interface InterestRateChartSlab {
 }
 
 export interface InterestRateChartTemplate {
-  periodTypeOptions: Array<{ id: number; code: string; value: string }>;
+  periodTypes: Array<{ id: number; code: string; value: string }>;
 }
 
 export async function fetchInterestRateCharts(productId?: number): Promise<InterestRateChart[]> {

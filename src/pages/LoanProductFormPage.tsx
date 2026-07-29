@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,8 +80,25 @@ const LoanProductFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
+  const queryClient = useQueryClient();
   const { data: existingProduct, isLoading: productLoading } = useLoanProduct(id ? Number(id) : undefined);
   const { data: funds = [] } = useFunds();
+
+  const createMutation = useMutation({
+    mutationFn: (payload: LoanProductCreateRequest) => createLoanProduct(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["loanProducts"] });
+      navigate("/lending/products");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (payload: Partial<LoanProductCreateRequest>) => updateLoanProduct(Number(id), payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["loanProducts"] });
+      navigate("/lending/products");
+    },
+  });
 
   const {
     register,
@@ -161,12 +179,15 @@ const LoanProductFormPage: React.FC = () => {
     Object.keys(payload).forEach((k) => {
       if (payload[k] === undefined) delete payload[k];
     });
-    if (isEdit) {
-      await updateLoanProduct(Number(id), payload as any);
-    } else {
-      await createLoanProduct(payload as any);
+    try {
+      if (isEdit) {
+        await updateMutation.mutateAsync(payload as any);
+      } else {
+        await createMutation.mutateAsync(payload as any);
+      }
+    } catch {
+      // error handled by onError
     }
-    navigate("/lending/products");
   };
 
   if (isEdit && productLoading) {
@@ -410,8 +431,12 @@ const LoanProductFormPage: React.FC = () => {
           <Button variant="outline" type="button" onClick={() => navigate("/lending/products")}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
-            {isSubmitting ? (
+          <Button
+            type="submit"
+            disabled={createMutation.isPending || updateMutation.isPending}
+            className="bg-[#D32F2F] hover:bg-red-700"
+          >
+            {createMutation.isPending || updateMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
               </>

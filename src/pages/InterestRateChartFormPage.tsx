@@ -27,16 +27,16 @@ import type { InterestRateChartSlab, InterestRateChartTemplate } from "@/feature
 interface SlabForm {
   description: string;
   periodType: string;
-  fromPeriod: number;
-  toPeriod: number;
+  fromPeriod: number | null;
+  toPeriod: number | null;
   annualInterestRate: number;
 }
 
 const emptySlab = (template?: InterestRateChartTemplate): SlabForm => ({
   description: "",
-  periodType: String(template?.periodTypeOptions?.[0]?.id ?? 2),
-  fromPeriod: 0,
-  toPeriod: 0,
+  periodType: String(template?.periodTypes?.[0]?.id ?? 2),
+  fromPeriod: null,
+  toPeriod: null,
   annualInterestRate: 0,
 });
 
@@ -79,7 +79,7 @@ const InterestRateChartFormPage: React.FC = () => {
     if (!template) return;
     setSlabForm((prev) => ({
       ...prev,
-      periodType: prev.periodType || String(template.periodTypeOptions?.[0]?.id ?? 2),
+      periodType: prev.periodType || String(template.periodTypes?.[0]?.id ?? 2),
     }));
   }, [template]);
 
@@ -145,8 +145,8 @@ const InterestRateChartFormPage: React.FC = () => {
       const payload: Record<string, unknown> = {
         description: slabForm.description || undefined,
         periodType: Number(slabForm.periodType),
-        fromPeriod: slabForm.fromPeriod,
-        toPeriod: slabForm.toPeriod,
+        fromPeriod: slabForm.fromPeriod ?? 0,
+        toPeriod: slabForm.toPeriod ?? 0,
         annualInterestRate: slabForm.annualInterestRate,
         locale: "en",
       };
@@ -169,7 +169,7 @@ const InterestRateChartFormPage: React.FC = () => {
     setDeleteSlabTarget(null);
   };
 
-  const periodOptions = template?.periodTypeOptions ?? [];
+  const periodOptions = template?.periodTypes ?? [];
 
   const slabColumns: ColumnDef<InterestRateChartSlab>[] = [
     { key: "description", header: "Description", cell: (r) => r.description || "—" },
@@ -342,7 +342,9 @@ const InterestRateChartFormPage: React.FC = () => {
               <Input
                 type="number"
                 value={slabForm.fromPeriod ?? ""}
-                onChange={(e) => setSlabForm((f) => ({ ...f, fromPeriod: parseInt(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setSlabForm((f) => ({ ...f, fromPeriod: e.target.value === "" ? null : parseInt(e.target.value) }))
+                }
               />
             </div>
             <div className="space-y-1.5">
@@ -350,7 +352,9 @@ const InterestRateChartFormPage: React.FC = () => {
               <Input
                 type="number"
                 value={slabForm.toPeriod ?? ""}
-                onChange={(e) => setSlabForm((f) => ({ ...f, toPeriod: parseInt(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setSlabForm((f) => ({ ...f, toPeriod: e.target.value === "" ? null : parseInt(e.target.value) }))
+                }
               />
             </div>
           </div>
