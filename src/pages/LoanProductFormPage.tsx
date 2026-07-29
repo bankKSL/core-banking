@@ -14,11 +14,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { createLoanProduct, updateLoanProduct, useLoanProduct, useLoanProductTemplate, useFunds } from "@/features/loans";
+import {
+  createLoanProduct,
+  updateLoanProduct,
+  useLoanProduct,
+  useLoanProductTemplate,
+  useFunds,
+} from "@/features/loans";
 import type { LoanProductCreateRequest, LoanProductTemplate } from "@/features/loans";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
-
-
 
 /** Extract string value from Finfact enum objects {id,code,value} or primitive */
 function enumVal(v: any, fallback = ""): string {
@@ -29,10 +33,11 @@ function enumVal(v: any, fallback = ""): string {
 
 const loanProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  shortName: z.string().optional(),
+  shortName: z.string().min(1, "Short name is required").max(4, "Max 4 chars"),
   description: z.string().optional(),
   externalId: z.string().optional(),
   currencyCode: z.string().min(1, "Currency is required"),
+  digitsAfterDecimal: z.coerce.number().int().min(0).max(6),
   principal: z.coerce.number().positive("Principal must be > 0"),
   minPrincipal: z.coerce.number().optional(),
   maxPrincipal: z.coerce.number().optional(),
@@ -44,11 +49,11 @@ const loanProductSchema = z.object({
   amortizationType: z.coerce.number(),
   interestCalculationPeriodType: z.coerce.number(),
   allowPartialPeriodInterestCalculation: z.boolean().optional(),
-  transactionProcessingStrategyCode: z.string().optional(),
+  transactionProcessingStrategyCode: z.string().min(1, "Required"),
   loanScheduleType: z.string().optional(),
-  daysInYearType: z.coerce.number().optional(),
-  daysInMonthType: z.coerce.number().optional(),
-  isInterestRecalculationEnabled: z.boolean().optional(),
+  daysInYearType: z.coerce.number(),
+  daysInMonthType: z.coerce.number(),
+  isInterestRecalculationEnabled: z.boolean(),
   interestRatePerPeriod: z.coerce.number().min(0, "Required"),
   minInterestRatePerPeriod: z.coerce.number().optional(),
   maxInterestRatePerPeriod: z.coerce.number().optional(),
@@ -80,8 +85,33 @@ const loanProductSchema = z.object({
   capitalizedIncomeCalculationType: z.string().optional(),
   capitalizedIncomeStrategy: z.string().optional(),
   capitalizedIncomeType: z.string().optional(),
+  chargeOffBehaviour: z.string().optional(),
+  enableAccrualActivityPosting: z.boolean().optional(),
+  interestRecognitionOnDisbursementDate: z.boolean().optional(),
+  isEqualAmortization: z.boolean().optional(),
+  canUseForTopup: z.boolean().optional(),
+  syncExpectedWithDisbursementDate: z.boolean().optional(),
+  disallowExpectedDisbursements: z.boolean().optional(),
+  allowApprovedDisbursedAmountsOverApplied: z.boolean().optional(),
+  holdGuaranteeFunds: z.boolean().optional(),
+  enableInstallmentLevelDelinquency: z.boolean().optional(),
+  includeInBorrowerCycle: z.boolean().optional(),
+  useBorrowerCycle: z.boolean().optional(),
+  overdueDaysForNpa: z.coerce.number().optional(),
+  minDaysBetweenDisbursalAndFirstRepayment: z.coerce.number().optional(),
+  principalThresholdForLastInstallment: z.coerce.number().optional(),
+  fixedPrincipalPercentagePerInstallment: z.coerce.number().optional(),
+  dueDaysForRepaymentEvent: z.coerce.number().optional(),
+  overdueDaysForRepaymentEvent: z.coerce.number().optional(),
+  overAppliedCalculationType: z.string().optional(),
+  overAppliedNumber: z.coerce.number().optional(),
+  minimumGap: z.coerce.number().optional(),
+  maximumGap: z.coerce.number().optional(),
+  delinquencyBucketId: z.coerce.number().optional(),
+  compoundingFrequencyType: z.coerce.number().optional(),
+  isArrearsBasedOnOriginalSchedule: z.boolean().optional(),
+  inArrearsTolerance: z.coerce.number().optional(),
   fundId: z.coerce.number().optional(),
-  digitsAfterDecimal: z.coerce.number().optional(),
   inMultiplesOf: z.coerce.number().optional(),
   accountingRule: z.coerce.number(),
   locale: z.string(),
@@ -127,62 +157,26 @@ const LoanProductFormPage: React.FC = () => {
     defaultValues: {
       name: "",
       shortName: "",
-      description: "",
-      externalId: "",
-      currencyCode: "USD",
-      principal: 0,
-      minPrincipal: undefined,
-      maxPrincipal: undefined,
-      numberOfRepayments: 12,
-      minNumberOfRepayments: undefined,
-      maxNumberOfRepayments: undefined,
+      currencyCode: "",
+      digitsAfterDecimal: 2,
+      principal: undefined,
+      numberOfRepayments: 0,
       repaymentEvery: 1,
       repaymentFrequencyType: 2,
       amortizationType: 1,
-      interestCalculationPeriodType: 0,
-      allowPartialPeriodInterestCalculation: false,
-      transactionProcessingStrategyCode: "mifos-standard-strategy",
-      loanScheduleType: "CUMULATIVE",
-      daysInYearType: 1,
-      daysInMonthType: 1,
-      isInterestRecalculationEnabled: false,
-      interestRatePerPeriod: 0,
-      minInterestRatePerPeriod: undefined,
-      maxInterestRatePerPeriod: undefined,
       interestType: 0,
-      interestRateFrequencyType: 3,
-      graceOnPrincipalPayment: undefined,
-      graceOnInterestPayment: undefined,
-      graceOnInterestCharged: undefined,
-      graceOnArrearsAgeing: undefined,
-      multiDisburseLoan: false,
-      maxTrancheCount: undefined,
-      outstandingLoanBalance: undefined,
-      canDefineInstallmentAmount: false,
-      installmentAmountInMultiplesOf: undefined,
-      interestRecalculationCompoundingMethod: undefined,
-      rescheduleStrategyMethod: undefined,
-      recalculationRestFrequencyType: undefined,
-      preClosureInterestCalculationStrategy: undefined,
-      enableDownPayment: false,
-      disbursedAmountPercentageDownPayment: undefined,
-      enableAutoRepaymentForDownPayment: false,
-      repaymentStartDateType: undefined,
-      enableBuyDownFee: false,
-      merchantBuyDownFee: false,
-      buyDownFeeCalculationType: undefined,
-      buyDownFeeStrategy: undefined,
-      buyDownFeeIncomeType: undefined,
-      enableIncomeCapitalization: false,
-      capitalizedIncomeCalculationType: undefined,
-      capitalizedIncomeStrategy: undefined,
-      capitalizedIncomeType: undefined,
-      fundId: undefined,
-      digitsAfterDecimal: 2,
-      inMultiplesOf: 0,
+      interestCalculationPeriodType: 1,
+      transactionProcessingStrategyCode: "mifos-standard-strategy",
+      interestRatePerPeriod: 5,
+      interestRateFrequencyType: 2,
+      daysInYearType: 365,
+      daysInMonthType: 30,
+      isInterestRecalculationEnabled: false,
       accountingRule: 1,
       locale: "en",
       dateFormat: "yyyy-MM-dd",
+      minInterestRatePerPeriod: 0,
+      maxInterestRatePerPeriod: 100,
     },
   });
 
@@ -246,6 +240,32 @@ const LoanProductFormPage: React.FC = () => {
       capitalizedIncomeCalculationType: p.capitalizedIncomeCalculationType?.id ?? undefined,
       capitalizedIncomeStrategy: p.capitalizedIncomeStrategy?.id ?? undefined,
       capitalizedIncomeType: p.capitalizedIncomeType?.id ?? undefined,
+      chargeOffBehaviour: enumVal(p.chargeOffBehaviour, undefined) || undefined,
+      enableAccrualActivityPosting: !!p.enableAccrualActivityPosting,
+      interestRecognitionOnDisbursementDate: !!p.interestRecognitionOnDisbursementDate,
+      isEqualAmortization: !!p.isEqualAmortization,
+      canUseForTopup: !!p.canUseForTopup,
+      syncExpectedWithDisbursementDate: !!p.syncExpectedWithDisbursementDate,
+      disallowExpectedDisbursements: !!p.disallowExpectedDisbursements,
+      allowApprovedDisbursedAmountsOverApplied: !!p.allowApprovedDisbursedAmountsOverApplied,
+      holdGuaranteeFunds: !!p.holdGuaranteeFunds,
+      enableInstallmentLevelDelinquency: !!p.enableInstallmentLevelDelinquency,
+      includeInBorrowerCycle: !!p.includeInBorrowerCycle,
+      useBorrowerCycle: !!p.useBorrowerCycle,
+      overdueDaysForNpa: p.overdueDaysForNpa ?? undefined,
+      minDaysBetweenDisbursalAndFirstRepayment: p.minDaysBetweenDisbursalAndFirstRepayment ?? undefined,
+      principalThresholdForLastInstallment: p.principalThresholdForLastInstallment ?? undefined,
+      fixedPrincipalPercentagePerInstallment: p.fixedPrincipalPercentagePerInstallment ?? undefined,
+      dueDaysForRepaymentEvent: p.dueDaysForRepaymentEvent ?? undefined,
+      overdueDaysForRepaymentEvent: p.overdueDaysForRepaymentEvent ?? undefined,
+      overAppliedCalculationType: p.overAppliedCalculationType ?? undefined,
+      overAppliedNumber: p.overAppliedNumber ?? undefined,
+      minimumGap: p.minimumGap ?? undefined,
+      maximumGap: p.maximumGap ?? undefined,
+      delinquencyBucketId: p.delinquencyBucketId ?? undefined,
+      compoundingFrequencyType: p.interestRecalculationData?.compoundingFrequencyType?.id ?? undefined,
+      isArrearsBasedOnOriginalSchedule: !!p.interestRecalculationData?.isArrearsBasedOnOriginalSchedule,
+      inArrearsTolerance: p.inArrearsTolerance ?? undefined,
       fundId: p.fundId ?? undefined,
       digitsAfterDecimal: p.currency?.decimalPlaces ?? 2,
       inMultiplesOf: p.currency?.inMultiplesOf ?? 0,
@@ -364,15 +384,6 @@ const LoanProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">Max Principal</label>
               <Input type="number" step="0.01" {...register("maxPrincipal")} />
             </div>
-            {/* Row 5c: Min/Max Interest Rate */}
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Interest Rate (%)</label>
-              <Input type="number" step="0.01" {...register("minInterestRatePerPeriod")} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Max Interest Rate (%)</label>
-              <Input type="number" step="0.01" {...register("maxInterestRatePerPeriod")} />
-            </div>
             {/* Row 6: Repayments | Every */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Number of Repayments *</label>
@@ -421,7 +432,9 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.interestRateFrequencyTypeOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -453,7 +466,9 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.interestTypeOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -478,7 +493,9 @@ const LoanProductFormPage: React.FC = () => {
             {/* Row 8c: Allow Partial Period Interest */}
             <div
               className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-              onClick={() => setValue("allowPartialPeriodInterestCalculation", !watch("allowPartialPeriodInterestCalculation"))}
+              onClick={() =>
+                setValue("allowPartialPeriodInterestCalculation", !watch("allowPartialPeriodInterestCalculation"))
+              }
             >
               <Checkbox
                 id="allowPartialPeriodInterestCalculation"
@@ -501,7 +518,9 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.daysInMonthTypeOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -518,7 +537,9 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.loanScheduleTypeOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={o.code}>{o.value}</SelectItem>
+                    <SelectItem key={o.id} value={o.code}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -535,7 +556,11 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.transactionProcessingStrategyOptions ?? [])
-                    .filter((s) => (isProgressive ? s.code === "advance-payment-allocation-strategy" : s.code !== "advance-payment-allocation-strategy"))
+                    .filter((s) =>
+                      isProgressive
+                        ? s.code === "advance-payment-allocation-strategy"
+                        : s.code !== "advance-payment-allocation-strategy",
+                    )
                     .map((o) => (
                       <SelectItem key={o.code} value={o.code}>
                         {o.name}
@@ -556,7 +581,9 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.daysInYearTypeOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -581,7 +608,11 @@ const LoanProductFormPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Compounding Method</label>
                   <Select
-                    value={watch("interestRecalculationCompoundingMethod") ? String(watch("interestRecalculationCompoundingMethod")) : ""}
+                    value={
+                      watch("interestRecalculationCompoundingMethod")
+                        ? String(watch("interestRecalculationCompoundingMethod"))
+                        : ""
+                    }
                     onValueChange={(v) => setValue("interestRecalculationCompoundingMethod", Number(v))}
                   >
                     <SelectTrigger>
@@ -589,7 +620,9 @@ const LoanProductFormPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.interestRecalculationCompoundingTypeOptions ?? []).map((o) => (
-                        <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.value}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -605,7 +638,9 @@ const LoanProductFormPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.rescheduleStrategyTypeOptions ?? []).map((o) => (
-                        <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.value}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -613,7 +648,9 @@ const LoanProductFormPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Rest Frequency Type</label>
                   <Select
-                    value={watch("recalculationRestFrequencyType") ? String(watch("recalculationRestFrequencyType")) : ""}
+                    value={
+                      watch("recalculationRestFrequencyType") ? String(watch("recalculationRestFrequencyType")) : ""
+                    }
                     onValueChange={(v) => setValue("recalculationRestFrequencyType", Number(v))}
                   >
                     <SelectTrigger>
@@ -621,7 +658,9 @@ const LoanProductFormPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.interestRecalculationFrequencyTypeOptions ?? []).map((o) => (
-                        <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.value}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -629,7 +668,11 @@ const LoanProductFormPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Pre-Closure Interest Calculation</label>
                   <Select
-                    value={watch("preClosureInterestCalculationStrategy") ? String(watch("preClosureInterestCalculationStrategy")) : ""}
+                    value={
+                      watch("preClosureInterestCalculationStrategy")
+                        ? String(watch("preClosureInterestCalculationStrategy"))
+                        : ""
+                    }
                     onValueChange={(v) => setValue("preClosureInterestCalculationStrategy", Number(v))}
                   >
                     <SelectTrigger>
@@ -637,7 +680,9 @@ const LoanProductFormPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.preClosureInterestCalculationStrategyOptions ?? []).map((o) => (
-                        <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.value}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -713,7 +758,9 @@ const LoanProductFormPage: React.FC = () => {
                 </div>
                 <div
                   className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-                  onClick={() => setValue("enableAutoRepaymentForDownPayment", !watch("enableAutoRepaymentForDownPayment"))}
+                  onClick={() =>
+                    setValue("enableAutoRepaymentForDownPayment", !watch("enableAutoRepaymentForDownPayment"))
+                  }
                 >
                   <Checkbox
                     id="enableAutoRepaymentForDownPayment"
@@ -774,7 +821,9 @@ const LoanProductFormPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.buyDownFeeCalculationTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>{o.value}</SelectItem>
+                            <SelectItem key={o.id} value={o.id}>
+                              {o.value}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -790,7 +839,9 @@ const LoanProductFormPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.buyDownFeeStrategyOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>{o.value}</SelectItem>
+                            <SelectItem key={o.id} value={o.id}>
+                              {o.value}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -806,7 +857,9 @@ const LoanProductFormPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.buyDownFeeIncomeTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>{o.value}</SelectItem>
+                            <SelectItem key={o.id} value={o.id}>
+                              {o.value}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -841,7 +894,9 @@ const LoanProductFormPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.capitalizedIncomeCalculationTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>{o.value}</SelectItem>
+                            <SelectItem key={o.id} value={o.id}>
+                              {o.value}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -857,7 +912,9 @@ const LoanProductFormPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.capitalizedIncomeStrategyOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>{o.value}</SelectItem>
+                            <SelectItem key={o.id} value={o.id}>
+                              {o.value}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -873,7 +930,9 @@ const LoanProductFormPage: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.capitalizedIncomeTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>{o.value}</SelectItem>
+                            <SelectItem key={o.id} value={o.id}>
+                              {o.value}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
