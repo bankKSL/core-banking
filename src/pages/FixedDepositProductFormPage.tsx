@@ -128,9 +128,7 @@ const FixedDepositProductFormPage: React.FC = () => {
   const createMutation = useCreateFixedDepositProduct();
   const updateMutation = useUpdateFixedDepositProduct();
 
-  const [slabs, setSlabs] = React.useState<Slab[]>([
-    { periodType: 2, fromPeriod: 1, annualInterestRate: 5 },
-  ]);
+  const [slabs, setSlabs] = React.useState<Slab[]>([{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
 
   const {
     register,
@@ -140,7 +138,7 @@ const FixedDepositProductFormPage: React.FC = () => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(fdProductSchema),
+    resolver: zodResolver(fdProductSchema) as any,
     defaultValues: {
       name: "",
       shortName: "",
@@ -187,13 +185,13 @@ const FixedDepositProductFormPage: React.FC = () => {
       depositAmount: p.depositAmount ?? 1000,
       minDepositTerm: p.minDepositTerm ?? 1,
       minDepositTermTypeId: enumId(p.minDepositTermType, 2) ?? 2,
-      maxDepositTerm: p.maxDepositTerm ?? "" as any,
-      maxDepositTermTypeId: enumId(p.maxDepositTermType, undefined) ?? "" as any,
-      lockinPeriodFrequency: p.lockinPeriodFrequency ?? "" as any,
-      lockinPeriodFrequencyType: enumId(p.lockinPeriodFrequencyType, undefined) ?? "" as any,
+      maxDepositTerm: p.maxDepositTerm ?? ("" as any),
+      maxDepositTermTypeId: enumId(p.maxDepositTermType, undefined) ?? ("" as any),
+      lockinPeriodFrequency: p.lockinPeriodFrequency ?? ("" as any),
+      lockinPeriodFrequencyType: enumId(p.lockinPeriodFrequencyType, undefined) ?? ("" as any),
       preClosurePenalApplicable: !!p.preClosurePenalApplicable,
-      preClosurePenalInterest: p.preClosurePenalInterest ?? "" as any,
-      preClosurePenalInterestOnTypeId: enumId(p.preClosurePenalInterestOnType, undefined) ?? "" as any,
+      preClosurePenalInterest: p.preClosurePenalInterest ?? ("" as any),
+      preClosurePenalInterestOnTypeId: enumId(p.preClosurePenalInterestOnType, undefined) ?? ("" as any),
       withHoldTax: !!p.withHoldTax,
       accountingRule: enumId(p.accountingRule, 1) ?? 1,
     });
@@ -220,7 +218,7 @@ const FixedDepositProductFormPage: React.FC = () => {
     setSlabs((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: Record<string, any>) => {
     const payload: FixedDepositProductCreateRequest = {
       name: values.name,
       shortName: values.shortName,
@@ -239,10 +237,14 @@ const FixedDepositProductFormPage: React.FC = () => {
       maxDepositTerm: values.maxDepositTerm ? Number(values.maxDepositTerm) : undefined,
       maxDepositTermTypeId: values.maxDepositTermTypeId ? Number(values.maxDepositTermTypeId) : undefined,
       lockinPeriodFrequency: values.lockinPeriodFrequency ? Number(values.lockinPeriodFrequency) : undefined,
-      lockinPeriodFrequencyType: values.lockinPeriodFrequencyType ? Number(values.lockinPeriodFrequencyType) : undefined,
+      lockinPeriodFrequencyType: values.lockinPeriodFrequencyType
+        ? Number(values.lockinPeriodFrequencyType)
+        : undefined,
       preClosurePenalApplicable: !!values.preClosurePenalApplicable,
       preClosurePenalInterest: values.preClosurePenalInterest ? Number(values.preClosurePenalInterest) : undefined,
-      preClosurePenalInterestOnTypeId: values.preClosurePenalInterestOnTypeId ? Number(values.preClosurePenalInterestOnTypeId) : undefined,
+      preClosurePenalInterestOnTypeId: values.preClosurePenalInterestOnTypeId
+        ? Number(values.preClosurePenalInterestOnTypeId)
+        : undefined,
       withHoldTax: !!values.withHoldTax,
       locale: "en",
       charts: [
@@ -300,7 +302,12 @@ const FixedDepositProductFormPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Short Name *</label>
-              <Input {...register("shortName")} error={errors.shortName?.message} maxLength={4} placeholder="No spaces" />
+              <Input
+                {...register("shortName")}
+                error={errors.shortName?.message}
+                maxLength={4}
+                placeholder="No spaces"
+              />
             </div>
             <CurrencySelect
               value={watch("currencyCode")}
@@ -309,7 +316,12 @@ const FixedDepositProductFormPage: React.FC = () => {
             />
             <div className="col-span-2 space-y-1.5">
               <label className="block text-sm font-medium">Description *</label>
-              <Textarea {...register("description")} rows={3} placeholder="Brief product description" error={errors.description?.message} />
+              <Textarea
+                {...register("description")}
+                rows={3}
+                placeholder="Brief product description"
+                error={errors.description?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Decimal Places</label>
@@ -329,10 +341,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={String(watch("interestCompoundingPeriodType"))}
                 onValueChange={(v) => setValue("interestCompoundingPeriodType", Number(v))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -343,10 +359,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={String(watch("interestPostingPeriodType"))}
                 onValueChange={(v) => setValue("interestPostingPeriodType", Number(v))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {INTEREST_POSTING_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -357,10 +377,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={String(watch("interestCalculationType"))}
                 onValueChange={(v) => setValue("interestCalculationType", Number(v))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {INTEREST_CALCULATION_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -371,10 +395,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={String(watch("interestCalculationDaysInYearType"))}
                 onValueChange={(v) => setValue("interestCalculationDaysInYearType", Number(v))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {DAYS_IN_YEAR_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -389,12 +417,21 @@ const FixedDepositProductFormPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Deposit Amount *</label>
-              <Input type="number" step="0.01" {...register("depositAmount", { valueAsNumber: true })} error={errors.depositAmount?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("depositAmount", { valueAsNumber: true })}
+                error={errors.depositAmount?.message}
+              />
             </div>
             <div />
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Deposit Term *</label>
-              <Input type="number" {...register("minDepositTerm", { valueAsNumber: true })} error={errors.minDepositTerm?.message} />
+              <Input
+                type="number"
+                {...register("minDepositTerm", { valueAsNumber: true })}
+                error={errors.minDepositTerm?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Term Type</label>
@@ -402,10 +439,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={String(watch("minDepositTermTypeId"))}
                 onValueChange={(v) => setValue("minDepositTermTypeId", Number(v))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {PERIOD_FREQUENCIES.map((f) => (
-                    <SelectItem key={f.id} value={String(f.id)}>{f.label}</SelectItem>
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -420,10 +461,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={watch("maxDepositTermTypeId") ? String(watch("maxDepositTermTypeId")) : ""}
                 onValueChange={(v) => setValue("maxDepositTermTypeId", v ? Number(v) : ("" as any))}
               >
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
                 <SelectContent>
                   {PERIOD_FREQUENCIES.map((f) => (
-                    <SelectItem key={f.id} value={String(f.id)}>{f.label}</SelectItem>
+                    <SelectItem key={f.id} value={String(f.id)}>
+                      {f.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -446,10 +491,14 @@ const FixedDepositProductFormPage: React.FC = () => {
                 value={watch("lockinPeriodFrequencyType") ? String(watch("lockinPeriodFrequencyType")) : ""}
                 onValueChange={(v) => setValue("lockinPeriodFrequencyType", v ? Number(v) : ("" as any))}
               >
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
                 <SelectContent>
                   {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -470,7 +519,9 @@ const FixedDepositProductFormPage: React.FC = () => {
                 onChange={(e) => setValue("preClosurePenalApplicable", e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300"
               />
-              <label htmlFor="preClosurePenalApplicable" className="text-sm font-medium">Apply Pre-closure Penalty</label>
+              <label htmlFor="preClosurePenalApplicable" className="text-sm font-medium">
+                Apply Pre-closure Penalty
+              </label>
             </div>
             {preClosurePenalApplicable && (
               <>
@@ -481,13 +532,19 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Penalty Type</label>
                   <Select
-                    value={watch("preClosurePenalInterestOnTypeId") ? String(watch("preClosurePenalInterestOnTypeId")) : ""}
+                    value={
+                      watch("preClosurePenalInterestOnTypeId") ? String(watch("preClosurePenalInterestOnTypeId")) : ""
+                    }
                     onValueChange={(v) => setValue("preClosurePenalInterestOnTypeId", v ? Number(v) : ("" as any))}
                   >
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
                     <SelectContent>
                       {PRE_CLOSURE_PENALTY_ON_OPTIONS.map((o) => (
-                        <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -502,7 +559,9 @@ const FixedDepositProductFormPage: React.FC = () => {
                 onChange={(e) => setValue("withHoldTax", e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300"
               />
-              <label htmlFor="withHoldTax" className="text-sm font-medium">Withhold Tax</label>
+              <label htmlFor="withHoldTax" className="text-sm font-medium">
+                Withhold Tax
+              </label>
             </div>
           </CardContent>
         </Card>
@@ -513,11 +572,18 @@ const FixedDepositProductFormPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Select value={String(watch("accountingRule"))} onValueChange={(v) => setValue("accountingRule", Number(v))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={String(watch("accountingRule"))}
+                onValueChange={(v) => setValue("accountingRule", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ACCOUNTING_OPTIONS.map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>{o.label}</SelectItem>
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -548,11 +614,18 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-xs font-medium">Period Type</label>
-                    <Select value={String(slab.periodType)} onValueChange={(v) => updateSlab(i, "periodType", Number(v))}>
-                      <SelectTrigger className="mt-0.5"><SelectValue /></SelectTrigger>
+                    <Select
+                      value={String(slab.periodType)}
+                      onValueChange={(v) => updateSlab(i, "periodType", Number(v))}
+                    >
+                      <SelectTrigger className="mt-0.5">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         {CHART_PERIOD_TYPES.map((pt) => (
-                          <SelectItem key={pt.id} value={String(pt.id)}>{pt.label}</SelectItem>
+                          <SelectItem key={pt.id} value={String(pt.id)}>
+                            {pt.label}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
