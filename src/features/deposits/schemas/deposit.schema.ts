@@ -67,7 +67,7 @@ export const createSavingsProductSchema = z.object({
 
 export type CreateSavingsProductFormValues = z.infer<typeof createSavingsProductSchema>;
 
-/** Schema for recurring deposit account creation — matches Fineract POST /recurringdepositaccounts */
+/** Schema for recurring deposit account creation — matches finfact POST /recurringdepositaccounts */
 export const createRecurringDepositAccountSchema = z.object({
   clientId: z.string().min(1, "Client is required"),
   productId: z.string().min(1, "Product is required"),
@@ -82,7 +82,7 @@ export const createRecurringDepositAccountSchema = z.object({
 
 export type CreateRecurringDepositAccountFormValues = z.infer<typeof createRecurringDepositAccountSchema>;
 
-/** Schema for recurring deposit product creation — matches Fineract POST /recurringdepositproducts */
+/** Schema for recurring deposit product creation — matches finfact POST /recurringdepositproducts */
 export const createRecurringDepositProductSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   shortName: z.string().min(1, "Short name is required").max(4, "Max 4 characters").regex(/^\S+$/, "No spaces allowed"),
