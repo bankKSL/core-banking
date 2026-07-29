@@ -24,6 +24,7 @@ export type {
   DepositAccountType,
   FixedDepositProduct,
   FixedDepositProductCreateRequest,
+  FixedDepositAccountCreateRequest,
 } from "./types/deposit";
 
 export {
@@ -73,6 +74,7 @@ export {
   fetchFixedDepositAccounts,
   fetchFixedDepositAccount,
   createFixedDepositAccount,
+  updateFixedDepositAccount,
   approveFixedDeposit,
   activateFixedDeposit,
   closeFixedDeposit,
@@ -128,7 +130,7 @@ export { useUpdateSavingsAccount } from "./hooks/useUpdateSavingsAccount";
 
 export { useMakeDeposit, useMakeWithdrawal } from "./hooks/useDepositWithdraw";
 
-export { useFixedDepositAccounts, useFixedDepositAccount, useDeleteFixedDepositAccount } from "./hooks/useFixedDeposits";
+export { useFixedDepositAccounts, useFixedDepositAccount, useDeleteFixedDepositAccount, useUpdateFixedDepositAccount } from "./hooks/useFixedDeposits";
 
 export {
   useFixedDepositProducts,

@@ -262,6 +262,18 @@ export async function createFixedDepositAccount(payload: Record<string, unknown>
   return data;
 }
 
+export async function updateFixedDepositAccount(
+  accountId: number,
+  payload: Record<string, unknown>,
+): Promise<SavingsCommandResponse> {
+  const { data } = await client.put<SavingsCommandResponse>(`/fixeddepositaccounts/${accountId}`, {
+    locale: "en",
+    dateFormat: "yyyy-MM-dd",
+    ...payload,
+  });
+  return data;
+}
+
 // ─── Fetch Fixed Deposits (10.1, 10.3) ────────────────────────
 
 export async function fetchFixedDepositAccounts(params: FixedDepositListParams = {}): Promise<FixedDepositAccount[]> {

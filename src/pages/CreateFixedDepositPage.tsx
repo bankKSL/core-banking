@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useMemo, useEffect } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +16,10 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useClients } from "@/features/clients";
 import {
   createFixedDepositAccount,
+  updateFixedDepositAccount,
   fetchFixedDepositAccountTemplate,
   useFixedDepositProducts,
+  useFixedDepositAccount,
   DEPOSIT_PERIOD_FREQUENCIES,
 } from "@/features/deposits";
 
@@ -90,14 +92,19 @@ type FixedDepositFormValues = z.infer<typeof fixedDepositSchema>;
 
 const CreateFixedDepositPage: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const clientIdParam = searchParams.get("clientId");
+  const isEdit = !!id;
+
+  const { data: existingAccount, isLoading: accountLoading } = useFixedDepositAccount(id);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FixedDepositFormValues>({
     resolver: zodResolver(fixedDepositSchema) as any,
@@ -140,7 +147,7 @@ const CreateFixedDepositPage: React.FC = () => {
   const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
 
   const { data: template, isLoading: templateLoading } = useQuery({
-    queryKey: ["fixeddepositaccounts", "template", clientId, productId],
+    queryKey: ["fixeddepositaccounts", "template", clientId, productId, isEdit],
     queryFn: () =>
       fetchFixedDepositAccountTemplate(
         clientId ? Number(clientId) : undefined,
@@ -150,7 +157,34 @@ const CreateFixedDepositPage: React.FC = () => {
     staleTime: 60_000,
   });
 
-  const isLoading = clientsLoading || productsLoading;
+  useEffect(() => {
+    if (!existingAccount) return;
+    const a = existingAccount as any;
+    reset({
+      officeId: String(a.clientOfficeId ?? ""),
+      clientId: String(a.clientId ?? ""),
+      productId: String(a.depositProductId ?? ""),
+      externalId: a.externalId ?? "",
+      depositAmount: String(a.depositAmount ?? ""),
+      depositPeriod: String(a.depositPeriod ?? "12"),
+      depositPeriodFrequencyId: String(a.depositPeriodFrequencyType?.id ?? "2"),
+      submittedOnDate: a.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0],
+      nominalAnnualInterestRate: String(a.nominalAnnualInterestRate ?? ""),
+      interestCompoundingPeriodType: String(a.interestCompoundingPeriodType?.id ?? ""),
+      interestPostingPeriodType: String(a.interestPostingPeriodType?.id ?? ""),
+      interestCalculationType: String(a.interestCalculationType?.id ?? ""),
+      interestCalculationDaysInYearType: String(a.interestCalculationDaysInYearType?.id ?? ""),
+      maturityInstructionId: String(a.maturityInstructionId ?? ""),
+      preClosurePenalApplicable: !!a.preClosurePenalApplicable,
+      preClosurePenalInterest: String(a.preClosurePenalInterest ?? ""),
+      preClosurePenalInterestOnTypeId: String(a.preClosurePenalInterestOnType?.id ?? ""),
+      transferInterestToSavings: !!a.transferInterestToSavings,
+      linkedAccount: String(a.savingsAccountId ?? ""),
+      withHoldTax: !!a.withHoldTax,
+    });
+  }, [existingAccount, reset]);
+
+  const isLoading = clientsLoading || productsLoading || (isEdit && accountLoading);
   const clients = clientsData?.pageItems ?? [];
 
   const onSubmit = async (values: FixedDepositFormValues) => {
@@ -162,7 +196,7 @@ const CreateFixedDepositPage: React.FC = () => {
       depositPeriod: Number(values.depositPeriod),
       depositPeriodFrequencyId: Number(values.depositPeriodFrequencyId),
       locale: "en",
-      dateFormat: "yyyy-MM-dd",
+      dateFormat: "dd MMMM yyyy",
       externalId: values.externalId || undefined,
     };
 
@@ -189,7 +223,11 @@ const CreateFixedDepositPage: React.FC = () => {
       payload.transferToSavingsId = Number(values.linkedAccount);
     }
 
-    await createFixedDepositAccount(payload);
+    if (isEdit) {
+      await updateFixedDepositAccount(Number(id), payload);
+    } else {
+      await createFixedDepositAccount(payload);
+    }
     navigate("/deposits/fixed");
   };
 
@@ -205,8 +243,8 @@ const CreateFixedDepositPage: React.FC = () => {
   return (
     <div className="max-w-4xl m-auto space-y-6 p-6">
       <PageHeader
-        title="New Fixed Deposit"
-        description="Open a fixed deposit account"
+        title={isEdit ? "Edit Fixed Deposit" : "New Fixed Deposit"}
+        description={isEdit ? `Editing account #${existingAccount?.accountNo ?? id}` : "Open a fixed deposit account"}
         actions={
           <Button variant="outline" onClick={() => navigate("/deposits/fixed")}>
             <ArrowLeft className="mr-2 h-4 w-4" />

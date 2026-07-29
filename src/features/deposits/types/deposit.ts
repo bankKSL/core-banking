@@ -282,6 +282,43 @@ export interface FixedDepositListParams {
   status?: number;
 }
 
+export interface FixedDepositAccountCreateRequest {
+  clientId: number;
+  productId: number;
+  submittedOnDate: string;
+  depositAmount: number;
+  depositPeriod: number;
+  depositPeriodFrequencyId: number;
+  accountNo?: string;
+  externalId?: string;
+  fieldOfficerId?: number;
+  linkAccountId?: number;
+  transferInterestToSavings?: boolean;
+  maturityInstructionId?: number;
+  transferToSavingsId?: number;
+  nominalAnnualInterestRate?: number;
+  interestCompoundingPeriodType?: number;
+  interestPostingPeriodType?: number;
+  interestCalculationType?: number;
+  interestCalculationDaysInYearType?: number;
+  minRequiredOpeningBalance?: number;
+  lockinPeriodFrequency?: number;
+  lockinPeriodFrequencyType?: number;
+  preClosurePenalApplicable?: boolean;
+  preClosurePenalInterest?: number;
+  preClosurePenalInterestOnTypeId?: number;
+  minDepositTerm?: number;
+  minDepositTermTypeId?: number;
+  maxDepositTerm?: number;
+  maxDepositTermTypeId?: number;
+  inMultiplesOfDepositTerm?: number;
+  inMultiplesOfDepositTermTypeId?: number;
+  withHoldTax?: boolean;
+  charges?: Array<{ chargeId: number; amount: number }>;
+  locale?: string;
+  dateFormat?: string;
+}
+
 // ─── Recurring Deposit ───────────────────────────────────────────
 
 export interface RecurringDepositAccount {
