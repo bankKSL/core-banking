@@ -21,8 +21,8 @@ export interface FundUpdateRequest {
   externalId?: string;
 }
 
-export async function fetchFunds(params?: Record<string, unknown>): Promise<FundListResponse> {
-  const { data } = await client.get<FundListResponse>("/funds", { params });
+export async function fetchFunds(params?: Record<string, unknown>): Promise<Fund[]> {
+  const { data } = await client.get<Fund[]>("/funds", { params });
   return data;
 }
 
