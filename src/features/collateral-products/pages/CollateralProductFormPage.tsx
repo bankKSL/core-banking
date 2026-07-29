@@ -23,6 +23,7 @@ import {
   useCreateCollateralProduct,
   useUpdateCollateralProduct,
 } from "../hooks/useCollateralProducts";
+import type { CollateralProductCreateRequest } from "../types/collateralProduct";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const CollateralProductFormPage: FC = () => {
@@ -70,7 +71,7 @@ const CollateralProductFormPage: FC = () => {
   const onSubmit = async (values: FormValues) => {
     if (isEdit) {
       const changed: Record<string, unknown> = {};
-      const orig = product as Record<string, unknown>;
+      const orig = product as unknown as Record<string, unknown>;
       for (const [key, val] of Object.entries(values)) {
         if (val !== orig[key] && val !== undefined) {
           changed[key] = val;
@@ -79,7 +80,7 @@ const CollateralProductFormPage: FC = () => {
       changed.locale = "en";
       await updateMutation.mutateAsync({ id: id!, payload: changed });
     } else {
-      await createMutation.mutateAsync({ ...values, locale: "en" });
+      await createMutation.mutateAsync({ ...values, locale: "en" } as CollateralProductCreateRequest);
     }
     navigate("/collateral-products");
   };
