@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchLoanProducts, fetchLoanProduct, deleteLoanProduct } from "../api/loan";
+import { fetchLoanProducts, fetchLoanProduct, fetchLoanProductTemplate, deleteLoanProduct } from "../api/loan";
 import { loanKeys } from "./useLoans";
 
 export function useLoanProducts() {
@@ -17,6 +17,14 @@ export function useDeleteLoanProduct() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: loanKeys.products });
     },
+  });
+}
+
+export function useLoanProductTemplate() {
+  return useQuery({
+    queryKey: loanKeys.productTemplate,
+    queryFn: () => fetchLoanProductTemplate(),
+    staleTime: 10 * 60_000,
   });
 }
 

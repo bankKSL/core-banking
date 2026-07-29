@@ -11,6 +11,7 @@ export const loanKeys = {
   template: ["loans", "template"] as const,
   products: ["loans", "products"] as const,
   product: (id: number) => ["loans", "product", id] as const,
+  productTemplate: ["loans", "productTemplate"] as const,
   schedule: (id: number) => ["loans", "schedule", id] as const,
   repaymentTemplate: (id: number) => ["loans", "repaymentTemplate", id] as const,
   transactionTemplate: (id: number, command?: string) => ["loans", "transactionTemplate", id, command] as const,

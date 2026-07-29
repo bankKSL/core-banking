@@ -18,6 +18,7 @@ export type {
   RepaymentTransactionRequest,
   RepaymentTemplate,
   LoanProductCreateRequest,
+  LoanProductTemplate,
   AmortizationType,
   InterestType as LoanInterestType,
   InterestCalculationPeriodType,
@@ -108,6 +109,7 @@ export {
   fetchLoanTransactions,
   fetchLoanProducts,
   fetchLoanProduct,
+  fetchLoanProductTemplate,
   createLoanProduct,
   updateLoanProduct,
   fetchTransactionTemplate,
@@ -162,7 +164,7 @@ export { useLoans, loanKeys } from "./hooks/useLoans";
 
 export { useLoan, useLoanByExternalId } from "./hooks/useLoan";
 
-export { useLoanProducts, useLoanProduct, useDeleteLoanProduct } from "./hooks/useLoanProducts";
+export { useLoanProducts, useLoanProduct, useLoanProductTemplate, useDeleteLoanProduct } from "./hooks/useLoanProducts";
 
 export { useLoanTemplate } from "./hooks/useLoanTemplate";
 

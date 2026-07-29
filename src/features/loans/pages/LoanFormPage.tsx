@@ -7,7 +7,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useLoanProducts } from "../hooks/useLoanProducts";
+import { useLoanProducts, useLoanProductTemplate } from "../hooks/useLoanProducts";
 import { useCreateLoan } from "../hooks/useCreateLoan";
 import { useUpdateLoan } from "../hooks/useUpdateLoan";
 import { useLoan } from "../hooks/useLoan";
@@ -26,6 +26,7 @@ const LoanFormPage: FC = () => {
   const clientId = searchParams.get("clientId") ? Number(searchParams.get("clientId")) : undefined;
 
   const { data: products = [], isLoading: productsLoading } = useLoanProducts();
+  const { data: productTemplate } = useLoanProductTemplate();
   const { data: loan, isLoading: loanLoading } = useLoan(id);
   const createMutation = useCreateLoan();
   const updateMutation = useUpdateLoan();
@@ -47,7 +48,7 @@ const LoanFormPage: FC = () => {
         interestType: values.interestType ?? 0,
         interestCalculationPeriodType: values.interestCalculationPeriodType ?? 1,
         expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
-        transactionProcessingStrategyCode: "mifos-standard-strategy",
+        transactionProcessingStrategyCode: values.transactionProcessingStrategyCode ?? "mifos-standard-strategy",
         loanType: "individual",
       }),
     onSuccess: () => setPreviewOpen(true),
@@ -69,10 +70,10 @@ const LoanFormPage: FC = () => {
         clientId: clientId ?? values.clientId,
         submittedOnDate: currentDate(values.submittedOnDate),
         expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
+        expectedFirstRepaymentOnDate: values.expectedFirstRepaymentOnDate ? currentDate(values.expectedFirstRepaymentOnDate) : undefined,
         dateFormat: "yyyy-MM-dd" as const,
         locale: "en" as const,
         loanType: "individual",
-        transactionProcessingStrategyCode: "mifos-standard-strategy",
       };
 
       if (isEditMode && id) {
@@ -151,6 +152,7 @@ const LoanFormPage: FC = () => {
         error={error}
         mode={isEditMode ? "edit" : "create"}
         clientId={clientId}
+        strategyOptions={productTemplate?.transactionProcessingStrategyOptions}
         onPreviewSchedule={(values) => previewMutation.mutate(values)}
         previewLoading={previewMutation.isPending}
       />

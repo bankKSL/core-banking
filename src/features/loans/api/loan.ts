@@ -16,6 +16,7 @@ import type {
   RepaymentTemplate,
   LoanProduct,
   LoanProductCreateRequest,
+  LoanProductTemplate,
   LoanRepaymentSchedule,
   CalculateLoanScheduleRequest,
   LoanDelinquencyTag,
@@ -31,6 +32,11 @@ export async function fetchLoanProducts(params?: { offset?: number; limit?: numb
 
 export async function fetchLoanProduct(productId: number): Promise<LoanProduct> {
   const { data } = await client.get<LoanProduct>(`/loanproducts/${productId}`);
+  return data;
+}
+
+export async function fetchLoanProductTemplate(): Promise<LoanProductTemplate> {
+  const { data } = await client.get<LoanProductTemplate>("/loanproducts/template");
   return data;
 }
 

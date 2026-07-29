@@ -158,6 +158,7 @@ export interface Loan {
   maxOutstandingLoanBalance?: number;
   expectedDisbursementDate?: string;
   submittedOnDate?: string;
+  expectedFirstRepaymentOnDate?: string;
 }
 
 /** Repayment schedule block as returned with associations=repaymentSchedule|all */
@@ -437,6 +438,53 @@ export interface RepaymentTemplate {
   outstandingLoanBalance: number;
 }
 
+// ─── Loan Product Template ───────────────────────────────────────
+
+export interface LoanProductTemplate {
+  currencyOptions?: Array<{
+    code: string;
+    name: string;
+    decimalPlaces: number;
+    displaySymbol?: string;
+    nameCode: string;
+    displayLabel: string;
+  }>;
+  fundOptions?: Array<{ id: number; name: string }>;
+  repaymentFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestRateFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  amortizationTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestCalculationPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  transactionProcessingStrategyOptions?: Array<{ code: string; name: string }>;
+  daysInYearTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  daysInMonthTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  accountingRuleOptions?: Array<{ id: number; code: string; value: string }>;
+  loanScheduleTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  loanScheduleProcessingTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  repaymentStartDateTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  chargeOffBehaviourOptions?: Array<{ id: string; code: string; value: string }>;
+  interestRecalculationCompoundingTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  rescheduleStrategyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestRecalculationFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  preClosureInterestCalculationStrategyOptions?: Array<{ id: number; code: string; value: string }>;
+  buyDownFeeIncomeTypeOptions?: Array<{ id: string; code: string; value: string }>;
+  buyDownFeeCalculationTypeOptions?: Array<{ id: string; code: string; value: string }>;
+  buyDownFeeStrategyOptions?: Array<{ id: string; code: string; value: string }>;
+  capitalizedIncomeTypeOptions?: Array<{ id: string; code: string; value: string }>;
+  capitalizedIncomeCalculationTypeOptions?: Array<{ id: string; code: string; value: string }>;
+  capitalizedIncomeStrategyOptions?: Array<{ id: string; code: string; value: string }>;
+  valueConditionTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  paymentTypeOptions?: Array<{
+    id: number;
+    name: string;
+    description?: string;
+    isCashPayment?: boolean;
+    position?: number;
+    isSystemDefined?: boolean;
+    codeName?: string;
+  }>;
+}
+
 // ─── Loan Product Create ─────────────────────────────────────────
 
 export interface LoanProductCreateRequest {
@@ -450,20 +498,53 @@ export interface LoanProductCreateRequest {
   digitsAfterDecimal?: number;
   inMultiplesOf?: number;
   principal: number;
+  minPrincipal?: number;
+  maxPrincipal?: number;
   numberOfRepayments: number;
+  minNumberOfRepayments?: number;
+  maxNumberOfRepayments?: number;
   repaymentEvery: number;
   repaymentFrequencyType: number;
   interestRatePerPeriod: number;
+  minInterestRatePerPeriod?: number;
+  maxInterestRatePerPeriod?: number;
   interestRateFrequencyType?: number;
   amortizationType: number;
   interestType: number;
   interestCalculationPeriodType: number;
+  allowPartialPeriodInterestCalculation?: boolean;
   loanScheduleType?: string;
   loanScheduleProcessingType?: string;
   transactionProcessingStrategyCode?: string;
   daysInYearType?: number;
   daysInMonthType?: number;
+  graceOnPrincipalPayment?: number;
+  graceOnInterestPayment?: number;
+  graceOnInterestCharged?: number;
+  graceOnArrearsAgeing?: number;
+  multiDisburseLoan?: boolean;
+  maxTrancheCount?: number;
+  outstandingLoanBalance?: number;
+  canDefineInstallmentAmount?: boolean;
+  installmentAmountInMultiplesOf?: number;
   isInterestRecalculationEnabled?: boolean;
+  interestRecalculationCompoundingMethod?: number;
+  rescheduleStrategyMethod?: number;
+  recalculationRestFrequencyType?: number;
+  preClosureInterestCalculationStrategy?: number;
+  enableDownPayment?: boolean;
+  disbursedAmountPercentageDownPayment?: number;
+  enableAutoRepaymentForDownPayment?: boolean;
+  repaymentStartDateType?: number;
+  enableBuyDownFee?: boolean;
+  merchantBuyDownFee?: boolean;
+  buyDownFeeCalculationType?: number;
+  buyDownFeeStrategy?: number;
+  buyDownFeeIncomeType?: number;
+  enableIncomeCapitalization?: boolean;
+  capitalizedIncomeCalculationType?: number;
+  capitalizedIncomeStrategy?: number;
+  capitalizedIncomeType?: number;
   paymentAllocation?: unknown[];
   creditAllocation?: unknown[];
   accountingRule?: number;

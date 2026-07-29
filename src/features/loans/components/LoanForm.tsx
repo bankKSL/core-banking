@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
@@ -20,6 +21,7 @@ interface LoanFormProps {
   error?: string | null;
   mode: "create" | "edit";
   clientId?: number;
+  strategyOptions?: Array<{ code: string; name: string }>;
   /** Preview the repayment schedule before submitting (POST /loans?command=calculateLoanSchedule) */
   onPreviewSchedule?: (values: FormFields) => void;
   previewLoading?: boolean;
@@ -27,8 +29,6 @@ interface LoanFormProps {
 
 /** Type override for fields not in the Zod schema yet */
 export type FormFields = CreateLoanFormValues & {
-  graceOnInterestPayment?: number;
-  inArrearsTolerance?: number;
   repaymentsStartingFromDate?: string;
 };
 
@@ -41,6 +41,7 @@ const LoanForm: FC<LoanFormProps> = ({
   error,
   mode,
   clientId,
+  strategyOptions,
   onPreviewSchedule,
   previewLoading,
 }) => {
@@ -63,14 +64,26 @@ const LoanForm: FC<LoanFormProps> = ({
       repaymentEvery: loan?.repaymentEvery ?? 1,
       repaymentFrequencyType: loan?.repaymentFrequencyType?.id ?? 2,
       interestRatePerPeriod: loan?.interestRatePerPeriod ?? 0,
-      interestType: 0,
-      amortizationType: 1,
-      interestCalculationPeriodType: 0,
+      interestRateFrequencyType: loan?.interestRateFrequencyType?.id ?? 3,
+      interestType: loan?.interestType?.id ?? 0,
+      amortizationType: loan?.amortizationType?.id ?? 1,
+      interestCalculationPeriodType: loan?.interestCalculationPeriodType?.id ?? 0,
       expectedDisbursementDate: currentDate(loan?.expectedDisbursementDate) || currentDate(),
+      expectedFirstRepaymentOnDate: loan?.expectedFirstRepaymentOnDate ?? "",
       submittedOnDate: currentDate(loan?.submittedOnDate) || currentDate(),
+      transactionProcessingStrategyCode: loan?.transactionProcessingStrategyCode ?? "mifos-standard-strategy",
+      loanPurposeId: undefined,
+      loanOfficerId: undefined,
+      fundId: undefined,
+      linkAccountId: undefined,
       externalId: loan?.externalId ?? "",
+      graceOnPrincipalPayment: undefined,
       graceOnInterestPayment: undefined,
+      graceOnInterestCharged: undefined,
+      graceOnArrearsAgeing: undefined,
       inArrearsTolerance: undefined,
+      allowPartialPeriodInterestCalcualtion: false,
+      maxOutstandingLoanBalance: undefined,
       repaymentsStartingFromDate: "",
       dateFormat: "yyyy-MM-dd",
       locale: "en",
@@ -220,6 +233,24 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
           <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Interest Rate Frequency</label>
+            <Select
+              value={String(watch("interestRateFrequencyType") ?? 3)}
+              onValueChange={(v) => setValue("interestRateFrequencyType", Number(v) as any)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">Per Month</SelectItem>
+                <SelectItem value="3">Per Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Row 6: Interest Calculation Period | Amortization Type */}
+          <div className="space-y-1.5">
             <label className="block text-sm font-medium">Interest Calculation Period Type *</label>
             <Select
               value={String(watch("interestCalculationPeriodType") ?? 0)}
@@ -235,8 +266,32 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Amortization Type</label>
+            <Select
+              value={String(watch("amortizationType") ?? 1)}
+              onValueChange={(v) => setValue("amortizationType", Number(v) as any)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Equal Principal</SelectItem>
+                <SelectItem value="1">Equal Installments</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {/* Row 6: Grace on Interest | In Arrears Tolerance */}
+          {/* Row 7: Grace Settings */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Grace on Principal Payment</label>
+            <Input
+              type="number"
+              {...register("graceOnPrincipalPayment", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Grace on Interest Payment</label>
             <Input
@@ -246,6 +301,24 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Grace on Interest Charged</label>
+            <Input
+              type="number"
+              {...register("graceOnInterestCharged", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Grace on Arrears Ageing</label>
+            <Input
+              type="number"
+              {...register("graceOnArrearsAgeing", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Row 8: In Arrears Tolerance | Max Outstanding */}
+          <div className="space-y-1.5">
             <label className="block text-sm font-medium">In Arrears Tolerance</label>
             <Input
               type="number"
@@ -254,8 +327,17 @@ const LoanForm: FC<LoanFormProps> = ({
               disabled={isSubmitting}
             />
           </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Max Outstanding Loan Balance</label>
+            <Input
+              type="number"
+              step="0.01"
+              {...register("maxOutstandingLoanBalance", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
 
-          {/* Row 7: Submitted On Date | Expected Disbursement Date */}
+          {/* Row 9: Submitted On Date | Expected Disbursement Date */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Submitted On Date *</label>
             <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} error={errors.submittedOnDate?.message} />
@@ -270,13 +352,120 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
 
-          {/* Row 8: Repayments Starting From Date (span full width) */}
-          <div className="col-span-2 space-y-1.5">
+          {/* Row 10: Expected First Repayment Date | Repayments Starting From */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Expected First Repayment On Date</label>
+            <Input
+              type="date"
+              {...register("expectedFirstRepaymentOnDate")}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-1.5">
             <label className="block text-sm font-medium">Repayments Starting From Date</label>
             <Input
               type="date"
               {...register("repaymentsStartingFromDate")}
               disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Row 11: Transaction Processing Strategy */}
+          <div className="col-span-2 space-y-1.5">
+            <label className="block text-sm font-medium">Transaction Processing Strategy</label>
+            <Select
+              value={watch("transactionProcessingStrategyCode") ?? "mifos-standard-strategy"}
+              onValueChange={(v) => setValue("transactionProcessingStrategyCode", v)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(strategyOptions ?? []).length > 0
+                  ? (strategyOptions ?? []).map((o) => (
+                      <SelectItem key={o.code} value={o.code}>{o.name}</SelectItem>
+                    ))
+                  : (
+                    <>
+                      <SelectItem value="mifos-standard-strategy">Mifos Standard Strategy</SelectItem>
+                      <SelectItem value="heavensfamily-strategy">Heavensfamily Strategy</SelectItem>
+                      <SelectItem value="early-repayment-strategy">Early Repayment Strategy</SelectItem>
+                      <SelectItem value="advance-payment-allocation-strategy">Advance Payment Allocation Strategy</SelectItem>
+                      <SelectItem value="principal-interest-penalty-fees-order-strategy">P-I-Penalty-Fees Order</SelectItem>
+                      <SelectItem value="interest-principal-penalty-fees-order-strategy">I-P-Penalty-Fees Order</SelectItem>
+                      <SelectItem value="penalties-fees-interest-principal-order-strategy">Penalties-Fees-I-P Order</SelectItem>
+                    </>
+                  )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Row 12: Allow Partial Interest Calculation */}
+          <div
+            className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+            onClick={() => setValue("allowPartialPeriodInterestCalcualtion", !watch("allowPartialPeriodInterestCalcualtion"))}
+          >
+            <Checkbox
+              id="allowPartialPeriodInterestCalcualtion"
+              checked={!!watch("allowPartialPeriodInterestCalcualtion")}
+              onCheckedChange={(v) => setValue("allowPartialPeriodInterestCalcualtion", v === true)}
+            />
+            <label htmlFor="allowPartialPeriodInterestCalcualtion" className="block text-sm font-medium cursor-pointer">
+              Allow Partial Period Interest Calculation
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Additional Options Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Additional Options</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Fund</label>
+            <Input
+              type="number"
+              placeholder="Fund ID"
+              {...register("fundId", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Loan Officer</label>
+            <Input
+              type="number"
+              placeholder="Officer ID"
+              {...register("loanOfficerId", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Loan Purpose</label>
+            <Input
+              type="number"
+              placeholder="Purpose ID"
+              {...register("loanPurposeId", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Link Account ID</label>
+            <Input
+              type="number"
+              placeholder="Savings account ID"
+              {...register("linkAccountId", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="col-span-2 space-y-1.5">
+            <label className="block text-sm font-medium">External ID</label>
+            <Input
+              {...register("externalId")}
+              disabled={isSubmitting}
+              placeholder="External reference"
               className="max-w-sm"
             />
           </div>
