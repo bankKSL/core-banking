@@ -34,36 +34,90 @@ export const depositTransactionSchema = z.object({
 export type DepositTransactionFormValues = z.infer<typeof depositTransactionSchema>;
 
 /** Schema for savings product creation — matches Finfact POST /savingsproducts */
-export const createSavingsProductSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
-  shortName: z.string().min(1, "Short name is required").max(4, "Max 4 characters").regex(/^\S+$/, "No spaces allowed"),
-  description: z.string().max(500).optional(),
-  currencyCode: z.string().min(1, "Currency is required"),
-  digitsAfterDecimal: z.number().int().min(0).max(6).default(2),
-  inMultiplesOf: z.number().int().min(0).optional(),
-  nominalAnnualInterestRate: z.number({ message: "Interest rate is required" }).min(0),
-  interestCompoundingPeriodType: z.number({ message: "Required" }).int(),
-  interestPostingPeriodType: z.number({ message: "Required" }).int(),
-  interestCalculationType: z.number({ message: "Required" }).int(),
-  interestCalculationDaysInYearType: z.number({ message: "Required" }).int(),
-  minRequiredOpeningBalance: z.number().min(0).optional(),
-  lockinPeriodFrequency: z.number().int().positive().optional(),
-  lockinPeriodFrequencyType: z.number().int().optional(),
-  withdrawalFeeForTransfers: z.boolean().optional(),
-  allowOverdraft: z.boolean().optional(),
-  overdraftLimit: z.number().optional(),
-  minRequiredBalance: z.number().optional(),
-  enforceMinRequiredBalance: z.boolean().optional(),
-  accountingRule: z.number().int().optional(),
-  isDormancyTrackingActive: z.boolean().optional(),
-  daysToInactive: z.number().int().min(0).optional(),
-  daysToDormancy: z.number().int().min(0).optional(),
-  daysToEscheat: z.number().int().min(0).optional(),
-  withHoldTax: z.boolean().optional(),
-  // accountMappingForPayment: z.string().max(100).optional(),
-  locale: z.string().default("en"),
-  dateFormat: z.string().default("yyyy-MM-dd"),
-});
+export const createSavingsProductSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(100),
+    shortName: z.string().min(1, "Short name is required").max(4, "Max 4 characters").regex(/^\S+$/, "No spaces allowed"),
+    description: z.string().max(500).optional(),
+    currencyCode: z.string().min(1, "Currency is required"),
+    digitsAfterDecimal: z.number().int().min(0).max(6).default(2),
+    inMultiplesOf: z.number().int().min(0).optional(),
+    nominalAnnualInterestRate: z.number({ message: "Interest rate is required" }).min(0),
+    interestCompoundingPeriodType: z.number({ message: "Required" }).int(),
+    interestPostingPeriodType: z.number({ message: "Required" }).int(),
+    interestCalculationType: z.number({ message: "Required" }).int(),
+    interestCalculationDaysInYearType: z.number({ message: "Required" }).int(),
+    minRequiredOpeningBalance: z.number().min(0).optional(),
+    minBalanceForInterestCalculation: z.number().min(0).optional(),
+    lockinPeriodFrequency: z.number().int().min(0).optional(),
+    lockinPeriodFrequencyType: z.number().int().min(0).max(3).optional(),
+    withdrawalFeeAmount: z.number().min(0).optional(),
+    withdrawalFeeType: z.number().int().optional(),
+    withdrawalFeeForTransfers: z.boolean().optional(),
+    feeAmount: z.number().min(0).optional(),
+    feeOnMonthDay: z
+      .string()
+      .regex(/^(0[1-9]|[12]\d|3[01]) (January|February|March|April|May|June|July|August|September|October|November|December)$/, "Must be in 'dd MMMM' format, e.g. '01 January'")
+      .optional(),
+    allowOverdraft: z.boolean().optional(),
+    overdraftLimit: z.number().min(0).optional(),
+    nominalAnnualInterestRateOverdraft: z.number().min(0).optional(),
+    minOverdraftForInterestCalculation: z.number().min(0).optional(),
+    minRequiredBalance: z.number().min(0).optional(),
+    enforceMinRequiredBalance: z.boolean().optional(),
+    lienAllowed: z.boolean().optional(),
+    maxAllowedLienLimit: z.number().min(0).optional(),
+    accountingRule: z.number().int().min(1).max(3).default(1),
+    isDormancyTrackingActive: z.boolean().optional(),
+    daysToInactive: z.number().int().min(1).optional(),
+    daysToDormancy: z.number().int().min(1).optional(),
+    daysToEscheat: z.number().int().min(1).optional(),
+    withHoldTax: z.boolean().optional(),
+    taxGroupId: z.number().int().positive().optional(),
+    locale: z.string().default("en"),
+    dateFormat: z.string().default("yyyy-MM-dd"),
+    monthDayFormat: z.string().default("dd MMMM"),
+  })
+  .superRefine((data, ctx) => {
+    // lockinPeriodFrequency + lockinPeriodFrequencyType pair
+    if (data.lockinPeriodFrequency && data.lockinPeriodFrequency > 0 && !data.lockinPeriodFrequencyType) {
+      ctx.addIssue({ code: "custom", path: ["lockinPeriodFrequencyType"], message: "Lock-in type is required when frequency is set" });
+    }
+    if (data.lockinPeriodFrequencyType !== undefined && data.lockinPeriodFrequencyType >= 0 && !data.lockinPeriodFrequency) {
+      ctx.addIssue({ code: "custom", path: ["lockinPeriodFrequency"], message: "Lock-in frequency is required when type is set" });
+    }
+    // feeAmount + feeOnMonthDay pair
+    if (data.feeAmount && data.feeAmount > 0 && !data.feeOnMonthDay) {
+      ctx.addIssue({ code: "custom", path: ["feeOnMonthDay"], message: "Fee month/day is required when fee amount is set. Format: 'dd MMMM' e.g. '01 January'" });
+    }
+    if (data.feeOnMonthDay && !data.feeAmount) {
+      ctx.addIssue({ code: "custom", path: ["feeAmount"], message: "Fee amount is required when month/day is set" });
+    }
+    // dormancy day ordering
+    if (data.isDormancyTrackingActive) {
+      if (!data.daysToInactive) {
+        ctx.addIssue({ code: "custom", path: ["daysToInactive"], message: "Days to inactive is required" });
+      }
+      if (!data.daysToDormancy) {
+        ctx.addIssue({ code: "custom", path: ["daysToDormancy"], message: "Days to dormancy is required" });
+      } else if (data.daysToInactive && data.daysToDormancy <= data.daysToInactive) {
+        ctx.addIssue({ code: "custom", path: ["daysToDormancy"], message: "Must be greater than days to inactive" });
+      }
+      if (!data.daysToEscheat) {
+        ctx.addIssue({ code: "custom", path: ["daysToEscheat"], message: "Days to escheat is required" });
+      } else if (data.daysToDormancy && data.daysToEscheat <= data.daysToDormancy) {
+        ctx.addIssue({ code: "custom", path: ["daysToEscheat"], message: "Must be greater than days to dormancy" });
+      }
+    }
+    // withHoldTax + taxGroupId
+    if (data.withHoldTax && !data.taxGroupId) {
+      ctx.addIssue({ code: "custom", path: ["taxGroupId"], message: "Tax group is required when withholding tax is enabled" });
+    }
+    // lien + overdraft limit check
+    if (data.lienAllowed && data.allowOverdraft && data.overdraftLimit && data.maxAllowedLienLimit && data.overdraftLimit > data.maxAllowedLienLimit) {
+      ctx.addIssue({ code: "custom", path: ["maxAllowedLienLimit"], message: "Lien limit must be greater than or equal to overdraft limit" });
+    }
+  });
 
 export type CreateSavingsProductFormValues = z.infer<typeof createSavingsProductSchema>;
 

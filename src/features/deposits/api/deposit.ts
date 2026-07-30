@@ -29,6 +29,35 @@ import { currentDate } from "@/lib/utils";
 
 // ─── Savings Products ────────────────────────────────────────────
 
+export interface SavingsProductTemplate {
+  currencyOptions: Array<{ code: string; name: string; decimalPlaces: number; inMultiplesOf?: number; displaySymbol?: string }>;
+  interestCompoundingPeriodTypeOptions: Array<{ id: number; code: string; value: string }>;
+  interestPostingPeriodTypeOptions: Array<{ id: number; code: string; value: string }>;
+  interestCalculationTypeOptions: Array<{ id: number; code: string; value: string }>;
+  interestCalculationDaysInYearTypeOptions: Array<{ id: number; code: string; value: string }>;
+  lockinPeriodFrequencyTypeOptions: Array<{ id: number; code: string; value: string }>;
+  withdrawalFeeTypeOptions: Array<{ id: number; code: string; value: string }>;
+  paymentTypeOptions: Array<{ id: number; name: string }>;
+  accountingRuleOptions: Array<{ id: number; code: string; value: string }>;
+  accountingMappingOptions: Record<string, Array<{ id: number; name: string; glCode: string }>>;
+  chargeOptions: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number }; chargeCalculationType?: { id: number } }>;
+  penaltyOptions: Array<{ id: number; name: string; amount: number }>;
+  taxGroupOptions: Array<{ id: number; name: string }>;
+  accountMappingForPayment?: string;
+}
+
+export async function fetchSavingsProductTemplate(): Promise<SavingsProductTemplate> {
+  const { data } = await client.get<SavingsProductTemplate>("/savingsproducts/template");
+  return data;
+}
+
+export async function fetchSavingsProductWithTemplate(productId: number): Promise<SavingsProduct & SavingsProductTemplate> {
+  const { data } = await client.get<SavingsProduct & SavingsProductTemplate>(`/savingsproducts/${productId}`, {
+    params: { template: true },
+  });
+  return data;
+}
+
 export async function fetchSavingsProducts(params?: { offset?: number; limit?: number }): Promise<SavingsProduct[]> {
   const { data } = await client.get<SavingsProduct[]>("/savingsproducts", { params });
   return data;

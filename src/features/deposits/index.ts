@@ -115,14 +115,17 @@ export {
   deleteRecurringDepositProduct,
   fetchSavingsProducts,
   fetchSavingsProduct,
+  fetchSavingsProductTemplate,
+  fetchSavingsProductWithTemplate,
   createSavingsProduct,
   updateSavingsProduct,
   deleteSavingsProduct,
 } from "./api/deposit";
+export type { SavingsProductTemplate } from "./api/deposit";
 
 export { useSavingsAccounts, useSavingsAccount, depositKeys } from "./hooks/useSavingsAccounts";
 
-export { useSavingsProducts, useSavingsProduct } from "./hooks/useSavingsProducts";
+export { useSavingsProducts, useSavingsProduct, useSavingsProductTemplate } from "./hooks/useSavingsProducts";
 
 export { useSavingsTemplate } from "./hooks/useSavingsTemplate";
 

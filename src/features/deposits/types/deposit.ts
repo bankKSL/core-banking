@@ -31,16 +31,30 @@ export interface SavingsProduct {
   lockinPeriodFrequency?: number;
   lockinPeriodFrequencyType?: { id: number; code: string; value: string };
   withdrawalFeeForTransfers?: boolean;
+  withdrawalFeeAmount?: number;
+  withdrawalFeeType?: { id: number; code: string; value: string };
+  feeAmount?: number;
+  feeOnMonthDay?: string;
   allowOverdraft?: boolean;
   overdraftLimit?: number;
+  nominalAnnualInterestRateOverdraft?: number;
+  minOverdraftForInterestCalculation?: number;
   minBalanceForInterestCalculation?: number;
   minRequiredBalance?: number;
   enforceMinRequiredBalance?: boolean;
+  lienAllowed?: boolean;
+  maxAllowedLienLimit?: number;
   accountingType?: number;
+  interestCompoundingPeriodType?: { id: number; code: string; value: string };
+  interestPostingPeriodType?: { id: number; code: string; value: string };
+  interestCalculationType?: { id: number; code: string; value: string };
+  interestCalculationDaysInYearType?: { id: number; code: string; value: string };
   isDormancyTrackingActive?: boolean;
   daysToInactive?: number;
   daysToDormancy?: number;
   daysToEscheat?: number;
+  withHoldTax?: boolean;
+  taxGroupId?: number;
   charges: Array<{
     id: number;
     chargeId: number;
@@ -489,7 +503,6 @@ export interface RecurringDepositAccountCreateRequest {
 
 export interface SavingsProductCreateRequest {
   name: string;
-  /** Short unique identifier — no spaces (per Finfact spec) */
   shortName: string;
   description?: string;
   currencyCode: string;
@@ -498,32 +511,37 @@ export interface SavingsProductCreateRequest {
   locale: string;
   dateFormat?: string;
   nominalAnnualInterestRate: number;
-  /** 1=Daily, 4=Monthly, 5=Quarterly, 6=Semi-Annual, 7=Annual */
   interestCompoundingPeriodType: number;
-  /** 1=Monthly, 4=Quarterly, 5=Semi-Annual, 7=Annual */
   interestPostingPeriodType: number;
-  /** 1=Daily balance, 2=Average daily balance */
   interestCalculationType: number;
-  /** 360, 364, 365 */
   interestCalculationDaysInYearType: number;
   minRequiredOpeningBalance?: number;
   lockinPeriodFrequency?: number;
   lockinPeriodFrequencyType?: number;
+  withdrawalFeeAmount?: number;
+  withdrawalFeeType?: number;
   withdrawalFeeForTransfers?: boolean;
+  feeAmount?: number;
+  feeOnMonthDay?: string;
   allowOverdraft?: boolean;
   overdraftLimit?: number;
+  nominalAnnualInterestRateOverdraft?: number;
+  minOverdraftForInterestCalculation?: number;
+  minBalanceForInterestCalculation?: number;
   minRequiredBalance?: number;
   enforceMinRequiredBalance?: boolean;
+  lienAllowed?: boolean;
+  maxAllowedLienLimit?: number;
   accountingRule: number;
   charges?: Array<{ chargeId: number }>;
   isDormancyTrackingActive?: boolean;
   daysToInactive?: number;
   daysToDormancy?: number;
   daysToEscheat?: number;
-  /** Section 6: Enable tax withholding */
   withHoldTax?: boolean;
-  /** Section 6: Payment account mapping key */
+  taxGroupId?: number;
   accountMappingForPayment?: string;
+  monthDayFormat?: string;
 }
 
 // ─── Fixed Deposit Product (Section 11) ───────────────────────

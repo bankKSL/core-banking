@@ -300,7 +300,7 @@ const CreateFixedDepositPage: React.FC = () => {
             <CardTitle>Fixed Deposit Product</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4">
-            <div>
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Product *</label>
               <Select value={productId} onValueChange={(v) => setValue("productId", v, { shouldValidate: true })}>
                 <SelectTrigger>
@@ -351,7 +351,7 @@ const CreateFixedDepositPage: React.FC = () => {
               <label className="block text-sm font-medium">Period Length *</label>
               <Input type="number" {...register("depositPeriod")} error={errors.depositPeriod?.message} />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Frequency *</label>
               <Select
                 value={watch("depositPeriodFrequencyId")}
@@ -475,7 +475,7 @@ const CreateFixedDepositPage: React.FC = () => {
             <CardTitle>Maturity &amp; Pre-closure</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Maturity Instruction</label>
               <Select value={maturityInstructionId} onValueChange={(v) => setValue("maturityInstructionId", v)}>
                 <SelectTrigger>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchSavingsProducts, fetchSavingsProduct } from "../api/deposit";
+import { fetchSavingsProducts, fetchSavingsProduct, fetchSavingsProductTemplate } from "../api/deposit";
 import { depositKeys } from "./useSavingsAccounts";
 
 export function useSavingsProducts() {
@@ -15,6 +15,14 @@ export function useSavingsProduct(productId: number | undefined) {
     queryKey: depositKeys.savingsProduct(productId!),
     queryFn: () => fetchSavingsProduct(productId!),
     enabled: !!productId,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useSavingsProductTemplate() {
+  return useQuery({
+    queryKey: [...depositKeys.savingsProducts, "template"],
+    queryFn: () => fetchSavingsProductTemplate(),
     staleTime: 5 * 60_000,
   });
 }
