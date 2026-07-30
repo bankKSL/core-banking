@@ -44,7 +44,7 @@ const PeriodicAccrualPage: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Accrue Till Date *</Label>
+            <label className="block text-sm font-medium">Accrue Till Date *</label>
             <Input type="date" value={tillDate} onChange={(e) => setTillDate(e.target.value)} />
             <p className="text-xs text-gray-500">
               Accrual entries will be created for all active loans up to and including this date.

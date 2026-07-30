@@ -12,12 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { ColumnDef } from "@/components/shared/DataTable";
-import {
-  useDocuments,
-  useCreateDocument,
-  useDeleteDocument,
-  useUpdateDocument,
-} from "../hooks/useDocuments";
+import { useDocuments, useCreateDocument, useDeleteDocument, useUpdateDocument } from "../hooks/useDocuments";
 import { downloadDocument } from "../api/documents";
 import type { Document } from "../types/document";
 
@@ -135,7 +130,7 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
       key: "description",
       header: "Description",
       accessorFn: (row) => (
-        <span className="text-sm text-gray-500 truncate max-w-[200px]">{row.description ?? "\u2014"}</span>
+        <span className="text-sm text-gray-500 truncate max-w-50">{row.description ?? "\u2014"}</span>
       ),
     },
     {
@@ -207,9 +202,7 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingDoc ? "Edit Document" : "Upload Document"}</DialogTitle>
-            <DialogDescription>
-              {editingDoc ? "Update document metadata." : "Upload a new document."}
-            </DialogDescription>
+            <DialogDescription>{editingDoc ? "Update document metadata." : "Upload a new document."}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
@@ -218,7 +211,7 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
             </div>
             {!editingDoc && (
               <div className="flex flex-col gap-1.5">
-                <Label>File *</Label>
+                <label className="block text-sm font-medium">File *</label>
                 <Input
                   type="file"
                   ref={fileInputRef}
@@ -228,7 +221,9 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="description">Description</Label>
+              <label className="block text-sm font-medium" htmlFor="description">
+                Description
+              </label>
               <Textarea id="description" {...register("description")} rows={3} />
             </div>
             <Button

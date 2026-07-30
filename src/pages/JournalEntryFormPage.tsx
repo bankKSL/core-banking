@@ -8,11 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  useGLAccounts,
-  useAccountingRules,
-  useCreateJournalEntry,
-} from "@/features/accounting";
+import { useGLAccounts, useAccountingRules, useCreateJournalEntry } from "@/features/accounting";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { currentDate } from "@/lib/utils";
@@ -122,7 +118,7 @@ const JournalEntryFormPage: React.FC = () => {
       {rows.map((row, i) => (
         <div key={i} className="grid grid-cols-[1fr_160px_40px] items-end gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">GL Account</Label>
+            <label className="block text-sm font-medium">GL Account</label>
             <Select
               value={row.glAccountId ? String(row.glAccountId) : ""}
               onValueChange={(v) => updateRow(side, i, "glAccountId", Number(v))}
@@ -138,12 +134,10 @@ const JournalEntryFormPage: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            {errors[`${side}_${i}_account`] && (
-              <p className="text-xs text-red-500">{errors[`${side}_${i}_account`]}</p>
-            )}
+            {errors[`${side}_${i}_account`] && <p className="text-xs text-red-500">{errors[`${side}_${i}_account`]}</p>}
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Amount</Label>
+            <label className="block text-sm font-medium">Amount</label>
             <Input
               type="number"
               step="0.01"
@@ -195,7 +189,7 @@ const JournalEntryFormPage: React.FC = () => {
             error={errors.officeId}
           />
           <div className="space-y-1.5">
-            <Label>Transaction Date *</Label>
+            <label className="block text-sm font-medium">Transaction Date *</label>
             <Input
               type="date"
               value={header.transactionDate}
@@ -203,12 +197,9 @@ const JournalEntryFormPage: React.FC = () => {
             />
             {errors.transactionDate && <p className="text-xs text-red-500">{errors.transactionDate}</p>}
           </div>
-          <CurrencySelect
-            value={header.currencyCode}
-            onChange={(v) => setHeader((h) => ({ ...h, currencyCode: v }))}
-          />
+          <CurrencySelect value={header.currencyCode} onChange={(v) => setHeader((h) => ({ ...h, currencyCode: v }))} />
           <div className="space-y-1.5">
-            <Label>Reference Number</Label>
+            <label className="block text-sm font-medium">Reference Number</label>
             <Input
               value={header.referenceNumber}
               onChange={(e) => setHeader((h) => ({ ...h, referenceNumber: e.target.value }))}
@@ -216,7 +207,7 @@ const JournalEntryFormPage: React.FC = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Accounting Rule (auto-fill)</Label>
+            <label className="block text-sm font-medium">Accounting Rule (auto-fill)</label>
             <Select
               value={header.accountingRuleId ? String(header.accountingRuleId) : ""}
               onValueChange={(v) => setHeader((h) => ({ ...h, accountingRuleId: Number(v) }))}
@@ -234,7 +225,7 @@ const JournalEntryFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Comments</Label>
+            <label className="block text-sm font-medium">Comments</label>
             <Textarea
               value={header.comments}
               onChange={(e) => setHeader((h) => ({ ...h, comments: e.target.value }))}
@@ -271,9 +262,7 @@ const JournalEntryFormPage: React.FC = () => {
               Total Credits:{" "}
               <span className="font-mono font-semibold">{formatCurrency(totalCredits, header.currencyCode)}</span>
             </span>
-            <span
-              className={`flex items-center gap-1 font-medium ${balanced ? "text-emerald-600" : "text-red-500"}`}
-            >
+            <span className={`flex items-center gap-1 font-medium ${balanced ? "text-emerald-600" : "text-red-500"}`}>
               <Scale className="h-4 w-4" />
               {balanced ? "Balanced" : "Out of balance"}
             </span>

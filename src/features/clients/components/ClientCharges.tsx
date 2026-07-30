@@ -238,7 +238,7 @@ const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Charge Type *</Label>
+              <label className="block text-sm font-medium">Charge Type *</label>
               <Select onValueChange={(v) => setValue("chargeId", Number(v), { shouldValidate: true })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select charge" />
@@ -255,7 +255,12 @@ const ClientCharges: FC<ClientChargesProps> = ({ clientId }) => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Amount *</label>
-              <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} error={errors.amount?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("amount", { valueAsNumber: true })}
+                error={errors.amount?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Due Date</label>

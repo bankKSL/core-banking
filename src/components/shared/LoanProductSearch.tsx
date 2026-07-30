@@ -60,7 +60,9 @@ export function LoanProductSearch({
 
   return (
     <div ref={ref} className="relative">
-      <Label htmlFor={name ?? "productSearch"}>{label}</Label>
+      <label className="block text-sm font-medium" htmlFor={name ?? "productSearch"}>
+        {label}
+      </label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />

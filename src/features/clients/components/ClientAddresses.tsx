@@ -202,7 +202,7 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label>Address Type</Label>
+                <label className="block text-sm font-medium">Address Type</label>
                 <Select
                   defaultValue={String(template?.addressTypeIdOptions?.[0]?.id ?? "")}
                   onValueChange={(v) => setValue("addressTypeId", Number(v))}
@@ -255,7 +255,7 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
                 </Select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Country</Label>
+                <label className="block text-sm font-medium">Country</label>
                 <Select onValueChange={(v) => setValue("countryId", Number(v))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />

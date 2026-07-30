@@ -337,7 +337,11 @@ const CreateFixedDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} placeholder="Optional external reference" error={errors.externalId?.message} />
+              <Input
+                {...register("externalId")}
+                placeholder="Optional external reference"
+                error={errors.externalId?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Deposit Amount *</label>
@@ -490,7 +494,12 @@ const CreateFixedDepositPage: React.FC = () => {
             {maturityInstructionId === "200" && (
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Transfer to Savings Account ID</label>
-                <Input type="number" {...register("linkedAccount")} placeholder="Savings account ID" error={errors.linkedAccount?.message} />
+                <Input
+                  type="number"
+                  {...register("linkedAccount")}
+                  placeholder="Savings account ID"
+                  error={errors.linkedAccount?.message}
+                />
               </div>
             )}
 
@@ -500,7 +509,9 @@ const CreateFixedDepositPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("preClosurePenalApplicable", v)}
                 defaultChecked={template?.preClosurePenalApplicable ?? false}
               />
-              <label className="block text-sm font-medium" htmlFor="preClosurePenalApplicable">Apply Pre-closure Penalty</label>
+              <label className="block text-sm font-medium" htmlFor="preClosurePenalApplicable">
+                Apply Pre-closure Penalty
+              </label>
             </div>
 
             {preClosurePenalApplicable && (
@@ -541,19 +552,28 @@ const CreateFixedDepositPage: React.FC = () => {
                 id="transferInterestToSavings"
                 onCheckedChange={(v) => setValue("transferInterestToSavings", v)}
               />
-              <label className="block text-sm font-medium" htmlFor="transferInterestToSavings">Transfer Interest to Savings</label>
+              <label className="block text-sm font-medium" htmlFor="transferInterestToSavings">
+                Transfer Interest to Savings
+              </label>
             </div>
 
             {transferInterestToSavings && (
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Linked Savings Account ID</label>
-                <Input type="number" {...register("linkedAccount")} placeholder="Linked account ID" error={errors.linkedAccount?.message} />
+                <Input
+                  type="number"
+                  {...register("linkedAccount")}
+                  placeholder="Linked account ID"
+                  error={errors.linkedAccount?.message}
+                />
               </div>
             )}
 
             <div className="flex items-center gap-3 pt-2">
               <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
-              <label className="block text-sm font-medium" htmlFor="withHoldTax">Withhold Tax</label>
+              <label className="block text-sm font-medium" htmlFor="withHoldTax">
+                Withhold Tax
+              </label>
             </div>
           </CardContent>
         </Card>

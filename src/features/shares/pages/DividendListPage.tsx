@@ -188,7 +188,7 @@ const DividendListPage: FC = () => {
         <CardContent>
           <div className="flex items-end gap-4">
             <div className="flex-1">
-              <Label>Share Product</Label>
+              <label className="block text-sm font-medium">Share Product</label>
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />

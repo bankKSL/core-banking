@@ -132,9 +132,7 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
     {
       key: "description",
       header: "Description",
-      accessorFn: (row) => (
-        <span className="text-sm text-gray-500 truncate max-w-[200px]">{row.description ?? "—"}</span>
-      ),
+      accessorFn: (row) => <span className="text-sm text-gray-500 truncate max-w-50">{row.description ?? "—"}</span>,
     },
     {
       key: "actions",
@@ -216,7 +214,7 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
             </div>
             {!editingDoc && (
               <div className="flex flex-col gap-1.5">
-                <Label>File *</Label>
+                <label className="block text-sm font-medium">File *</label>
                 <Input
                   type="file"
                   ref={fileInputRef}
@@ -226,7 +224,9 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="description">Description</Label>
+              <label className="block text-sm font-medium" htmlFor="description">
+                Description
+              </label>
               <Textarea id="description" {...register("description")} rows={3} />
             </div>
             <Button

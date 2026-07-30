@@ -70,7 +70,9 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="amount">Amount *</Label>
+            <label className="block text-sm font-medium" htmlFor="amount">
+              Amount *
+            </label>
             <Input
               id="amount"
               type="number"
@@ -82,7 +84,9 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="paymentType">Payment Type *</Label>
+            <label className="block text-sm font-medium" htmlFor="paymentType">
+              Payment Type *
+            </label>
             <Select value={paymentTypeId} onValueChange={setPaymentTypeId}>
               <SelectTrigger>
                 <SelectValue />
@@ -97,11 +101,15 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="date">Transaction Date *</Label>
+            <label className="block text-sm font-medium" htmlFor="date">
+              Transaction Date *
+            </label>
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="note">Note</Label>
+            <label className="block text-sm font-medium" htmlFor="note">
+              Note
+            </label>
             <Textarea
               id="note"
               rows={2}

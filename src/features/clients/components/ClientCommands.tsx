@@ -47,7 +47,14 @@ interface ClientCommandsProps {
   onSuccess?: () => void;
 }
 
-const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName, template, currentStaffId, onSuccess }) => {
+const ClientCommands: FC<ClientCommandsProps> = ({
+  clientId,
+  status,
+  displayName,
+  template,
+  currentStaffId,
+  onSuccess,
+}) => {
   const rejectMutation = useRejectClient();
   const withdrawMutation = useWithdrawClient();
   const closeMutation = useCloseClient();
@@ -100,7 +107,17 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
       setCommand(null);
       onSuccess?.();
     },
-    [clientId, closeDate, rejectMutation, withdrawMutation, closeMutation, reactivateMutation, undoRejectMutation, undoWithdrawMutation, onSuccess],
+    [
+      clientId,
+      closeDate,
+      rejectMutation,
+      withdrawMutation,
+      closeMutation,
+      reactivateMutation,
+      undoRejectMutation,
+      undoWithdrawMutation,
+      onSuccess,
+    ],
   );
 
   const handleAssignStaff = useCallback(async () => {
@@ -235,7 +252,13 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
               {currentStaffId ? "Change Staff" : "Assign Staff"}
             </Button>
             {currentStaffId && (
-              <Button variant="outline" size="sm" onClick={handleUnassignStaff} className="text-gray-600" disabled={anyLoading}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUnassignStaff}
+                className="text-gray-600"
+                disabled={anyLoading}
+              >
                 <UserX className="mr-1 h-4 w-4" />
                 Unassign Staff
               </Button>
@@ -260,15 +283,33 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
         )}
         {isTransferInProgress && (
           <>
-            <Button variant="outline" size="sm" onClick={handleAcceptTransfer} className="text-emerald-600" disabled={anyLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAcceptTransfer}
+              className="text-emerald-600"
+              disabled={anyLoading}
+            >
               <CheckCircle2 className="mr-1 h-4 w-4" />
               Accept Transfer
             </Button>
-            <Button variant="outline" size="sm" onClick={handleRejectTransfer} className="text-red-600" disabled={anyLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRejectTransfer}
+              className="text-red-600"
+              disabled={anyLoading}
+            >
               <XCircle className="mr-1 h-4 w-4" />
               Reject Transfer
             </Button>
-            <Button variant="outline" size="sm" onClick={handleWithdrawTransfer} className="text-amber-600" disabled={anyLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleWithdrawTransfer}
+              className="text-amber-600"
+              disabled={anyLoading}
+            >
               <Ban className="mr-1 h-4 w-4" />
               Withdraw Transfer
             </Button>
@@ -285,7 +326,9 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="closeDate">Closure Date</Label>
+              <label className="block text-sm font-medium" htmlFor="closeDate">
+                Closure Date
+              </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
             <Button onClick={() => handleCommand("close")} disabled={closeMutation.isPending} variant="destructive">
@@ -305,7 +348,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Staff (Loan Officer)</Label>
+              <label className="block text-sm font-medium">Staff (Loan Officer)</label>
               <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select staff" />
@@ -336,7 +379,9 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="savingsAccountId">Savings Account ID</Label>
+              <label className="block text-sm font-medium" htmlFor="savingsAccountId">
+                Savings Account ID
+              </label>
               <Input
                 id="savingsAccountId"
                 type="number"
@@ -362,7 +407,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Destination Office</Label>
+              <label className="block text-sm font-medium">Destination Office</label>
               <Select value={destinationOfficeId} onValueChange={setDestinationOfficeId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select office" />
@@ -377,14 +422,31 @@ const ClientCommands: FC<ClientCommandsProps> = ({ clientId, status, displayName
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="transferDate">Transfer Date</Label>
-              <Input id="transferDate" type="date" value={transferDate} onChange={(e) => setTransferDate(e.target.value)} />
+              <label className="block text-sm font-medium" htmlFor="transferDate">
+                Transfer Date
+              </label>
+              <Input
+                id="transferDate"
+                type="date"
+                value={transferDate}
+                onChange={(e) => setTransferDate(e.target.value)}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="transferNote">Note</Label>
-              <Input id="transferNote" value={transferNote} onChange={(e) => setTransferNote(e.target.value)} placeholder="Optional note" />
+              <label className="block text-sm font-medium" htmlFor="transferNote">
+                Note
+              </label>
+              <Input
+                id="transferNote"
+                value={transferNote}
+                onChange={(e) => setTransferNote(e.target.value)}
+                placeholder="Optional note"
+              />
             </div>
-            <Button onClick={handleProposeTransfer} disabled={!destinationOfficeId || proposeTransferMutation.isPending}>
+            <Button
+              onClick={handleProposeTransfer}
+              disabled={!destinationOfficeId || proposeTransferMutation.isPending}
+            >
               {proposeTransferMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Propose Transfer
             </Button>

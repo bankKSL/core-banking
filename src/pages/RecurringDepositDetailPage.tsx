@@ -599,7 +599,9 @@ const RecurringDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="closeDate">Closure Date</Label>
+              <label className="block text-sm font-medium" htmlFor="closeDate">
+                Closure Date
+              </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
             <Button onClick={handleClose} disabled={acting} variant="destructive">
@@ -619,11 +621,11 @@ const RecurringDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Amount</Label>
+              <label className="block text-sm font-medium">Amount</label>
               <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Date</Label>
+              <label className="block text-sm font-medium">Date</label>
               <Input type="date" value={depositDate} onChange={(e) => setDepositDate(e.target.value)} />
             </div>
             <Button onClick={handleDeposit} disabled={!depositAmount || makeTxnMutation.isPending}>
@@ -643,11 +645,11 @@ const RecurringDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Amount</Label>
+              <label className="block text-sm font-medium">Amount</label>
               <Input type="number" value={withdrawalAmount} onChange={(e) => setWithdrawalAmount(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Date</Label>
+              <label className="block text-sm font-medium">Date</label>
               <Input type="date" value={withdrawalDate} onChange={(e) => setWithdrawalDate(e.target.value)} />
             </div>
             <Button
@@ -671,7 +673,7 @@ const RecurringDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>New Recurring Amount</Label>
+              <label className="block text-sm font-medium">New Recurring Amount</label>
               <Input
                 type="number"
                 value={newRecurringAmount}
@@ -680,7 +682,7 @@ const RecurringDepositDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Effective Date</Label>
+              <label className="block text-sm font-medium">Effective Date</label>
               <Input type="date" value={effectiveDate} onChange={(e) => setEffectiveDate(e.target.value)} />
             </div>
             <Button onClick={handleUpdateAmount} disabled={!newRecurringAmount || commandMutation.isPending}>

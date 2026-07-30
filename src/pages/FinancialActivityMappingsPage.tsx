@@ -118,7 +118,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-[1fr_1fr_auto] items-end gap-4">
             <div className="space-y-1.5">
-              <Label>Financial Activity *</Label>
+              <label className="block text-sm font-medium">Financial Activity *</label>
               <Select
                 value={financialActivityId ? String(financialActivityId) : ""}
                 onValueChange={(v) => setFinancialActivityId(Number(v))}
@@ -136,7 +136,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>GL Account *</Label>
+              <label className="block text-sm font-medium">GL Account *</label>
               <Select value={glAccountId ? String(glAccountId) : ""} onValueChange={(v) => setGlAccountId(Number(v))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select account" />

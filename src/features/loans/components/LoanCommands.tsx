@@ -411,13 +411,17 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="commandDate">{dateCommand === "approve" ? "Approval Date" : "Disbursement Date"}</Label>
+              <label className="block text-sm font-medium" htmlFor="commandDate">
+                {dateCommand === "approve" ? "Approval Date" : "Disbursement Date"}
+              </label>
               <Input id="commandDate" type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
             </div>
             {dateCommand === "approve" && (
               <>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="approvedAmount">Approved Amount</Label>
+                  <label className="block text-sm font-medium" htmlFor="approvedAmount">
+                    Approved Amount
+                  </label>
                   <Input
                     id="approvedAmount"
                     type="number"
@@ -427,7 +431,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="expectedDisbDate">Expected Disbursement Date</Label>
+                  <label className="block text-sm font-medium" htmlFor="expectedDisbDate">
+                    Expected Disbursement Date
+                  </label>
                   <Input
                     id="expectedDisbDate"
                     type="date"
@@ -439,7 +445,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
             )}
             {dateCommand === "disburse" && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="disbAmount">Transaction Amount</Label>
+                <label className="block text-sm font-medium" htmlFor="disbAmount">
+                  Transaction Amount
+                </label>
                 <Input
                   id="disbAmount"
                   type="number"
@@ -450,7 +458,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="commandNote">Note</Label>
+              <label className="block text-sm font-medium" htmlFor="commandNote">
+                Note
+              </label>
               <Textarea
                 id="commandNote"
                 rows={2}

@@ -102,7 +102,9 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pauseStartDate">Start Date *</Label>
+              <label className="block text-sm font-medium" htmlFor="pauseStartDate">
+                Start Date *
+              </label>
               <Input
                 id="pauseStartDate"
                 type="date"
@@ -112,7 +114,9 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pauseEndDate">End Date *</Label>
+              <label className="block text-sm font-medium" htmlFor="pauseEndDate">
+                End Date *
+              </label>
               <Input
                 id="pauseEndDate"
                 type="date"

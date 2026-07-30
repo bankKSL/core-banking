@@ -137,7 +137,9 @@ const GroupDetailPage: FC = () => {
     try {
       await deleteMutation.mutateAsync(group.id);
       navigate("/groups");
-    } catch { /* handled */ }
+    } catch {
+      /* handled */
+    }
   }, [group, deleteMutation, navigate]);
 
   const onCloseSubmit = useCallback(
@@ -154,11 +156,14 @@ const GroupDetailPage: FC = () => {
     [group, closeMutation, closeForm, refetch],
   );
 
-  const handleRemoveClient = useCallback(async (clientId: number) => {
-    if (!group?.id) return;
-    await disassociateMutation.mutateAsync({ groupId: group.id, clientIds: [clientId] });
-    refetch();
-  }, [group, disassociateMutation, refetch]);
+  const handleRemoveClient = useCallback(
+    async (clientId: number) => {
+      if (!group?.id) return;
+      await disassociateMutation.mutateAsync({ groupId: group.id, clientIds: [clientId] });
+      refetch();
+    },
+    [group, disassociateMutation, refetch],
+  );
 
   const onAddClientSubmit = useCallback(
     async (values: { clientId: string }) => {
@@ -204,11 +209,14 @@ const GroupDetailPage: FC = () => {
     [group, assignRoleMutation, assignRoleForm, refetch],
   );
 
-  const handleUnassignRole = useCallback(async (role: GroupRoleData) => {
-    if (!group?.id) return;
-    await unassignRoleMutation.mutateAsync({ groupId: group.id, roleId: role.id });
-    refetch();
-  }, [group, unassignRoleMutation, refetch]);
+  const handleUnassignRole = useCallback(
+    async (role: GroupRoleData) => {
+      if (!group?.id) return;
+      await unassignRoleMutation.mutateAsync({ groupId: group.id, roleId: role.id });
+      refetch();
+    },
+    [group, unassignRoleMutation, refetch],
+  );
 
   const filteredClients = clientMembers.filter(
     (c) => !clientSearch || c.displayName?.toLowerCase().includes(clientSearch.toLowerCase()),
@@ -255,7 +263,10 @@ const GroupDetailPage: FC = () => {
           variant="outline"
           size="sm"
           className="text-red-600 border-red-200 hover:bg-red-50"
-          onClick={(e) => { e.stopPropagation(); handleRemoveClient(r.id); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemoveClient(r.id);
+          }}
           disabled={disassociateMutation.isPending}
         >
           <UserX className="mr-1 h-3.5 w-3.5" />
@@ -279,7 +290,10 @@ const GroupDetailPage: FC = () => {
           variant="outline"
           size="sm"
           className="text-red-600 border-red-200 hover:bg-red-50"
-          onClick={(e) => { e.stopPropagation(); handleUnassignRole(r); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleUnassignRole(r);
+          }}
           disabled={unassignRoleMutation.isPending}
         >
           <ShieldX className="mr-1 h-3.5 w-3.5" />
@@ -385,7 +399,9 @@ const GroupDetailPage: FC = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">Activation Date</span>
-              <span className="text-sm font-medium">{formatDate(group.activationDate ?? group.timeline?.activatedOnDate)}</span>
+              <span className="text-sm font-medium">
+                {formatDate(group.activationDate ?? group.timeline?.activatedOnDate)}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -400,7 +416,9 @@ const GroupDetailPage: FC = () => {
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">Submitted On</span>
-              <span className="text-sm font-medium">{formatDate(group.submittedDate ?? group.timeline?.submittedOnDate)}</span>
+              <span className="text-sm font-medium">
+                {formatDate(group.submittedDate ?? group.timeline?.submittedOnDate)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">Activated On</span>
@@ -413,7 +431,9 @@ const GroupDetailPage: FC = () => {
             {group.collectionMeetingCalendar && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Meeting Calendar</span>
-                <span className="text-sm font-medium">{group.collectionMeetingCalendar.title ?? `#${group.collectionMeetingCalendar.id}`}</span>
+                <span className="text-sm font-medium">
+                  {group.collectionMeetingCalendar.title ?? `#${group.collectionMeetingCalendar.id}`}
+                </span>
               </div>
             )}
           </CardContent>
@@ -476,7 +496,12 @@ const GroupDetailPage: FC = () => {
             {isActive && (
               <>
                 {group.staffId ? (
-                  <Button variant="outline" size="sm" onClick={handleUnassignStaff} disabled={unassignStaffMutation.isPending}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUnassignStaff}
+                    disabled={unassignStaffMutation.isPending}
+                  >
                     <UserX className="mr-1 h-4 w-4" />
                     Unassign Staff
                   </Button>
@@ -493,7 +518,9 @@ const GroupDetailPage: FC = () => {
         <CardContent>
           <p className="text-sm text-gray-700 dark:text-gray-300">
             {group.staffName ? (
-              <>Current staff: <span className="font-medium">{group.staffName}</span></>
+              <>
+                Current staff: <span className="font-medium">{group.staffName}</span>
+              </>
             ) : (
               "No staff assigned to this group."
             )}
@@ -537,10 +564,14 @@ const GroupDetailPage: FC = () => {
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Closure Date</label>
-                <Input type="date" {...closeForm.register("closureDate")} error={closeForm.formState.errors.closureDate?.message} />
+                <Input
+                  type="date"
+                  {...closeForm.register("closureDate")}
+                  error={closeForm.formState.errors.closureDate?.message}
+                />
               </div>
               <div className="space-y-1.5">
-                <Label>Closure Reason</Label>
+                <label cursor-pointer>Closure Reason</label>
                 <Controller
                   name="closureReasonId"
                   control={closeForm.control}
@@ -551,7 +582,9 @@ const GroupDetailPage: FC = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {closureReasons.map((r: GroupClosureReason) => (
-                          <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                          <SelectItem key={r.id} value={String(r.id)}>
+                            {r.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -563,7 +596,15 @@ const GroupDetailPage: FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowCloseDialog(false); closeForm.reset(); }}>Cancel</Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCloseDialog(false);
+                  closeForm.reset();
+                }}
+              >
+                Cancel
+              </Button>
               <Button type="submit" disabled={closeMutation.isPending}>
                 {closeMutation.isPending ? "Closing..." : "Close Group"}
               </Button>
@@ -575,7 +616,9 @@ const GroupDetailPage: FC = () => {
       {associateMutation.isError && (
         <ErrorState
           title="Failed to add client"
-          message={associateMutation.error instanceof Error ? associateMutation.error.message : "An unexpected error occurred."}
+          message={
+            associateMutation.error instanceof Error ? associateMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => associateMutation.reset()}
         />
       )}
@@ -588,7 +631,7 @@ const GroupDetailPage: FC = () => {
           <form onSubmit={addClientForm.handleSubmit(onAddClientSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <Label>Search Client</Label>
+                <label cursor-pointer>Search Client</label>
                 <Input
                   placeholder="Type to search..."
                   value={clientSearch}
@@ -596,7 +639,7 @@ const GroupDetailPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Select Client</Label>
+                <label cursor-pointer>Select Client</label>
                 <Controller
                   name="clientId"
                   control={addClientForm.control}
@@ -608,10 +651,14 @@ const GroupDetailPage: FC = () => {
                       <SelectContent>
                         {filteredClients.length > 0 ? (
                           filteredClients.map((c) => (
-                            <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
+                            <SelectItem key={c.id} value={String(c.id)}>
+                              {c.displayName ?? `#${c.id}`}
+                            </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>No clients found</SelectItem>
+                          <SelectItem value="" disabled>
+                            No clients found
+                          </SelectItem>
                         )}
                       </SelectContent>
                     </Select>
@@ -623,7 +670,14 @@ const GroupDetailPage: FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowAddClientDialog(false); addClientForm.reset(); setClientSearch(""); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddClientDialog(false);
+                  addClientForm.reset();
+                  setClientSearch("");
+                }}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={addClientForm.watch("clientId") === "" || associateMutation.isPending}>
@@ -637,7 +691,11 @@ const GroupDetailPage: FC = () => {
       {assignStaffMutation.isError && (
         <ErrorState
           title="Failed to assign staff"
-          message={assignStaffMutation.error instanceof Error ? assignStaffMutation.error.message : "An unexpected error occurred."}
+          message={
+            assignStaffMutation.error instanceof Error
+              ? assignStaffMutation.error.message
+              : "An unexpected error occurred."
+          }
           onRetry={() => assignStaffMutation.reset()}
         />
       )}
@@ -660,7 +718,13 @@ const GroupDetailPage: FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowAssignStaffDialog(false); assignStaffForm.reset(); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAssignStaffDialog(false);
+                  assignStaffForm.reset();
+                }}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={assignStaffMutation.isPending}>
@@ -674,7 +738,11 @@ const GroupDetailPage: FC = () => {
       {assignRoleMutation.isError && (
         <ErrorState
           title="Failed to assign role"
-          message={assignRoleMutation.error instanceof Error ? assignRoleMutation.error.message : "An unexpected error occurred."}
+          message={
+            assignRoleMutation.error instanceof Error
+              ? assignRoleMutation.error.message
+              : "An unexpected error occurred."
+          }
           onRetry={() => assignRoleMutation.reset()}
         />
       )}
@@ -687,7 +755,7 @@ const GroupDetailPage: FC = () => {
           <form onSubmit={assignRoleForm.handleSubmit(onAssignRoleSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <Label>Client</Label>
+                <label cursor-pointer>Client</label>
                 <Controller
                   name="clientId"
                   control={assignRoleForm.control}
@@ -698,7 +766,9 @@ const GroupDetailPage: FC = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {clientMembers.map((c) => (
-                          <SelectItem key={c.id} value={String(c.id)}>{c.displayName ?? `#${c.id}`}</SelectItem>
+                          <SelectItem key={c.id} value={String(c.id)}>
+                            {c.displayName ?? `#${c.id}`}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -719,7 +789,13 @@ const GroupDetailPage: FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowAssignRoleDialog(false); assignRoleForm.reset(); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAssignRoleDialog(false);
+                  assignRoleForm.reset();
+                }}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={assignRoleMutation.isPending}>
@@ -733,7 +809,9 @@ const GroupDetailPage: FC = () => {
       {deleteMutation.isError && (
         <ErrorState
           title="Failed to delete group"
-          message={deleteMutation.error instanceof Error ? deleteMutation.error.message : "An unexpected error occurred."}
+          message={
+            deleteMutation.error instanceof Error ? deleteMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => deleteMutation.reset()}
         />
       )}

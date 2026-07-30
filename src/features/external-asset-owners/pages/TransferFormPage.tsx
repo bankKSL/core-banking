@@ -110,7 +110,7 @@ const TransferFormPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Transfer Type *</Label>
+              <label className="block text-sm font-medium">Transfer Type *</label>
               <Select value={transferType} onValueChange={(v) => handleTypeChange(v as TransferType)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -125,10 +125,7 @@ const TransferFormPage: FC = () => {
               </Select>
             </div>
 
-            <LoanSearch
-              value={Number(loanId) || 0}
-              onChange={(id) => setLoanId(String(id))}
-            />
+            <LoanSearch value={Number(loanId) || 0} onChange={(id) => setLoanId(String(id))} />
 
             {isSale && (
               <>
@@ -143,7 +140,11 @@ const TransferFormPage: FC = () => {
 
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Purchase Price Ratio *</label>
-                  <Input {...register("purchasePriceRatio")} placeholder="e.g. 1.23456789" error={errors.purchasePriceRatio?.message} />
+                  <Input
+                    {...register("purchasePriceRatio")}
+                    placeholder="e.g. 1.23456789"
+                    error={errors.purchasePriceRatio?.message}
+                  />
                 </div>
 
                 <div className="space-y-1.5">
@@ -161,9 +162,7 @@ const TransferFormPage: FC = () => {
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Transfer External ID</label>
               <Input {...register("transferExternalId")} placeholder="Auto-generated if empty" />
-              <p className="text-xs text-gray-500">
-                Optional. A unique external ID will be generated if not provided.
-              </p>
+              <p className="text-xs text-gray-500">Optional. A unique external ID will be generated if not provided.</p>
             </div>
           </CardContent>
         </Card>

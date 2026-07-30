@@ -1,26 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  useCalendars,
-  useMeetingTemplate,
-  useCreateMeeting,
-} from "../hooks/useCalendars";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCalendars, useMeetingTemplate, useCreateMeeting } from "../hooks/useCalendars";
 import type { MeetingData } from "../api/calendars";
 
 interface MeetingFormDialogProps {
@@ -39,13 +23,7 @@ const ATTENDANCE_TYPE_LABELS: Record<number, string> = {
   5: "Late",
 };
 
-const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({
-  entityType,
-  entityId,
-  open,
-  onOpenChange,
-  meeting,
-}) => {
+const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entityId, open, onOpenChange, meeting }) => {
   const isEdit = !!meeting;
   const { data: calendars, isLoading: calendarsLoading } = useCalendars(entityType, entityId);
   const createMutation = useCreateMeeting();
@@ -102,7 +80,11 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({
     };
 
     try {
-      await createMutation.mutateAsync({ entityType, entityId, payload: payload as unknown as Record<string, unknown> });
+      await createMutation.mutateAsync({
+        entityType,
+        entityId,
+        payload: payload as unknown as Record<string, unknown>,
+      });
       onOpenChange(false);
     } catch {
       /* error handled by react-query */
@@ -120,8 +102,8 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div>
-            <Label>Calendar *</Label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Calendar *</label>
             <Select
               value={selectedCalendarId ? String(selectedCalendarId) : ""}
               onValueChange={(v) => {
@@ -144,8 +126,8 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({
           </div>
 
           {selectedCalendarId && (
-            <div>
-              <Label>Meeting Date *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Meeting Date *</label>
               <Select value={selectedDate ?? ""} onValueChange={setSelectedDate} disabled={templateLoading}>
                 <SelectTrigger>
                   <SelectValue placeholder={templateLoading ? "Loading dates..." : "Select date"} />
@@ -166,16 +148,14 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({
           )}
 
           {selectedDate && template?.clients && (
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Client Attendance</Label>
+            <div className="space-y-1.5">
+              <label className="text-base font-semibold">Client Attendance</label>
               {template.clients.map((client) => (
                 <div key={client.id} className="flex items-center justify-between gap-4">
                   <span className="text-sm flex-1">{client.displayName}</span>
                   <Select
                     value={String(attendance[client.id] ?? 1)}
-                    onValueChange={(v) =>
-                      setAttendance((prev) => ({ ...prev, [client.id]: Number(v) }))
-                    }
+                    onValueChange={(v) => setAttendance((prev) => ({ ...prev, [client.id]: Number(v) }))}
                   >
                     <SelectTrigger className="w-36">
                       <SelectValue />

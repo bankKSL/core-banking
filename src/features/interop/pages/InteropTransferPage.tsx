@@ -147,7 +147,7 @@ const InteropTransferPage: FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Transaction Role *</Label>
+                  <label className="block text-sm font-medium">Transaction Role *</label>
                   <Select onValueChange={(v) => setValue("transactionRole", v)} defaultValue="PAYER">
                     <SelectTrigger>
                       <SelectValue />
@@ -159,7 +159,7 @@ const InteropTransferPage: FC = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label>Scenario *</Label>
+                  <label className="block text-sm font-medium">Scenario *</label>
                   <Select onValueChange={(v) => setValue("scenario", v)} defaultValue="TRANSFER">
                     <SelectTrigger>
                       <SelectValue />
@@ -176,7 +176,7 @@ const InteropTransferPage: FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Initiator *</Label>
+                  <label className="block text-sm font-medium">Initiator *</label>
                   <Select onValueChange={(v) => setValue("initiator", v)} defaultValue="PAYER">
                     <SelectTrigger>
                       <SelectValue />
@@ -188,7 +188,7 @@ const InteropTransferPage: FC = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label>Initiator Type *</Label>
+                  <label className="block text-sm font-medium">Initiator Type *</label>
                   <Select onValueChange={(v) => setValue("initiatorType", v)} defaultValue="CONSUMER">
                     <SelectTrigger>
                       <SelectValue />

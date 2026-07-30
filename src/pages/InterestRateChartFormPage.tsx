@@ -228,11 +228,11 @@ const InterestRateChartFormPage: React.FC = () => {
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="col-span-2 space-y-1.5">
-            <Label>Name *</Label>
+            <label className="block text-sm font-medium">Name *</label>
             <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Description</Label>
+            <label className="block text-sm font-medium">Description</label>
             <Textarea
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
@@ -241,7 +241,7 @@ const InterestRateChartFormPage: React.FC = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>From Date *</Label>
+            <label className="block text-sm font-medium">From Date *</label>
             <Input
               type="date"
               value={form.fromDate}
@@ -250,7 +250,7 @@ const InterestRateChartFormPage: React.FC = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>End Date</Label>
+            <label className="block text-sm font-medium">End Date</label>
             <Input type="date" value={form.endDate} onChange={(e) => updateForm("endDate", e.target.value)} />
           </div>
         </CardContent>
@@ -306,7 +306,7 @@ const InterestRateChartFormPage: React.FC = () => {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2 space-y-1.5">
-              <Label>Description</Label>
+              <label className="block text-sm font-medium">Description</label>
               <Input
                 value={slabForm.description}
                 onChange={(e) => setSlabForm((f) => ({ ...f, description: e.target.value }))}
@@ -314,7 +314,7 @@ const InterestRateChartFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Period Type</Label>
+              <label className="block text-sm font-medium">Period Type</label>
               <Select value={slabForm.periodType} onValueChange={(v) => setSlabForm((f) => ({ ...f, periodType: v }))}>
                 <SelectTrigger>
                   <SelectValue />
@@ -329,7 +329,7 @@ const InterestRateChartFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Annual Rate (%)</Label>
+              <label className="block text-sm font-medium">Annual Rate (%)</label>
               <Input
                 type="number"
                 step="0.01"
@@ -338,7 +338,7 @@ const InterestRateChartFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>From Period</Label>
+              <label className="block text-sm font-medium">From Period</label>
               <Input
                 type="number"
                 value={slabForm.fromPeriod ?? ""}
@@ -348,7 +348,7 @@ const InterestRateChartFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>To Period</Label>
+              <label className="block text-sm font-medium">To Period</label>
               <Input
                 type="number"
                 value={slabForm.toPeriod ?? ""}

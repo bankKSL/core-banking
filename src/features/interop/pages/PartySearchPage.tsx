@@ -62,7 +62,7 @@ const PartySearchPage: FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Identifier Type *</Label>
+                <label className="block text-sm font-medium">Identifier Type *</label>
                 <Select onValueChange={(v) => setValue("idType", v)} defaultValue="MSISDN">
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />

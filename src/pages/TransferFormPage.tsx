@@ -178,8 +178,8 @@ const TransferFormPage: React.FC = () => {
 
     return (
       <div className="space-y-4">
-        <div>
-          <Label>Office *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">Office *</label>
           <Select
             value={state.officeId ? String(state.officeId) : ""}
             onValueChange={(v) => updateSide(side, "officeId", Number(v))}
@@ -196,8 +196,8 @@ const TransferFormPage: React.FC = () => {
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>Client *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">Client *</label>
           <Select
             value={state.clientId ? String(state.clientId) : ""}
             onValueChange={(v) => updateSide(side, "clientId", Number(v))}
@@ -215,8 +215,8 @@ const TransferFormPage: React.FC = () => {
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>Account Type *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">Account Type *</label>
           <Select
             value={state.accountType ? String(state.accountType) : ""}
             onValueChange={(v) => updateSide(side, "accountType", Number(v))}
@@ -234,8 +234,8 @@ const TransferFormPage: React.FC = () => {
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>Account *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">Account *</label>
           <Select
             value={state.accountId ? String(state.accountId) : ""}
             onValueChange={(v) => updateSide(side, "accountId", Number(v))}
@@ -292,10 +292,10 @@ const TransferFormPage: React.FC = () => {
         <Card className="mt-6">
           <CardContent className="pt-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="transferDate">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium" htmlFor="transferDate">
                   Transfer Date <span className="text-red-500">*</span>
-                </Label>
+                </label>
                 <Input
                   id="transferDate"
                   type="date"
@@ -303,10 +303,10 @@ const TransferFormPage: React.FC = () => {
                   error={errors.transferDate?.message}
                 />
               </div>
-              <div>
-                <Label htmlFor="transferAmount">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium" htmlFor="transferAmount">
                   Amount <span className="text-red-500">*</span>
-                </Label>
+                </label>
                 <Input
                   id="transferAmount"
                   type="number"
@@ -318,8 +318,10 @@ const TransferFormPage: React.FC = () => {
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="transferDescription">Description</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium" htmlFor="transferDescription">
+                Description
+              </label>
               <Textarea
                 id="transferDescription"
                 placeholder="Optional description"

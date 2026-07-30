@@ -35,9 +35,7 @@ const StaffFormPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
 
-  const { data: staffMember, isLoading: staffLoading, isError: staffError } = useStaff(
-    id ? Number(id) : undefined,
-  );
+  const { data: staffMember, isLoading: staffLoading, isError: staffError } = useStaff(id ? Number(id) : undefined);
   const createMutation = useCreateStaff();
   const updateMutation = useUpdateStaff();
 
@@ -88,9 +86,7 @@ const StaffFormPage: FC = () => {
       lastname: values.lastname,
       isLoanOfficer: values.isLoanOfficer ?? false,
       isActive: isEdit ? values.isActive : (values.isActive ?? true),
-      joiningDate: values.joiningDate
-        ? (currentDate(values.joiningDate) ?? values.joiningDate)
-        : undefined,
+      joiningDate: values.joiningDate ? (currentDate(values.joiningDate) ?? values.joiningDate) : undefined,
       mobileNo: values.mobileNo || undefined,
       emailAddress: values.emailAddress || undefined,
       externalId: values.externalId || undefined,
@@ -148,11 +144,7 @@ const StaffFormPage: FC = () => {
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Staff" : "New Staff"}
-        description={
-          isEdit
-            ? `Editing "${staffMember?.displayName ?? ""}"`
-            : "Create a new staff member"
-        }
+        description={isEdit ? `Editing "${staffMember?.displayName ?? ""}"` : "Create a new staff member"}
         actions={
           <Button variant="outline" onClick={() => navigate("/staff")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -194,9 +186,9 @@ const StaffFormPage: FC = () => {
                   checked={watch("isLoanOfficer")}
                   onCheckedChange={(checked) => setValue("isLoanOfficer", checked === true)}
                 />
-                <Label htmlFor="isLoanOfficer" className="cursor-pointer">
+                <label className="block text-sm font-medium cursor-pointer" htmlFor="isLoanOfficer">
                   Loan Officer
-                </Label>
+                </label>
               </div>
 
               <div className="flex items-center gap-2 pt-6">
@@ -205,9 +197,9 @@ const StaffFormPage: FC = () => {
                   checked={watch("isActive")}
                   onCheckedChange={(checked) => setValue("isActive", checked === true)}
                 />
-                <Label htmlFor="isActive" className="cursor-pointer">
+                <label className="block text-sm font-medium cursor-pointer" htmlFor="isActive">
                   Active
-                </Label>
+                </label>
               </div>
             </div>
 
@@ -218,27 +210,17 @@ const StaffFormPage: FC = () => {
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Mobile No</label>
-              <Input
-                {...register("mobileNo")}
-                placeholder="Enter mobile number"
-              />
+              <Input {...register("mobileNo")} placeholder="Enter mobile number" />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Email Address</label>
-              <Input
-                type="email"
-                {...register("emailAddress")}
-                placeholder="Enter email address"
-              />
+              <Input type="email" {...register("emailAddress")} placeholder="Enter email address" />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">External ID</label>
-              <Input
-                {...register("externalId")}
-                placeholder="Optional external identifier"
-              />
+              <Input {...register("externalId")} placeholder="Optional external identifier" />
             </div>
           </CardContent>
         </Card>

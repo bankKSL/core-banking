@@ -49,8 +49,8 @@ export function SavingProductSelect({
   }, []);
 
   return (
-    <div ref={ref} className="relative">
-      <Label>{label}</Label>
+    <div ref={ref} className="relative space-y-1.5">
+      <label className="block text-sm font-medium">{label}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />

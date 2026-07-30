@@ -115,8 +115,8 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
     disabled = false,
     disabledPlaceholder?: string,
   ) => (
-    <div>
-      <Label>{label}</Label>
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium">{label}</label>
       <Select value={value ? String(value) : ""} onValueChange={(v) => onChange(Number(v))} disabled={disabled}>
         <SelectTrigger>
           <SelectValue placeholder={disabled && disabledPlaceholder ? disabledPlaceholder : placeholder} />
@@ -145,8 +145,8 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
 
     return (
       <div className="space-y-4">
-        <div>
-          <Label>{side === "from" ? "From" : "To"} Office *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Office *</label>
           <Select
             value={state.officeId ? String(state.officeId) : ""}
             onValueChange={(v) => update("officeId", Number(v))}
@@ -163,8 +163,8 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>{side === "from" ? "From" : "To"} Client *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Client *</label>
           <Select
             value={state.clientId ? String(state.clientId) : ""}
             onValueChange={(v) => update("clientId", Number(v))}
@@ -182,8 +182,8 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>{side === "from" ? "From" : "To"} Account Type *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Account Type *</label>
           <Select
             value={state.accountType ? String(state.accountType) : ""}
             onValueChange={(v) => update("accountType", Number(v))}
@@ -201,8 +201,8 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>{side === "from" ? "From" : "To"} Account *</Label>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Account *</label>
           <Select
             value={state.accountId ? String(state.accountId) : ""}
             onValueChange={(v) => update("accountId", Number(v))}
@@ -275,11 +275,7 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Name *</label>
-              <Input
-                {...register("name")}
-                placeholder="e.g. Monthly savings transfer"
-                error={errors.name?.message}
-              />
+              <Input {...register("name")} placeholder="e.g. Monthly savings transfer" error={errors.name?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -346,8 +342,8 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
 
             {recurrenceType === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Recurrence Frequency *</Label>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">Recurrence Frequency *</label>
                   <Select
                     value={recurrenceFrequency != null ? String(recurrenceFrequency) : ""}
                     onValueChange={(v) => onRecurrenceFrequencyChange(Number(v))}

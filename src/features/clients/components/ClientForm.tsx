@@ -162,7 +162,9 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="officeId">Office *</Label>
+            <label className="block text-sm font-medium" htmlFor="officeId">
+              Office *
+            </label>
             <Select
               disabled={isSubmitting || mode === "edit"}
               value={client?.officeId ? String(client.officeId) : undefined}
@@ -182,7 +184,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             {errors.officeId && <p className="text-xs text-red-500">{errors.officeId.message}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label>Staff (Loan Officer)</Label>
+            <label className="block text-sm font-medium">Staff (Loan Officer)</label>
             <Select
               disabled={isSubmitting}
               value={client?.staffId ? String(client.staffId) : undefined}
@@ -215,7 +217,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             <Input {...register("externalId")} disabled={isSubmitting} maxLength={100} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label>Client Type</Label>
+            <label className="block text-sm font-medium">Client Type</label>
             <Select
               disabled={isSubmitting}
               onValueChange={(v) => setValue("clientTypeId", v === "" ? null : Number(v))}
@@ -234,7 +236,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label>Client Classification</Label>
+            <label className="block text-sm font-medium">Client Classification</label>
             <Select
               disabled={isSubmitting}
               onValueChange={(v) => setValue("clientClassificationId", v === "" ? null : Number(v))}
@@ -265,11 +267,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             <>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">First Name *</label>
-                <Input
-                  {...register("firstname")}
-                  disabled={isSubmitting}
-                  error={errors.firstname?.message}
-                />
+                <Input {...register("firstname")} disabled={isSubmitting} error={errors.firstname?.message} />
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Middle Name</label>
@@ -277,11 +275,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Last Name *</label>
-                <Input
-                  {...register("lastname")}
-                  disabled={isSubmitting}
-                  error={errors.lastname?.message}
-                />
+                <Input {...register("lastname")} disabled={isSubmitting} error={errors.lastname?.message} />
               </div>
             </>
           ) : (
@@ -306,7 +300,12 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Mobile No</label>
-            <Input {...register("mobileNo")} disabled={isSubmitting} placeholder="+1234567890" error={errors.mobileNo?.message} />
+            <Input
+              {...register("mobileNo")}
+              disabled={isSubmitting}
+              placeholder="+1234567890"
+              error={errors.mobileNo?.message}
+            />
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Email Address</label>
@@ -332,7 +331,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label>Gender</Label>
+            <label className="block text-sm font-medium">Gender</label>
             <Select
               disabled={isSubmitting}
               value={client?.gender?.id ? String(client.gender.id) : undefined}
@@ -357,7 +356,9 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               onCheckedChange={(v) => setValue("isStaff", v)}
               defaultChecked={client?.isStaff ?? false}
             />
-            <Label htmlFor="isStaff">Is Staff?</Label>
+            <label className="block text-sm font-medium" htmlFor="isStaff">
+              Is Staff?
+            </label>
           </div>
         </CardContent>
       </Card>
@@ -405,7 +406,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col gap-1.5">
-              <Label>Constitution</Label>
+              <label className="block text-sm font-medium">Constitution</label>
               <Select
                 disabled={isSubmitting}
                 onValueChange={(v) => setValue("clientNonPersonDetails.constitutionId", v === "" ? null : Number(v))}
@@ -428,10 +429,12 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               <Input {...register("clientNonPersonDetails.incorpNumber")} disabled={isSubmitting} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Main Business Line</Label>
+              <label className="block text-sm font-medium">Main Business Line</label>
               <Select
                 disabled={isSubmitting}
-                onValueChange={(v) => setValue("clientNonPersonDetails.mainBusinessLineId", v === "" ? null : Number(v))}
+                onValueChange={(v) =>
+                  setValue("clientNonPersonDetails.mainBusinessLineId", v === "" ? null : Number(v))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select business line" />
@@ -470,7 +473,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-1.5 max-w-xs">
-              <Label>Savings Product</Label>
+              <label className="block text-sm font-medium">Savings Product</label>
               <Select
                 disabled={isSubmitting}
                 onValueChange={(v) => setValue("savingsProductId", v === "" ? null : Number(v))}

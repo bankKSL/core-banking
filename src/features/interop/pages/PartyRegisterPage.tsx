@@ -65,7 +65,7 @@ const PartyRegisterPage: FC = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Identifier Type *</Label>
+                <label className="block text-sm font-medium">Identifier Type *</label>
                 <Select onValueChange={(v) => setValue("idType", v, { shouldValidate: true })} defaultValue="MSISDN">
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -87,7 +87,11 @@ const PartyRegisterPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Account External ID *</label>
-              <Input {...register("accountId")} placeholder="e.g. ext-uuid-account-id" error={errors.accountId?.message} />
+              <Input
+                {...register("accountId")}
+                placeholder="e.g. ext-uuid-account-id"
+                error={errors.accountId?.message}
+              />
               <p className="text-xs text-gray-500">
                 The external ID of the savings account to link this identifier to.
               </p>

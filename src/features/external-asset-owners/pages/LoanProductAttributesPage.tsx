@@ -145,7 +145,9 @@ const LoanProductAttributesPage: FC = () => {
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                   <div>
-                    <Label htmlFor="attributeKey">Attribute Key *</Label>
+                    <label className="block text-sm font-medium" htmlFor="attributeKey">
+                      Attribute Key *
+                    </label>
                     <Select
                       value={watch("attributeKey")}
                       onValueChange={(v) => setValue("attributeKey", v, { shouldValidate: true })}
@@ -195,7 +197,11 @@ const LoanProductAttributesPage: FC = () => {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Input {...register("attributeValue")} placeholder="Enter value" error={errors.attributeValue?.message} />
+                      <Input
+                        {...register("attributeValue")}
+                        placeholder="Enter value"
+                        error={errors.attributeValue?.message}
+                      />
                     )}
                   </div>
                   <div className="flex justify-end gap-3 pt-2">

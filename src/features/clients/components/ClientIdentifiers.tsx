@@ -184,7 +184,7 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Document Type</Label>
+              <label className="block text-sm font-medium">Document Type</label>
               <Select
                 defaultValue={String(template?.allowedDocumentTypes?.[0]?.id ?? "")}
                 onValueChange={(v) => setValue("documentTypeId", Number(v), { shouldValidate: true })}
@@ -204,7 +204,11 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Document Key</label>
-              <Input {...register("documentKey")} placeholder="e.g. passport number" error={errors.documentKey?.message} />
+              <Input
+                {...register("documentKey")}
+                placeholder="e.g. passport number"
+                error={errors.documentKey?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Description</label>

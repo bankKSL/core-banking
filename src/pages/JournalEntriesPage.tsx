@@ -168,7 +168,7 @@ const JournalEntriesPage: React.FC = () => {
           <CardTitle>Entries</CardTitle>
           <div className="flex items-end gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">Office</Label>
+              <label className="block text-sm font-medium">Office</label>
               <OfficeSelect
                 value={officeFilter}
                 onChange={(v) => {
@@ -179,7 +179,7 @@ const JournalEntriesPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">From</Label>
+              <label className="block text-sm font-medium">From</label>
               <Input
                 type="date"
                 value={fromDate}
@@ -191,7 +191,7 @@ const JournalEntriesPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">To</Label>
+              <label className="block text-sm font-medium">To</label>
               <Input
                 type="date"
                 value={toDate}
@@ -203,7 +203,7 @@ const JournalEntriesPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Source</Label>
+              <label className="block text-sm font-medium">Source</label>
               <Select
                 value={manualOnly}
                 onValueChange={(v) => {

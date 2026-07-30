@@ -322,8 +322,8 @@ const ShareProductFormPage: FC = () => {
                 <label className="block text-sm font-medium">Lock-in Period Frequency</label>
                 <Input type="number" {...register("lockinPeriodFrequency")} />
               </div>
-              <div>
-                <Label>Lock-in Period Type</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Lock-in Period Type</label>
                 <Select
                   value={watch("lockinPeriodFrequencyType")}
                   onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}

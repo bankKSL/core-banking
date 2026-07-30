@@ -179,7 +179,7 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Collateral Type {editingId ? "" : "*"}</Label>
+              <label className="block text-sm font-medium">Collateral Type {editingId ? "" : "*"}</label>
               <Select
                 defaultValue={
                   editingId
@@ -208,7 +208,12 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Quantity *</label>
-              <Input type="number" step="0.01" {...register("quantity", { valueAsNumber: true })} error={errors.quantity?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("quantity", { valueAsNumber: true })}
+                error={errors.quantity?.message}
+              />
             </div>
             <Button
               type="submit"

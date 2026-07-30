@@ -228,7 +228,7 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label>Relationship *</Label>
+                <label className="block text-sm font-medium">Relationship *</label>
                 <Select onValueChange={(v) => setValue("relationshipId", Number(v), { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />
@@ -244,7 +244,7 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
                 {errors.relationshipId && <p className="text-xs text-red-500">{errors.relationshipId.message}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Gender *</Label>
+                <label className="block text-sm font-medium">Gender *</label>
                 <Select onValueChange={(v) => setValue("genderId", Number(v), { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />
@@ -272,7 +272,9 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
             </div>
             <div className="flex items-center gap-2">
               <Switch id="isDependent" onCheckedChange={(v) => setValue("isDependent", v)} />
-              <Label htmlFor="isDependent">Is Dependent</Label>
+              <label className="block text-sm font-medium" htmlFor="isDependent">
+                Is Dependent
+              </label>
             </div>
             <Button
               type="submit"

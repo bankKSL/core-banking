@@ -737,7 +737,9 @@ const DepositAccountDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="holdAmount">Amount *</Label>
+              <label className="block text-sm font-medium" htmlFor="holdAmount">
+                Amount *
+              </label>
               <Input
                 id="holdAmount"
                 type="number"
@@ -747,11 +749,15 @@ const DepositAccountDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="holdDate">Date *</Label>
+              <label className="block text-sm font-medium" htmlFor="holdDate">
+                Date *
+              </label>
               <Input id="holdDate" type="date" value={holdDate} onChange={(e) => setHoldDate(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="holdReason">Reason *</Label>
+              <label className="block text-sm font-medium" htmlFor="holdReason">
+                Reason *
+              </label>
               <Input
                 id="holdReason"
                 value={holdReason}
@@ -803,7 +809,9 @@ const DepositAccountDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="fwAmount">Amount *</Label>
+              <label className="block text-sm font-medium" htmlFor="fwAmount">
+                Amount *
+              </label>
               <Input
                 id="fwAmount"
                 type="number"
@@ -813,7 +821,9 @@ const DepositAccountDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="fwDate">Date *</Label>
+              <label className="block text-sm font-medium" htmlFor="fwDate">
+                Date *
+              </label>
               <Input id="fwDate" type="date" value={fwDate} onChange={(e) => setFwDate(e.target.value)} />
             </div>
             <Button onClick={handleForceWithdrawal} disabled={!fwAmount || forceWithdrawalMutation.isPending}>
@@ -833,7 +843,7 @@ const DepositAccountDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Officer *</Label>
+              <label className="block text-sm font-medium">Officer *</label>
               <Select onValueChange={setSelectedOfficerId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select officer" />
@@ -865,11 +875,15 @@ const DepositAccountDetailPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex gap-4">
               <div className="flex flex-col gap-1.5 flex-1">
-                <Label htmlFor="searchFrom">From Date</Label>
+                <label className="block text-sm font-medium" htmlFor="searchFrom">
+                  From Date
+                </label>
                 <Input id="searchFrom" type="date" value={searchFrom} onChange={(e) => setSearchFrom(e.target.value)} />
               </div>
               <div className="flex flex-col gap-1.5 flex-1">
-                <Label htmlFor="searchTo">To Date</Label>
+                <label className="block text-sm font-medium" htmlFor="searchTo">
+                  To Date
+                </label>
                 <Input id="searchTo" type="date" value={searchTo} onChange={(e) => setSearchTo(e.target.value)} />
               </div>
             </div>

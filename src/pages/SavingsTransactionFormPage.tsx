@@ -137,7 +137,9 @@ const SavingsTransactionFormPage: FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="amount">Transaction Amount *</Label>
+              <label className="block text-sm font-medium" htmlFor="amount">
+                Transaction Amount *
+              </label>
               <Input
                 id="amount"
                 type="number"
@@ -149,7 +151,9 @@ const SavingsTransactionFormPage: FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="transactionDate">Transaction Date *</Label>
+              <label className="block text-sm font-medium" htmlFor="transactionDate">
+                Transaction Date *
+              </label>
               <Input
                 id="transactionDate"
                 type="date"
@@ -158,7 +162,9 @@ const SavingsTransactionFormPage: FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="paymentTypeId">Payment Type *</Label>
+              <label className="block text-sm font-medium" htmlFor="paymentTypeId">
+                Payment Type *
+              </label>
               <div>
                 <Select
                   value={paymentTypeId}
@@ -178,7 +184,9 @@ const SavingsTransactionFormPage: FC = () => {
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="note">Note</Label>
+              <label className="block text-sm font-medium" htmlFor="note">
+                Note
+              </label>
               <Textarea id="note" rows={3} {...register("note")} placeholder="Optional note..." />
             </div>
             <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">

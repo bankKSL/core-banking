@@ -139,12 +139,16 @@ const EmailCampaignFormPage: FC = () => {
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Campaign Name *</label>
-              <Input {...register("campaignName")} placeholder="e.g. Monthly Statement" error={errors.campaignName?.message} />
+              <Input
+                {...register("campaignName")}
+                placeholder="e.g. Monthly Statement"
+                error={errors.campaignName?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Campaign Type *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Campaign Type *</label>
                 <Select
                   value={watch("campaignType")}
                   onValueChange={(v) => setValue("campaignType", v, { shouldValidate: true })}
@@ -162,8 +166,8 @@ const EmailCampaignFormPage: FC = () => {
                 </Select>
               </div>
 
-              <div>
-                <Label>Business Rule *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Business Rule *</label>
                 <Select
                   value={watch("businessRuleId")}
                   onValueChange={(v) => setValue("businessRuleId", v, { shouldValidate: true })}
@@ -190,11 +194,17 @@ const EmailCampaignFormPage: FC = () => {
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Subject *</label>
-              <Input {...register("emailSubject")} placeholder="e.g. Your Monthly Statement" error={errors.emailSubject?.message} />
+              <Input
+                {...register("emailSubject")}
+                placeholder="e.g. Your Monthly Statement"
+                error={errors.emailSubject?.message}
+              />
             </div>
 
-            <div>
-              <Label htmlFor="emailMessage">Message *</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium" htmlFor="emailMessage">
+                Message *
+              </label>
               <Textarea
                 id="emailMessage"
                 {...register("emailMessage")}
@@ -204,8 +214,8 @@ const EmailCampaignFormPage: FC = () => {
               {errors.emailMessage && <p className="text-xs text-red-500 mt-1">{errors.emailMessage.message}</p>}
             </div>
 
-            <div>
-              <Label>Attachment Format</Label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Attachment Format</label>
               <Select
                 value={watch("emailAttachmentFileFormatId")}
                 onValueChange={(v) => setValue("emailAttachmentFileFormatId", v)}

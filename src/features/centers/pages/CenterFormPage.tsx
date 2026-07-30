@@ -167,7 +167,12 @@ const CenterFormPage: FC = () => {
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Name *</label>
-              <Input {...register("name")} disabled={isSubmitting} placeholder="e.g. Downtown Center" error={errors.name?.message} />
+              <Input
+                {...register("name")}
+                disabled={isSubmitting}
+                placeholder="e.g. Downtown Center"
+                error={errors.name?.message}
+              />
             </div>
 
             <OfficeSelect
@@ -178,7 +183,9 @@ const CenterFormPage: FC = () => {
             />
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="staffId">Staff</Label>
+              <label className="block text-sm font-medium" htmlFor="staffId">
+                Staff
+              </label>
               <Select
                 value={watch("staffId") ? String(watch("staffId")) : ""}
                 onValueChange={(v) => setValue("staffId", v ? Number(v) : "")}
@@ -212,16 +219,21 @@ const CenterFormPage: FC = () => {
                   onCheckedChange={(checked) => setValue("active", checked === true)}
                   disabled={isSubmitting}
                 />
-                <Label htmlFor="active" className="cursor-pointer">
+                <label className="block text-sm font-medium cursor-pointer" htmlFor="active">
                   Active
-                </Label>
+                </label>
               </div>
             )}
 
             {!isEditMode && active && (
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Activation Date *</label>
-                <Input type="date" {...register("activationDate")} disabled={isSubmitting} error={errors.activationDate?.message} />
+                <Input
+                  type="date"
+                  {...register("activationDate")}
+                  disabled={isSubmitting}
+                  error={errors.activationDate?.message}
+                />
               </div>
             )}
 

@@ -118,7 +118,12 @@ const GroupForm: FC<GroupFormProps> = ({
           {!isEditMode && (
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} disabled={isSubmitting} placeholder="Optional" error={errors.externalId?.message} />
+              <Input
+                {...register("externalId")}
+                disabled={isSubmitting}
+                placeholder="Optional"
+                error={errors.externalId?.message}
+              />
             </div>
           )}
 
@@ -130,16 +135,21 @@ const GroupForm: FC<GroupFormProps> = ({
               onCheckedChange={(checked) => setValue("active", checked === true)}
               disabled={isEditMode || isSubmitting}
             />
-            <Label htmlFor="active" className="cursor-pointer">
+            <label className="block text-sm font-medium cursor-pointer" htmlFor="active">
               Active
-            </Label>
+            </label>
           </div>
 
           {/* Activation Date — create: shown, required when active; edit: only for the Activate action on pending groups */}
           {((!isEditMode && active) || showActivate) && (
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Activation Date *</label>
-              <Input type="date" {...register("activationDate")} disabled={isSubmitting} error={errors.activationDate?.message} />
+              <Input
+                type="date"
+                {...register("activationDate")}
+                disabled={isSubmitting}
+                error={errors.activationDate?.message}
+              />
             </div>
           )}
         </CardContent>

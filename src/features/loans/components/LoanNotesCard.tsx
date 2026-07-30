@@ -82,7 +82,7 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
                 <div key={note.id} className="px-6 py-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm whitespace-pre-wrap break-words">{note.note}</p>
+                      <p className="text-sm whitespace-pre-wrap wrap-break-word">{note.note}</p>
                       <p className="mt-1 text-xs text-gray-500">
                         {note.createdByUsername} &middot; {formatFineractDate(note.createdOnDate)}
                         {note.updatedByUsername && <> (edited &middot; {formatFineractDate(note.updatedOnDate)})</>}
@@ -113,7 +113,9 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addNoteText">Note</Label>
+              <label className="block text-sm font-medium" htmlFor="addNoteText">
+                Note
+              </label>
               <Textarea
                 id="addNoteText"
                 value={noteText}
@@ -144,7 +146,9 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="editNoteText">Note</Label>
+              <label className="block text-sm font-medium" htmlFor="editNoteText">
+                Note
+              </label>
               <Textarea
                 id="editNoteText"
                 value={noteText}

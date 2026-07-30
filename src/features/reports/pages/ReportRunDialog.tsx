@@ -43,11 +43,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
   const [paramValues, setParamValues] = useState<Record<string, string>>({});
   const runReportMutation = useRunReport();
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-  } = useForm<ReportRunFormValues>({
+  const { control, handleSubmit, reset } = useForm<ReportRunFormValues>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: { outputType: "HTML" },
   });
@@ -104,7 +100,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4 py-4">
             <div>
-              <Label>Output Type</Label>
+              <label className="block text-sm font-medium">Output Type</label>
               <Controller
                 name="outputType"
                 control={control}
@@ -127,10 +123,10 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
 
             {(report?.reportParameters ?? []).length > 0 && (
               <div className="space-y-3">
-                <Label>Parameters</Label>
+                <label className="block text-sm font-medium">Parameters</label>
                 {report?.reportParameters.map((param) => (
                   <div key={param.id} className="grid grid-cols-2 gap-2 items-center">
-                    <Label>{param.parameterName}</Label>
+                    <label className="block text-sm font-medium">{param.parameterName}</label>
                     {param.selectOne ? (
                       <Select
                         value={paramValues[param.parameterName] ?? ""}

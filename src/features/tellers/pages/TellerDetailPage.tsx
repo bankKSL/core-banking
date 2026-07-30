@@ -245,14 +245,23 @@ const TellerDetailPage: FC = () => {
         <ErrorState
           title={`Failed to ${cashTxnDialog?.type === "allocate" ? "allocate" : "settle"} cash`}
           message={cashTxnError instanceof Error ? cashTxnError.message : "An unexpected error occurred."}
-          onRetry={() => { allocateMutation.reset(); settleMutation.reset(); }}
+          onRetry={() => {
+            allocateMutation.reset();
+            settleMutation.reset();
+          }}
         />
       )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Cashiers</CardTitle>
-          <Button size="sm" onClick={() => { setCashierDialogOpen(true); resetCashier(); }}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setCashierDialogOpen(true);
+              resetCashier();
+            }}
+          >
             <Plus className="mr-1 h-4 w-4" />
             Assign Cashier
           </Button>
@@ -300,7 +309,9 @@ const TellerDetailPage: FC = () => {
                               : `Type ${t.txnType}`}
                     </span>
                     <span className="font-mono">${Number(t.txnAmount).toFixed(2)}</span>
-                    <span className="text-gray-500">{t.txnDate ? new Date(t.txnDate).toLocaleDateString() : "\u2014"}</span>
+                    <span className="text-gray-500">
+                      {t.txnDate ? new Date(t.txnDate).toLocaleDateString() : "\u2014"}
+                    </span>
                     <span className="text-gray-400 text-xs">{t.txnNote ?? "\u2014"}</span>
                   </div>
                 ))}
@@ -312,7 +323,15 @@ const TellerDetailPage: FC = () => {
         </Card>
       )}
 
-      <Dialog open={cashierDialogOpen} onOpenChange={(o) => { if (!o) { setCashierDialogOpen(false); resetCashier(); } }}>
+      <Dialog
+        open={cashierDialogOpen}
+        onOpenChange={(o) => {
+          if (!o) {
+            setCashierDialogOpen(false);
+            resetCashier();
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign Cashier</DialogTitle>
@@ -320,7 +339,7 @@ const TellerDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmitCashier(onSubmitCashier)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Staff *</Label>
+              <label className="block text-sm font-medium">Staff *</label>
               <Controller
                 control={controlCashier}
                 name="selectedStaffId"
@@ -339,32 +358,36 @@ const TellerDetailPage: FC = () => {
                   </Select>
                 )}
               />
-              {cashierErrors.selectedStaffId && <p className="text-xs text-red-500">{cashierErrors.selectedStaffId.message}</p>}
+              {cashierErrors.selectedStaffId && (
+                <p className="text-xs text-red-500">{cashierErrors.selectedStaffId.message}</p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label>Start Date</Label>
+                <label className="block text-sm font-medium">Start Date</label>
                 <Input type="date" {...registerCashier("cashierStartDate")} />
-                {cashierErrors.cashierStartDate && <p className="text-xs text-red-500">{cashierErrors.cashierStartDate.message}</p>}
+                {cashierErrors.cashierStartDate && (
+                  <p className="text-xs text-red-500">{cashierErrors.cashierStartDate.message}</p>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>End Date</Label>
+                <label className="block text-sm font-medium">End Date</label>
                 <Input type="date" {...registerCashier("cashierEndDate")} />
-                {cashierErrors.cashierEndDate && <p className="text-xs text-red-500">{cashierErrors.cashierEndDate.message}</p>}
+                {cashierErrors.cashierEndDate && (
+                  <p className="text-xs text-red-500">{cashierErrors.cashierEndDate.message}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Controller
                 control={controlCashier}
                 name="isFullDay"
-                render={({ field }) => (
-                  <Switch id="isFullDay" checked={field.value} onCheckedChange={field.onChange} />
-                )}
+                render={({ field }) => <Switch id="isFullDay" checked={field.value} onCheckedChange={field.onChange} />}
               />
               <Label htmlFor="isFullDay">Full Day</Label>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Description</Label>
+              <label className="block text-sm font-medium">Description</label>
               <Input {...registerCashier("cashierDescription")} placeholder="Optional" />
             </div>
             <Button type="submit" disabled={createCashierMutation.isPending}>
@@ -374,7 +397,13 @@ const TellerDetailPage: FC = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!cashTxnDialog} onOpenChange={() => { setCashTxnDialog(null); resetTxn(); }}>
+      <Dialog
+        open={!!cashTxnDialog}
+        onOpenChange={() => {
+          setCashTxnDialog(null);
+          resetTxn();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{cashTxnDialog?.type === "allocate" ? "Allocate Cash" : "Settle Cash"}</DialogTitle>
@@ -384,24 +413,21 @@ const TellerDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmitTxn(onSubmitCashTxn)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Amount *</Label>
+              <label className="block text-sm font-medium">Amount *</label>
               <Input type="number" step="0.01" {...registerTxn("txnAmount", { valueAsNumber: true })} />
               {txnErrors.txnAmount && <p className="text-xs text-red-500">{txnErrors.txnAmount.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Date</Label>
+              <label className="block text-sm font-medium">Date</label>
               <Input type="date" {...registerTxn("txnDate")} />
               {txnErrors.txnDate && <p className="text-xs text-red-500">{txnErrors.txnDate.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Note *</Label>
+              <label className="block text-sm font-medium">Note *</label>
               <Input {...registerTxn("txnNote")} placeholder="e.g. Starting cash" />
               {txnErrors.txnNote && <p className="text-xs text-red-500">{txnErrors.txnNote.message}</p>}
             </div>
-            <Button
-              type="submit"
-              disabled={allocateMutation.isPending || settleMutation.isPending}
-            >
+            <Button type="submit" disabled={allocateMutation.isPending || settleMutation.isPending}>
               {(allocateMutation.isPending || settleMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}

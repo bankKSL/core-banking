@@ -39,8 +39,10 @@ const StandingInstructionFilters: React.FC<StandingInstructionFiltersProps> = ({
 }) => {
   return (
     <div className="flex flex-wrap items-end gap-4">
-      <div className="flex-1 min-w-[200px]">
-        <Label htmlFor="si-search">Search</Label>
+      <div className="flex-1 min-w-50 space-y-1.5">
+        <label className="block text-sm font-medium" htmlFor="si-search">
+          Search
+        </label>
         <Input
           id="si-search"
           placeholder="Search by client name..."
@@ -48,8 +50,8 @@ const StandingInstructionFilters: React.FC<StandingInstructionFiltersProps> = ({
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
-      <div className="w-[180px]">
-        <Label>Transfer Type</Label>
+      <div className="w-45 space-y-1.5">
+        <label className="block text-sm font-medium">Transfer Type</label>
         <Select
           value={transferType ? String(transferType) : ""}
           onValueChange={(v) => onTransferTypeChange(v ? Number(v) : null)}
@@ -67,12 +69,9 @@ const StandingInstructionFilters: React.FC<StandingInstructionFiltersProps> = ({
           </SelectContent>
         </Select>
       </div>
-      <div className="w-[150px]">
-        <Label>Status</Label>
-        <Select
-          value={status ? String(status) : ""}
-          onValueChange={(v) => onStatusChange(v ? Number(v) : null)}
-        >
+      <div className="w-37.5 space-y-1.5">
+        <label className="block text-sm font-medium">Status</label>
+        <Select value={status ? String(status) : ""} onValueChange={(v) => onStatusChange(v ? Number(v) : null)}>
           <SelectTrigger>
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>

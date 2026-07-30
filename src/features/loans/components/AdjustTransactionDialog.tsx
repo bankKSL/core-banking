@@ -101,7 +101,11 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
                 onClick={() => {
                   if (transaction) {
                     const d = transaction.date;
-                    setModifyDate(Array.isArray(d) && d.length >= 3 ? `${d[0]}-${String(d[1]).padStart(2, "0")}-${String(d[2]).padStart(2, "0")}` : String(d ?? ""));
+                    setModifyDate(
+                      Array.isArray(d) && d.length >= 3
+                        ? `${d[0]}-${String(d[1]).padStart(2, "0")}-${String(d[2]).padStart(2, "0")}`
+                        : String(d ?? ""),
+                    );
                     setModifyAmount(transaction.amount);
                   }
                   setMode("modify");
@@ -120,7 +124,9 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
           {mode === "modify" && (
             <div className="space-y-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="modifyDate">Transaction Date</Label>
+                <label className="block text-sm font-medium" htmlFor="modifyDate">
+                  Transaction Date
+                </label>
                 <Input
                   id="modifyDate"
                   type="date"
@@ -130,7 +136,9 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="modifyAmount">Transaction Amount</Label>
+                <label className="block text-sm font-medium" htmlFor="modifyAmount">
+                  Transaction Amount
+                </label>
                 <Input
                   id="modifyAmount"
                   type="number"

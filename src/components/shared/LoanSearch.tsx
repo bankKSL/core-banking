@@ -30,8 +30,7 @@ export function LoanSearch({
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const params: LoanListParams =
-    query.length >= 2 ? { limit: 20, offset: 0, searchByParam: query } : { limit: 50 };
+  const params: LoanListParams = query.length >= 2 ? { limit: 20, offset: 0, searchByParam: query } : { limit: 50 };
 
   const { data, isLoading } = useLoans(params);
 
@@ -57,18 +56,16 @@ export function LoanSearch({
 
   return (
     <div ref={ref} className="relative">
-      <Label htmlFor={name ?? "loanSearch"}>{label}</Label>
+      <label className="block text-sm font-medium" htmlFor={name ?? "loanSearch"}>
+        {label}
+      </label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
           <span className="flex-1 text-sm">
             Loan #{selected.id}
-            {selected.accountNo && (
-              <span className="ml-1 text-gray-400">({selected.accountNo})</span>
-            )}
-            {selected.clientName && (
-              <span className="ml-1 text-gray-500">- {selected.clientName}</span>
-            )}
+            {selected.accountNo && <span className="ml-1 text-gray-400">({selected.accountNo})</span>}
+            {selected.clientName && <span className="ml-1 text-gray-500">- {selected.clientName}</span>}
           </span>
           {!disabled && (
             <button

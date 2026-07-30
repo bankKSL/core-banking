@@ -150,7 +150,9 @@ const NoteList: FC<NoteListProps> = ({ resourceType, resourceId }) => {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="note">Note *</Label>
+              <label className="block text-sm font-medium" htmlFor="note">
+                Note *
+              </label>
               <Textarea id="note" {...register("note")} rows={5} placeholder="Write your note here..." />
               {errors.note && <p className="text-xs text-red-500">{errors.note.message}</p>}
             </div>

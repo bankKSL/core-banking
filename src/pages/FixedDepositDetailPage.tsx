@@ -532,11 +532,13 @@ const FixedDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="closeDate">Closure Date</Label>
+              <label className="block text-sm font-medium" htmlFor="closeDate">
+                Closure Date
+              </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Closure Action</Label>
+              <label className="block text-sm font-medium">Closure Action</label>
               <Select value={onAccountClosureId} onValueChange={setOnAccountClosureId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select action" />
@@ -552,7 +554,9 @@ const FixedDepositDetailPage: React.FC = () => {
             </div>
             {onAccountClosureId === "200" && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="toSavingsAccountId">Transfer to Savings Account ID</Label>
+                <label className="block text-sm font-medium" htmlFor="toSavingsAccountId">
+                  Transfer to Savings Account ID
+                </label>
                 <Input
                   id="toSavingsAccountId"
                   type="number"
@@ -592,7 +596,9 @@ const FixedDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="depositAmount">Amount</Label>
+              <label className="block text-sm font-medium" htmlFor="depositAmount">
+                Amount
+              </label>
               <Input
                 id="depositAmount"
                 type="number"
@@ -601,7 +607,9 @@ const FixedDepositDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="depositDate">Date</Label>
+              <label className="block text-sm font-medium" htmlFor="depositDate">
+                Date
+              </label>
               <Input
                 id="depositDate"
                 type="date"
@@ -626,7 +634,9 @@ const FixedDepositDetailPage: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="withdrawalAmount">Amount</Label>
+              <label className="block text-sm font-medium" htmlFor="withdrawalAmount">
+                Amount
+              </label>
               <Input
                 id="withdrawalAmount"
                 type="number"
@@ -635,7 +645,9 @@ const FixedDepositDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="withdrawalDate">Date</Label>
+              <label className="block text-sm font-medium" htmlFor="withdrawalDate">
+                Date
+              </label>
               <Input
                 id="withdrawalDate"
                 type="date"

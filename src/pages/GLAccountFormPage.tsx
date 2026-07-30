@@ -167,11 +167,11 @@ const GLAccountFormPage: React.FC = () => {
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Account Name *</Label>
+            <label className="block text-sm font-medium">Account Name *</label>
             <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
           </div>
           <div className="space-y-1.5">
-            <Label>GL Code *</Label>
+            <label className="block text-sm font-medium">GL Code *</label>
             <Input
               value={form.glCode}
               onChange={(e) => updateForm("glCode", e.target.value)}
@@ -181,7 +181,7 @@ const GLAccountFormPage: React.FC = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Account Type *</Label>
+            <label className="block text-sm font-medium">Account Type *</label>
             <Select value={String(form.type)} onValueChange={(v) => updateForm("type", Number(v))} disabled={isEdit}>
               <SelectTrigger>
                 <SelectValue />
@@ -196,7 +196,7 @@ const GLAccountFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Usage *</Label>
+            <label className="block text-sm font-medium">Usage *</label>
             <Select value={String(form.usage)} onValueChange={(v) => updateForm("usage", Number(v))} disabled={isEdit}>
               <SelectTrigger>
                 <SelectValue />
@@ -241,7 +241,7 @@ const GLAccountFormPage: React.FC = () => {
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Parent Account</Label>
+            <label className="block text-sm font-medium">Parent Account</label>
             <Select value={String(form.parentId)} onValueChange={(v) => updateForm("parentId", Number(v))}>
               <SelectTrigger>
                 <SelectValue placeholder="None (top level)" />
@@ -257,7 +257,7 @@ const GLAccountFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Tag</Label>
+            <label className="block text-sm font-medium">Tag</label>
             <Select value={String(form.tagId)} onValueChange={(v) => updateForm("tagId", Number(v))}>
               <SelectTrigger>
                 <SelectValue placeholder="No tag" />
@@ -273,7 +273,7 @@ const GLAccountFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Description</Label>
+            <label className="block text-sm font-medium">Description</label>
             <Textarea
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}

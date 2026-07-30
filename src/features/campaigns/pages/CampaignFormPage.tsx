@@ -152,12 +152,16 @@ const CampaignFormPage: FC = () => {
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Campaign Name *</label>
-              <Input {...register("campaignName")} placeholder="e.g. Loan Arrears Reminder" error={errors.campaignName?.message} />
+              <Input
+                {...register("campaignName")}
+                placeholder="e.g. Loan Arrears Reminder"
+                error={errors.campaignName?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Campaign Type *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Campaign Type *</label>
                 <Select
                   value={watch("campaignType")}
                   onValueChange={(v) => setValue("campaignType", v, { shouldValidate: true })}
@@ -175,8 +179,8 @@ const CampaignFormPage: FC = () => {
                 </Select>
               </div>
 
-              <div>
-                <Label>Trigger Type *</Label>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Trigger Type *</label>
                 <Select
                   value={watch("triggerType")}
                   onValueChange={(v) => setValue("triggerType", v, { shouldValidate: true })}
@@ -197,12 +201,12 @@ const CampaignFormPage: FC = () => {
 
             <div className="flex items-center gap-2">
               <Switch checked={isNotification} onCheckedChange={(v) => setValue("isNotification", v)} />
-              <Label>Is Notification (no provider needed)</Label>
+              <label className="block text-sm font-medium">Is Notification (no provider needed)</label>
             </div>
 
             {!isNotification && campaignType === "1" && (
               <div>
-                <Label>SMS Provider</Label>
+                <label className="block text-sm font-medium">SMS Provider</label>
                 <Select value={watch("providerId")} onValueChange={(v) => setValue("providerId", v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select provider" />
@@ -219,7 +223,7 @@ const CampaignFormPage: FC = () => {
             )}
 
             <div>
-              <Label>Business Rule *</Label>
+              <label className="block text-sm font-medium">Business Rule *</label>
               <Select
                 value={watch("runReportId")}
                 onValueChange={(v) => setValue("runReportId", v, { shouldValidate: true })}
@@ -239,11 +243,11 @@ const CampaignFormPage: FC = () => {
             </div>
 
             {isDirectOrSchedule && (
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Param Value (JSON)</label>
-              <Input {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
-              <p className="text-xs text-gray-500 mt-1">JSON key-value pairs matching report parameters.</p>
-            </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Param Value (JSON)</label>
+                <Input {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
+                <p className="text-xs text-gray-500 mt-1">JSON key-value pairs matching report parameters.</p>
+              </div>
             )}
 
             <div>
@@ -268,7 +272,7 @@ const CampaignFormPage: FC = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Frequency *</Label>
+                  <label className="block text-sm font-medium">Frequency *</label>
                   <Select value={watch("frequency")} onValueChange={(v) => setValue("frequency", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select frequency" />
@@ -289,7 +293,7 @@ const CampaignFormPage: FC = () => {
               </div>
               {watch("frequency") === "2" && (
                 <div>
-                  <Label>Repeats On Day</Label>
+                  <label className="block text-sm font-medium">Repeats On Day</label>
                   <Select value={watch("repeatsOnDay")} onValueChange={(v) => setValue("repeatsOnDay", v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select day" />

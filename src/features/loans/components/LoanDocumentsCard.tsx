@@ -145,7 +145,9 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="uploadFile">File *</Label>
+              <label className="block text-sm font-medium" htmlFor="uploadFile">
+                File *
+              </label>
               <Input
                 id="uploadFile"
                 type="file"
@@ -158,7 +160,9 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="uploadName">Name *</Label>
+              <label className="block text-sm font-medium" htmlFor="uploadName">
+                Name *
+              </label>
               <Input
                 id="uploadName"
                 value={uploadName}
@@ -167,7 +171,9 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="uploadDescription">Description</Label>
+              <label className="block text-sm font-medium" htmlFor="uploadDescription">
+                Description
+              </label>
               <Input
                 id="uploadDescription"
                 value={uploadDescription}

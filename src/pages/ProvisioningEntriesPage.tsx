@@ -135,7 +135,7 @@ const ProvisioningEntriesPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-[240px_1fr_auto] items-end gap-4">
             <div className="space-y-1.5">
-              <Label>Date *</Label>
+              <label className="block text-sm font-medium">Date *</label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
             <label className="flex items-center gap-2 pb-2 text-sm">
