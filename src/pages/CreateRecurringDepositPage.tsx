@@ -151,7 +151,7 @@ const CreateRecurringDepositPage: React.FC = () => {
       accountNo: "",
       externalId: "",
       mandatoryRecommendedDepositAmount: "",
-      depositPeriod: "12",
+      depositPeriod: "",
       depositPeriodFrequencyId: "2",
       submittedOnDate: new Date().toISOString().split("T")[0],
       isCalendarInherited: true,
@@ -194,6 +194,11 @@ const CreateRecurringDepositPage: React.FC = () => {
   );
   const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
   const { data: products = [], isLoading: productsLoading } = useRecurringDepositProducts();
+
+  const selectedProduct = useMemo(() => {
+    if (!productId || !products.length) return null;
+    return products.find((p) => String(p.id) === productId) ?? null;
+  }, [productId, products]);
 
   const { data: template, isLoading: templateLoading } = useQuery({
     queryKey: ["recurringdepositaccounts", "template", clientId, productId],
@@ -307,9 +312,12 @@ const CreateRecurringDepositPage: React.FC = () => {
     setValue("depositPeriod", String(rd.depositPeriod ?? ""));
     setValue("depositPeriodFrequencyId", String(rd.depositPeriodFrequencyType?.id ?? "2"));
     const submittedDate = rd.timeline?.submittedOnDate;
-    setValue("submittedOnDate", Array.isArray(submittedDate)
-      ? `${submittedDate[0]}-${String(submittedDate[1]).padStart(2, "0")}-${String(submittedDate[2]).padStart(2, "0")}`
-      : submittedDate?.split("T")[0] ?? new Date().toISOString().split("T")[0]);
+    setValue(
+      "submittedOnDate",
+      Array.isArray(submittedDate)
+        ? `${submittedDate[0]}-${String(submittedDate[1]).padStart(2, "0")}-${String(submittedDate[2]).padStart(2, "0")}`
+        : (submittedDate?.split("T")[0] ?? new Date().toISOString().split("T")[0]),
+    );
     setValue("nominalAnnualInterestRate", String(rd.nominalAnnualInterestRate ?? ""));
     setValue("interestCompoundingPeriodType", String(rd.interestCompoundingPeriodType?.id ?? ""));
     setValue("interestPostingPeriodType", String(rd.interestPostingPeriodType?.id ?? ""));
@@ -325,9 +333,12 @@ const CreateRecurringDepositPage: React.FC = () => {
     setValue("allowWithdrawal", rd.allowWithdrawal ?? false);
     setValue("adjustAdvanceTowardsFuturePayments", rd.adjustAdvanceTowardsFuturePayments ?? false);
     const firstDepositDate = rd.expectedFirstDepositOnDate;
-    setValue("expectedFirstDepositOnDate", Array.isArray(firstDepositDate)
-      ? `${firstDepositDate[0]}-${String(firstDepositDate[1]).padStart(2, "0")}-${String(firstDepositDate[2]).padStart(2, "0")}`
-      : firstDepositDate?.split("T")[0] ?? "");
+    setValue(
+      "expectedFirstDepositOnDate",
+      Array.isArray(firstDepositDate)
+        ? `${firstDepositDate[0]}-${String(firstDepositDate[1]).padStart(2, "0")}-${String(firstDepositDate[2]).padStart(2, "0")}`
+        : (firstDepositDate?.split("T")[0] ?? ""),
+    );
     setValue("lockinPeriodFrequency", String(rd.lockinPeriodFrequency ?? ""));
     setValue("lockinPeriodFrequencyType", String(rd.lockinPeriodFrequencyType?.id ?? ""));
     setValue("transferInterestToSavings", rd.transferInterestToSavings ?? false);
@@ -468,7 +479,20 @@ const CreateRecurringDepositPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Period Length *</label>
-              <Input type="number" {...register("depositPeriod")} error={errors.depositPeriod?.message} />
+              <Input
+                type="number"
+                {...register("depositPeriod")}
+                placeholder={
+                  selectedProduct
+                    ? `Between ${selectedProduct.minDepositTerm} and ${selectedProduct.maxDepositTerm}`
+                    : "Select product first"
+                }
+                disabled={!selectedProduct}
+                min={selectedProduct?.minDepositTerm}
+                max={selectedProduct?.maxDepositTerm}
+                step={selectedProduct?.inMultiplesOfDepositTerm}
+                error={errors.depositPeriod?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Period Frequency</label>

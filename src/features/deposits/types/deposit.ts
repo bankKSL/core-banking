@@ -416,8 +416,7 @@ export interface RecurringDepositProduct {
   maxDepositTerm?: number;
   minDepositTermType: { id: number; code: string; description: string };
   maxDepositTermType?: { id: number; code: string; description: string };
-  recurringDepositFrequency: number;
-  recurringDepositFrequencyType: { id: number; code: string; description: string };
+  inMultiplesOfDepositTerm?: number;
   preClosurePenalApplicable: boolean;
   preClosurePenalInterest?: number;
   preClosurePenalInterestOnType?: { id: number; code: string; description: string };
