@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +16,9 @@ import {
   useFixedDepositProduct,
   useCreateFixedDepositProduct,
   useUpdateFixedDepositProduct,
+  fetchFixedDepositProductTemplate,
 } from "@/features/deposits";
-import type { FixedDepositProductCreateRequest } from "@/features/deposits";
+import type { FixedDepositProductCreateRequest, FixedDepositProductTemplate } from "@/features/deposits";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const INTEREST_COMPOUNDING_OPTIONS = [
@@ -128,6 +130,12 @@ const FixedDepositProductFormPage: React.FC = () => {
   const createMutation = useCreateFixedDepositProduct();
   const updateMutation = useUpdateFixedDepositProduct();
 
+  const { data: template } = useQuery<FixedDepositProductTemplate>({
+    queryKey: ["fixeddepositproducts", "template"],
+    queryFn: fetchFixedDepositProductTemplate,
+    staleTime: 10 * 60_000,
+  });
+
   const [slabs, setSlabs] = React.useState<Slab[]>([{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
 
   const {
@@ -167,6 +175,15 @@ const FixedDepositProductFormPage: React.FC = () => {
 
   const preClosurePenalApplicable = watch("preClosurePenalApplicable");
   const withHoldTax = watch("withHoldTax");
+
+  // Apply template defaults on create (not edit)
+  useEffect(() => {
+    if (!template || isEdit || existingProduct) return;
+    const currencies = template.currencyOptions;
+    if (currencies?.length === 1) {
+      setValue("currencyCode", currencies[0].code);
+    }
+  }, [template, isEdit, existingProduct, setValue]);
 
   useEffect(() => {
     if (!existingProduct) return;

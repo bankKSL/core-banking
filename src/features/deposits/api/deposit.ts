@@ -781,6 +781,23 @@ export async function deleteFixedDepositProduct(productId: number): Promise<{ re
   return data;
 }
 
+export interface FixedDepositProductTemplate {
+  currencyOptions?: Array<{ code: string; name: string; decimalPlaces: number; inMultiplesOf?: number; displaySymbol?: string }>;
+  interestCompoundingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestPostingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestCalculationTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  interestCalculationDaysInYearTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  lockinPeriodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  accountingRuleOptions?: Array<{ id: number; code: string; value: string }>;
+  chargeOptions?: Array<{ id: number; name: string; amount: number }>;
+  taxGroupOptions?: Array<{ id: number; name: string }>;
+}
+
+export async function fetchFixedDepositProductTemplate(): Promise<FixedDepositProductTemplate> {
+  const { data } = await client.get<FixedDepositProductTemplate>("/fixeddepositproducts/template");
+  return data;
+}
+
 // ─── Savings Charges (Section 5) ──────────────────────────────────
 
 export interface SavingsCharge {

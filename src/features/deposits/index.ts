@@ -89,6 +89,7 @@ export {
   fetchFixedDepositProduct,
   createFixedDepositProduct,
   updateFixedDepositProduct,
+  fetchFixedDepositProductTemplate,
   fetchRecurringDepositAccounts,
   fetchRecurringDepositAccount,
   createRecurringDepositAccount,
@@ -244,6 +245,7 @@ export {
 export type {
   FixedDepositAccountTemplate,
   FixedDepositClosureTemplate,
+  FixedDepositProductTemplate,
   CalculateFDInterestQuery,
   CalculateFDInterestResponse,
   FixedDepositCharge,
