@@ -168,7 +168,9 @@ const CreateFixedDepositPage: React.FC = () => {
       depositAmount: String(a.depositAmount ?? ""),
       depositPeriod: String(a.depositPeriod ?? "12"),
       depositPeriodFrequencyId: String(a.depositPeriodFrequencyType?.id ?? "2"),
-      submittedOnDate: a.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0],
+      submittedOnDate: Array.isArray(a.timeline?.submittedOnDate)
+        ? `${a.timeline.submittedOnDate[0]}-${String(a.timeline.submittedOnDate[1]).padStart(2, "0")}-${String(a.timeline.submittedOnDate[2]).padStart(2, "0")}`
+        : a.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0],
       nominalAnnualInterestRate: String(a.nominalAnnualInterestRate ?? ""),
       interestCompoundingPeriodType: String(a.interestCompoundingPeriodType?.id ?? ""),
       interestPostingPeriodType: String(a.interestPostingPeriodType?.id ?? ""),

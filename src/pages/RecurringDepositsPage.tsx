@@ -30,8 +30,8 @@ const RecurringDepositsPage: React.FC = () => {
     isError: rdError,
   } = useRecurringDepositAccounts({ limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
 
-  const rds = rdData?.pageItems ?? [];
-  const totalRecords = rdData?.totalFilteredRecords ?? 0;
+  const rds = rdData ?? [];
+  const totalRecords = rdData?.length ?? 0;
 
   const filtered = useMemo(() => {
     let result = rds;
@@ -50,17 +50,9 @@ const RecurringDepositsPage: React.FC = () => {
     },
     { key: "depositProductName", header: "Product" },
     {
-      key: "recurringDepositAmount",
-      header: "Installment",
-      cell: (r) => (
-        <span className="font-mono text-sm">{formatCurrency(r.recurringDepositAmount ?? 0, r.currency.code)}</span>
-      ),
-    },
-    {
-      key: "recurringDepositFrequency",
-      header: "Frequency",
-      cell: (r) =>
-        `Every ${r.recurringDepositFrequency ?? 1} ${r.recurringDepositFrequencyType?.value?.toLowerCase() ?? "mo"}`,
+      key: "depositAmount",
+      header: "Deposit Amount",
+      cell: (r) => <span className="font-mono text-sm">{formatCurrency(r.depositAmount ?? 0, r.currency.code)}</span>,
     },
     {
       key: "depositPeriod",

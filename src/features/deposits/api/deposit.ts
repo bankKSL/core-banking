@@ -30,7 +30,13 @@ import { currentDate } from "@/lib/utils";
 // ─── Savings Products ────────────────────────────────────────────
 
 export interface SavingsProductTemplate {
-  currencyOptions: Array<{ code: string; name: string; decimalPlaces: number; inMultiplesOf?: number; displaySymbol?: string }>;
+  currencyOptions: Array<{
+    code: string;
+    name: string;
+    decimalPlaces: number;
+    inMultiplesOf?: number;
+    displaySymbol?: string;
+  }>;
   interestCompoundingPeriodTypeOptions: Array<{ id: number; code: string; value: string }>;
   interestPostingPeriodTypeOptions: Array<{ id: number; code: string; value: string }>;
   interestCalculationTypeOptions: Array<{ id: number; code: string; value: string }>;
@@ -40,7 +46,13 @@ export interface SavingsProductTemplate {
   paymentTypeOptions: Array<{ id: number; name: string }>;
   accountingRuleOptions: Array<{ id: number; code: string; value: string }>;
   accountingMappingOptions: Record<string, Array<{ id: number; name: string; glCode: string }>>;
-  chargeOptions: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number }; chargeCalculationType?: { id: number } }>;
+  chargeOptions: Array<{
+    id: number;
+    name: string;
+    amount: number;
+    chargeTimeType?: { id: number };
+    chargeCalculationType?: { id: number };
+  }>;
   penaltyOptions: Array<{ id: number; name: string; amount: number }>;
   taxGroupOptions: Array<{ id: number; name: string }>;
   accountMappingForPayment?: string;
@@ -51,7 +63,9 @@ export async function fetchSavingsProductTemplate(): Promise<SavingsProductTempl
   return data;
 }
 
-export async function fetchSavingsProductWithTemplate(productId: number): Promise<SavingsProduct & SavingsProductTemplate> {
+export async function fetchSavingsProductWithTemplate(
+  productId: number,
+): Promise<SavingsProduct & SavingsProductTemplate> {
   const { data } = await client.get<SavingsProduct & SavingsProductTemplate>(`/savingsproducts/${productId}`, {
     params: { template: true },
   });
@@ -319,11 +333,8 @@ export async function fetchFixedDepositAccount(accountId: number | string): Prom
 
 export async function fetchRecurringDepositAccounts(
   params: FixedDepositListParams = {},
-): Promise<{ totalFilteredRecords: number; pageItems: RecurringDepositAccount[] }> {
-  const { data } = await client.get<{ totalFilteredRecords: number; pageItems: RecurringDepositAccount[] }>(
-    "/recurringdepositaccounts",
-    { params },
-  );
+): Promise<RecurringDepositAccount[]> {
+  const { data } = await client.get("/recurringdepositaccounts", { params });
   return data;
 }
 
@@ -493,14 +504,26 @@ export async function deleteRecurringDepositProduct(productId: number): Promise<
 }
 
 export interface RecurringDepositProductTemplate {
-  currencyOptions?: Array<{ code: string; name: string; decimalPlaces: number; inMultiplesOf?: number; displaySymbol?: string }>;
+  currencyOptions?: Array<{
+    code: string;
+    name: string;
+    decimalPlaces: number;
+    inMultiplesOf?: number;
+    displaySymbol?: string;
+  }>;
   interestCompoundingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
   interestPostingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
   interestCalculationTypeOptions?: Array<{ id: number; code: string; value: string }>;
   interestCalculationDaysInYearTypeOptions?: Array<{ id: number; code: string; value: string }>;
   lockinPeriodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
   accountingRuleOptions?: Array<{ id: number; code: string; value: string }>;
-  chargeOptions?: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number }; chargeCalculationType?: { id: number } }>;
+  chargeOptions?: Array<{
+    id: number;
+    name: string;
+    amount: number;
+    chargeTimeType?: { id: number };
+    chargeCalculationType?: { id: number };
+  }>;
   penaltyOptions?: Array<{ id: number; name: string; amount: number }>;
   taxGroupOptions?: Array<{ id: number; name: string }>;
   periodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
@@ -827,7 +850,13 @@ export async function deleteFixedDepositProduct(productId: number): Promise<{ re
 }
 
 export interface FixedDepositProductTemplate {
-  currencyOptions?: Array<{ code: string; name: string; decimalPlaces: number; inMultiplesOf?: number; displaySymbol?: string }>;
+  currencyOptions?: Array<{
+    code: string;
+    name: string;
+    decimalPlaces: number;
+    inMultiplesOf?: number;
+    displaySymbol?: string;
+  }>;
   interestCompoundingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
   interestPostingPeriodTypeOptions?: Array<{ id: number; code: string; value: string }>;
   interestCalculationTypeOptions?: Array<{ id: number; code: string; value: string }>;
@@ -1066,10 +1095,10 @@ export async function releaseAmountSavings(
 }
 
 /** GET /savingsaccounts/{savingsId}/onholdtransactions */
-export async function fetchOnHoldTransactions(
-  savingsAccountId: number | string,
-): Promise<OnHoldTransactionResponse> {
-  const { data } = await client.get<OnHoldTransactionResponse>(`/savingsaccounts/${savingsAccountId}/onholdtransactions`);
+export async function fetchOnHoldTransactions(savingsAccountId: number | string): Promise<OnHoldTransactionResponse> {
+  const { data } = await client.get<OnHoldTransactionResponse>(
+    `/savingsaccounts/${savingsAccountId}/onholdtransactions`,
+  );
   return data;
 }
 
@@ -1174,11 +1203,15 @@ export async function undoApproveSavingsAccount(accountId: number): Promise<void
 
 /** POST /savingsaccounts/{accountId}/transactions?command=force-withdrawal */
 export async function forceWithdrawalSavings(accountId: number, payload: Record<string, unknown>): Promise<void> {
-  await client.post(`/savingsaccounts/${accountId}/transactions`, {
-    ...payload,
-    dateFormat: "yyyy-MM-dd",
-    locale: "en",
-  }, { params: { command: "force-withdrawal" } });
+  await client.post(
+    `/savingsaccounts/${accountId}/transactions`,
+    {
+      ...payload,
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+    },
+    { params: { command: "force-withdrawal" } },
+  );
 }
 
 /** POST /savingsaccounts/{accountId}?command=applyAnnualFees */
@@ -1188,21 +1221,38 @@ export async function applyAnnualFeesSavings(accountId: number): Promise<void> {
 
 /** POST /savingsaccounts/{accountId}?command=assignSavingsOfficer */
 export async function assignSavingsOfficer(accountId: number, officerId: number): Promise<void> {
-  await client.post(`/savingsaccounts/${accountId}`, { savingsOfficerId: officerId }, { params: { command: "assignSavingsOfficer" } });
+  await client.post(
+    `/savingsaccounts/${accountId}`,
+    { savingsOfficerId: officerId },
+    { params: { command: "assignSavingsOfficer" } },
+  );
 }
 
 /** POST /savingsaccounts/{accountId}?command=unassignSavingsOfficer */
 export async function unassignSavingsOfficer(accountId: number): Promise<void> {
-  await client.post(`/savingsaccounts/${accountId}`, { unassignDate: new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" }, { params: { command: "unassignSavingsOfficer" } });
+  await client.post(
+    `/savingsaccounts/${accountId}`,
+    { unassignDate: new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" },
+    { params: { command: "unassignSavingsOfficer" } },
+  );
 }
 
 /** POST /savingsaccounts/{accountId}/transactions/{transactionId}?command=undo|reverse|modify */
-export async function adjustSavingsTransaction(accountId: number, transactionId: number, command: "undo" | "reverse" | "modify", payload?: Record<string, unknown>): Promise<void> {
-  await client.post(`/savingsaccounts/${accountId}/transactions/${transactionId}`, {
-    ...payload,
-    dateFormat: "yyyy-MM-dd",
-    locale: "en",
-  }, { params: { command } });
+export async function adjustSavingsTransaction(
+  accountId: number,
+  transactionId: number,
+  command: "undo" | "reverse" | "modify",
+  payload?: Record<string, unknown>,
+): Promise<void> {
+  await client.post(
+    `/savingsaccounts/${accountId}/transactions/${transactionId}`,
+    {
+      ...payload,
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+    },
+    { params: { command } },
+  );
 }
 
 export interface TransactionSearchParams {
@@ -1214,7 +1264,10 @@ export interface TransactionSearchParams {
 }
 
 /** GET /savingsaccounts/{accountId}/transactions/search */
-export async function searchTransactions(accountId: number, params?: TransactionSearchParams): Promise<{ pageItems?: any[] }> {
+export async function searchTransactions(
+  accountId: number,
+  params?: TransactionSearchParams,
+): Promise<{ pageItems?: any[] }> {
   const { data } = await client.get(`/savingsaccounts/${accountId}/transactions/search`, { params });
   return data;
 }
@@ -1264,7 +1317,10 @@ export async function createInterestRateChart(payload: Record<string, unknown>):
   return data;
 }
 
-export async function updateInterestRateChart(chartId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+export async function updateInterestRateChart(
+  chartId: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
   const { data } = await client.put<{ resourceId: number }>(`/interestratecharts/${chartId}`, payload);
   return data;
 }
@@ -1283,13 +1339,23 @@ export async function fetchChartSlabTemplate(chartId: number): Promise<InterestR
   return data;
 }
 
-export async function createChartSlab(chartId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+export async function createChartSlab(
+  chartId: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
   const { data } = await client.post<{ resourceId: number }>(`/interestratecharts/${chartId}/chartslabs`, payload);
   return data;
 }
 
-export async function updateChartSlab(chartId: number, slabId: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
-  const { data } = await client.put<{ resourceId: number }>(`/interestratecharts/${chartId}/chartslabs/${slabId}`, payload);
+export async function updateChartSlab(
+  chartId: number,
+  slabId: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(
+    `/interestratecharts/${chartId}/chartslabs/${slabId}`,
+    payload,
+  );
   return data;
 }
 

@@ -64,8 +64,8 @@ const rdProductSchema = z.object({
   inMultiplesOfDepositTerm: z.coerce.number().int().positive().optional().or(z.literal("")),
   inMultiplesOfDepositTermTypeId: z.coerce.number().optional().or(z.literal("")),
   depositAmount: z.coerce.number().positive("Must be > 0"),
-  minDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
-  maxDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
+  // minDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
+  // maxDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
   recurringFrequency: z.coerce.number().int().positive(),
   recurringFrequencyType: z.coerce.number(),
   isMandatoryDeposit: z.boolean().optional(),
@@ -162,8 +162,8 @@ const RecurringDepositProductFormPage: React.FC = () => {
       inMultiplesOfDepositTerm: "" as any,
       inMultiplesOfDepositTermTypeId: "" as any,
       depositAmount: undefined,
-      minDepositAmount: "" as any,
-      maxDepositAmount: "" as any,
+      // minDepositAmount: "" as any,
+      // maxDepositAmount: "" as any,
       recurringFrequency: 1,
       recurringFrequencyType: 2,
       isMandatoryDeposit: false,
@@ -247,8 +247,8 @@ const RecurringDepositProductFormPage: React.FC = () => {
       inMultiplesOfDepositTerm: p.inMultiplesOfDepositTerm ?? ("" as any),
       inMultiplesOfDepositTermTypeId: enumId(p.inMultiplesOfDepositTermType, undefined) ?? ("" as any),
       depositAmount: p.depositAmount ?? undefined,
-      minDepositAmount: p.minDepositAmount ?? ("" as any),
-      maxDepositAmount: p.maxDepositAmount ?? ("" as any),
+      // minDepositAmount: p.minDepositAmount ?? ("" as any),
+      // maxDepositAmount: p.maxDepositAmount ?? ("" as any),
       recurringFrequency: p.recurringFrequency ?? 1,
       recurringFrequencyType: enumId(p.recurringFrequencyType, 2) ?? 2,
       isMandatoryDeposit: !!p.isMandatoryDeposit,
@@ -634,14 +634,14 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Deposit Amount</label>
               <Input type="number" step="0.01" {...register("minDepositAmount", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Deposit Amount</label>
               <Input type="number" step="0.01" {...register("maxDepositAmount", { valueAsNumber: true })} />
-            </div>
+            </div> */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">In Multiples Of Deposit Term</label>
               <Input type="number" {...register("inMultiplesOfDepositTerm", { valueAsNumber: true })} />

@@ -126,7 +126,7 @@ export const createRecurringDepositAccountSchema = z.object({
   clientId: z.string().min(1, "Client is required"),
   productId: z.string().min(1, "Product is required"),
   externalId: z.string().optional(),
-  depositAmount: z.string().min(1, "Deposit amount is required"),
+  mandatoryRecommendedDepositAmount: z.string().min(1, "Recurring amount is required"),
   depositPeriod: z.string().min(1, "Period is required"),
   depositPeriodFrequencyId: z.string(),
   submittedOnDate: z.string().min(1, "Date is required"),
