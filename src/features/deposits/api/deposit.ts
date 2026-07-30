@@ -434,7 +434,7 @@ export async function rejectRecurringDeposit(accountId: number, rejectedOnDate?:
 export async function withdrawRecurringDeposit(accountId: number, withdrawnOnDate?: string) {
   return recurringDepositCommand(
     accountId,
-    "withdraw",
+    "withdrawnByApplicant",
     withdrawnOnDate ? { withdrawnOnDate } : { withdrawnOnDate: new Date().toISOString().split("T")[0] },
   );
 }
@@ -501,7 +501,23 @@ export interface RecurringDepositProductTemplate {
   lockinPeriodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
   accountingRuleOptions?: Array<{ id: number; code: string; value: string }>;
   chargeOptions?: Array<{ id: number; name: string; amount: number; chargeTimeType?: { id: number }; chargeCalculationType?: { id: number } }>;
+  penaltyOptions?: Array<{ id: number; name: string; amount: number }>;
   taxGroupOptions?: Array<{ id: number; name: string }>;
+  periodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  preClosurePenalInterestOnTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  paymentTypeOptions?: Array<{ id: number; name: string }>;
+  withdrawalFeeTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  accountingMappingOptions?: Record<string, Array<{ id: number; name: string; glCode: string }>>;
+  chartTemplate?: {
+    periodTypes?: Array<{ id: number; code: string; value: string }>;
+    entityTypeOptions?: Array<{ id: number; code: string; value: string }>;
+    attributeNameOptions?: Array<{ id: number; code: string; value: string }>;
+    conditionTypeOptions?: Array<{ id: number; code: string; value: string }>;
+    incentiveTypeOptions?: Array<{ id: number; code: string; value: string }>;
+    genderOptions?: Array<{ id: number; name: string }>;
+    clientTypeOptions?: Array<{ id: number; name: string }>;
+    clientClassificationOptions?: Array<{ id: number; name: string }>;
+  };
 }
 
 export async function fetchRecurringDepositProductTemplate(): Promise<RecurringDepositProductTemplate> {

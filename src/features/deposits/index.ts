@@ -36,7 +36,6 @@ export {
   DEPOSIT_PERIOD_FREQUENCIES,
   FIXED_DEPOSIT_STATUS_CONFIG,
   RECURRING_DEPOSIT_STATUS_CONFIG,
-  RECURRING_DEPOSIT_FREQUENCY_TYPES,
   PRE_CLOSURE_PENALTY_TYPES,
   CHART_SLAB_PERIOD_TYPES,
   ACCOUNTING_RULES,
@@ -135,7 +134,12 @@ export { useUpdateSavingsAccount } from "./hooks/useUpdateSavingsAccount";
 
 export { useMakeDeposit, useMakeWithdrawal } from "./hooks/useDepositWithdraw";
 
-export { useFixedDepositAccounts, useFixedDepositAccount, useDeleteFixedDepositAccount, useUpdateFixedDepositAccount } from "./hooks/useFixedDeposits";
+export {
+  useFixedDepositAccounts,
+  useFixedDepositAccount,
+  useDeleteFixedDepositAccount,
+  useUpdateFixedDepositAccount,
+} from "./hooks/useFixedDeposits";
 
 export {
   useFixedDepositProducts,
@@ -220,19 +224,11 @@ export {
 export type { OnHoldTransaction } from "./api/deposit";
 
 // API — Savings Transactions
-export {
-  fetchSavingsTransactions,
-  adjustSavingsTransaction,
-  searchTransactions,
-} from "./api/deposit";
+export { fetchSavingsTransactions, adjustSavingsTransaction, searchTransactions } from "./api/deposit";
 export type { TransactionSearchParams } from "./api/deposit";
 
 // API — Fixed Deposit Transactions
-export {
-  fetchFixedDepositTransactions,
-  undoFixedDepositTransaction,
-  makeFixedDepositTransaction,
-} from "./api/deposit";
+export { fetchFixedDepositTransactions, undoFixedDepositTransaction, makeFixedDepositTransaction } from "./api/deposit";
 export type { FixedDepositTransaction } from "./api/deposit";
 
 // API — Fixed Deposit
@@ -316,11 +312,7 @@ export {
   updateChartSlab,
   deleteChartSlab,
 } from "./api/deposit";
-export type {
-  InterestRateChart,
-  InterestRateChartSlab,
-  InterestRateChartTemplate,
-} from "./api/deposit";
+export type { InterestRateChart, InterestRateChartSlab, InterestRateChartTemplate } from "./api/deposit";
 
 // Hooks — Interest Rate Charts
 export {

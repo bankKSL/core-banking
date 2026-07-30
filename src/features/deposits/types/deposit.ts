@@ -380,6 +380,18 @@ export interface RecurringDepositAccount {
   group?: { id: number; name: string };
   fieldOfficerId?: number;
   savingsOfficerName?: string;
+  lockinPeriodFrequency?: number;
+  lockinPeriodFrequencyType?: { id: number; code: string; value: string };
+  isCalendarInherited?: boolean;
+  isMandatoryDeposit?: boolean;
+  allowWithdrawal?: boolean;
+  adjustAdvanceTowardsFuturePayments?: boolean;
+  transferInterestToSavings?: boolean;
+  linkAccountId?: number;
+  maturityInstructionId?: number;
+  transferToSavingsId?: number;
+  recurringFrequency?: number;
+  recurringFrequencyType?: { id: number; code: string; value: string };
 }
 
 export interface RecurringDepositListParams {
@@ -449,8 +461,8 @@ export interface RecurringDepositProductCreateRequest {
   minDepositTerm: number;
   minDepositTermTypeId: number;
   depositAmount: number;
-  recurringDepositFrequency: number;
-  recurringDepositFrequencyType: number;
+  recurringFrequency: number;
+  recurringFrequencyType: number;
   lockinPeriodFrequency?: number;
   lockinPeriodFrequencyType?: number;
   maxDepositTerm?: number;
@@ -487,14 +499,41 @@ export interface RecurringDepositAccountCreateRequest {
   groupId?: number;
   productId: number;
   submittedOnDate: string;
-  depositAmount: number;
+  mandatoryRecommendedDepositAmount: number;
   depositPeriod: number;
   depositPeriodFrequencyId: number;
+  isCalendarInherited?: boolean;
   recurringFrequency?: number;
   recurringFrequencyType?: number;
-  isCalendarInherited?: boolean;
+  accountNo?: string;
   externalId?: string;
   fieldOfficerId?: number;
+  nominalAnnualInterestRate?: number;
+  interestCompoundingPeriodType?: number;
+  interestPostingPeriodType?: number;
+  interestCalculationType?: number;
+  interestCalculationDaysInYearType?: number;
+  lockinPeriodFrequency?: number;
+  lockinPeriodFrequencyType?: number;
+  isMandatoryDeposit?: boolean;
+  allowWithdrawal?: boolean;
+  adjustAdvanceTowardsFuturePayments?: boolean;
+  expectedFirstDepositOnDate?: string;
+  transferInterestToSavings?: boolean;
+  linkAccountId?: number;
+  maturityInstructionId?: number;
+  transferToSavingsId?: number;
+  preClosurePenalApplicable?: boolean;
+  preClosurePenalInterest?: number;
+  preClosurePenalInterestOnTypeId?: number;
+  minDepositTerm?: number;
+  minDepositTermTypeId?: number;
+  maxDepositTerm?: number;
+  maxDepositTermTypeId?: number;
+  inMultiplesOfDepositTerm?: number;
+  inMultiplesOfDepositTermTypeId?: number;
+  withHoldTax?: boolean;
+  charges?: Array<{ chargeId: number; amount: number }>;
   locale?: string;
   dateFormat?: string;
 }

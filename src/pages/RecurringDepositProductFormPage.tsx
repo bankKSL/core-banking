@@ -17,72 +17,30 @@ import {
   useCreateRecurringDepositProduct,
   useUpdateRecurringDepositProduct,
   fetchRecurringDepositProductTemplate,
-  RECURRING_DEPOSIT_FREQUENCY_TYPES,
 } from "@/features/deposits";
 import type { RecurringDepositProductCreateRequest, RecurringDepositProductTemplate } from "@/features/deposits";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
-const INTEREST_COMPOUNDING_OPTIONS = [
-  { id: 1, label: "Daily" },
-  { id: 4, label: "Monthly" },
-  { id: 5, label: "Quarterly" },
-  { id: 6, label: "Semi-Annual" },
-  { id: 7, label: "Annual" },
-];
+const ACCOUNTING_CASH = 2;
+const ACCOUNTING_ACCRUAL = 3;
 
-const INTEREST_POSTING_OPTIONS = [
-  { id: 1, label: "Daily" },
-  { id: 4, label: "Monthly" },
-  { id: 5, label: "Quarterly" },
-  { id: 6, label: "Semi-Annual" },
-  { id: 7, label: "Annual" },
-  { id: 8, label: "Anniversary Monthly" },
-  { id: 9, label: "Anniversary Quarterly" },
-  { id: 10, label: "Anniversary Bi-Annual" },
-  { id: 11, label: "Anniversary Annual" },
-];
+const GL_FIELDS = [
+  { name: "savingsReferenceAccountId", label: "Savings Reference Account" },
+  { name: "savingsControlAccountId", label: "Savings Control Account" },
+  { name: "interestOnSavingsAccountId", label: "Interest on Savings Account" },
+  { name: "incomeFromFeeAccountId", label: "Income from Fee Account" },
+  { name: "incomeFromPenaltyAccountId", label: "Income from Penalty Account" },
+  { name: "transfersInSuspenseAccountId", label: "Transfers in Suspense Account" },
+] as const;
 
-const INTEREST_CALCULATION_OPTIONS = [
-  { id: 1, label: "Daily Balance" },
-  { id: 2, label: "Average Daily Balance" },
-];
+const GL_FIELDS_ACCRUAL_ONLY = [
+  { name: "feesReceivableAccountId", label: "Fees Receivable Account" },
+  { name: "penaltiesReceivableAccountId", label: "Penalties Receivable Account" },
+  { name: "interestPayableAccountId", label: "Interest Payable Account" },
+  { name: "interestReceivableAccountId", label: "Interest Receivable Account" },
+] as const;
 
-const DAYS_IN_YEAR_OPTIONS = [
-  { id: 360, label: "360" },
-  { id: 365, label: "365" },
-];
-
-const LOCKIN_PERIOD_TYPE_OPTIONS = [
-  { id: 0, label: "Days" },
-  { id: 1, label: "Weeks" },
-  { id: 2, label: "Months" },
-  { id: 3, label: "Years" },
-];
-
-const PERIOD_FREQUENCIES = [
-  { id: 0, label: "Days" },
-  { id: 1, label: "Weeks" },
-  { id: 2, label: "Months" },
-  { id: 3, label: "Years" },
-];
-
-const CHART_PERIOD_TYPES = [
-  { id: 0, label: "Days" },
-  { id: 1, label: "Weeks" },
-  { id: 2, label: "Months" },
-  { id: 3, label: "Years" },
-];
-
-const ACCOUNTING_OPTIONS = [
-  { id: 1, label: "None" },
-  { id: 2, label: "Cash" },
-  { id: 3, label: "Accrual" },
-];
-
-const PRE_CLOSURE_PENALTY_ON_OPTIONS = [
-  { id: 1, label: "Whole Term" },
-  { id: 2, label: "Till Premature Withdrawal" },
-];
+const glField = () => z.coerce.number().int().positive().optional().or(z.literal(""));
 
 const rdProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -108,8 +66,8 @@ const rdProductSchema = z.object({
   depositAmount: z.coerce.number().positive("Must be > 0"),
   minDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
   maxDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
-  recurringDepositFrequency: z.coerce.number().int().positive(),
-  recurringDepositFrequencyType: z.coerce.number(),
+  recurringFrequency: z.coerce.number().int().positive(),
+  recurringFrequencyType: z.coerce.number(),
   isMandatoryDeposit: z.boolean().optional(),
   allowWithdrawal: z.boolean().optional(),
   adjustAdvanceTowardsFuturePayments: z.boolean().optional(),
@@ -119,6 +77,16 @@ const rdProductSchema = z.object({
   withHoldTax: z.boolean().optional(),
   taxGroupId: z.coerce.number().int().positive().optional().or(z.literal("")),
   accountingRule: z.coerce.number(),
+  savingsReferenceAccountId: glField(),
+  savingsControlAccountId: glField(),
+  interestOnSavingsAccountId: glField(),
+  incomeFromFeeAccountId: glField(),
+  incomeFromPenaltyAccountId: glField(),
+  transfersInSuspenseAccountId: glField(),
+  feesReceivableAccountId: glField(),
+  penaltiesReceivableAccountId: glField(),
+  interestPayableAccountId: glField(),
+  interestReceivableAccountId: glField(),
 });
 
 type FormValues = z.infer<typeof rdProductSchema>;
@@ -151,6 +119,18 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
   const [slabs, setSlabs] = React.useState<Slab[]>([{ periodType: 2, fromPeriod: 1, annualInterestRate: 5 }]);
 
+  const interestCompoundingOptions = template?.interestCompoundingPeriodTypeOptions ?? [];
+  const interestPostingOptions = template?.interestPostingPeriodTypeOptions ?? [];
+  const interestCalcOptions = template?.interestCalculationTypeOptions ?? [];
+  const daysInYearOptions = template?.interestCalculationDaysInYearTypeOptions ?? [];
+  const lockinTypeOptions = template?.lockinPeriodFrequencyTypeOptions ?? [];
+  const periodFreqOptions = template?.periodFrequencyTypeOptions ?? [];
+  const preClosurePenaltyOptions = template?.preClosurePenalInterestOnTypeOptions ?? [];
+  const accountingOptions = template?.accountingRuleOptions ?? [];
+  const chartPeriodTypes = template?.chartTemplate?.periodTypes ?? [];
+  const taxGroupOpts = template?.taxGroupOptions ?? [];
+  const glAccountOptions = template?.accountingMappingOptions ?? {};
+
   const {
     register,
     handleSubmit,
@@ -181,11 +161,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
       maxDepositTermTypeId: "" as any,
       inMultiplesOfDepositTerm: "" as any,
       inMultiplesOfDepositTermTypeId: "" as any,
-      depositAmount: 1000,
+      depositAmount: undefined,
       minDepositAmount: "" as any,
       maxDepositAmount: "" as any,
-      recurringDepositFrequency: 1,
-      recurringDepositFrequencyType: 2,
+      recurringFrequency: 1,
+      recurringFrequencyType: 2,
       isMandatoryDeposit: false,
       allowWithdrawal: false,
       adjustAdvanceTowardsFuturePayments: false,
@@ -195,11 +175,23 @@ const RecurringDepositProductFormPage: React.FC = () => {
       withHoldTax: false,
       taxGroupId: "" as any,
       accountingRule: 1,
+      savingsReferenceAccountId: "" as any,
+      savingsControlAccountId: "" as any,
+      interestOnSavingsAccountId: "" as any,
+      incomeFromFeeAccountId: "" as any,
+      incomeFromPenaltyAccountId: "" as any,
+      transfersInSuspenseAccountId: "" as any,
+      feesReceivableAccountId: "" as any,
+      penaltiesReceivableAccountId: "" as any,
+      interestPayableAccountId: "" as any,
+      interestReceivableAccountId: "" as any,
     },
   });
 
   const preClosurePenalApplicable = watch("preClosurePenalApplicable");
   const withHoldTax = watch("withHoldTax");
+  const accountingRule = watch("accountingRule");
+  const inMultiplesOfDepositTerm = watch("inMultiplesOfDepositTerm");
 
   // Apply template defaults on create (not edit)
   useEffect(() => {
@@ -210,9 +202,29 @@ const RecurringDepositProductFormPage: React.FC = () => {
     }
   }, [template, isEdit, existingProduct, setValue]);
 
+  // Reset GL fields when accountingRule changes to NONE
+  useEffect(() => {
+    if (accountingRule === 1) {
+      const glFields = [
+        "savingsReferenceAccountId",
+        "savingsControlAccountId",
+        "interestOnSavingsAccountId",
+        "incomeFromFeeAccountId",
+        "incomeFromPenaltyAccountId",
+        "transfersInSuspenseAccountId",
+        "feesReceivableAccountId",
+        "penaltiesReceivableAccountId",
+        "interestPayableAccountId",
+        "interestReceivableAccountId",
+      ];
+      glFields.forEach((f) => setValue(f as any, "" as any));
+    }
+  }, [accountingRule, setValue]);
+
   useEffect(() => {
     if (!existingProduct) return;
     const p = existingProduct as any;
+    const gl = (key: string) => p[key] ?? ("" as any);
     reset({
       name: p.name ?? "",
       shortName: p.shortName ?? "",
@@ -234,11 +246,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
       maxDepositTermTypeId: enumId(p.maxDepositTermType, undefined) ?? ("" as any),
       inMultiplesOfDepositTerm: p.inMultiplesOfDepositTerm ?? ("" as any),
       inMultiplesOfDepositTermTypeId: enumId(p.inMultiplesOfDepositTermType, undefined) ?? ("" as any),
-      depositAmount: p.depositAmount ?? 1000,
+      depositAmount: p.depositAmount ?? undefined,
       minDepositAmount: p.minDepositAmount ?? ("" as any),
       maxDepositAmount: p.maxDepositAmount ?? ("" as any),
-      recurringDepositFrequency: p.recurringDepositFrequency ?? 1,
-      recurringDepositFrequencyType: enumId(p.recurringDepositFrequencyType, 2) ?? 2,
+      recurringFrequency: p.recurringFrequency ?? 1,
+      recurringFrequencyType: enumId(p.recurringFrequencyType, 2) ?? 2,
       isMandatoryDeposit: !!p.isMandatoryDeposit,
       allowWithdrawal: !!p.allowWithdrawal,
       adjustAdvanceTowardsFuturePayments: !!p.adjustAdvanceTowardsFuturePayments,
@@ -248,6 +260,16 @@ const RecurringDepositProductFormPage: React.FC = () => {
       withHoldTax: !!p.withHoldTax,
       taxGroupId: p.taxGroupId ?? ("" as any),
       accountingRule: enumId(p.accountingRule, 1) ?? 1,
+      savingsReferenceAccountId: gl("savingsReferenceAccountId"),
+      savingsControlAccountId: gl("savingsControlAccountId"),
+      interestOnSavingsAccountId: gl("interestOnSavingsAccountId"),
+      incomeFromFeeAccountId: gl("incomeFromFeeAccountId"),
+      incomeFromPenaltyAccountId: gl("incomeFromPenaltyAccountId"),
+      transfersInSuspenseAccountId: gl("transfersInSuspenseAccountId"),
+      feesReceivableAccountId: gl("feesReceivableAccountId"),
+      penaltiesReceivableAccountId: gl("penaltiesReceivableAccountId"),
+      interestPayableAccountId: gl("interestPayableAccountId"),
+      interestReceivableAccountId: gl("interestReceivableAccountId"),
     });
     if (p.activeChart?.chartSlabs?.length) {
       setSlabs(
@@ -272,6 +294,8 @@ const RecurringDepositProductFormPage: React.FC = () => {
     setSlabs((prev) => prev.filter((_, idx) => idx !== i));
   };
 
+  const num = (v: any) => (v ? Number(v) : undefined);
+
   const onSubmit = async (values: Record<string, any>) => {
     const payload: RecurringDepositProductCreateRequest = {
       name: values.name,
@@ -282,8 +306,8 @@ const RecurringDepositProductFormPage: React.FC = () => {
       minDepositTerm: values.minDepositTerm,
       minDepositTermTypeId: values.minDepositTermTypeId,
       depositAmount: values.depositAmount,
-      recurringDepositFrequency: values.recurringDepositFrequency,
-      recurringDepositFrequencyType: values.recurringDepositFrequencyType,
+      recurringFrequency: values.recurringFrequency,
+      recurringFrequencyType: values.recurringFrequencyType,
       accountingRule: values.accountingRule,
       nominalAnnualInterestRate: values.nominalAnnualInterestRate || undefined,
       inMultiplesOf: values.inMultiplesOf ? Number(values.inMultiplesOf) : undefined,
@@ -297,11 +321,13 @@ const RecurringDepositProductFormPage: React.FC = () => {
       lockinPeriodFrequencyType: values.lockinPeriodFrequencyType
         ? Number(values.lockinPeriodFrequencyType)
         : undefined,
+      inMultiplesOfDepositTerm: num(values.inMultiplesOfDepositTerm),
+      inMultiplesOfDepositTermTypeId: num(values.inMultiplesOfDepositTermTypeId),
+      minDepositAmount: num(values.minDepositAmount),
+      maxDepositAmount: num(values.maxDepositAmount),
       preClosurePenalApplicable: !!values.preClosurePenalApplicable,
-      preClosurePenalInterest: values.preClosurePenalInterest ? Number(values.preClosurePenalInterest) : undefined,
-      preClosurePenalInterestOnTypeId: values.preClosurePenalInterestOnTypeId
-        ? Number(values.preClosurePenalInterestOnTypeId)
-        : undefined,
+      preClosurePenalInterest: num(values.preClosurePenalInterest),
+      preClosurePenalInterestOnTypeId: num(values.preClosurePenalInterestOnTypeId),
       isMandatoryDeposit: !!values.isMandatoryDeposit,
       allowWithdrawal: !!values.allowWithdrawal,
       adjustAdvanceTowardsFuturePayments: !!values.adjustAdvanceTowardsFuturePayments,
@@ -321,6 +347,24 @@ const RecurringDepositProductFormPage: React.FC = () => {
         },
       ],
     };
+
+    // GL account mappings
+    const glKeys = [
+      "savingsReferenceAccountId",
+      "savingsControlAccountId",
+      "interestOnSavingsAccountId",
+      "incomeFromFeeAccountId",
+      "incomeFromPenaltyAccountId",
+      "transfersInSuspenseAccountId",
+      "feesReceivableAccountId",
+      "penaltiesReceivableAccountId",
+      "interestPayableAccountId",
+      "interestReceivableAccountId",
+    ];
+    for (const key of glKeys) {
+      const v = values[key];
+      if (v) (payload as any)[key] = Number(v);
+    }
 
     if (isEdit) {
       await updateMutation.mutateAsync({ productId: Number(id), payload });
@@ -405,6 +449,16 @@ const RecurringDepositProductFormPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Nominal Annual Interest Rate (%)</label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="e.g. 5.0"
+                {...register("nominalAnnualInterestRate", { valueAsNumber: true })}
+              />
+            </div>
+            <div />
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Compounding Period *</label>
               <Select
                 value={String(watch("interestCompoundingPeriodType"))}
@@ -414,9 +468,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
+                  {interestCompoundingOptions.map((o: any) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -432,9 +486,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {INTEREST_POSTING_OPTIONS.map((o) => (
+                  {interestPostingOptions.map((o: any) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -450,9 +504,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {INTEREST_CALCULATION_OPTIONS.map((o) => (
+                  {interestCalcOptions.map((o: any) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -468,9 +522,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {DAYS_IN_YEAR_OPTIONS.map((o) => (
+                  {daysInYearOptions.map((o: any) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -506,9 +560,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
+                  {lockinTypeOptions.map((o: any) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -550,9 +604,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PERIOD_FREQUENCIES.map((f) => (
-                    <SelectItem key={f.id} value={String(f.id)}>
-                      {f.label}
+                  {periodFreqOptions.map((o: any) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -572,9 +626,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PERIOD_FREQUENCIES.map((f) => (
-                    <SelectItem key={f.id} value={String(f.id)}>
-                      {f.label}
+                  {periodFreqOptions.map((o: any) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -592,24 +646,26 @@ const RecurringDepositProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">In Multiples Of Deposit Term</label>
               <Input type="number" {...register("inMultiplesOfDepositTerm", { valueAsNumber: true })} />
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Multiples Term Type</label>
-              <Select
-                value={watch("inMultiplesOfDepositTermTypeId") ? String(watch("inMultiplesOfDepositTermTypeId")) : ""}
-                onValueChange={(v) => setValue("inMultiplesOfDepositTermTypeId", v ? Number(v) : ("" as any))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PERIOD_FREQUENCIES.map((f) => (
-                    <SelectItem key={f.id} value={String(f.id)}>
-                      {f.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {inMultiplesOfDepositTerm && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Multiples Term Type</label>
+                <Select
+                  value={watch("inMultiplesOfDepositTermTypeId") ? String(watch("inMultiplesOfDepositTermTypeId")) : ""}
+                  onValueChange={(v) => setValue("inMultiplesOfDepositTermTypeId", v ? Number(v) : ("" as any))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periodFreqOptions.map((o: any) => (
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.value ?? o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -620,21 +676,21 @@ const RecurringDepositProductFormPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Deposit Every *</label>
-              <Input type="number" {...register("recurringDepositFrequency", { valueAsNumber: true })} />
+              <Input type="number" {...register("recurringFrequency", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Frequency Type</label>
               <Select
-                value={String(watch("recurringDepositFrequencyType"))}
-                onValueChange={(v) => setValue("recurringDepositFrequencyType", Number(v))}
+                value={String(watch("recurringFrequencyType"))}
+                onValueChange={(v) => setValue("recurringFrequencyType", Number(v))}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
-                    <SelectItem key={f.id} value={String(f.id)}>
-                      {f.label}
+                  {periodFreqOptions.map((o: any) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -722,9 +778,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      {PRE_CLOSURE_PENALTY_ON_OPTIONS.map((o) => (
+                      {preClosurePenaltyOptions.map((o: any) => (
                         <SelectItem key={o.id} value={String(o.id)}>
-                          {o.label}
+                          {o.value ?? o.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -746,12 +802,22 @@ const RecurringDepositProductFormPage: React.FC = () => {
             </div>
             {withHoldTax && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Tax Group ID</label>
-                <Input
-                  type="number"
-                  {...register("taxGroupId", { valueAsNumber: true })}
-                  placeholder="Required when withholding tax"
-                />
+                <label className="block text-sm font-medium">Tax Group</label>
+                <Select
+                  value={watch("taxGroupId") ? String(watch("taxGroupId")) : ""}
+                  onValueChange={(v) => setValue("taxGroupId", v ? Number(v) : ("" as any))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tax group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taxGroupOpts.map((o: any) => (
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
           </CardContent>
@@ -763,6 +829,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Accounting Rule *</label>
               <Select
                 value={String(watch("accountingRule"))}
                 onValueChange={(v) => setValue("accountingRule", Number(v))}
@@ -771,15 +838,72 @@ const RecurringDepositProductFormPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ACCOUNTING_OPTIONS.map((o) => (
+                  {accountingOptions.map((o: any) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {o.value ?? o.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </CardContent>
+          {(accountingRule === ACCOUNTING_CASH || accountingRule === ACCOUNTING_ACCRUAL) && (
+            <CardContent className="grid grid-cols-2 gap-4 border-t pt-4">
+              {GL_FIELDS.map(({ name, label }) => (
+                <div key={name} className="space-y-1.5">
+                  <label className="block text-sm font-medium">{label}</label>
+                  <Select
+                    value={watch(name as any) ? String(watch(name as any)) : ""}
+                    onValueChange={(v) => setValue(name as any, v ? Number(v) : ("" as any))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={`Select ${label}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        ...(glAccountOptions?.assetAccountOptions ?? []),
+                        ...(glAccountOptions?.liabilityAccountOptions ?? []),
+                        ...(glAccountOptions?.equityAccountOptions ?? []),
+                        ...(glAccountOptions?.incomeAccountOptions ?? []),
+                        ...(glAccountOptions?.expenseAccountOptions ?? []),
+                      ].map((o: any) => (
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.name} ({o.glCode})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+              {accountingRule === ACCOUNTING_ACCRUAL &&
+                GL_FIELDS_ACCRUAL_ONLY.map(({ name, label }) => (
+                  <div key={name} className="space-y-1.5">
+                    <label className="block text-sm font-medium">{label}</label>
+                    <Select
+                      value={watch(name as any) ? String(watch(name as any)) : ""}
+                      onValueChange={(v) => setValue(name as any, v ? Number(v) : ("" as any))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={`Select ${label}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          ...(glAccountOptions?.assetAccountOptions ?? []),
+                          ...(glAccountOptions?.liabilityAccountOptions ?? []),
+                          ...(glAccountOptions?.equityAccountOptions ?? []),
+                          ...(glAccountOptions?.incomeAccountOptions ?? []),
+                          ...(glAccountOptions?.expenseAccountOptions ?? []),
+                        ].map((o: any) => (
+                          <SelectItem key={o.id} value={String(o.id)}>
+                            {o.name} ({o.glCode})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+            </CardContent>
+          )}
         </Card>
 
         <Card>
@@ -813,9 +937,17 @@ const RecurringDepositProductFormPage: React.FC = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {CHART_PERIOD_TYPES.map((pt) => (
+                        {(chartPeriodTypes.length > 0
+                          ? chartPeriodTypes
+                          : [
+                              { id: 0, value: "Days" },
+                              { id: 1, value: "Weeks" },
+                              { id: 2, value: "Months" },
+                              { id: 3, value: "Years" },
+                            ]
+                        ).map((pt: any) => (
                           <SelectItem key={pt.id} value={String(pt.id)}>
-                            {pt.label}
+                            {pt.value ?? pt.label}
                           </SelectItem>
                         ))}
                       </SelectContent>

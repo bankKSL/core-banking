@@ -95,11 +95,3 @@ export const RECURRING_DEPOSIT_STATUS_CONFIG: Record<
   "Recurring deposit account status - withdrawn by applicant": { variant: "warning", label: "Withdrawn" },
   "Recurring deposit account status - premature closed": { variant: "warning", label: "Premature Closed" },
 };
-
-/** Deposit frequency types for recurring deposits */
-export const RECURRING_DEPOSIT_FREQUENCY_TYPES = [
-  { id: 1, label: "Days" },
-  { id: 2, label: "Months" },
-  { id: 3, label: "Weeks" },
-  { id: 4, label: "Years" },
-];

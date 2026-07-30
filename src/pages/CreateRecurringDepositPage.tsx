@@ -16,7 +16,6 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useClients } from "@/features/clients";
 import {
   DEPOSIT_PERIOD_FREQUENCIES,
-  RECURRING_DEPOSIT_FREQUENCY_TYPES,
   useRecurringDepositProducts,
   useCreateRecurringDepositAccount,
   useUpdateRecurringDepositAccount,
@@ -64,14 +63,23 @@ const PRE_CLOSURE_PENALTY_ON_OPTIONS = [
   { id: 2, label: "Till Premature Withdrawal" },
 ];
 
-const rdSchema = z.object({
+const MATURITY_INSTRUCTION_OPTIONS = [
+  { id: 100, label: "Withdraw Deposit" },
+  { id: 200, label: "Transfer to Savings" },
+  { id: 300, label: "Reinvest Principal + Interest" },
+  { id: 400, label: "Reinvest Principal Only" },
+];
+
+const baseSchema = z.object({
   officeId: z.string().min(1, "Office is required"),
-  clientId: z.string().min(1, "Client is required"),
+  clientId: z.string().min(1, "Client or Group is required"),
+  groupId: z.string().optional(),
   productId: z.string().min(1, "Product is required"),
+  accountNo: z.string().optional(),
   externalId: z.string().optional(),
   mandatoryRecommendedDepositAmount: z.string().min(1, "Recurring amount is required"),
   depositPeriod: z.string().min(1, "Period is required"),
-  depositPeriodFrequencyId: z.string(),
+  depositPeriodFrequencyId: z.string().min(1, "Period frequency is required"),
   submittedOnDate: z.string().min(1, "Date is required"),
   isCalendarInherited: z.boolean().optional(),
   recurringFrequency: z.string().optional(),
@@ -92,6 +100,63 @@ const rdSchema = z.object({
   preClosurePenalInterestOnTypeId: z.string().optional(),
   withHoldTax: z.boolean().optional(),
   fieldOfficerId: z.string().optional(),
+  transferInterestToSavings: z.boolean().optional(),
+  linkAccountId: z.string().optional(),
+  maturityInstructionId: z.string().optional(),
+  transferToSavingsId: z.string().optional(),
+});
+
+const rdSchema = baseSchema.superRefine((data, ctx) => {
+  if (!data.isCalendarInherited) {
+    if (!data.recurringFrequency || data.recurringFrequency === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Recurring frequency is required when calendar is not inherited",
+        path: ["recurringFrequency"],
+      });
+    }
+    if (!data.recurringFrequencyType || data.recurringFrequencyType === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Recurring frequency type is required when calendar is not inherited",
+        path: ["recurringFrequencyType"],
+      });
+    }
+  }
+  if (data.preClosurePenalApplicable) {
+    if (!data.preClosurePenalInterest || data.preClosurePenalInterest === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Penalty interest rate is required when penalty is applicable",
+        path: ["preClosurePenalInterest"],
+      });
+    }
+    if (!data.preClosurePenalInterestOnTypeId || data.preClosurePenalInterestOnTypeId === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Penalty applied on type is required when penalty is applicable",
+        path: ["preClosurePenalInterestOnTypeId"],
+      });
+    }
+  }
+  if (data.transferInterestToSavings) {
+    if (!data.linkAccountId || data.linkAccountId === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Linked savings account is required when transfer interest to savings is enabled",
+        path: ["linkAccountId"],
+      });
+    }
+  }
+  if (data.maturityInstructionId === "200") {
+    if (!data.transferToSavingsId || data.transferToSavingsId === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Transfer to savings account is required when maturity instruction is Transfer to Savings",
+        path: ["transferToSavingsId"],
+      });
+    }
+  }
 });
 
 type RDFormValues = z.infer<typeof rdSchema>;
@@ -118,7 +183,9 @@ const CreateRecurringDepositPage: React.FC = () => {
     defaultValues: {
       officeId: "",
       clientId: clientIdParam || "",
+      groupId: "",
       productId: "",
+      accountNo: "",
       externalId: "",
       mandatoryRecommendedDepositAmount: "",
       depositPeriod: "12",
@@ -143,6 +210,10 @@ const CreateRecurringDepositPage: React.FC = () => {
       preClosurePenalInterestOnTypeId: "",
       withHoldTax: false,
       fieldOfficerId: "",
+      transferInterestToSavings: false,
+      linkAccountId: "",
+      maturityInstructionId: "",
+      transferToSavingsId: "",
     },
   });
 
@@ -151,6 +222,8 @@ const CreateRecurringDepositPage: React.FC = () => {
   const productId = watch("productId");
   const isCalendarInherited = watch("isCalendarInherited");
   const preClosurePenalApplicable = watch("preClosurePenalApplicable");
+  const transferInterestToSavings = watch("transferInterestToSavings");
+  const maturityInstructionId = watch("maturityInstructionId");
 
   const clientsQuery = useMemo(
     () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
@@ -169,6 +242,30 @@ const CreateRecurringDepositPage: React.FC = () => {
     enabled: !!clientId && !!productId,
     staleTime: 60_000,
   });
+
+  useEffect(() => {
+    if (!template) return;
+    const t = template as Record<string, any>;
+    if (t.nominalAnnualInterestRate != null) setValue("nominalAnnualInterestRate", String(t.nominalAnnualInterestRate));
+    if (t.interestCompoundingPeriodType?.id != null)
+      setValue("interestCompoundingPeriodType", String(t.interestCompoundingPeriodType.id));
+    if (t.interestPostingPeriodType?.id != null)
+      setValue("interestPostingPeriodType", String(t.interestPostingPeriodType.id));
+    if (t.interestCalculationType?.id != null)
+      setValue("interestCalculationType", String(t.interestCalculationType.id));
+    if (t.interestCalculationDaysInYearType?.id != null)
+      setValue("interestCalculationDaysInYearType", String(t.interestCalculationDaysInYearType.id));
+    if (t.lockinPeriodFrequency != null) setValue("lockinPeriodFrequency", String(t.lockinPeriodFrequency));
+    if (t.lockinPeriodFrequencyType?.id != null)
+      setValue("lockinPeriodFrequencyType", String(t.lockinPeriodFrequencyType.id));
+    if (t.preClosurePenalApplicable != null) setValue("preClosurePenalApplicable", t.preClosurePenalApplicable);
+    if (t.preClosurePenalInterest != null) setValue("preClosurePenalInterest", String(t.preClosurePenalInterest));
+    if (t.preClosurePenalInterestOnType?.id != null)
+      setValue("preClosurePenalInterestOnTypeId", String(t.preClosurePenalInterestOnType.id));
+    if (t.mandatoryRecommendedDepositAmount != null)
+      setValue("mandatoryRecommendedDepositAmount", String(t.mandatoryRecommendedDepositAmount));
+    if (t.transferInterestToSavings != null) setValue("transferInterestToSavings", t.transferInterestToSavings);
+  }, [template, setValue]);
 
   const isLoading = clientsLoading || productsLoading;
   const clients = clientsData?.pageItems ?? [];
@@ -190,9 +287,12 @@ const CreateRecurringDepositPage: React.FC = () => {
       adjustAdvanceTowardsFuturePayments: !!values.adjustAdvanceTowardsFuturePayments,
     };
 
+    if (values.groupId) payload.groupId = Number(values.groupId);
+    if (values.accountNo) payload.accountNo = values.accountNo;
+
     if (!values.isCalendarInherited) {
-      if (values.recurringFrequency) payload.recurringFrequency = Number(values.recurringFrequency);
-      if (values.recurringFrequencyType) payload.recurringFrequencyType = Number(values.recurringFrequencyType);
+      payload.recurringFrequency = Number(values.recurringFrequency);
+      payload.recurringFrequencyType = Number(values.recurringFrequencyType);
     }
     if (values.expectedFirstDepositOnDate) payload.expectedFirstDepositOnDate = values.expectedFirstDepositOnDate;
     if (values.nominalAnnualInterestRate) payload.nominalAnnualInterestRate = Number(values.nominalAnnualInterestRate);
@@ -208,11 +308,21 @@ const CreateRecurringDepositPage: React.FC = () => {
 
     if (values.preClosurePenalApplicable) {
       payload.preClosurePenalApplicable = true;
-      if (values.preClosurePenalInterest) payload.preClosurePenalInterest = Number(values.preClosurePenalInterest);
-      if (values.preClosurePenalInterestOnTypeId)
-        payload.preClosurePenalInterestOnTypeId = Number(values.preClosurePenalInterestOnTypeId);
+      payload.preClosurePenalInterest = Number(values.preClosurePenalInterest);
+      payload.preClosurePenalInterestOnTypeId = Number(values.preClosurePenalInterestOnTypeId);
     }
     if (values.withHoldTax) payload.withHoldTax = true;
+
+    if (values.transferInterestToSavings) {
+      payload.transferInterestToSavings = true;
+      payload.linkAccountId = Number(values.linkAccountId);
+    }
+    if (values.maturityInstructionId) {
+      payload.maturityInstructionId = Number(values.maturityInstructionId);
+      if (values.maturityInstructionId === "200") {
+        payload.transferToSavingsId = Number(values.transferToSavingsId);
+      }
+    }
 
     if (isEdit) {
       await updateMutation.mutateAsync({ accountId: Number(id), payload });
@@ -224,27 +334,40 @@ const CreateRecurringDepositPage: React.FC = () => {
 
   useEffect(() => {
     if (!existingAccount) return;
+    const rd = existingAccount;
     setValue("officeId", "");
-    setValue("clientId", String(existingAccount.clientId));
-    setValue("productId", String(existingAccount.depositProductId));
-    setValue("externalId", existingAccount.externalId ?? "");
-    setValue("mandatoryRecommendedDepositAmount", String(existingAccount.recurringDepositAmount ?? ""));
-    setValue("depositPeriod", String(existingAccount.depositPeriod ?? ""));
-    setValue("depositPeriodFrequencyId", String(existingAccount.depositPeriodFrequencyType?.id ?? "2"));
-    setValue(
-      "submittedOnDate",
-      existingAccount.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0],
-    );
-    setValue("nominalAnnualInterestRate", String(existingAccount.nominalAnnualInterestRate ?? ""));
-    setValue("interestCompoundingPeriodType", String(existingAccount.interestCompoundingPeriodType?.id ?? ""));
-    setValue("interestPostingPeriodType", String(existingAccount.interestPostingPeriodType?.id ?? ""));
-    setValue("interestCalculationType", String(existingAccount.interestCalculationType?.id ?? ""));
-    setValue("interestCalculationDaysInYearType", String(existingAccount.interestCalculationDaysInYearType?.id ?? ""));
-    setValue("preClosurePenalApplicable", existingAccount.preClosurePenalApplicable ?? false);
-    setValue("preClosurePenalInterest", String(existingAccount.preClosurePenalInterest ?? ""));
-    setValue("preClosurePenalInterestOnTypeId", String(existingAccount.preClosurePenalInterestOnType?.id ?? ""));
-    setValue("withHoldTax", existingAccount.withHoldTax ?? false);
-    setValue("fieldOfficerId", String(existingAccount.fieldOfficerId ?? ""));
+    setValue("clientId", String(rd.clientId));
+    if (rd.group?.id) setValue("groupId", String(rd.group.id));
+    setValue("productId", String(rd.depositProductId));
+    setValue("accountNo", rd.accountNo ?? "");
+    setValue("externalId", rd.externalId ?? "");
+    setValue("mandatoryRecommendedDepositAmount", String(rd.recurringDepositAmount ?? ""));
+    setValue("depositPeriod", String(rd.depositPeriod ?? ""));
+    setValue("depositPeriodFrequencyId", String(rd.depositPeriodFrequencyType?.id ?? "2"));
+    setValue("submittedOnDate", rd.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0]);
+    setValue("nominalAnnualInterestRate", String(rd.nominalAnnualInterestRate ?? ""));
+    setValue("interestCompoundingPeriodType", String(rd.interestCompoundingPeriodType?.id ?? ""));
+    setValue("interestPostingPeriodType", String(rd.interestPostingPeriodType?.id ?? ""));
+    setValue("interestCalculationType", String(rd.interestCalculationType?.id ?? ""));
+    setValue("interestCalculationDaysInYearType", String(rd.interestCalculationDaysInYearType?.id ?? ""));
+    setValue("preClosurePenalApplicable", rd.preClosurePenalApplicable ?? false);
+    setValue("preClosurePenalInterest", String(rd.preClosurePenalInterest ?? ""));
+    setValue("preClosurePenalInterestOnTypeId", String(rd.preClosurePenalInterestOnType?.id ?? ""));
+    setValue("withHoldTax", rd.withHoldTax ?? false);
+    setValue("fieldOfficerId", String(rd.fieldOfficerId ?? ""));
+    setValue("isCalendarInherited", rd.isCalendarInherited ?? false);
+    setValue("isMandatoryDeposit", rd.isMandatoryDeposit ?? true);
+    setValue("allowWithdrawal", rd.allowWithdrawal ?? false);
+    setValue("adjustAdvanceTowardsFuturePayments", rd.adjustAdvanceTowardsFuturePayments ?? false);
+    setValue("expectedFirstDepositOnDate", rd.expectedFirstDepositOnDate?.split("T")[0] ?? "");
+    setValue("lockinPeriodFrequency", String(rd.lockinPeriodFrequency ?? ""));
+    setValue("lockinPeriodFrequencyType", String(rd.lockinPeriodFrequencyType?.id ?? ""));
+    setValue("transferInterestToSavings", rd.transferInterestToSavings ?? false);
+    setValue("linkAccountId", String(rd.linkAccountId ?? ""));
+    setValue("maturityInstructionId", String(rd.maturityInstructionId ?? ""));
+    setValue("transferToSavingsId", String(rd.transferToSavingsId ?? ""));
+    if (rd.recurringFrequency) setValue("recurringFrequency", String(rd.recurringFrequency));
+    if (rd.recurringFrequencyType?.id) setValue("recurringFrequencyType", String(rd.recurringFrequencyType.id));
   }, [existingAccount, setValue]);
 
   if (isLoading || existingLoading)
@@ -284,7 +407,7 @@ const CreateRecurringDepositPage: React.FC = () => {
                 setValue("clientId", "");
               }}
             />
-            <div>
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Client *</label>
               <Select
                 value={clientId}
@@ -304,6 +427,15 @@ const CreateRecurringDepositPage: React.FC = () => {
               </Select>
               {errors.clientId && <p className="text-sm text-red-500 mt-1">{errors.clientId.message}</p>}
             </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Group</label>
+              <Input
+                type="number"
+                {...register("groupId")}
+                placeholder="Group ID (optional)"
+                error={errors.groupId?.message}
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -313,7 +445,7 @@ const CreateRecurringDepositPage: React.FC = () => {
             <CardTitle>Recurring Deposit Product</CardTitle>
           </CardHeader>
           <CardContent>
-            <div>
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Product *</label>
               <Select value={productId} onValueChange={(v) => setValue("productId", v, { shouldValidate: true })}>
                 <SelectTrigger>
@@ -333,7 +465,7 @@ const CreateRecurringDepositPage: React.FC = () => {
                 variant="link"
                 size="sm"
                 className="h-auto p-0 text-xs"
-                onClick={() => window.open("/deposits/recurring-products", "_blank")}
+                onClick={() => window.open("/deposits/recurring-products/new", "")}
               >
                 <ExternalLink className="mr-1 h-3 w-3" />
                 Create New Product
@@ -348,19 +480,29 @@ const CreateRecurringDepositPage: React.FC = () => {
             <CardTitle>Deposit Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} placeholder="Optional" error={errors.externalId?.message} />
+            <div className="col-span-2 grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Account No</label>
+                <Input {...register("accountNo")} placeholder="Optional" error={errors.accountNo?.message} />
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">External ID</label>
+                <Input {...register("externalId")} placeholder="Optional" error={errors.externalId?.message} />
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Recurring Deposit Amount *</label>
-              <Input type="number" {...register("mandatoryRecommendedDepositAmount")} error={errors.mandatoryRecommendedDepositAmount?.message} />
+              <Input
+                type="number"
+                {...register("mandatoryRecommendedDepositAmount")}
+                error={errors.mandatoryRecommendedDepositAmount?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Period Length *</label>
               <Input type="number" {...register("depositPeriod")} error={errors.depositPeriod?.message} />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Period Frequency</label>
               <Select
                 value={watch("depositPeriodFrequencyId")}
@@ -384,7 +526,12 @@ const CreateRecurringDepositPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Field Officer ID</label>
-              <Input type="number" {...register("fieldOfficerId")} placeholder="Optional" error={errors.fieldOfficerId?.message} />
+              <Input
+                type="number"
+                {...register("fieldOfficerId")}
+                placeholder="Optional"
+                error={errors.fieldOfficerId?.message}
+              />
             </div>
           </CardContent>
         </Card>
@@ -397,13 +544,20 @@ const CreateRecurringDepositPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="isCalendarInherited" onCheckedChange={(v) => setValue("isCalendarInherited", v)} />
-              <label className="block text-sm font-medium" htmlFor="isCalendarInherited">Use Group Calendar</label>
+              <label className="block text-sm font-medium" htmlFor="isCalendarInherited">
+                Use Group Calendar
+              </label>
             </div>
             {!isCalendarInherited && (
               <>
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Deposit Every</label>
-                  <Input type="number" {...register("recurringFrequency")} placeholder="e.g. 1" error={errors.recurringFrequency?.message} />
+                  <Input
+                    type="number"
+                    {...register("recurringFrequency")}
+                    placeholder="e.g. 1"
+                    error={errors.recurringFrequency?.message}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium">Frequency Type</label>
@@ -415,11 +569,11 @@ const CreateRecurringDepositPage: React.FC = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
+                      {/* {RECURRING_DEPOSIT_FREQUENCY_TYPES.map((f) => (
                         <SelectItem key={f.id} value={String(f.id)}>
                           {f.label}
                         </SelectItem>
-                      ))}
+                      ))} */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -431,22 +585,32 @@ const CreateRecurringDepositPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("isMandatoryDeposit", v)}
                 defaultChecked
               />
-              <label className="block text-sm font-medium" htmlFor="isMandatoryDeposit">Mandatory Deposit</label>
+              <label className="block text-sm font-medium" htmlFor="isMandatoryDeposit">
+                Mandatory Deposit
+              </label>
             </div>
             <div className="flex items-center gap-3 pt-2">
               <Switch id="allowWithdrawal" onCheckedChange={(v) => setValue("allowWithdrawal", v)} />
-              <label className="block text-sm font-medium" htmlFor="allowWithdrawal">Allow Withdrawal</label>
+              <label className="block text-sm font-medium" htmlFor="allowWithdrawal">
+                Allow Withdrawal
+              </label>
             </div>
             <div className="flex items-center gap-3 pt-2">
               <Switch
                 id="adjustAdvanceTowardsFuturePayments"
                 onCheckedChange={(v) => setValue("adjustAdvanceTowardsFuturePayments", v)}
               />
-              <label className="block text-sm font-medium" htmlFor="adjustAdvanceTowardsFuturePayments">Advance Payment Adjustment</label>
+              <label className="block text-sm font-medium" htmlFor="adjustAdvanceTowardsFuturePayments">
+                Advance Payment Adjustment
+              </label>
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">First Deposit Expected On</label>
-              <Input type="date" {...register("expectedFirstDepositOnDate")} error={errors.expectedFirstDepositOnDate?.message} />
+              <Input
+                type="date"
+                {...register("expectedFirstDepositOnDate")}
+                error={errors.expectedFirstDepositOnDate?.message}
+              />
             </div>
           </CardContent>
         </Card>
@@ -584,13 +748,20 @@ const CreateRecurringDepositPage: React.FC = () => {
                 id="preClosurePenalApplicable"
                 onCheckedChange={(v) => setValue("preClosurePenalApplicable", v)}
               />
-              <label className="block text-sm font-medium" htmlFor="preClosurePenalApplicable">Apply Pre-closure Penalty</label>
+              <label className="block text-sm font-medium" htmlFor="preClosurePenalApplicable">
+                Apply Pre-closure Penalty
+              </label>
             </div>
             {preClosurePenalApplicable && (
               <>
                 <div className="space-y-1.5">
                   <label className="block text-sm font-medium">Penalty Interest Rate (%)</label>
-                  <Input type="number" step="0.01" {...register("preClosurePenalInterest")} error={errors.preClosurePenalInterest?.message} />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    {...register("preClosurePenalInterest")}
+                    error={errors.preClosurePenalInterest?.message}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium">Penalty Applied On</label>
@@ -614,8 +785,65 @@ const CreateRecurringDepositPage: React.FC = () => {
             )}
             <div className="flex items-center gap-3 pt-2">
               <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
-              <label className="block text-sm font-medium" htmlFor="withHoldTax">Withhold Tax</label>
+              <label className="block text-sm font-medium" htmlFor="withHoldTax">
+                Withhold Tax
+              </label>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Maturity & Transfer */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Maturity &amp; Transfer</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Maturity Instruction</label>
+              <Select value={maturityInstructionId} onValueChange={(v) => setValue("maturityInstructionId", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select instruction" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MATURITY_INSTRUCTION_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {maturityInstructionId === "200" && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Transfer to Savings Account ID</label>
+                <Input
+                  type="number"
+                  {...register("transferToSavingsId")}
+                  placeholder="Savings account ID"
+                  error={errors.transferToSavingsId?.message}
+                />
+              </div>
+            )}
+            <div className="flex items-center gap-3 pt-2">
+              <Switch
+                id="transferInterestToSavings"
+                onCheckedChange={(v) => setValue("transferInterestToSavings", v)}
+              />
+              <label className="block text-sm font-medium" htmlFor="transferInterestToSavings">
+                Transfer Interest to Savings
+              </label>
+            </div>
+            {transferInterestToSavings && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">Link Savings Account ID</label>
+                <Input
+                  type="number"
+                  {...register("linkAccountId")}
+                  placeholder="Savings account ID"
+                  error={errors.linkAccountId?.message}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
