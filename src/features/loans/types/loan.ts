@@ -62,7 +62,6 @@ export interface LoanProduct {
   amortizationType: { id: number; code: string; value: string };
   interestType: { id: number; code: string; value: string };
   interestCalculationPeriodType: { id: number; code: string; value: string };
-  allowPartialPeriodInterestCalcualtion?: boolean;
   transactionProcessingStrategyId?: number;
   transactionProcessingStrategyName?: string;
   daysInMonthType?: { id: number; code: string; value: string };
@@ -158,7 +157,6 @@ export interface Loan {
   maxOutstandingLoanBalance?: number;
   expectedDisbursementDate?: string;
   submittedOnDate?: string;
-  expectedFirstRepaymentOnDate?: string;
 }
 
 /** Repayment schedule block as returned with associations=repaymentSchedule|all */
@@ -317,40 +315,99 @@ export interface LoanListParams {
 
 // ─── Loan Template ───────────────────────────────────────────────
 
+export interface LoanTemplateOption {
+  id: number;
+  code?: string;
+  value?: string;
+  name?: string;
+}
+
 export interface LoanTemplate {
   clientId?: number;
   clientName?: string;
+  clientAccountNo?: string;
   clientOfficeId?: number;
   loanProductId?: number;
-  loanProductOptions: Array<{ id: number; name: string }>;
-  currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
-  principal: number;
-  termFrequency: number;
-  termPeriodFrequencyType: { id: number; code: string; value: string };
-  numberOfRepayments: number;
-  repaymentEvery: number;
-  repaymentFrequencyType: { id: number; code: string; value: string };
-  interestRatePerPeriod: number;
-  interestRateFrequencyType: { id: number; code: string; value: string };
-  annualInterestRate: number;
-  amortizationType: { id: number; code: string; value: string };
-  interestType: { id: number; code: string; value: string };
-  interestCalculationPeriodType: { id: number; code: string; value: string };
-  transactionProcessingStrategyId?: number;
-  transactionProcessingStrategyName?: string;
-  isFloatingInterestRate?: boolean;
-  daysInMonthType: { id: number; code: string; value: string };
-  daysInYearType: { id: number; code: string; value: string };
-  amortizationTypeOptions: Array<{ id: number; code: string; value: string }>;
-  interestTypeOptions: Array<{ id: number; code: string; value: string }>;
-  interestCalculationPeriodTypeOptions: Array<{ id: number; code: string; value: string }>;
-  repaymentPeriodFrequencyTypeOptions: Array<{ id: number; code: string; value: string }>;
-  termFrequencyTypeOptions: Array<{ id: number; code: string; value: string }>;
-  isLoanProductLinkedToFloatingRate?: boolean;
+  loanProductName?: string;
+  /** Product dropdown — `GET /v1/loans/template?...` → productOptions (doc §3/§6) */
+  productOptions?: Array<{ id: number; name: string; multiDisburseLoan?: boolean }>;
+  loanProductOptions?: Array<{ id: number; name: string; multiDisburseLoan?: boolean }>;
+  loanOfficerOptions?: Array<{ id: number; displayName?: string; name?: string }>;
   fundOptions?: Array<{ id: number; name: string }>;
-  chargeOptions?: unknown[];
+  loanPurposeOptions?: Array<{ id: number; name: string }>;
+  loanCollateralOptions?: Array<{ id: number; name: string; position?: number }>;
+  accountLinkingOptions?: Array<{
+    id: number;
+    accountNo?: string;
+    productName?: string;
+    accountType?: { id: number; code: string; value: string };
+  }>;
+  clientActiveLoanOptions?: Array<{ id: number; accountNo?: string; loanProductName?: string }>;
+  chargeOptions?: Array<{ id: number; name: string; active?: boolean; penalty?: boolean }>;
+  datatables?: Array<{ registeredTableName: string; entity?: number }>;
+  expectedDisbursementDate?: string;
+
+  currency?: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+  principal?: number;
+  termFrequency?: number;
+  termPeriodFrequencyType?: LoanTemplateOption;
+  numberOfRepayments?: number;
+  repaymentEvery?: number;
+  repaymentFrequencyType?: LoanTemplateOption;
+  interestRatePerPeriod?: number;
+  interestRateFrequencyType?: LoanTemplateOption;
+  annualInterestRate?: number;
+  amortizationType?: LoanTemplateOption;
+  interestType?: LoanTemplateOption;
+  interestCalculationPeriodType?: LoanTemplateOption;
+  transactionProcessingStrategyCode?: string;
+  transactionProcessingStrategyName?: string;
+  transactionProcessingStrategyId?: number;
+  isFloatingInterestRate?: boolean;
+  isLoanProductLinkedToFloatingRate?: boolean;
+  daysInMonthType?: LoanTemplateOption;
+  daysInYearType?: LoanTemplateOption;
+  daysInYearTypeId?: number;
+  repaymentStartDateType?: number;
+  loanScheduleType?: { id: number; code: string; value: string } | string;
+  loanScheduleProcessingType?: { id: number; code: string; value: string } | string;
+  isEqualAmortization?: boolean;
+  fixedPrincipalPercentagePerInstallment?: number;
+  netDisbursalAmount?: number;
+  loanCounter?: number;
+  loanProductCounter?: number;
   multiDisburseLoan?: boolean;
   canDefineInstallmentAmount?: boolean;
+  canUseForTopup?: boolean;
+  enableDownPayment?: boolean;
+  enableAutoRepaymentForDownPayment?: boolean;
+  disbursedAmountPercentageForDownPayment?: number;
+  enableInstallmentLevelDelinquency?: boolean;
+  interestRecognitionOnDisbursementDate?: boolean;
+  enableIncomeCapitalization?: boolean;
+  enableBuyDownFee?: boolean;
+  maxOutstandingLoanBalance?: number;
+
+  graceOnPrincipalPayment?: number;
+  graceOnInterestPayment?: number;
+  graceOnInterestCharged?: number;
+  graceOnArrearsAgeing?: number;
+  inArrearsTolerance?: number;
+  charges?: LoanCharge[];
+
+  amortizationTypeOptions?: LoanTemplateOption[];
+  interestTypeOptions?: LoanTemplateOption[];
+  interestCalculationPeriodTypeOptions?: LoanTemplateOption[];
+  repaymentPeriodFrequencyTypeOptions?: LoanTemplateOption[];
+  termFrequencyTypeOptions?: LoanTemplateOption[];
+  repaymentFrequencyTypeOptions?: LoanTemplateOption[];
+  interestRateFrequencyTypeOptions?: LoanTemplateOption[];
+  transactionProcessingStrategyOptions?: Array<{ code: string; name: string }>;
+  loanScheduleTypeOptions?: LoanTemplateOption[];
+  loanScheduleProcessingTypeOptions?: LoanTemplateOption[];
+  repaymentStartDateTypeOptions?: LoanTemplateOption[];
+  repaymentFrequencyNthDayTypeOptions?: LoanTemplateOption[];
+  repaymentFrequencyDaysOfWeekTypeOptions?: LoanTemplateOption[];
 }
 
 // ─── Loan Create/Command Requests ────────────────────────────────
@@ -373,7 +430,6 @@ export interface LoanCreateRequest {
   fundId?: number;
   linkAccountId?: number;
   externalId?: string;
-  allowPartialPeriodInterestCalcualtion?: boolean;
   maxOutstandingLoanBalance?: number;
   charges?: Array<{ chargeId: number; amount: number; dueDate?: string }>;
   disbursementData?: Array<{

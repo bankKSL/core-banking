@@ -64,9 +64,13 @@ export async function fetchLoans(params: LoanListParams = {}): Promise<LoanListR
   return data;
 }
 
-export async function fetchLoan(loanId: number | string, associations = "all"): Promise<Loan> {
+export async function fetchLoan(
+  loanId: number | string,
+  associations = "all",
+  template = false,
+): Promise<Loan> {
   const { data } = await client.get<Loan>(`/loans/${loanId}`, {
-    params: { associations },
+    params: { associations, ...(template ? { template: "true" } : {}) },
   });
   return data;
 }
@@ -99,7 +103,7 @@ export async function fetchDelinquencyTags(loanId: number | string): Promise<Loa
 }
 
 export async function fetchLoanTemplate(clientId?: number, productId?: number): Promise<LoanTemplate> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { templateType: "individual", activeOnly: "true" };
   if (clientId) params.clientId = String(clientId);
   if (productId) params.productId = String(productId);
   const { data } = await client.get<LoanTemplate>("/loans/template", { params });

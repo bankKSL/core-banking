@@ -1,16 +1,23 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, X, BadgeCheck, ExternalLink } from "lucide-react";
+import { Search, X, BadgeCheck, ExternalLink, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { LoanProduct } from "@/features/loans";
+
+/** Minimal product shape returned by the loans template `productOptions` (doc §3/§6). */
+export interface LoanProductOption {
+  id: number;
+  name: string;
+  multiDisburseLoan?: boolean;
+}
 
 export interface LoanProductSearchProps {
-  products: LoanProduct[];
+  products: LoanProductOption[];
   value: number;
   onChange: (productId: number) => void;
   disabled?: boolean;
+  loading?: boolean;
   error?: string;
   label?: string;
   placeholder?: string;
@@ -22,6 +29,7 @@ export function LoanProductSearch({
   value,
   onChange,
   disabled,
+  loading,
   error,
   label = "Loan Product *",
   placeholder = "Search product by name…",
@@ -59,7 +67,7 @@ export function LoanProductSearch({
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative space-y-1.5">
       <label className="block text-sm font-medium" htmlFor={name ?? "productSearch"}>
         {label}
       </label>
@@ -88,16 +96,20 @@ export function LoanProductSearch({
         </div>
       ) : (
         <div className="relative">
-          <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          {loading ? (
+            <Loader2 className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400 animate-spin" />
+          ) : (
+            <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          )}
           <Input
             id={name ?? "productSearch"}
-            placeholder={placeholder}
+            placeholder={loading ? "Loading products..." : placeholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query.length >= 0 && setOpen(true)}
             onFocusCapture={() => setOpen((prev) => !prev)}
-            disabled={disabled}
+            disabled={disabled || loading}
             error={error}
           />
         </div>

@@ -7,7 +7,8 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useLoanProducts, useLoanProductTemplate } from "../hooks/useLoanProducts";
+import { useLoanProductTemplate } from "../hooks/useLoanProducts";
+import { useLoanTemplate } from "../hooks/useLoanTemplate";
 import { useCreateLoan } from "../hooks/useCreateLoan";
 import { useUpdateLoan } from "../hooks/useUpdateLoan";
 import { useLoan } from "../hooks/useLoan";
@@ -15,7 +16,7 @@ import LoanForm, { type FormFields } from "../components/LoanForm";
 import LoanScheduleTable from "../components/LoanScheduleTable";
 import { calculateLoanSchedule } from "../api/loan";
 import type { CreateLoanFormValues } from "../schemas/loan.schema";
-import type { LoanCreateRequest, LoanRepaymentSchedule } from "../types/loan";
+import type { Loan, LoanCreateRequest, LoanRepaymentSchedule, LoanTemplate } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
 const LoanFormPage: FC = () => {
@@ -23,19 +24,44 @@ const LoanFormPage: FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  const clientId = searchParams.get("clientId") ? Number(searchParams.get("clientId")) : undefined;
+  const urlClientId = searchParams.get("clientId") ? Number(searchParams.get("clientId")) : undefined;
 
-  const { data: products = [], isLoading: productsLoading } = useLoanProducts();
+  const [clientId, setClientId] = useState<number | undefined>(urlClientId);
+  const [selectedProductId, setSelectedProductId] = useState<number | undefined>(undefined);
+
   const { data: productTemplate } = useLoanProductTemplate();
-  const { data: loan, isLoading: loanLoading } = useLoan(id);
+  // Template-first flow (doc §3): fetch template once a client is chosen; product defaults
+  // arrive when a product is selected and the template is re-fetched with &productId=.
+  const { data: loanTemplate, isLoading: templateLoading } = useLoanTemplate(
+    isEditMode ? undefined : clientId,
+    isEditMode ? undefined : selectedProductId,
+  );
+  // Update flow (doc §4): GET /loans/{loanId}?template=true&associations=all
+  const { data: loan, isLoading: loanLoading } = useLoan(id, { template: true });
   const createMutation = useCreateLoan();
   const updateMutation = useUpdateLoan();
+
+  // Edit mode: values + template option sets come from the loan detail (?template=true).
+  // Create mode: they come from GET /v1/loans/template.
+  const template = (isEditMode ? loan : loanTemplate) as (Loan & Partial<LoanTemplate>) | undefined;
+  const templateProducts = template?.productOptions ?? template?.loanProductOptions ?? [];
+  // In edit mode the current product may not appear in the returned option list; keep it visible.
+  const products =
+    templateProducts.length > 0 || !isEditMode || !loan
+      ? templateProducts
+      : [{ id: loan.loanProductId, name: loan.loanProductName ?? `Product #${loan.loanProductId}` }];
+  const fundOptions = template?.fundOptions ?? [];
+  const loanOfficerOptions = template?.loanOfficerOptions ?? [];
+  const loanPurposeOptions = template?.loanPurposeOptions ?? [];
+  const accountLinkingOptions = template?.accountLinkingOptions ?? [];
+  const strategyOptions =
+    template?.transactionProcessingStrategyOptions ?? productTemplate?.transactionProcessingStrategyOptions ?? [];
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewMutation = useMutation({
     mutationFn: (values: FormFields) =>
       calculateLoanSchedule({
-        clientId: clientId ?? values.clientId,
+        clientId: values.clientId,
         productId: values.productId,
         principal: values.principal,
         loanTermFrequency: values.loanTermFrequency,
@@ -54,7 +80,24 @@ const LoanFormPage: FC = () => {
     onSuccess: () => setPreviewOpen(true),
   });
 
-  const isLoading = productsLoading || (isEditMode && loanLoading);
+  const handleClientChange = useCallback(
+    (cid: number) => {
+      setClientId(cid || undefined);
+      if (!isEditMode) {
+        setSelectedProductId(undefined);
+      }
+    },
+    [isEditMode],
+  );
+
+  const handleProductIdChange = useCallback((pid: number) => {
+    setSelectedProductId(pid || undefined);
+  }, []);
+
+  // Never block the create form while the template loads — the product dropdown and
+  // option sets simply populate asynchronously once the client-scoped template arrives.
+  // Only edit mode blocks while the existing loan (with ?template=true) is being fetched.
+  const isLoading = isEditMode && loanLoading;
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = useCallback(
@@ -67,10 +110,9 @@ const LoanFormPage: FC = () => {
 
       const payload = {
         ...cleaned,
-        clientId: clientId ?? values.clientId,
+        clientId: values.clientId,
         submittedOnDate: currentDate(values.submittedOnDate),
         expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
-        expectedFirstRepaymentOnDate: values.expectedFirstRepaymentOnDate ? currentDate(values.expectedFirstRepaymentOnDate) : undefined,
         dateFormat: "yyyy-MM-dd" as const,
         locale: "en" as const,
         loanType: "individual",
@@ -84,11 +126,34 @@ const LoanFormPage: FC = () => {
         navigate(`/loans/view/${result.resourceId ?? result.loanId}`);
       }
     },
-    [createMutation, updateMutation, navigate, isEditMode, id, clientId],
+    [createMutation, updateMutation, navigate, isEditMode, id],
   );
 
   const error = createMutation.error?.message ?? updateMutation.error?.message ?? null;
   const previewSchedule: LoanRepaymentSchedule | undefined = previewMutation.data;
+
+  // Status gate (doc §4 / §10.4): applications can only be modified while "Submitted and pending approval".
+  if (isEditMode && !isLoading && loan && loan.status?.id !== 100) {
+    return (
+      <div className="p-6 max-w-4xl m-auto">
+        <PageHeader
+          title="Edit Loan"
+          description={`Editing loan ${loan.accountNo ?? `#${id}`}`}
+          actions={
+            <Button variant="outline" onClick={() => navigate(`/loans/view/${id}`)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Loan
+            </Button>
+          }
+        />
+        <ErrorState
+          title="Loan cannot be modified"
+          message={`This loan is in "${loan.status?.value ?? "Unknown"}" state. Loan applications can only be modified while their status is "Submitted and pending approval".`}
+          onRetry={() => navigate(`/loans/view/${id}`)}
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -147,12 +212,20 @@ const LoanFormPage: FC = () => {
       <LoanForm
         products={products}
         loan={loan}
+        template={template}
+        templateLoading={templateLoading}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         error={error}
         mode={isEditMode ? "edit" : "create"}
-        clientId={clientId}
-        strategyOptions={productTemplate?.transactionProcessingStrategyOptions}
+        clientId={clientId ?? 0}
+        onClientChange={handleClientChange}
+        onProductIdChange={handleProductIdChange}
+        strategyOptions={strategyOptions}
+        fundOptions={fundOptions}
+        loanOfficerOptions={loanOfficerOptions}
+        loanPurposeOptions={loanPurposeOptions}
+        accountLinkingOptions={accountLinkingOptions}
         onPreviewSchedule={(values) => previewMutation.mutate(values)}
         previewLoading={previewMutation.isPending}
       />

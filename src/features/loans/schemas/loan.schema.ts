@@ -1,39 +1,93 @@
 import { z } from "zod";
 
-export const createLoanSchema = z.object({
-  clientId: z.number({ message: "Client is required" }).int().positive("Client is required"),
-  productId: z.number({ message: "Loan product is required" }).int().positive("Loan product is required"),
-  principal: z.number({ message: "Principal amount is required" }).positive("Principal must be greater than 0"),
-  loanTermFrequency: z.number({ message: "Term is required" }).int().positive(),
-  loanTermFrequencyType: z.number().int().min(0).max(3),
-  numberOfRepayments: z.number({ message: "Number of repayments is required" }).int().positive(),
-  repaymentEvery: z.number({ message: "Repayment frequency is required" }).int().positive(),
-  repaymentFrequencyType: z.number().int().positive(),
-  interestRatePerPeriod: z.number({ message: "Interest rate is required" }).min(0),
-  interestRateFrequencyType: z.number().int().optional(),
-  interestType: z.number().int().optional(),
-  amortizationType: z.number().int().optional(),
-  interestCalculationPeriodType: z.number().int().optional(),
-  expectedDisbursementDate: z.string({ message: "Disbursement date is required" }).min(1),
-  expectedFirstRepaymentOnDate: z.string().optional(),
-  submittedOnDate: z.string().min(1),
-  transactionProcessingStrategyCode: z.string().optional(),
-  loanPurposeId: z.number().int().optional().nullable(),
-  loanOfficerId: z.number().int().optional().nullable(),
-  fundId: z.number().int().optional().nullable(),
-  linkAccountId: z.number().int().optional().nullable(),
-  externalId: z.string().max(100).optional(),
-  graceOnPrincipalPayment: z.number().int().min(0).optional(),
-  graceOnInterestPayment: z.number().int().min(0).optional(),
-  graceOnInterestCharged: z.number().int().min(0).optional(),
-  graceOnArrearsAgeing: z.number().int().min(0).optional(),
-  inArrearsTolerance: z.number().min(0).optional(),
-  allowPartialPeriodInterestCalcualtion: z.boolean().optional(),
-  maxOutstandingLoanBalance: z.number().optional(),
-  dateFormat: z.string().default("yyyy-MM-dd"),
-  locale: z.string().default("en"),
-  charges: z.array(z.object({ chargeId: z.number(), amount: z.number() })).optional(),
-});
+export const createLoanSchema = z
+  .object({
+    clientId: z.number({ message: "Client is required" }).int().positive("Client is required"),
+    productId: z.number({ message: "Loan product is required" }).int().positive("Loan product is required"),
+    principal: z.number({ message: "Principal amount is required" }).positive("Principal must be greater than 0"),
+    loanTermFrequency: z.number({ message: "Term is required" }).int().positive(),
+    loanTermFrequencyType: z.number().int().min(0).max(3),
+    numberOfRepayments: z.number({ message: "Number of repayments is required" }).int().positive(),
+    repaymentEvery: z.number({ message: "Repayment frequency is required" }).int().positive(),
+    repaymentFrequencyType: z.number().int().min(0).max(3),
+    interestRatePerPeriod: z.number({ message: "Interest rate is required" }).min(0),
+    interestRateFrequencyType: z.number().int().optional(),
+    interestType: z.number().int().optional(),
+    amortizationType: z.number().int().optional(),
+    interestCalculationPeriodType: z.number().int().optional(),
+    expectedDisbursementDate: z.string({ message: "Disbursement date is required" }).min(1),
+    submittedOnDate: z.string().min(1),
+    transactionProcessingStrategyCode: z.string().optional(),
+    loanPurposeId: z.number().int().optional().nullable(),
+    loanOfficerId: z.number().int().optional().nullable(),
+    fundId: z.number().int().optional().nullable(),
+    linkAccountId: z.number().int().optional().nullable(),
+    externalId: z.string().max(100).optional(),
+    graceOnPrincipalPayment: z.number().int().min(0).optional(),
+    graceOnInterestPayment: z.number().int().min(0).optional(),
+    graceOnInterestCharged: z.number().int().min(0).optional(),
+    graceOnArrearsAgeing: z.number().int().min(0).optional(),
+    inArrearsTolerance: z.number().min(0).optional(),
+    allowPartialPeriodInterestCalcualtion: z.boolean().optional(),
+    maxOutstandingLoanBalance: z.number().optional(),
+    dateFormat: z.string().default("yyyy-MM-dd"),
+    locale: z.string().default("en"),
+    charges: z.array(z.object({ chargeId: z.number(), amount: z.number() })).optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Cross-field rules (doc §8/§11): term & repayment frequency types must match
+    if (data.loanTermFrequencyType !== data.repaymentFrequencyType) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["loanTermFrequencyType"],
+        message: "Loan term frequency type must match repayment frequency type",
+      });
+      ctx.addIssue({
+        code: "custom",
+        path: ["repaymentFrequencyType"],
+        message: "Repayment frequency type must match loan term frequency type",
+      });
+    }
+    // loanTermFrequency must equal repaymentEvery × numberOfRepayments
+    const impliedTerm = data.repaymentEvery * data.numberOfRepayments;
+    if (data.loanTermFrequency !== impliedTerm) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["loanTermFrequency"],
+        message: `Loan term must equal repayment frequency × number of repayments (${impliedTerm})`,
+      });
+    }
+    // submittedOnDate ≤ expectedDisbursementDate
+    if (data.submittedOnDate && data.expectedDisbursementDate && data.submittedOnDate > data.expectedDisbursementDate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["submittedOnDate"],
+        message: "Submitted on date cannot be after the expected disbursement date",
+      });
+    }
+    // grace periods must be < numberOfRepayments
+    if (data.graceOnPrincipalPayment != null && data.graceOnPrincipalPayment >= data.numberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnPrincipalPayment"],
+        message: "Grace on principal payment must be less than number of repayments",
+      });
+    }
+    if (data.graceOnInterestPayment != null && data.graceOnInterestPayment >= data.numberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnInterestPayment"],
+        message: "Grace on interest payment must be less than number of repayments",
+      });
+    }
+    if (data.graceOnInterestCharged != null && data.graceOnInterestCharged >= data.numberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnInterestCharged"],
+        message: "Grace on interest charged must be less than number of repayments",
+      });
+    }
+  });
 
 export type CreateLoanFormValues = z.infer<typeof createLoanSchema>;
 

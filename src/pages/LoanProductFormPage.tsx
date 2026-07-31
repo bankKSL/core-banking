@@ -42,8 +42,8 @@ const loanProductSchema = z.object({
   minPrincipal: z.coerce.number().optional(),
   maxPrincipal: z.coerce.number().optional(),
   numberOfRepayments: z.coerce.number().int().positive("Required"),
-  minNumberOfRepayments: z.coerce.number().optional(),
-  maxNumberOfRepayments: z.coerce.number().optional(),
+  // minNumberOfRepayments: z.coerce.number().optional(),
+  // maxNumberOfRepayments: z.coerce.number().optional(),
   repaymentEvery: z.coerce.number().int().positive("Required"),
   repaymentFrequencyType: z.coerce.number(),
   amortizationType: z.coerce.number(),
@@ -73,7 +73,6 @@ const loanProductSchema = z.object({
   recalculationRestFrequencyType: z.coerce.number().optional(),
   preClosureInterestCalculationStrategy: z.coerce.number().optional(),
   enableDownPayment: z.boolean().optional(),
-  disbursedAmountPercentageDownPayment: z.coerce.number().optional(),
   enableAutoRepaymentForDownPayment: z.boolean().optional(),
   repaymentStartDateType: z.coerce.number().optional(),
   enableBuyDownFee: z.boolean().optional(),
@@ -194,11 +193,11 @@ const LoanProductFormPage: React.FC = () => {
       externalId: p.externalId ?? "",
       currencyCode: p.currency?.code ?? "USD",
       principal: p.principal ?? 0,
-      minPrincipal: p.minPrincipal ?? undefined,
-      maxPrincipal: p.maxPrincipal ?? undefined,
+      minPrincipal: undefined,
+      maxPrincipal: undefined,
       numberOfRepayments: p.numberOfRepayments ?? 12,
-      minNumberOfRepayments: p.minNumberOfRepayments ?? undefined,
-      maxNumberOfRepayments: p.maxNumberOfRepayments ?? undefined,
+      // minNumberOfRepayments: p.minNumberOfRepayments > 0 ? p.minNumberOfRepayments : undefined,
+      // maxNumberOfRepayments: p.maxNumberOfRepayments > 0 ? p.maxNumberOfRepayments : undefined,
       repaymentEvery: p.repaymentEvery ?? 1,
       repaymentFrequencyType: p.repaymentFrequencyType?.id ?? 2,
       amortizationType: p.amortizationType?.id ?? 1,
@@ -228,8 +227,7 @@ const LoanProductFormPage: React.FC = () => {
       recalculationRestFrequencyType: p.recalculationRestFrequencyType?.id ?? undefined,
       preClosureInterestCalculationStrategy: p.preClosureInterestCalculationStrategy?.id ?? undefined,
       enableDownPayment: !!p.enableDownPayment,
-      disbursedAmountPercentageDownPayment: p.disbursedAmountPercentageDownPayment ?? undefined,
-      enableAutoRepaymentForDownPayment: !!p.enableAutoRepaymentForDownPayment,
+      enableAutoRepaymentForDownPayment: p.enableDownPayment ? p.enableAutoRepaymentForDownPayment : undefined,
       repaymentStartDateType: p.repaymentStartDateType?.id ?? undefined,
       enableBuyDownFee: !!p.enableBuyDownFee,
       merchantBuyDownFee: !!p.merchantBuyDownFee,
@@ -240,7 +238,7 @@ const LoanProductFormPage: React.FC = () => {
       capitalizedIncomeCalculationType: p.capitalizedIncomeCalculationType?.id ?? undefined,
       capitalizedIncomeStrategy: p.capitalizedIncomeStrategy?.id ?? undefined,
       capitalizedIncomeType: p.capitalizedIncomeType?.id ?? undefined,
-      chargeOffBehaviour: enumVal(p.chargeOffBehaviour, undefined) || undefined,
+      chargeOffBehaviour: enumVal(p.chargeOffBehaviour.id, undefined) || undefined,
       enableAccrualActivityPosting: !!p.enableAccrualActivityPosting,
       interestRecognitionOnDisbursementDate: !!p.interestRecognitionOnDisbursementDate,
       isEqualAmortization: !!p.isEqualAmortization,
@@ -259,9 +257,9 @@ const LoanProductFormPage: React.FC = () => {
       dueDaysForRepaymentEvent: p.dueDaysForRepaymentEvent ?? undefined,
       overdueDaysForRepaymentEvent: p.overdueDaysForRepaymentEvent ?? undefined,
       overAppliedCalculationType: p.overAppliedCalculationType ?? undefined,
-      overAppliedNumber: p.overAppliedNumber ?? undefined,
-      minimumGap: p.minimumGap ?? undefined,
-      maximumGap: p.maximumGap ?? undefined,
+      overAppliedNumber: p.allowApprovedDisbursedAmountsOverApplied ? p.overAppliedNumber : undefined,
+      minimumGap: p.minimumGap > 0 ? p.minimumGap : undefined,
+      maximumGap: p.maximumGap > 0 ? p.maximumGap : undefined,
       delinquencyBucketId: p.delinquencyBucketId ?? undefined,
       compoundingFrequencyType: p.interestRecalculationData?.compoundingFrequencyType?.id ?? undefined,
       isArrearsBasedOnOriginalSchedule: !!p.interestRecalculationData?.isArrearsBasedOnOriginalSchedule,
@@ -277,9 +275,13 @@ const LoanProductFormPage: React.FC = () => {
 
   const onSubmit = async (values: LoanProductFormValues) => {
     const payload: Record<string, any> = { ...values };
+
+    console.log({ payload });
+
     Object.keys(payload).forEach((k) => {
       if (payload[k] === undefined) delete payload[k];
     });
+
     try {
       if (isEdit) {
         await updateMutation.mutateAsync(payload as any);
@@ -376,14 +378,14 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             {/* Row 5b: Min/Max Principal */}
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Principal</label>
               <Input type="number" step="0.01" {...register("minPrincipal")} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Principal</label>
               <Input type="number" step="0.01" {...register("maxPrincipal")} />
-            </div>
+            </div> */}
             {/* Row 6: Repayments | Every */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Number of Repayments *</label>
@@ -394,14 +396,14 @@ const LoanProductFormPage: React.FC = () => {
               <Input type="number" {...register("repaymentEvery")} error={errors.repaymentEvery?.message} />
             </div>
             {/* Row 6b: Min/Max Repayments */}
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Number of Repayments</label>
               <Input type="number" {...register("minNumberOfRepayments")} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Number of Repayments</label>
               <Input type="number" {...register("maxNumberOfRepayments")} />
-            </div>
+            </div> */}
             {/* Row 7: Repayment Frequency | Interest Type */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Repayment Frequency *</label>
@@ -752,10 +754,6 @@ const LoanProductFormPage: React.FC = () => {
             </div>
             {watch("enableDownPayment") && (
               <>
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Disbursed Amount % Down Payment</label>
-                  <Input type="number" step="0.01" {...register("disbursedAmountPercentageDownPayment")} />
-                </div>
                 <div
                   className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
                   onClick={() =>

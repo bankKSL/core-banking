@@ -1,4 +1,4 @@
-import { type FC, useCallback } from "react";
+import { type FC, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -10,18 +10,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import { LoanProductSearch } from "@/components/shared/LoanProductSearch";
 import { createLoanSchema, type CreateLoanFormValues } from "../schemas/loan.schema";
-import type { LoanProduct, Loan } from "../types/loan";
+import type { Loan, LoanTemplate } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
 interface LoanFormProps {
-  products: LoanProduct[];
+  products: Array<{ id: number; name: string; multiDisburseLoan?: boolean }>;
   loan?: Loan;
+  /** Loans template (doc §3/§4): carries product defaults + option sets. */
+  template?: Partial<LoanTemplate>;
+  /** Client-scoped template is being fetched (create mode). */
+  templateLoading?: boolean;
   onSubmit: (values: CreateLoanFormValues) => Promise<void>;
   isSubmitting: boolean;
   error?: string | null;
   mode: "create" | "edit";
   clientId?: number;
+  onClientChange?: (clientId: number) => void;
+  onProductIdChange?: (productId: number) => void;
   strategyOptions?: Array<{ code: string; name: string }>;
+  fundOptions?: Array<{ id: number; name: string }>;
+  loanOfficerOptions?: Array<{ id: number; displayName?: string; name?: string }>;
+  loanPurposeOptions?: Array<{ id: number; name: string }>;
+  accountLinkingOptions?: Array<{ id: number; accountNo?: string; productName?: string }>;
   /** Preview the repayment schedule before submitting (POST /loans?command=calculateLoanSchedule) */
   onPreviewSchedule?: (values: FormFields) => void;
   previewLoading?: boolean;
@@ -32,16 +42,32 @@ export type FormFields = CreateLoanFormValues & {
   repaymentsStartingFromDate?: string;
 };
 
+/** Frequency options (0=Days, 1=Weeks, 2=Months, 3=Years) shared by term & repayment selects */
+const FREQUENCY_OPTIONS = [
+  { id: 0, label: "Days" },
+  { id: 1, label: "Weeks" },
+  { id: 2, label: "Months" },
+  { id: 3, label: "Years" },
+];
+
 // ─── Loan Form Component ─────────────────────────────────────────
 const LoanForm: FC<LoanFormProps> = ({
   products,
   loan,
+  template,
+  templateLoading,
   onSubmit,
   isSubmitting,
   error,
   mode,
   clientId,
+  onClientChange,
+  onProductIdChange,
   strategyOptions,
+  fundOptions,
+  loanOfficerOptions,
+  loanPurposeOptions,
+  accountLinkingOptions,
   onPreviewSchedule,
   previewLoading,
 }) => {
@@ -58,18 +84,17 @@ const LoanForm: FC<LoanFormProps> = ({
       clientId: loan?.clientId ?? clientId ?? 0,
       productId: loan?.loanProductId ?? 0,
       principal: loan?.principal ?? 0,
-      loanTermFrequency: loan?.termFrequency ?? 12,
-      loanTermFrequencyType: loan?.termPeriodFrequencyType?.id ?? 2,
-      numberOfRepayments: loan?.numberOfRepayments ?? 12,
+      loanTermFrequency: loan?.termFrequency ?? 0,
+      loanTermFrequencyType: loan?.termPeriodFrequencyType?.id ?? 0,
+      numberOfRepayments: loan?.numberOfRepayments ?? 0,
       repaymentEvery: loan?.repaymentEvery ?? 1,
-      repaymentFrequencyType: loan?.repaymentFrequencyType?.id ?? 2,
+      repaymentFrequencyType: loan?.repaymentFrequencyType?.id ?? 0,
       interestRatePerPeriod: loan?.interestRatePerPeriod ?? 0,
-      interestRateFrequencyType: loan?.interestRateFrequencyType?.id ?? 3,
+      interestRateFrequencyType: loan?.interestRateFrequencyType?.id ?? 0,
       interestType: loan?.interestType?.id ?? 0,
-      amortizationType: loan?.amortizationType?.id ?? 1,
+      amortizationType: loan?.amortizationType?.id ?? 0,
       interestCalculationPeriodType: loan?.interestCalculationPeriodType?.id ?? 0,
       expectedDisbursementDate: currentDate(loan?.expectedDisbursementDate) || currentDate(),
-      expectedFirstRepaymentOnDate: loan?.expectedFirstRepaymentOnDate ?? "",
       submittedOnDate: currentDate(loan?.submittedOnDate) || currentDate(),
       transactionProcessingStrategyCode: loan?.transactionProcessingStrategyCode ?? "mifos-standard-strategy",
       loanPurposeId: undefined,
@@ -82,7 +107,6 @@ const LoanForm: FC<LoanFormProps> = ({
       graceOnInterestCharged: undefined,
       graceOnArrearsAgeing: undefined,
       inArrearsTolerance: undefined,
-      allowPartialPeriodInterestCalcualtion: false,
       maxOutstandingLoanBalance: undefined,
       repaymentsStartingFromDate: "",
       dateFormat: "yyyy-MM-dd",
@@ -90,7 +114,62 @@ const LoanForm: FC<LoanFormProps> = ({
     },
   });
 
-  const productId = watch("productId");
+  const productIdVal = watch("productId");
+  const clientIdVal = watch("clientId");
+
+  // Report client/product changes so the page can (re)load the template (doc §3).
+  useEffect(() => {
+    if (mode === "create") onClientChange?.(clientIdVal);
+  }, [clientIdVal, onClientChange, mode]);
+
+  useEffect(() => {
+    if (mode === "create") onProductIdChange?.(productIdVal);
+  }, [productIdVal, onProductIdChange, mode]);
+
+  // ── Prefill product defaults from the product-scoped template (doc §3/§7) ─────
+  const prefillFromTemplate = useCallback(
+    (tpl: Partial<LoanTemplate>) => {
+      if (tpl.principal != null) setValue("principal", tpl.principal);
+      if (tpl.termFrequency != null) setValue("loanTermFrequency", tpl.termFrequency);
+      if (tpl.termPeriodFrequencyType?.id != null) setValue("loanTermFrequencyType", tpl.termPeriodFrequencyType.id);
+      if (tpl.numberOfRepayments != null) setValue("numberOfRepayments", tpl.numberOfRepayments);
+      if (tpl.repaymentEvery != null) setValue("repaymentEvery", tpl.repaymentEvery);
+      if (tpl.repaymentFrequencyType?.id != null) setValue("repaymentFrequencyType", tpl.repaymentFrequencyType.id);
+      if (tpl.interestRatePerPeriod != null) setValue("interestRatePerPeriod", tpl.interestRatePerPeriod);
+      if (tpl.interestRateFrequencyType?.id != null)
+        setValue("interestRateFrequencyType", tpl.interestRateFrequencyType.id);
+      if (tpl.interestType?.id != null) setValue("interestType", tpl.interestType.id);
+      if (tpl.amortizationType?.id != null) setValue("amortizationType", tpl.amortizationType.id);
+      if (tpl.interestCalculationPeriodType?.id != null)
+        setValue("interestCalculationPeriodType", tpl.interestCalculationPeriodType.id);
+      if (tpl.transactionProcessingStrategyCode)
+        setValue("transactionProcessingStrategyCode", tpl.transactionProcessingStrategyCode);
+      if (tpl.graceOnPrincipalPayment != null) setValue("graceOnPrincipalPayment", tpl.graceOnPrincipalPayment);
+      if (tpl.graceOnInterestPayment != null) setValue("graceOnInterestPayment", tpl.graceOnInterestPayment);
+      if (tpl.graceOnInterestCharged != null) setValue("graceOnInterestCharged", tpl.graceOnInterestCharged);
+      if (tpl.graceOnArrearsAgeing != null) setValue("graceOnArrearsAgeing", tpl.graceOnArrearsAgeing);
+      if (tpl.inArrearsTolerance != null) setValue("inArrearsTolerance", tpl.inArrearsTolerance);
+      if (tpl.maxOutstandingLoanBalance != null) setValue("maxOutstandingLoanBalance", tpl.maxOutstandingLoanBalance);
+      if (tpl.expectedDisbursementDate) setValue("expectedDisbursementDate", currentDate(tpl.expectedDisbursementDate));
+    },
+    [setValue],
+  );
+
+  // Apply the template's business-day default for the disbursement date (doc §5).
+  useEffect(() => {
+    if (template?.expectedDisbursementDate) {
+      setValue("expectedDisbursementDate", currentDate(template.expectedDisbursementDate));
+    }
+  }, [template?.expectedDisbursementDate, setValue]);
+
+  useEffect(() => {
+    if (!template) return;
+    // Only apply product defaults once a product is selected and the template
+    // actually corresponds to the current selection.
+    if (template.loanProductId == null && template.principal == null) return;
+    if (template.loanProductId != null && template.loanProductId !== productIdVal) return;
+    prefillFromTemplate(template);
+  }, [template, prefillFromTemplate, productIdVal]);
 
   // ── Product select handler ───────────────────────────────────────
   const handleProductSelect = (id: number) => {
@@ -98,28 +177,25 @@ const LoanForm: FC<LoanFormProps> = ({
       setValue("productId", 0, { shouldValidate: true });
       return;
     }
-
-    const prod = products.find((p) => p.id === id);
-    if (!prod) return;
-    setValue("productId", prod.id);
-    setValue("principal", prod.principal);
-    setValue("numberOfRepayments", prod.numberOfRepayments);
-    setValue("repaymentEvery", prod.repaymentEvery);
-    setValue("repaymentFrequencyType", prod.repaymentFrequencyType.id);
-    setValue("interestRatePerPeriod", prod.interestRatePerPeriod);
-    if (prod.amortizationType?.id != null) setValue("amortizationType", prod.amortizationType.id as any);
-    if (prod.interestType?.id != null) setValue("interestType", prod.interestType.id as any);
-    if (prod.interestCalculationPeriodType?.id != null)
-      setValue("interestCalculationPeriodType", prod.interestCalculationPeriodType.id as any);
+    setValue("productId", id, { shouldValidate: true });
   };
-
-  const clientIdVal = watch("clientId");
 
   // ── Client change handler ────────────────────────────────────────
   const handleClientChange = useCallback(
-    (id: number) => setValue("clientId", id, { shouldValidate: true }),
-    [setValue],
+    (id: number) => {
+      setValue("clientId", id, { shouldValidate: true });
+      if (mode === "create") {
+        setValue("productId", 0, { shouldValidate: true });
+      }
+    },
+    [setValue, mode],
   );
+
+  // ── Sync term frequency type with repayment frequency type (doc §8/§11) ──
+  const syncFrequencyType = (v: number) => {
+    setValue("loanTermFrequencyType", v, { shouldValidate: true });
+    setValue("repaymentFrequencyType", v, { shouldValidate: true });
+  };
 
   return (
     <form onSubmit={handleSubmit((values) => onSubmit(values as any))} className="space-y-6">
@@ -148,9 +224,10 @@ const LoanForm: FC<LoanFormProps> = ({
           <div className="col-span-1">
             <LoanProductSearch
               products={products}
-              value={productId}
+              value={productIdVal}
               onChange={handleProductSelect}
-              disabled={isSubmitting || mode === "edit"}
+              loading={templateLoading}
+              disabled={isSubmitting || mode === "edit" || (mode === "create" && !clientIdVal)}
               error={errors.productId?.message}
             />
           </div>
@@ -184,7 +261,29 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
 
-          {/* Row 4: # Repayments | Repayment Frequency Type */}
+          {/* Row 4: Loan Term Frequency Type | Number of Repayments */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Loan Term Frequency Type *</label>
+            <Select
+              value={String(watch("loanTermFrequencyType") ?? 2)}
+              onValueChange={(v) => syncFrequencyType(Number(v))}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FREQUENCY_OPTIONS.map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.loanTermFrequencyType && (
+              <p className="text-xs text-red-500">{errors.loanTermFrequencyType.message}</p>
+            )}
+          </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Number of Repayments *</label>
             <Input
@@ -194,20 +293,33 @@ const LoanForm: FC<LoanFormProps> = ({
               error={errors.numberOfRepayments?.message}
             />
           </div>
+
+          {/* Row 5: Repayment Every | Repayment Frequency Type */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">Repayment Every *</label>
+            <Input
+              type="number"
+              {...register("repaymentEvery", { valueAsNumber: true })}
+              disabled={isSubmitting}
+              error={errors.repaymentEvery?.message}
+            />
+          </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Repayment Frequency Type *</label>
             <Select
               value={String(watch("repaymentFrequencyType"))}
-              onValueChange={(v) => setValue("repaymentFrequencyType", Number(v))}
+              onValueChange={(v) => syncFrequencyType(Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Days</SelectItem>
-                <SelectItem value="1">Weeks</SelectItem>
-                <SelectItem value="2">Months</SelectItem>
+                {FREQUENCY_OPTIONS.map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors.repaymentFrequencyType && (
@@ -215,7 +327,7 @@ const LoanForm: FC<LoanFormProps> = ({
             )}
           </div>
 
-          {/* Row 5: Interest Type | Interest Calculation Period Type */}
+          {/* Row 6: Interest Type | Interest Rate Frequency */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Interest Type *</label>
             <Select
@@ -249,7 +361,7 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
 
-          {/* Row 6: Interest Calculation Period | Amortization Type */}
+          {/* Row 7: Interest Calculation Period | Amortization Type */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Interest Calculation Period Type *</label>
             <Select
@@ -283,13 +395,14 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
 
-          {/* Row 7: Grace Settings */}
+          {/* Row 8: Grace Settings */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Grace on Principal Payment</label>
             <Input
               type="number"
               {...register("graceOnPrincipalPayment", { valueAsNumber: true })}
               disabled={isSubmitting}
+              error={errors.graceOnPrincipalPayment?.message}
             />
           </div>
           <div className="space-y-1.5">
@@ -298,6 +411,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("graceOnInterestPayment", { valueAsNumber: true })}
               disabled={isSubmitting}
+              error={errors.graceOnInterestPayment?.message}
             />
           </div>
           <div className="space-y-1.5">
@@ -306,6 +420,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("graceOnInterestCharged", { valueAsNumber: true })}
               disabled={isSubmitting}
+              error={errors.graceOnInterestCharged?.message}
             />
           </div>
           <div className="space-y-1.5">
@@ -317,7 +432,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
 
-          {/* Row 8: In Arrears Tolerance | Max Outstanding */}
+          {/* Row 9: In Arrears Tolerance | Max Outstanding */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">In Arrears Tolerance</label>
             <Input
@@ -337,10 +452,15 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
 
-          {/* Row 9: Submitted On Date | Expected Disbursement Date */}
+          {/* Row 10: Submitted On Date | Expected Disbursement Date */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Submitted On Date *</label>
-            <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} error={errors.submittedOnDate?.message} />
+            <Input
+              type="date"
+              {...register("submittedOnDate")}
+              disabled={isSubmitting}
+              error={errors.submittedOnDate?.message}
+            />
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Expected Disbursement Date *</label>
@@ -352,25 +472,13 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
 
-          {/* Row 10: Expected First Repayment Date | Repayments Starting From */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Expected First Repayment On Date</label>
-            <Input
-              type="date"
-              {...register("expectedFirstRepaymentOnDate")}
-              disabled={isSubmitting}
-            />
-          </div>
+          {/* Row 11: Expected First Repayment Date | Repayments Starting From */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Repayments Starting From Date</label>
-            <Input
-              type="date"
-              {...register("repaymentsStartingFromDate")}
-              disabled={isSubmitting}
-            />
+            <Input type="date" {...register("repaymentsStartingFromDate")} disabled={isSubmitting} />
           </div>
 
-          {/* Row 11: Transaction Processing Strategy */}
+          {/* Row 12: Transaction Processing Strategy */}
           <div className="col-span-2 space-y-1.5">
             <label className="block text-sm font-medium">Transaction Processing Strategy</label>
             <Select
@@ -382,29 +490,41 @@ const LoanForm: FC<LoanFormProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(strategyOptions ?? []).length > 0
-                  ? (strategyOptions ?? []).map((o) => (
-                      <SelectItem key={o.code} value={o.code}>{o.name}</SelectItem>
-                    ))
-                  : (
-                    <>
-                      <SelectItem value="mifos-standard-strategy">Mifos Standard Strategy</SelectItem>
-                      <SelectItem value="heavensfamily-strategy">Heavensfamily Strategy</SelectItem>
-                      <SelectItem value="early-repayment-strategy">Early Repayment Strategy</SelectItem>
-                      <SelectItem value="advance-payment-allocation-strategy">Advance Payment Allocation Strategy</SelectItem>
-                      <SelectItem value="principal-interest-penalty-fees-order-strategy">P-I-Penalty-Fees Order</SelectItem>
-                      <SelectItem value="interest-principal-penalty-fees-order-strategy">I-P-Penalty-Fees Order</SelectItem>
-                      <SelectItem value="penalties-fees-interest-principal-order-strategy">Penalties-Fees-I-P Order</SelectItem>
-                    </>
-                  )}
+                {(strategyOptions ?? []).length > 0 ? (
+                  (strategyOptions ?? []).map((o) => (
+                    <SelectItem key={o.code} value={o.code}>
+                      {o.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <>
+                    <SelectItem value="mifos-standard-strategy">Mifos Standard Strategy</SelectItem>
+                    <SelectItem value="heavensfamily-strategy">Heavensfamily Strategy</SelectItem>
+                    <SelectItem value="early-repayment-strategy">Early Repayment Strategy</SelectItem>
+                    <SelectItem value="advance-payment-allocation-strategy">
+                      Advance Payment Allocation Strategy
+                    </SelectItem>
+                    <SelectItem value="principal-interest-penalty-fees-order-strategy">
+                      P-I-Penalty-Fees Order
+                    </SelectItem>
+                    <SelectItem value="interest-principal-penalty-fees-order-strategy">
+                      I-P-Penalty-Fees Order
+                    </SelectItem>
+                    <SelectItem value="penalties-fees-interest-principal-order-strategy">
+                      Penalties-Fees-I-P Order
+                    </SelectItem>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Row 12: Allow Partial Interest Calculation */}
+          {/* Row 13: Allow Partial Interest Calculation */}
           <div
             className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-            onClick={() => setValue("allowPartialPeriodInterestCalcualtion", !watch("allowPartialPeriodInterestCalcualtion"))}
+            onClick={() =>
+              setValue("allowPartialPeriodInterestCalcualtion", !watch("allowPartialPeriodInterestCalcualtion"))
+            }
           >
             <Checkbox
               id="allowPartialPeriodInterestCalcualtion"
@@ -426,39 +546,83 @@ const LoanForm: FC<LoanFormProps> = ({
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Fund</label>
-            <Input
-              type="number"
-              placeholder="Fund ID"
-              {...register("fundId", { valueAsNumber: true })}
+            <Select
+              value={watch("fundId") ? String(watch("fundId")) : "0"}
+              onValueChange={(v) => setValue("fundId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select fund" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">None</SelectItem>
+                {(fundOptions ?? []).map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Loan Officer</label>
-            <Input
-              type="number"
-              placeholder="Officer ID"
-              {...register("loanOfficerId", { valueAsNumber: true })}
+            <Select
+              value={watch("loanOfficerId") ? String(watch("loanOfficerId")) : "0"}
+              onValueChange={(v) => setValue("loanOfficerId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select loan officer" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">None</SelectItem>
+                {(loanOfficerOptions ?? []).map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.displayName ?? o.name ?? `Officer #${o.id}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Loan Purpose</label>
-            <Input
-              type="number"
-              placeholder="Purpose ID"
-              {...register("loanPurposeId", { valueAsNumber: true })}
+            <Select
+              value={watch("loanPurposeId") ? String(watch("loanPurposeId")) : "0"}
+              onValueChange={(v) => setValue("loanPurposeId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select loan purpose" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">None</SelectItem>
+                {(loanPurposeOptions ?? []).map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Link Account ID</label>
-            <Input
-              type="number"
-              placeholder="Savings account ID"
-              {...register("linkAccountId", { valueAsNumber: true })}
+            <label className="block text-sm font-medium">Link Account</label>
+            <Select
+              value={watch("linkAccountId") ? String(watch("linkAccountId")) : "0"}
+              onValueChange={(v) => setValue("linkAccountId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select linked savings account" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">None</SelectItem>
+                {(accountLinkingOptions ?? []).map((o) => (
+                  <SelectItem key={o.id} value={String(o.id)}>
+                    {o.accountNo ?? o.productName ?? `Account #${o.id}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="col-span-2 space-y-1.5">
             <label className="block text-sm font-medium">External ID</label>
