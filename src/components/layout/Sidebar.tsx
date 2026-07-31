@@ -43,6 +43,7 @@ import {
   ToggleLeft,
   Repeat,
   Percent,
+  Handshake,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
@@ -77,6 +78,7 @@ const sections: NavSectionConfig[] = [
     items: [
       { label: "Loans", path: "/loans", icon: Banknote, exact: true },
       { label: "Loan Products", path: "/lending/products", icon: Briefcase },
+      { label: "Loan Originators", path: "/loan-originators", icon: Handshake },
       { label: "Collateral Products", path: "/collateral-products", icon: Gem },
       { label: "External Asset Owners", path: "/external-asset-owners/owners", icon: UsersRound },
       { label: "Transfers (Investor)", path: "/external-asset-owners/transfers", icon: ArrowRightLeft },

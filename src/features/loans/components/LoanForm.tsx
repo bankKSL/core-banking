@@ -1,4 +1,4 @@
-import { type FC, useCallback, useEffect } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import { LoanProductSearch } from "@/components/shared/LoanProductSearch";
+import { LoanOriginatorPicker } from "@/features/loan-originators";
+import type { LoanOriginator } from "@/features/loan-originators";
 import { createLoanSchema, type CreateLoanFormValues } from "../schemas/loan.schema";
 import type { Loan, LoanTemplate } from "../types/loan";
 import { currentDate } from "@/lib/utils";
@@ -40,6 +42,7 @@ interface LoanFormProps {
 /** Type override for fields not in the Zod schema yet */
 export type FormFields = CreateLoanFormValues & {
   repaymentsStartingFromDate?: string;
+  originators?: Array<{ id: number; name?: string | null }>;
 };
 
 /** Frequency options (0=Days, 1=Weeks, 2=Months, 3=Years) shared by term & repayment selects */
@@ -116,6 +119,7 @@ const LoanForm: FC<LoanFormProps> = ({
 
   const productIdVal = watch("productId");
   const clientIdVal = watch("clientId");
+  const [selectedOriginators, setSelectedOriginators] = useState<LoanOriginator[]>([]);
 
   // Report client/product changes so the page can (re)load the template (doc §3).
   useEffect(() => {
@@ -198,7 +202,15 @@ const LoanForm: FC<LoanFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit((values) => onSubmit(values as any))} className="space-y-6">
+    <form
+      onSubmit={handleSubmit((values) =>
+        onSubmit({
+          ...values,
+          originators: selectedOriginators.map((o) => ({ id: o.id, name: o.name })),
+        } as any),
+      )}
+      className="space-y-6"
+    >
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {error}
@@ -635,6 +647,25 @@ const LoanForm: FC<LoanFormProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Originators (create only) — attached at application time */}
+      {mode === "create" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Originators</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LoanOriginatorPicker
+              value={selectedOriginators}
+              onChange={setSelectedOriginators}
+              disabled={isSubmitting}
+            />
+            <p className="mt-2 text-xs text-gray-500">
+              Link the external party (merchant, broker, affiliate, platform) that sourced this application.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3">

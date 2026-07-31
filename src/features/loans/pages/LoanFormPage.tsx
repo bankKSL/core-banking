@@ -101,25 +101,26 @@ const LoanFormPage: FC = () => {
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = useCallback(
-    async (values: CreateLoanFormValues) => {
+    async (values: CreateLoanFormValues & { originators?: Array<{ id: number; name?: string | null }> }) => {
       // Strip null values since LoanCreateRequest doesn't accept null
       const cleaned = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== null)) as Record<
         string,
         unknown
       >;
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         ...cleaned,
         clientId: values.clientId,
         submittedOnDate: currentDate(values.submittedOnDate),
         expectedDisbursementDate: currentDate(values.expectedDisbursementDate),
-        dateFormat: "yyyy-MM-dd" as const,
-        locale: "en" as const,
+        dateFormat: "yyyy-MM-dd",
+        locale: "en",
         loanType: "individual",
       };
 
       if (isEditMode && id) {
-        await updateMutation.mutateAsync({ loanId: Number(id), payload });
+        delete payload.originators;
+        await updateMutation.mutateAsync({ loanId: Number(id), payload: payload as Partial<LoanCreateRequest> });
         navigate(`/loans/view/${id}`);
       } else {
         const result = await createMutation.mutateAsync(payload as unknown as LoanCreateRequest);

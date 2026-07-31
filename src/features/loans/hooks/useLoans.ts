@@ -19,6 +19,7 @@ export const loanKeys = {
   chargesTemplate: (id: number) => ["loans", "chargesTemplate", id] as const,
   collateral: (id: number) => ["loans", "collateral", id] as const,
   collateralTemplate: ["loans", "collateralTemplate"] as const,
+  originators: (id: number | string) => ["loans", "detail", id, "originators"] as const,
   guarantors: (id: number) => ["loans", "guarantors", id] as const,
   delinquencyTags: (id: number) => ["loans", "delinquencyTags", id] as const,
 };

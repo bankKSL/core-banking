@@ -21,6 +21,7 @@ import LoanNotesCard from "../components/LoanNotesCard";
 import LoanDocumentsCard from "../components/LoanDocumentsCard";
 import LoanPDCsCard from "../components/LoanPDCsCard";
 import InterestPauseCard from "../components/InterestPauseCard";
+import { LoanOriginatorsCard } from "@/features/loan-originators";
 
 const LoanViewPage: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,6 +113,7 @@ const LoanViewPage: FC = () => {
           <TabsTrigger value="charges">Charges ({charges.length})</TabsTrigger>
           <TabsTrigger value="collateral">Collateral ({collateral.length})</TabsTrigger>
           <TabsTrigger value="guarantors">Guarantors ({guarantors.length})</TabsTrigger>
+          <TabsTrigger value="originators">Originators ({loan.originators?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="delinquency">Delinquency</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -141,6 +143,14 @@ const LoanViewPage: FC = () => {
 
         <TabsContent value="guarantors" className="mt-4">
           <LoanGuarantorsCard loanId={loan.id} currencyCode={currencyCode} guarantors={guarantors} />
+        </TabsContent>
+
+        <TabsContent value="originators" className="mt-4">
+          <LoanOriginatorsCard
+            loanId={loan.id}
+            originators={loan.originators}
+            canEdit={loan.status?.id === 100}
+          />
         </TabsContent>
 
         <TabsContent value="delinquency" className="mt-4">

@@ -1,5 +1,8 @@
 // ─── Apache Finfact Loan Types ────────────────────────────────
 
+import type { LoanOriginator } from "@/features/loan-originators/types/loanOriginator";
+import type { LoanApplicationOriginator } from "@/features/loan-originators/types/loanOriginator";
+
 export type LoanStatus =
   | "Submitted and pending approval"
   | "Approved"
@@ -145,6 +148,7 @@ export interface Loan {
   charges?: LoanCharge[];
   collateral?: LoanCollateral[];
   guarantors?: LoanGuarantor[];
+  originators?: LoanOriginator[];
   delinquent?: LoanDelinquentData;
   delinquencyRange?: { id: number; classification: string; minimumAgeDays: number; maximumAgeDays: number };
   inArrears?: boolean;
@@ -432,6 +436,7 @@ export interface LoanCreateRequest {
   externalId?: string;
   maxOutstandingLoanBalance?: number;
   charges?: Array<{ chargeId: number; amount: number; dueDate?: string }>;
+  originators?: LoanApplicationOriginator[];
   disbursementData?: Array<{
     expectedDisbursementDate: string;
     principal: number;
