@@ -9,7 +9,6 @@ import { Pagination } from "@/components/shared/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useLoans, LOAN_STATUS_CONFIG } from "@/features/loans";
 import type { Loan } from "@/features/loans";
 
@@ -209,32 +208,23 @@ const LoansListPage: FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : (
-            <>
-              <DataTable
-                columns={columns}
-                data={filtered}
-                emptyState={{ message: "No loans found." }}
-                onRowClick={(r) => navigate(`/loans/view/${r.id}`)}
+          <DataTable
+            columns={columns}
+            data={filtered}
+            loading={isLoading}
+            emptyState={{ message: "No loans found." }}
+            onRowClick={(r) => navigate(`/loans/view/${r.id}`)}
+          />
+          {totalFilteredRecords > 0 && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                totalItems={totalFilteredRecords}
+                pageSize={PAGE_SIZE}
               />
-              {totalPages > 1 && (
-                <div className="mt-4">
-                  <Pagination
-                    currentPage={safePage}
-                    totalPages={totalPages}
-                    onPageChange={setPage}
-                    totalItems={totalFilteredRecords}
-                    pageSize={PAGE_SIZE}
-                  />
-                </div>
-              )}
-            </>
+            </div>
           )}
         </CardContent>
       </Card>
