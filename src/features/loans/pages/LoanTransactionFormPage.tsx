@@ -76,7 +76,13 @@ const LoanTransactionFormPage: FC = () => {
       if (values.checkNumber) txPayload.checkNumber = values.checkNumber;
       if (values.routingCode) txPayload.routingCode = values.routingCode;
 
-      return makeTransaction(id, txPayload, transactionType!);
+      // Prepay is template-only on the backend; the actual prepayment is
+      // posted as a regular `repayment` with the amount returned by the
+      // `prepayLoan` template (see LoanTransactionsApiResource.executeTransaction
+      // — there is no `prepayLoan` case for the POST).
+      const postCommand = transactionType === "prepayLoan" ? "repayment" : transactionType!;
+
+      return makeTransaction(id, txPayload, postCommand);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: loanKeys.detail(loanId!) });

@@ -3,7 +3,6 @@ import { MessageSquare, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useLoanNotes, useCreateLoanNote, useUpdateLoanNote, useDeleteLoanNote } from "../hooks/useLoanNotes";

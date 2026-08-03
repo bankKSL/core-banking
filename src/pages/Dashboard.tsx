@@ -140,9 +140,9 @@ const Dashboard: React.FC = () => {
       try {
         const [clientRes, activeRes, pendingRes, closedRes, savingsRes] = await Promise.all([
           fetchClients({ offset: 0, limit: 1 }),
-          fetchLoans({ offset: 0, limit: 1, loanStatus: LOAN_STATUS_ACTIVE }),
-          fetchLoans({ offset: 0, limit: 50, loanStatus: LOAN_STATUS_PENDING }),
-          fetchLoans({ offset: 0, limit: 1, loanStatus: LOAN_STATUS_CLOSED }),
+          fetchLoans({ offset: 0, limit: 1, status: LOAN_STATUS_ACTIVE }),
+          fetchLoans({ offset: 0, limit: 50, status: LOAN_STATUS_PENDING }),
+          fetchLoans({ offset: 0, limit: 1, status: LOAN_STATUS_CLOSED }),
           fetchSavingsAccounts({ offset: 0, limit: 100 }),
         ]);
 

@@ -124,6 +124,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
                 step="0.01"
                 {...register("transactionAmount", { valueAsNumber: true })}
                 disabled={isSubmitting}
+                readOnly
               />
             </div>
           )}

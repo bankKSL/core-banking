@@ -230,10 +230,12 @@ export async function waiveInterest(loanId: number, payload: LoanCommandRequest 
   return makeTransaction(loanId, payload as Record<string, unknown>, "waiveinterest");
 }
 
-export async function prepayLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
-  return makeTransaction(loanId, payload as Record<string, unknown>, "prepayLoan");
-}
-
+/**
+ * Prepay loan: the backend exposes `prepayLoan` only as a *template* command
+ * (GET /loans/{id}/transactions/template?command=prepayLoan) that returns the
+ * total outstanding amount. The actual prepayment is posted as a regular
+ * `repayment` with that amount. See `LoanTransactionFormPage` for the mapping.
+ */
 export async function forecloseLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
   return makeTransaction(loanId, payload as Record<string, unknown>, "foreclosure");
 }

@@ -7,13 +7,15 @@ import type { ReassignmentRequest } from "../api/loanReassignment";
 
 export const reassignKeys = {
   all: ["loanReassignment"] as const,
-  template: () => ["loanReassignment", "template"] as const,
+  template: (officeId: number) => ["loanReassignment", "template", officeId] as const,
 };
 
-export function useReassignmentTemplate() {
+/** doc §7.32: `officeId` is required. */
+export function useReassignmentTemplate(officeId: number | undefined) {
   return useQuery({
-    queryKey: reassignKeys.template(),
-    queryFn: () => fetchReassignmentTemplate(),
+    queryKey: reassignKeys.template(officeId!),
+    queryFn: () => fetchReassignmentTemplate(officeId!),
+    enabled: !!officeId,
     staleTime: 5 * 60_000,
   });
 }

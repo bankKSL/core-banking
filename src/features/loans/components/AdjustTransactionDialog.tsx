@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Undo2, Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { undoTransaction, modifyTransaction } from "../api/transactionAdjustment";

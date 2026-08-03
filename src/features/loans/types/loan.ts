@@ -308,9 +308,8 @@ export interface LoanListParams {
   groupId?: number;
   accountNo?: string;
   externalId?: string;
-  status?: string;
-  loanStatus?: number;
-  searchByParam?: string;
+  /** Numeric `loan_status_id` (doc §8.1) — server uses the `status` query param. */
+  status?: number;
 }
 
 // ─── Loan Template ───────────────────────────────────────────────

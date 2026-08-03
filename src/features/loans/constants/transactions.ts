@@ -25,6 +25,8 @@ export const LOAN_TRANSACTION_COMMANDS = {
   CLOSE: "close",
   CLOSE_RESCHEDULED: "close-rescheduled",
   RECOVERY_REPAYMENT: "recoverypayment",
+  // Template-only command: GET .../transactions/template?command=prepayLoan
+  // returns the total outstanding. The actual POST must use `repayment`.
   PREPAY_LOAN: "prepayLoan",
   FORECLOSURE: "foreclosure",
   REFUND_BY_CASH: "refundbycash",
@@ -113,14 +115,16 @@ export const TRANSACTION_PAYMENT_TYPE_COMMANDS = new Set([
 /** Commands that show the extended payment details section */
 export const TRANSACTION_PAYMENT_DETAILS_COMMANDS = new Set(["repayment", "recoverypayment", "prepayLoan"]);
 
-/** Commands that do not require any date input */
+/**
+ * Commands that do not require any date input. Per doc §7.14 the following
+ * commands all require a `transactionDate` (and sometimes more), so they are
+ * intentionally NOT in this set:
+ *   - reAge, undoReAge, reAmortize, undoReAmortize
+ *     (doc §7.14: `transactionDate` is mandatory)
+ */
 export const TRANSACTION_NO_DATE_COMMANDS = new Set([
   "undoDisbursal",
   "undo-charge-off",
-  "undoReAge",
-  "undoReAmortize",
-  "reAge",
-  "reAmortize",
 ]);
 
 /** Commands rendered as destructive (red) submit buttons */

@@ -25,17 +25,7 @@ type LoanReassignmentFormValues = z.infer<typeof loanReassignmentSchema>;
 
 const LoanReassignmentPage: FC = () => {
   const navigate = useNavigate();
-  const { data: template, isLoading } = useReassignmentTemplate();
-  const executeMutation = useExecuteReassignment();
-
-  const {
-    control,
-    handleSubmit,
-    register,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<LoanReassignmentFormValues>({
+  const { control, handleSubmit, register, watch, setValue, formState: { errors } } = useForm<LoanReassignmentFormValues>({
     resolver: zodResolver(loanReassignmentSchema),
     defaultValues: {
       officeId: undefined,
@@ -44,6 +34,9 @@ const LoanReassignmentPage: FC = () => {
       loanIds: "",
     },
   });
+  const officeId = watch("officeId");
+  const { data: template, isLoading } = useReassignmentTemplate(officeId);
+  const executeMutation = useExecuteReassignment();
 
   const loanOfficerOptions = template?.loanOfficerOptions ?? [];
 
