@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,12 +46,12 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
   error,
 }) => {
   const defaultDate = new Date().toISOString().split("T")[0];
-  const { register, handleSubmit, setValue, watch } = useForm<TransactionFormValues>({
+  const { register, handleSubmit, setValue, watch, reset } = useForm<TransactionFormValues>({
     defaultValues: {
       transactionDate: defaultDate,
       approvedOnDate: defaultDate,
       actualDisbursementDate: defaultDate,
-      transactionAmount: loanSummary?.outstandingLoanBalance ?? loanSummary?.amount ?? 0,
+      transactionAmount: loanSummary?.amount ?? 0,
       paymentTypeId: undefined,
       receiptNumber: "",
       bankNumber: "",
@@ -60,6 +60,12 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
       note: "",
     },
   });
+
+  useEffect(() => {
+    if (loanSummary?.amount != null) {
+      reset((values) => ({ ...values, transactionAmount: loanSummary.amount }));
+    }
+  }, [loanSummary?.amount, reset]);
 
   const needsDate = !TRANSACTION_NO_DATE_COMMANDS.has(transactionType);
   const needsAmount = TRANSACTION_AMOUNT_COMMANDS.has(transactionType);
@@ -75,6 +81,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
           {error}
         </div>
       )}
+
       {loanSummary?.outstandingLoanBalance != null && (
         <Card>
           <CardHeader>
