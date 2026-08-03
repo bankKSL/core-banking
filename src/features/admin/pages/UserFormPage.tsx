@@ -127,7 +127,7 @@ const UserFormPage: FC = () => {
 
   if ((isEdit && userLoading) || templateLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -135,7 +135,7 @@ const UserFormPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit User" : "Create User"}
         description={isEdit ? `Editing user #${id}` : "Register a new application user"}
@@ -232,7 +232,9 @@ const UserFormPage: FC = () => {
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex items-center gap-3">
                 <Switch id="sendPasswordToEmail" onCheckedChange={(v) => setValue("sendPasswordToEmail", v)} />
-                <label className="block text-sm font-medium" htmlFor="sendPasswordToEmail">Send password via email</label>
+                <label className="block text-sm font-medium" htmlFor="sendPasswordToEmail">
+                  Send password via email
+                </label>
               </div>
               {!sendPasswordToEmail && (
                 <>
@@ -261,7 +263,9 @@ const UserFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("passwordNeverExpires", v)}
                 defaultChecked={user?.passwordNeverExpires ?? false}
               />
-              <label className="block text-sm font-medium" htmlFor="passwordNeverExpires">Password never expires</label>
+              <label className="block text-sm font-medium" htmlFor="passwordNeverExpires">
+                Password never expires
+              </label>
             </div>
             <div className="flex items-center gap-3">
               <Switch
@@ -269,7 +273,9 @@ const UserFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("isLoginRetriesEnabled", v)}
                 defaultChecked={user?.isLoginRetriesEnabled ?? true}
               />
-              <label className="block text-sm font-medium" htmlFor="isLoginRetriesEnabled">Enable login retry locking</label>
+              <label className="block text-sm font-medium" htmlFor="isLoginRetriesEnabled">
+                Enable login retry locking
+              </label>
             </div>
             <div className="flex items-center gap-3">
               <Switch
@@ -277,7 +283,9 @@ const UserFormPage: FC = () => {
                 onCheckedChange={(v) => setValue("isPasswordResetAllowed", v)}
                 defaultChecked={user?.isPasswordResetAllowed ?? true}
               />
-              <label className="block text-sm font-medium" htmlFor="isPasswordResetAllowed">Allow password reset</label>
+              <label className="block text-sm font-medium" htmlFor="isPasswordResetAllowed">
+                Allow password reset
+              </label>
             </div>
           </CardContent>
         </Card>

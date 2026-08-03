@@ -187,7 +187,7 @@ const ShareAccountFormPage: FC = () => {
 
   if (isEdit && accountLoading) {
     return (
-      <div className="max-w-4xl m-auto">
+      <div className="max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -195,7 +195,7 @@ const ShareAccountFormPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Share Account" : "New Share Account"}
         description={isEdit ? `Editing account #${id}` : "Create a new share account"}

@@ -99,7 +99,7 @@ const InteropTransferPage: FC = () => {
   const isPayer = watch("transactionRole") === "PAYER";
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Interop Transfer"
         description="Create quotes, prepare holds, and commit transfers"

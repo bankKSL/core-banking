@@ -30,7 +30,7 @@ const PeriodicAccrualPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Periodic Accrual Accounting"
         description="Accrue loan income up to a specified date for all active loans."

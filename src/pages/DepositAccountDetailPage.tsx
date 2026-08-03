@@ -193,7 +193,7 @@ const DepositAccountDetailPage: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
@@ -304,7 +304,7 @@ const DepositAccountDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={`Account ${a.accountNo}`}
         description={`${a.savingsProductName ?? "Savings"} — ${a.clientName ?? `Client #${a.clientId}`}`}

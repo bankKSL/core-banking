@@ -351,14 +351,14 @@ const CreateRecurringDepositPage: React.FC = () => {
 
   if (isLoading || existingLoading)
     return (
-      <div className="max-w-4xl m-auto space-y-6 p-6">
+      <div className="max-w-6xl m-auto space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
     );
 
   return (
-    <div className="max-w-4xl m-auto space-y-6 p-6">
+    <div className="max-w-6xl m-auto space-y-6 p-6">
       <PageHeader
         title={isEdit ? "Edit Recurring Deposit" : "New Recurring Deposit"}
         description={isEdit ? "Update recurring deposit account" : "Open a recurring deposit account"}

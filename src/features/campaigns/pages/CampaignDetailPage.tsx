@@ -118,7 +118,7 @@ const CampaignDetailPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-64 w-full rounded-xl" />
       </div>
@@ -127,7 +127,7 @@ const CampaignDetailPage: FC = () => {
 
   if (!campaign) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader title="Campaign Not Found" description="The requested campaign does not exist." />
       </div>
     );
@@ -137,7 +137,7 @@ const CampaignDetailPage: FC = () => {
   const closeError = isSms ? closeSms.error : closeEmail.error;
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={campaign.campaignName}
         description={`${isSms ? "SMS" : "Email"} campaign details and management`}
@@ -168,12 +168,26 @@ const CampaignDetailPage: FC = () => {
       <div className="flex items-center gap-3">
         <StatusBadge status={STATUS_LABELS[status!]?.toLowerCase() ?? "unknown"} size="lg" />
         {status === 100 && (
-          <Button size="sm" onClick={() => { setActionDialog("activate"); reset(); }} className="bg-emerald-600 hover:bg-emerald-700">
+          <Button
+            size="sm"
+            onClick={() => {
+              setActionDialog("activate");
+              reset();
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
             <Play className="mr-1 h-4 w-4" /> Activate
           </Button>
         )}
         {status === 300 && (
-          <Button size="sm" variant="outline" onClick={() => { setActionDialog("close"); reset(); }}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setActionDialog("close");
+              reset();
+            }}
+          >
             <XCircle className="mr-1 h-4 w-4" /> Close
           </Button>
         )}
@@ -248,7 +262,9 @@ const CampaignDetailPage: FC = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">{actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}</label>
+                <label className="block text-sm font-medium">
+                  {actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}
+                </label>
                 <Input type="date" {...register("actionDate")} error={errors.actionDate?.message} />
               </div>
               <div className="flex justify-end gap-3">
@@ -259,15 +275,22 @@ const CampaignDetailPage: FC = () => {
                   type="submit"
                   disabled={
                     actionDialog === "activate"
-                      ? (isSms ? activateSms.isPending : activateEmail.isPending)
-                      : (isSms ? closeSms.isPending : closeEmail.isPending)
+                      ? isSms
+                        ? activateSms.isPending
+                        : activateEmail.isPending
+                      : isSms
+                        ? closeSms.isPending
+                        : closeEmail.isPending
                   }
                   className="bg-[#D32F2F] hover:bg-red-700"
                 >
                   {(actionDialog === "activate"
-                    ? (isSms ? activateSms.isPending : activateEmail.isPending)
-                    : (isSms ? closeSms.isPending : closeEmail.isPending)
-                  ) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    ? isSms
+                      ? activateSms.isPending
+                      : activateEmail.isPending
+                    : isSms
+                      ? closeSms.isPending
+                      : closeEmail.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {actionDialog === "activate" ? "Activate" : "Close"}
                 </Button>
               </div>

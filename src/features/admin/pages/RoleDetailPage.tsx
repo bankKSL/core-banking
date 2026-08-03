@@ -70,7 +70,7 @@ const RoleDetailPage: FC = () => {
 
   if (isLoading || permsLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -84,7 +84,7 @@ const RoleDetailPage: FC = () => {
     );
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={role.name}
         description={role.description}
@@ -154,7 +154,11 @@ const RoleDetailPage: FC = () => {
       {updatePermsMutation.isError && (
         <ErrorState
           title="Failed to update permissions"
-          message={updatePermsMutation.error instanceof Error ? updatePermsMutation.error.message : "An unexpected error occurred."}
+          message={
+            updatePermsMutation.error instanceof Error
+              ? updatePermsMutation.error.message
+              : "An unexpected error occurred."
+          }
           onRetry={() => updatePermsMutation.reset()}
         />
       )}

@@ -90,7 +90,7 @@ const BusinessStepConfigPage: FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Business Step Configuration"
         description="Configure the order of business steps executed during COB processing"

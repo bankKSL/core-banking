@@ -109,7 +109,7 @@ const EmailCampaignFormPage: FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -117,7 +117,7 @@ const EmailCampaignFormPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Email Campaign" : "Create Email Campaign"}
         description={isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new email marketing campaign"}

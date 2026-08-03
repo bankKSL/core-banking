@@ -27,7 +27,7 @@ const CatchUpPage: FC = () => {
   const isRunning = catchUpStatus?.isCatchUpRunning;
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="COB Catch-Up"
         description="Trigger and monitor end-of-day catch-up processing for loan accounts"

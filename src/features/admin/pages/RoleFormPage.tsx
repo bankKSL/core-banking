@@ -62,7 +62,7 @@ const RoleFormPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Role" : "Create Role"}
         description={isEdit ? `Editing role #${id}` : "Define a new application role"}
@@ -84,11 +84,7 @@ const RoleFormPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Description *</label>
-              <Textarea
-                {...register("description")}
-                placeholder="Describe this role's purpose"
-                rows={3}
-              />
+              <Textarea {...register("description")} placeholder="Describe this role's purpose" rows={3} />
               {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
             </div>
           </CardContent>

@@ -28,9 +28,7 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
   const isEdit = !!id;
 
   const { data: template, isLoading: templateLoading } = useProvisioningCriteriaTemplate();
-  const { data: existingCriteria, isLoading: criteriaLoading } = useProvisioningCriteria(
-    id ? Number(id) : undefined,
-  );
+  const { data: existingCriteria, isLoading: criteriaLoading } = useProvisioningCriteria(id ? Number(id) : undefined);
 
   const createMutation = useCreateProvisioningCriteria();
   const updateMutation = useUpdateProvisioningCriteria();
@@ -98,8 +96,7 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
       navigate("/provisioning/criterias");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg =
-        error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save provisioning criteria.";
+      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save provisioning criteria.";
       setMutationError(msg);
     }
   };
@@ -108,7 +105,7 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6 animate-pulse">
+      <div className="p-6 max-w-6xl m-auto space-y-6 animate-pulse">
         <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48" />
         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64" />
         <Card>
@@ -123,7 +120,7 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Provisioning Criteria" : "New Provisioning Criteria"}
         description={isEdit ? "Update criteria details" : "Create new provisioning criteria"}

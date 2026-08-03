@@ -56,7 +56,7 @@ const StandingInstructionViewPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />
         <Card>
@@ -72,7 +72,7 @@ const StandingInstructionViewPage: React.FC = () => {
 
   if (isError || !instruction) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader
           title="Standing Instruction"
           description="View standing instruction details"
@@ -90,7 +90,7 @@ const StandingInstructionViewPage: React.FC = () => {
   const priorityLabel = PRIORITY_CONFIG[instruction.priority?.id]?.label ?? instruction.priority?.value ?? "—";
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={instruction.name ?? "Standing Instruction"}
         description="View standing instruction details"

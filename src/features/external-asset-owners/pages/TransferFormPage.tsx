@@ -89,7 +89,7 @@ const TransferFormPage: FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="New Transfer"
         description="Create a loan sale, buyback, or intermediary sale"

@@ -54,7 +54,7 @@ const BusinessDatePage: FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Business Date"
         description="View and update system business dates"
@@ -69,7 +69,9 @@ const BusinessDatePage: FC = () => {
       {updateMutation.isError && (
         <ErrorState
           title="Failed to update business date"
-          message={updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."}
+          message={
+            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => updateMutation.reset()}
         />
       )}
@@ -126,14 +128,16 @@ const BusinessDatePage: FC = () => {
                 <Input type="date" {...register("editDate")} error={errors.editDate?.message} />
               </div>
               <div className="flex justify-end gap-3">
-                <Button variant="outline" onClick={() => { setEditType(null); reset({ editDate: "" }); }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditType(null);
+                    reset({ editDate: "" });
+                  }}
+                >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                  className="bg-[#D32F2F] hover:bg-red-700"
-                >
+                <Button type="submit" disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
                   {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
                   Update

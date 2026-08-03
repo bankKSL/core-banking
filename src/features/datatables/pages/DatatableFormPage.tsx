@@ -23,16 +23,7 @@ const APPTABLE_OPTIONS = [
   { value: "m_savings_product", label: "Savings Product" },
 ];
 
-const COLUMN_TYPE_OPTIONS = [
-  "Boolean",
-  "Date",
-  "DateTime",
-  "Decimal",
-  "Dropdown",
-  "Number",
-  "String",
-  "Text",
-];
+const COLUMN_TYPE_OPTIONS = ["Boolean", "Date", "DateTime", "Decimal", "Dropdown", "Number", "String", "Text"];
 
 const columnSchema = z.object({
   name: z.string().min(1, "Column name is required"),
@@ -96,7 +87,7 @@ const DatatableFormPage: FC = () => {
   );
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
         title="New Datatable"
         description="Create or register a new datatable"
@@ -112,9 +103,7 @@ const DatatableFormPage: FC = () => {
           <ErrorState
             title="Failed to create datatable"
             message={
-              createMutation.error instanceof Error
-                ? createMutation.error.message
-                : "An unexpected error occurred."
+              createMutation.error instanceof Error ? createMutation.error.message : "An unexpected error occurred."
             }
             onRetry={() => createMutation.reset()}
           />
@@ -156,9 +145,7 @@ const DatatableFormPage: FC = () => {
                   </Select>
                 )}
               />
-              {errors.apptableName && (
-                <p className="text-xs text-red-500">{errors.apptableName.message}</p>
-              )}
+              {errors.apptableName && <p className="text-xs text-red-500">{errors.apptableName.message}</p>}
             </div>
 
             <div className="flex items-center gap-2">
@@ -166,11 +153,7 @@ const DatatableFormPage: FC = () => {
                 control={control}
                 name="multiRow"
                 render={({ field }) => (
-                  <Checkbox
-                    id="multiRow"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Checkbox id="multiRow" checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
               <label className="block text-sm font-medium cursor-pointer">Allow multiple rows per entity</label>
@@ -251,11 +234,7 @@ const DatatableFormPage: FC = () => {
                     control={control}
                     name={`columns.${index}.mandatory`}
                     render={({ field }) => (
-                      <Checkbox
-                        id={`mandatory-${field.name}`}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox id={`mandatory-${field.name}`} checked={field.value} onCheckedChange={field.onChange} />
                     )}
                   />
                   <label className="block text-sm font-medium cursor-pointer">Mandatory</label>
@@ -264,9 +243,7 @@ const DatatableFormPage: FC = () => {
             ))}
 
             {errors.columns?.root && (
-              <p className="text-sm text-red-500 text-center py-4">
-                {errors.columns.root.message}
-              </p>
+              <p className="text-sm text-red-500 text-center py-4">{errors.columns.root.message}</p>
             )}
 
             {fields.length === 0 && !errors.columns?.root && (

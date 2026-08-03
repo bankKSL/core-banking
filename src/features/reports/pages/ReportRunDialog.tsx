@@ -79,7 +79,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Run Report: {report?.reportName}</DialogTitle>
           <DialogDescription>Set parameters and run the report</DialogDescription>

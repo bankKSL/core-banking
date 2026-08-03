@@ -166,7 +166,7 @@ const RecurringDepositDetailPage: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -192,7 +192,7 @@ const RecurringDepositDetailPage: React.FC = () => {
   const acting = commandMutation.isPending;
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={`RD ${rd.accountNo}`}
         description={`${rd.depositProductName ?? "Recurring Deposit"} — ${rd.clientName ?? `Client #${rd.clientId}`}`}

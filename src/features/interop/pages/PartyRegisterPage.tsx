@@ -43,7 +43,7 @@ const PartyRegisterPage: FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Register Identifier"
         description="Link a secondary identifier (MSISDN, email, IBAN, etc.) to a savings account"

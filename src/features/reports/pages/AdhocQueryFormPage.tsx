@@ -96,7 +96,7 @@ const AdhocQueryFormPage: FC = () => {
 
   if (isQueryLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="p-6 max-w-6xl m-auto space-y-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />
         <div className="space-y-4">
@@ -109,7 +109,7 @@ const AdhocQueryFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Adhoc Query" : "New Adhoc Query"}
         description="Create or edit an adhoc query definition"
@@ -169,30 +169,17 @@ const AdhocQueryFormPage: FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Table Name</label>
-                <Input
-                  {...register("tableName")}
-                  placeholder="e.g. m_loan"
-                  disabled={isLoaded}
-                />
+                <Input {...register("tableName")} placeholder="e.g. m_loan" disabled={isLoaded} />
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Table Fields</label>
-                <Input
-                  {...register("tableFields")}
-                  placeholder="e.g. id, display_name"
-                  disabled={isLoaded}
-                />
+                <Input {...register("tableFields")} placeholder="e.g. id, display_name" disabled={isLoaded} />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Email</label>
-              <Input
-                type="email"
-                {...register("email")}
-                placeholder="recipient@example.com"
-                disabled={isLoaded}
-              />
+              <Input type="email" {...register("email")} placeholder="recipient@example.com" disabled={isLoaded} />
             </div>
 
             <div className="flex items-center gap-2">

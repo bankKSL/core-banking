@@ -288,7 +288,7 @@ const FixedDepositProductFormPage: React.FC = () => {
 
   if (isEdit && productLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -296,7 +296,7 @@ const FixedDepositProductFormPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Fixed Deposit Product" : "Create Fixed Deposit Product"}
         description="Configure fixed deposit product terms, interest rates, and chart slabs."

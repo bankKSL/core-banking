@@ -79,7 +79,7 @@ const FixedDepositProductDetailPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader
           title="Error loading product"
           description={error?.message ?? "An unexpected error occurred."}
@@ -100,7 +100,7 @@ const FixedDepositProductDetailPage: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader
           title="Product Not Found"
           description="The requested fixed deposit product does not exist."

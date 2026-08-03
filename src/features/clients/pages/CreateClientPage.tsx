@@ -56,7 +56,7 @@ const CreateClientPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto">
+    <div className="p-6 max-w-6xl m-auto">
       <PageHeader
         title="Create Client"
         description="Register a new client in Finfact"

@@ -207,7 +207,7 @@ const FixedDepositDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -235,7 +235,7 @@ const FixedDepositDetailPage: React.FC = () => {
   const isRejectedOrWithdrawn = statusCode.includes("rejected") || statusCode.includes("withdrawn");
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={`FD ${fd.accountNo}`}
         description={`${fd.depositProductName ?? "Fixed Deposit"} — ${fd.clientName ?? `Client #${fd.clientId}`}`}
