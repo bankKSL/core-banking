@@ -1,5 +1,5 @@
 import { type FC, useState } from "react";
-import { Banknote, Loader2, Trash2, XCircle } from "lucide-react";
+import { Banknote, Trash2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +36,6 @@ const LoanPDCsCard: FC<LoanPDCsCardProps> = ({ loanId, currencyCode = "USD" }) =
 
   const [bounceTarget, setBounceTarget] = useState<PostDatedCheck | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PostDatedCheck | null>(null);
-
-  const isMutating = bounceMutation.isPending || deleteMutation.isPending;
 
   const handleBounce = async () => {
     if (!bounceTarget) return;

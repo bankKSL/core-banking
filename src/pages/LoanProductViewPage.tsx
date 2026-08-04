@@ -44,7 +44,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
     <div className="mt-0.5 shrink-0 text-gray-400">{icon}</div>
     <div className="min-w-0 flex-1">
       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-100">{value ?? "—"}</p>
+      <div className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-100">{value ?? "—"}</div>
     </div>
   </div>
 );
@@ -56,7 +56,7 @@ const LoanProductViewPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[1, 2].map((i) => (
@@ -78,7 +78,7 @@ const LoanProductViewPage: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader
           title="Product Not Found"
           description="The requested loan product does not exist."

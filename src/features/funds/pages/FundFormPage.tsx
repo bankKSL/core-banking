@@ -70,7 +70,7 @@ const FundFormPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Fund" : "Create Fund"}
         description={isEdit ? `Editing fund #${id}` : "Create a new fund"}

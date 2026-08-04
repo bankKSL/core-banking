@@ -170,7 +170,15 @@ export async function activateSavingsAccount(
 
 export async function closeSavingsAccount(
   accountId: number,
-  payload: { closedOnDate?: string; locale?: string; dateFormat?: string } = {},
+  payload: {
+    closedOnDate?: string;
+    locale?: string;
+    dateFormat?: string;
+    withdrawBalance?: boolean;
+    paymentTypeId?: number;
+    note?: string;
+    postInterestValidationOnClosure?: boolean;
+  } = {},
 ): Promise<SavingsCommandResponse> {
   const { data } = await client.post<SavingsCommandResponse>(`/savingsaccounts/${accountId}`, payload, {
     params: { command: "close" },
@@ -968,10 +976,11 @@ export async function deleteSavingsCharge(
 export async function paySavingsCharge(
   savingsAccountId: number | string,
   chargeId: number | string,
+  payload: { amount?: number; dueDate?: string; dateFormat?: string; locale?: string } = {},
 ): Promise<{ savingsAccountId: number; resourceId: number }> {
   const { data } = await client.post(
     `/savingsaccounts/${savingsAccountId}/charges/${chargeId}`,
-    {},
+    payload,
     { params: { command: "paycharge" } },
   );
   return data;
@@ -998,8 +1007,15 @@ export async function postInterestSavings(savingsAccountId: number | string): Pr
 }
 
 /** POST /savingsaccounts/{savingsAccountId}?command=block */
-export async function blockSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
-  const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "block" } });
+export async function blockSavingsAccount(
+  savingsAccountId: number | string,
+  reasonForBlock?: string,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    { reasonForBlock: reasonForBlock || undefined, dateFormat: "yyyy-MM-dd", locale: "en" },
+    { params: { command: "block" } },
+  );
   return data;
 }
 
@@ -1010,10 +1026,13 @@ export async function unblockSavingsAccount(savingsAccountId: number | string): 
 }
 
 /** POST /savingsaccounts/{savingsAccountId}?command=blockCredit */
-export async function blockCreditSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
+export async function blockCreditSavingsAccount(
+  savingsAccountId: number | string,
+  reasonForBlock?: string,
+): Promise<{ resourceId: number }> {
   const { data } = await client.post(
     `/savingsaccounts/${savingsAccountId}`,
-    {},
+    { reasonForBlock: reasonForBlock || undefined, dateFormat: "yyyy-MM-dd", locale: "en" },
     { params: { command: "blockCredit" } },
   );
   return data;
@@ -1030,8 +1049,15 @@ export async function unblockCreditSavingsAccount(savingsAccountId: number | str
 }
 
 /** POST /savingsaccounts/{savingsAccountId}?command=blockDebit */
-export async function blockDebitSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
-  const { data } = await client.post(`/savingsaccounts/${savingsAccountId}`, {}, { params: { command: "blockDebit" } });
+export async function blockDebitSavingsAccount(
+  savingsAccountId: number | string,
+  reasonForBlock?: string,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${savingsAccountId}`,
+    { reasonForBlock: reasonForBlock || undefined, dateFormat: "yyyy-MM-dd", locale: "en" },
+    { params: { command: "blockDebit" } },
+  );
   return data;
 }
 

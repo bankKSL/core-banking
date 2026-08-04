@@ -59,6 +59,8 @@ import {
   releaseAmountSavings,
   fetchOnHoldTransactions,
   searchTransactions,
+  useUndoSavingsTransaction,
+  useReverseSavingsTransaction,
 } from "@/features/deposits";
 import { useMakeDeposit, useMakeWithdrawal } from "@/features/deposits";
 import { useStaffList } from "@/features/staff";
@@ -96,7 +98,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
     <span className="mt-0.5 text-gray-400">{icon}</span>
     <div className="min-w-0 flex-1">
       <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className="text-sm text-gray-900 dark:text-gray-100">{value}</p>
+      <div className="text-sm text-gray-900 dark:text-gray-100">{value}</div>
     </div>
   </div>
 );
@@ -126,6 +128,8 @@ const DepositAccountDetailPage: React.FC = () => {
   const applyAnnualFeesMutation = useApplyAnnualFeesSavings();
   const assignOfficerMutation = useAssignSavingsOfficer();
   const unassignOfficerMutation = useUnassignSavingsOfficer();
+  const undoTransactionMutation = useUndoSavingsTransaction();
+  const reverseTransactionMutation = useReverseSavingsTransaction();
   const [forceWithdrawalDialogOpen, setForceWithdrawalDialogOpen] = useState(false);
   const [fwAmount, setFwAmount] = useState("");
   const [fwDate, setFwDate] = useState(new Date().toISOString().split("T")[0]);
@@ -137,11 +141,13 @@ const DepositAccountDetailPage: React.FC = () => {
   const [searchTo, setSearchTo] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [blockReasonDialog, setBlockReasonDialog] = useState<string | null>(null);
+  const [blockReason, setBlockReason] = useState("");
 
   const summary = (account as any)?.summary ?? {};
 
   const handleCommand = useCallback(
-    async (cmd: string) => {
+    async (cmd: string, extra?: Record<string, unknown>) => {
       if (!account) return;
       setActing(true);
       const date = new Date().toISOString().split("T")[0];
@@ -159,7 +165,12 @@ const DepositAccountDetailPage: React.FC = () => {
         else if (cmd === "close")
           await closeMutation.mutateAsync({
             accountId: account.id,
-            payload: { closedOnDate: date, dateFormat: "yyyy-MM-dd", locale: "en" },
+            payload: {
+              closedOnDate: date,
+              dateFormat: "yyyy-MM-dd",
+              locale: "en",
+              ...(extra as Record<string, unknown>),
+            },
           });
         else if (cmd === "reject") await rejectMutation.mutateAsync(account.id);
         else if (cmd === "withdraw") await withdrawMutation.mutateAsync(account.id);
@@ -167,11 +178,13 @@ const DepositAccountDetailPage: React.FC = () => {
         else if (cmd === "undoapproval") await undoApproveMutation.mutateAsync(account.id);
         else if (cmd === "calculateInterest") await calculateInterestSavings(account.id);
         else if (cmd === "postInterest") await postInterestSavings(account.id);
-        else if (cmd === "block") await blockSavingsAccount(account.id);
+        else if (cmd === "block") await blockSavingsAccount(account.id, extra?.reasonForBlock as string | undefined);
         else if (cmd === "unblock") await unblockSavingsAccount(account.id);
-        else if (cmd === "blockCredit") await blockCreditSavingsAccount(account.id);
+        else if (cmd === "blockCredit")
+          await blockCreditSavingsAccount(account.id, extra?.reasonForBlock as string | undefined);
         else if (cmd === "unblockCredit") await unblockCreditSavingsAccount(account.id);
-        else if (cmd === "blockDebit") await blockDebitSavingsAccount(account.id);
+        else if (cmd === "blockDebit")
+          await blockDebitSavingsAccount(account.id, extra?.reasonForBlock as string | undefined);
         else if (cmd === "unblockDebit") await unblockDebitSavingsAccount(account.id);
         refetch();
       } finally {
@@ -193,7 +206,7 @@ const DepositAccountDetailPage: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
@@ -222,6 +235,10 @@ const DepositAccountDetailPage: React.FC = () => {
   const isActive = a.status?.active === true;
   const isApproved = a.status?.approved === true && !isActive;
   const isRejected = a.status?.rejected === true;
+  const subStatus = a.subStatus?.code ?? "";
+  const isBlocked = subStatus === "block" || subStatus === "BLOCK";
+  const isBlockedCredit = subStatus === "block_credit" || subStatus === "BLOCK_CREDIT";
+  const isBlockedDebit = subStatus === "block_debit" || subStatus === "BLOCK_DEBIT";
 
   const handleHoldAmount = async () => {
     if (!account) return;
@@ -247,7 +264,6 @@ const DepositAccountDetailPage: React.FC = () => {
   const loadOnHoldTransactions = async () => {
     if (!account) return;
     const txns = await fetchOnHoldTransactions(account.id);
-    console.log(txns);
 
     setOnHoldTxns(txns?.pageItems);
     setShowOnHold(true);
@@ -303,8 +319,27 @@ const DepositAccountDetailPage: React.FC = () => {
     }
   };
 
+  const handleUndoTransaction = async (transactionId: number) => {
+    if (!account) return;
+    await undoTransactionMutation.mutateAsync({ accountId: account.id, transactionId });
+    refetch();
+  };
+
+  const handleReverseTransaction = async (transactionId: number) => {
+    if (!account) return;
+    await reverseTransactionMutation.mutateAsync({ accountId: account.id, transactionId });
+    refetch();
+  };
+
+  const handleBlockConfirm = async () => {
+    if (!blockReasonDialog) return;
+    await handleCommand(blockReasonDialog, { reasonForBlock: blockReason || undefined });
+    setBlockReasonDialog(null);
+    setBlockReason("");
+  };
+
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={`Account ${a.accountNo}`}
         description={`${a.savingsProductName ?? "Savings"} — ${a.clientName ?? `Client #${a.clientId}`}`}
@@ -397,6 +432,7 @@ const DepositAccountDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setTxnDialog("deposit")}
+                  disabled={isBlocked || isBlockedDebit}
                   className="text-emerald-600"
                 >
                   <ArrowDownCircle className="mr-1 h-4 w-4" />
@@ -406,6 +442,7 @@ const DepositAccountDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setTxnDialog("withdrawal")}
+                  disabled={isBlocked || isBlockedCredit}
                   className="text-amber-600"
                 >
                   <ArrowUpCircle className="mr-1 h-4 w-4" />
@@ -457,7 +494,7 @@ const DepositAccountDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleCommand("block")}
+                  onClick={() => { setBlockReason(""); setBlockReasonDialog("block"); }}
                   disabled={acting}
                   className="text-red-600"
                 >
@@ -466,7 +503,7 @@ const DepositAccountDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleCommand("blockCredit")}
+                  onClick={() => { setBlockReason(""); setBlockReasonDialog("blockCredit"); }}
                   disabled={acting}
                   className="text-amber-600"
                 >
@@ -475,7 +512,7 @@ const DepositAccountDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleCommand("blockDebit")}
+                  onClick={() => { setBlockReason(""); setBlockReasonDialog("blockDebit"); }}
                   disabled={acting}
                   className="text-amber-600"
                 >
@@ -525,10 +562,6 @@ const DepositAccountDetailPage: React.FC = () => {
                 Undo Reject
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => navigate(`/savings/${account.id}/calendars`)}>
-              <Calendar className="mr-1 h-4 w-4" />
-              Calendars
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/saving-accounts")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
               Back
@@ -714,7 +747,7 @@ const DepositAccountDetailPage: React.FC = () => {
           <SavingsCharges accountId={a.id} />
         </TabsContent>
         <TabsContent value="transactions" className="mt-0">
-          <SavingsTransactions transactions={a?.transactions ?? []} />
+          <SavingsTransactions transactions={a?.transactions ?? []} onUndo={handleUndoTransaction} onReverse={handleReverseTransaction} />
         </TabsContent>
       </Tabs>
 
@@ -908,6 +941,34 @@ const DepositAccountDetailPage: React.FC = () => {
             {searchResults.length === 0 && !searching && searchFrom && (
               <p className="text-sm text-gray-500">No transactions found.</p>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block Reason Dialog */}
+      <Dialog open={!!blockReasonDialog} onOpenChange={() => setBlockReasonDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Block Account</DialogTitle>
+            <DialogDescription>Provide a reason for blocking (required by backend).</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="blockReason">
+                Reason for Block *
+              </label>
+              <Input
+                id="blockReason"
+                value={blockReason}
+                onChange={(e) => setBlockReason(e.target.value)}
+                placeholder="Enter reason..."
+                maxLength={100}
+              />
+            </div>
+            <Button onClick={handleBlockConfirm} disabled={acting || !blockReason.trim()}>
+              {acting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirm
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

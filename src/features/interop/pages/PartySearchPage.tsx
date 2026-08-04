@@ -43,7 +43,7 @@ const PartySearchPage: FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Lookup Party"
         description="Find an account by secondary identifier (MSISDN, email, IBAN, etc.)"

@@ -136,7 +136,7 @@ const LoanFormPage: FC = () => {
   // Status gate (doc §4 / §10.4): applications can only be modified while "Submitted and pending approval".
   if (isEditMode && !isLoading && loan && loan.status?.id !== 100) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader
           title="Edit Loan"
           description={`Editing loan ${loan.accountNo ?? `#${id}`}`}
@@ -158,7 +158,7 @@ const LoanFormPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-8 w-48 mb-6" />
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
@@ -177,7 +177,7 @@ const LoanFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto">
+    <div className="p-6 max-w-6xl m-auto">
       <PageHeader
         title={isEditMode ? "Edit Loan" : "Create Loan"}
         description={

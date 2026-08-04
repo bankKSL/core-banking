@@ -203,7 +203,7 @@ const InterestRateChartFormPage: React.FC = () => {
 
   if (isEdit && chartLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -211,7 +211,7 @@ const InterestRateChartFormPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Interest Rate Chart" : "Create Interest Rate Chart"}
         description="Define interest rate charts and their slabs."

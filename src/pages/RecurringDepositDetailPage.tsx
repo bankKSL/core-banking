@@ -85,7 +85,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
     <span className="mt-0.5 text-gray-400">{icon}</span>
     <div className="min-w-0 flex-1">
       <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className="text-sm text-gray-900 dark:text-gray-100">{value}</p>
+      <div className="text-sm text-gray-900 dark:text-gray-100">{value}</div>
     </div>
   </div>
 );
@@ -166,7 +166,7 @@ const RecurringDepositDetailPage: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -192,7 +192,7 @@ const RecurringDepositDetailPage: React.FC = () => {
   const acting = commandMutation.isPending;
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={`RD ${rd.accountNo}`}
         description={`${rd.depositProductName ?? "Recurring Deposit"} — ${rd.clientName ?? `Client #${rd.clientId}`}`}

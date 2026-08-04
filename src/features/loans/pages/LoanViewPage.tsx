@@ -35,7 +35,7 @@ const LoanViewPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
@@ -69,7 +69,7 @@ const LoanViewPage: FC = () => {
   const guarantors = loan.guarantors ?? [];
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={`Loan ${loan.accountNo ?? `#${loan.id}`}`}
         description={`${loan.loanProductName} — ${loan.clientName ?? `Client #${loan.clientId}`}`}

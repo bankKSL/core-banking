@@ -74,16 +74,19 @@ const CodeDetailPage: FC = () => {
     setValueDialog({ open: true });
   }, [reset]);
 
-  const openEditDialog = useCallback((value: CodeValue) => {
-    reset({
-      name: value.name,
-      position: String(value.position),
-      description: value.description ?? "",
-      isActive: value.isActive,
-      isMandatory: value.isMandatory,
-    });
-    setValueDialog({ open: true, editValue: value });
-  }, [reset]);
+  const openEditDialog = useCallback(
+    (value: CodeValue) => {
+      reset({
+        name: value.name,
+        position: String(value.position),
+        description: value.description ?? "",
+        isActive: value.isActive,
+        isMandatory: value.isMandatory,
+      });
+      setValueDialog({ open: true, editValue: value });
+    },
+    [reset],
+  );
 
   const onSubmit = useCallback(
     async (data: CodeValueFormValues) => {
@@ -172,7 +175,7 @@ const CodeDetailPage: FC = () => {
 
   if (codeLoading) {
     return (
-      <div className="max-w-4xl m-auto space-y-6">
+      <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
         <Card>
@@ -188,7 +191,7 @@ const CodeDetailPage: FC = () => {
 
   if (codeError || !code) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader
           title="Code Details"
           description="View and manage code values"
@@ -260,8 +263,7 @@ const CodeDetailPage: FC = () => {
               <ErrorState
                 title="Failed to save code value"
                 message={
-                  (createValueMutation.error ?? updateValueMutation.error)?.message ??
-                  "An unexpected error occurred."
+                  (createValueMutation.error ?? updateValueMutation.error)?.message ?? "An unexpected error occurred."
                 }
                 onRetry={() => {
                   createValueMutation.reset();
@@ -290,10 +292,7 @@ const CodeDetailPage: FC = () => {
                     name="isActive"
                     control={control}
                     render={({ field }) => (
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(checked) => field.onChange(checked === true)}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} />
                     )}
                   />
                   Active
@@ -303,10 +302,7 @@ const CodeDetailPage: FC = () => {
                     name="isMandatory"
                     control={control}
                     render={({ field }) => (
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(checked) => field.onChange(checked === true)}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} />
                     )}
                   />
                   Mandatory
@@ -317,10 +313,7 @@ const CodeDetailPage: FC = () => {
               <Button variant="outline" onClick={() => setValueDialog({ open: false })}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={createValueMutation.isPending || updateValueMutation.isPending}
-              >
+              <Button type="submit" disabled={createValueMutation.isPending || updateValueMutation.isPending}>
                 {createValueMutation.isPending || updateValueMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </DialogFooter>

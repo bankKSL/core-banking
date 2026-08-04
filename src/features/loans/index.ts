@@ -48,11 +48,16 @@ export {
   LOAN_STATUS_LABELS,
   LOAN_STATUS_CONFIG,
   LOAN_STATUS_ID_MAP,
+  STATUS_NAME_TO_ID,
+  LOAN_DEFAULT_ORDER_BY,
+  LOAN_DEFAULT_SORT_ORDER,
+  LOAN_SORT_OPTIONS,
   LOANS_PAGE_SIZE,
   LOAN_SEARCH_DEBOUNCE_MS,
   INTEREST_TYPE_LABELS,
   AMORTIZATION_TYPE_LABELS,
   REPAYMENT_FREQ_LABELS,
+  resolveStatusCode,
 } from "./constants/status";
 
 export {
@@ -115,7 +120,6 @@ export {
   fetchTransactionTemplate,
   makeTransaction,
   waiveInterest,
-  prepayLoan,
   forecloseLoan,
   writeOffLoan,
   rejectLoanApplication,
@@ -137,11 +141,40 @@ export {
 
 export {
   fetchLoanCollateral,
+  fetchLoanCollateralOne,
   fetchCollateralTemplate,
   addLoanCollateral,
   updateLoanCollateral,
   deleteLoanCollateral,
 } from "./api/loanCollateral";
+
+export type {
+  LoanApprovedAmountHistoryEntry,
+  UpdateApprovedAmountPayload,
+  UpdateAvailableDisbursementAmountPayload,
+  ReAgePreviewParams,
+  ReAmortizationPreviewParams,
+  DelinquencyAction,
+  CreateDelinquencyActionPayload,
+  GuarantorTemplate,
+  GuarantorSavingsTemplate,
+} from "./api/loanExtras";
+
+export {
+  fetchApprovedAmountHistory,
+  updateApprovedAmount,
+  fetchAvailableDisbursementAmount,
+  updateAvailableDisbursementAmount,
+  fetchReAgePreview,
+  fetchReAmortizationPreview,
+  fetchDelinquencyActions,
+  createDelinquencyAction,
+  fetchGuarantorTemplate,
+  fetchGuarantorSavingsTemplate,
+} from "./api/loanExtras";
+
+export { adjustTransaction, undoTransaction, modifyTransaction } from "./api/transactionAdjustment";
+export type { AdjustmentCommand, AdjustmentPayload } from "./api/transactionAdjustment";
 
 export {
   fetchLoanGuarantors,
@@ -208,6 +241,22 @@ export {
   useUpdateLoanCollateral,
   useDeleteLoanCollateral,
 } from "./hooks/useLoanCollateral";
+
+export {
+  useApprovedAmountHistory,
+  useUpdateApprovedAmount,
+  useAvailableDisbursementAmount,
+  useUpdateAvailableDisbursementAmount,
+  useReAgePreview,
+  useReAmortizationPreview,
+  useDelinquencyActions,
+  useCreateDelinquencyAction,
+  useGuarantorTemplate,
+  useGuarantorSavingsTemplate,
+} from "./hooks/useLoanExtras";
+
+export { useLoanPermissions, LOAN_ACTION_PERMISSIONS } from "./hooks/useLoanPermissions";
+export type { LoanAction } from "./hooks/useLoanPermissions";
 
 export {
   useLoanGuarantors,

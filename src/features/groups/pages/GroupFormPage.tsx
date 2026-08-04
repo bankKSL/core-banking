@@ -65,7 +65,7 @@ const GroupFormPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-8 w-48 mb-6" />
         <div className="rounded-xl border p-6 space-y-4">
           <Skeleton className="h-5 w-32" />
@@ -80,7 +80,7 @@ const GroupFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto">
+    <div className="p-6 max-w-6xl m-auto">
       <PageHeader
         title={isEditMode ? "Edit Group" : "Create Group"}
         description={

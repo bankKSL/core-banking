@@ -111,7 +111,7 @@ const LoanProductAttributesPage: FC = () => {
 
   if (!parsedId) {
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <PageHeader title="Loan Product Attributes" description="Configure investor attributes for a loan product" />
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
@@ -123,7 +123,7 @@ const LoanProductAttributesPage: FC = () => {
   }
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="Loan Product Attributes"
         description={`Configure investor settings for loan product #${parsedId}`}

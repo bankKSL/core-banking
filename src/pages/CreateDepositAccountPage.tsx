@@ -212,7 +212,7 @@ const CreateDepositAccountPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="m-auto max-w-4xl space-y-6 p-6">
+      <div className="m-auto max-w-6xl space-y-6 p-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full rounded-xl" />
       </div>
@@ -220,7 +220,7 @@ const CreateDepositAccountPage: React.FC = () => {
   }
 
   return (
-    <div className="m-auto max-w-4xl space-y-6 p-6">
+    <div className="m-auto max-w-6xl space-y-6 p-6">
       <PageHeader
         title={isEditMode ? "Edit Savings Account" : "New Savings Account"}
         description={isEditMode ? `Editing account #${id}` : "Open a new savings account"}
@@ -284,7 +284,11 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} placeholder="Optional external reference" error={errors.externalId?.message} />
+              <Input
+                {...register("externalId")}
+                placeholder="Optional external reference"
+                error={errors.externalId?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Submitted On Date *</label>
@@ -292,7 +296,12 @@ const CreateDepositAccountPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Field Officer ID</label>
-              <Input type="number" {...register("fieldOfficerId")} placeholder="Optional" error={errors.fieldOfficerId?.message} />
+              <Input
+                type="number"
+                {...register("fieldOfficerId")}
+                placeholder="Optional"
+                error={errors.fieldOfficerId?.message}
+              />
             </div>
           </CardContent>
         </Card>
@@ -400,7 +409,11 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Opening Balance</label>
-              <Input type="number" {...register("minRequiredOpeningBalance")} error={errors.minRequiredOpeningBalance?.message} />
+              <Input
+                type="number"
+                {...register("minRequiredOpeningBalance")}
+                error={errors.minRequiredOpeningBalance?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Lock-in Period</label>
@@ -435,14 +448,18 @@ const CreateDepositAccountPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("withdrawalFeeForTransfers", v)}
                 defaultChecked={template?.withdrawalFeeForTransfers ?? false}
               />
-              <label className="block text-sm font-medium" htmlFor="withdrawalFeeForTransfers">Withdrawal Fee for Transfers</label>
+              <label className="block text-sm font-medium" htmlFor="withdrawalFeeForTransfers">
+                Withdrawal Fee for Transfers
+              </label>
             </div>
             <div className="flex items-center gap-3 pt-2">
               <Switch
                 id="enforceMinRequiredBalance"
                 onCheckedChange={(v) => setValue("enforceMinRequiredBalance", v)}
               />
-              <label className="block text-sm font-medium" htmlFor="enforceMinRequiredBalance">Enforce Min Balance</label>
+              <label className="block text-sm font-medium" htmlFor="enforceMinRequiredBalance">
+                Enforce Min Balance
+              </label>
             </div>
             {enforceMinRequiredBalance && (
               <div className="space-y-1.5">
@@ -461,7 +478,9 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="allowOverdraft" onCheckedChange={(v) => setValue("allowOverdraft", v)} />
-              <label className="block text-sm font-medium" htmlFor="allowOverdraft">Allow Overdraft</label>
+              <label className="block text-sm font-medium" htmlFor="allowOverdraft">
+                Allow Overdraft
+              </label>
             </div>
             {allowOverdraft && (
               <div className="space-y-1.5">
@@ -480,7 +499,9 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="lienAllowed" onCheckedChange={(v) => setValue("lienAllowed", v)} />
-              <label className="block text-sm font-medium" htmlFor="lienAllowed">Allow Lien</label>
+              <label className="block text-sm font-medium" htmlFor="lienAllowed">
+                Allow Lien
+              </label>
             </div>
             {lienAllowed && (
               <div className="space-y-1.5">
@@ -490,7 +511,9 @@ const CreateDepositAccountPage: React.FC = () => {
             )}
             <div className="flex items-center gap-3 pt-2">
               <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
-              <label className="block text-sm font-medium" htmlFor="withHoldTax">Withhold Tax</label>
+              <label className="block text-sm font-medium" htmlFor="withHoldTax">
+                Withhold Tax
+              </label>
             </div>
           </CardContent>
         </Card>

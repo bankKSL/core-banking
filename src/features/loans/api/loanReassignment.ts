@@ -12,8 +12,11 @@ export interface ReassignmentRequest {
   loanIds: number[];
 }
 
-export async function fetchReassignmentTemplate(): Promise<ReassignmentTemplate> {
-  const { data } = await client.get<ReassignmentTemplate>("/loans/loanreassignment/template");
+/** doc §7.32: `GET /loans/loanreassignment/template?officeId=` is mandatory. */
+export async function fetchReassignmentTemplate(officeId: number): Promise<ReassignmentTemplate> {
+  const { data } = await client.get<ReassignmentTemplate>("/loans/loanreassignment/template", {
+    params: { officeId },
+  });
   return data;
 }
 

@@ -23,11 +23,7 @@ const ExternalServicesPage: FC = () => {
   const { data: service, isLoading } = useExternalService(selectedService);
   const updateMutation = useUpdateExternalService();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-  } = useForm<Record<string, string>>({
+  const { register, handleSubmit, reset } = useForm<Record<string, string>>({
     defaultValues: {} as Record<string, string>,
   });
 
@@ -63,7 +59,7 @@ const ExternalServicesPage: FC = () => {
   const properties = service?.properties ?? [];
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title="External Services"
         description="Configure S3, SMTP, SMS, and Notification service integrations"
@@ -78,7 +74,9 @@ const ExternalServicesPage: FC = () => {
       {updateMutation.isError && (
         <ErrorState
           title="Failed to save configuration"
-          message={updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."}
+          message={
+            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => updateMutation.reset()}
         />
       )}
@@ -128,10 +126,7 @@ const ExternalServicesPage: FC = () => {
                         {p.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </label>
                       <div className="relative">
-                        <Input
-                          type={sensitive && !visible ? "password" : "text"}
-                          {...register(p.name)}
-                        />
+                        <Input type={sensitive && !visible ? "password" : "text"} {...register(p.name)} />
                         {sensitive && (
                           <button
                             type="button"
@@ -150,11 +145,7 @@ const ExternalServicesPage: FC = () => {
 
             {properties.length > 0 && (
               <div className="flex justify-end pt-2">
-                <Button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                  className="bg-[#D32F2F] hover:bg-red-700"
-                >
+                <Button type="submit" disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
                   {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
                   Save Configuration

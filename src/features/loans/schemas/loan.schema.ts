@@ -28,7 +28,7 @@ export const createLoanSchema = z
     graceOnInterestCharged: z.number().int().min(0).optional(),
     graceOnArrearsAgeing: z.number().int().min(0).optional(),
     inArrearsTolerance: z.number().min(0).optional(),
-    allowPartialPeriodInterestCalcualtion: z.boolean().optional(),
+    allowPartialPeriodInterestCalculation: z.boolean().optional(),
     maxOutstandingLoanBalance: z.number().optional(),
     dateFormat: z.string().default("yyyy-MM-dd"),
     locale: z.string().default("en"),
@@ -178,10 +178,11 @@ export const createLoanTransactionSchema = z.object({
   transactionDate: z.string({ message: "Transaction date is required" }).min(1),
   transactionAmount: z.number().positive("Amount must be greater than 0").optional(),
   paymentTypeId: z.number().int().positive().optional(),
-  note: z.string().max(500).optional(),
-  receiptNumber: z.string().max(100).optional(),
-  bankNumber: z.string().max(100).optional(),
-  checkNumber: z.string().max(100).optional(),
-  routingCode: z.string().max(100).optional(),
+  // doc §15.3: notes (state and transaction) are capped at 1000 chars.
+  note: z.string().max(1000).optional(),
+  receiptNumber: z.string().max(50).optional(),
+  bankNumber: z.string().max(50).optional(),
+  checkNumber: z.string().max(50).optional(),
+  routingCode: z.string().max(50).optional(),
 });
 export type CreateLoanTransactionFormValues = z.infer<typeof createLoanTransactionSchema>;

@@ -1,8 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useLoans, type LoanListParams } from "@/features/loans";
+import { useLoans, LOAN_SEARCH_DEBOUNCE_MS, type LoanListParams } from "@/features/loans";
 
 export interface LoanSearchProps {
   value: number;
@@ -22,7 +21,7 @@ export function LoanSearch({
   disabled,
   error,
   label = "Loan ID *",
-  placeholder = "Search loan by ID or account no…",
+  placeholder = "Search loan by account no…",
   name,
 }: LoanSearchProps) {
   const [query, setQuery] = useState("");
@@ -30,12 +29,27 @@ export function LoanSearch({
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const params: LoanListParams = query.length >= 2 ? { limit: 20, offset: 0, searchByParam: query } : { limit: 50 };
-
+  // doc §10: backend supports exact-match `accountNo` / `externalId`. For the
+  // search-as-you-type UI we keep a small page and fall back to a client filter
+  // on the visible page so the dropdown still works for short numeric prefixes.
+  const params: LoanListParams = { limit: 50, offset: 0 };
   const { data, isLoading } = useLoans(params);
 
-  const loans = data?.pageItems ?? [];
-  const selected = loans.find((l) => l.id === value);
+  const loans = useMemo(() => {
+    const items = data?.pageItems ?? [];
+    const q = query.trim();
+    if (q.length < 1) return items;
+    const ql = q.toLowerCase();
+    return items.filter(
+      (l) =>
+        l.id === Number(q) ||
+        (l.accountNo ?? "").toLowerCase().includes(ql) ||
+        (l.externalId ?? "").toLowerCase().includes(ql) ||
+        (l.clientName ?? "").toLowerCase().includes(ql),
+    );
+  }, [data, query]);
+
+  const selected = data?.pageItems?.find((l) => l.id === value);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -51,7 +65,7 @@ export function LoanSearch({
   const handleSearch = useCallback((val: string) => {
     setQuery(val);
     clearTimeout(debounceRef.current!);
-    debounceRef.current = setTimeout(() => setOpen(true), 200);
+    debounceRef.current = setTimeout(() => setOpen(true), LOAN_SEARCH_DEBOUNCE_MS);
   }, []);
 
   return (

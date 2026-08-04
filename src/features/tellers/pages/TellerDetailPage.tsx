@@ -193,7 +193,7 @@ const TellerDetailPage: FC = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-64 w-full rounded-xl" />
       </div>
@@ -208,7 +208,7 @@ const TellerDetailPage: FC = () => {
   const cashTxnError = allocateMutation.error ?? settleMutation.error;
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={teller.name}
         description={teller.officeName ?? `Office #${teller.officeId}`}

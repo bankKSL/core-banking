@@ -127,7 +127,7 @@ const ReportFormPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-4xl m-auto space-y-6">
+      <div className="p-6 max-w-6xl m-auto space-y-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />
         <div className="space-y-4">
@@ -140,7 +140,7 @@ const ReportFormPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl m-auto space-y-6">
+    <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Report" : "New Report"}
         description="Create or edit a report definition"
@@ -256,21 +256,12 @@ const ReportFormPage: FC = () => {
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Description</label>
-              <Input
-                {...register("description")}
-                placeholder="Brief description of the report"
-                disabled={isLoaded}
-              />
+              <Input {...register("description")} placeholder="Brief description of the report" disabled={isLoaded} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Report SQL</label>
-              <Textarea
-                {...register("reportSql")}
-                placeholder="SELECT ..."
-                rows={6}
-                disabled={isLoaded}
-              />
+              <Textarea {...register("reportSql")} placeholder="SELECT ..." rows={6} disabled={isLoaded} />
             </div>
 
             <div className="flex items-center gap-2">
@@ -303,19 +294,13 @@ const ReportFormPage: FC = () => {
             )}
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.length === 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">No parameters defined.</p>
-            )}
+            {fields.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">No parameters defined.</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-start gap-3 p-3 border rounded-md">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div className="space-y-1.5">
                     <label className="block text-sm font-medium">Parameter Name</label>
-                    <Input
-                      {...register(`parameters.${index}.parameterName`)}
-                      disabled={isLoaded}
-                      placeholder="Name"
-                    />
+                    <Input {...register(`parameters.${index}.parameterName`)} disabled={isLoaded} placeholder="Name" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium">Parameter Type</label>

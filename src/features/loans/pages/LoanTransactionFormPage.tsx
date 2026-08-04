@@ -1,5 +1,5 @@
 import { type FC, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { data, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -128,10 +128,8 @@ const LoanTransactionFormPage: FC = () => {
         paymentTypeOptions={templateData?.paymentTypeOptions}
         loanSummary={
           loan?.summary
-            ? { outstandingLoanBalance: loan.summary.totalOutstanding }
-            : templateData?.amount != null
-              ? { amount: templateData.amount }
-              : undefined
+            ? { outstandingLoanBalance: loan.summary.totalOutstanding, amount: templateData?.amount }
+            : undefined
         }
         onSubmit={handleSubmit}
         isSubmitting={mutation.isPending}

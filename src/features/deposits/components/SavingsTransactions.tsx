@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import { ArrowLeftRight, RotateCcw } from "lucide-react";
+import { ArrowLeftRight, RotateCcw, Undo2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,10 @@ const formatCurrency = (currency?: string, n?: number) =>
 interface SavingsTransactionsProps {
   transactions: SavingsTransaction[];
   onUndo?: (transactionId: number) => void;
+  onReverse?: (transactionId: number) => void;
 }
 
-const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUndo }) => {
+const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUndo, onReverse }) => {
   const columns: ColumnDef<SavingsTransaction>[] = [
     { key: "id", header: "ID", accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
     {
@@ -59,10 +60,19 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUnd
       key: "actions",
       header: "",
       cell: (row: SavingsTransaction) =>
-        !row.reversed && onUndo ? (
-          <Button variant="ghost" size="sm" onClick={() => onUndo(row.id)}>
-            <RotateCcw className="h-4 w-4" />
-          </Button>
+        !row.reversed ? (
+          <div className="flex items-center gap-1">
+            {onUndo && (
+              <Button variant="ghost" size="sm" onClick={() => onUndo(row.id)} title="Undo">
+                <Undo2 className="h-4 w-4" />
+              </Button>
+            )}
+            {onReverse && (
+              <Button variant="ghost" size="sm" onClick={() => onReverse(row.id)} title="Reverse">
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         ) : null,
     },
   ];

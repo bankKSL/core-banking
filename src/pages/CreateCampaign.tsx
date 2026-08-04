@@ -163,11 +163,7 @@ const CreateCampaign: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Campaign Name *</label>
-                <Input
-                  {...register("name")}
-                  error={errors.name?.message}
-                  placeholder="e.g. Summer Savings Promotion"
-                />
+                <Input {...register("name")} error={errors.name?.message} placeholder="e.g. Summer Savings Promotion" />
               </div>
               <div>
                 <label className="text-sm font-medium">Category *</label>
@@ -415,7 +411,7 @@ const CreateCampaign: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Create Campaign</h1>

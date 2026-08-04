@@ -31,7 +31,7 @@ const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode
     <span className="mt-0.5 text-gray-400">{icon}</span>
     <div className="min-w-0 flex-1">
       <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className="text-sm text-gray-900 dark:text-gray-100">{value}</p>
+      <div className="text-sm text-gray-900 dark:text-gray-100">{value}</div>
     </div>
   </div>
 );
@@ -67,7 +67,7 @@ const UserDetailPage: FC = () => {
 
   if (isLoading)
     return (
-      <div className="p-6 max-w-4xl m-auto">
+      <div className="p-6 max-w-6xl m-auto">
         <Skeleton className="h-10 w-48 mb-6" />
         <Skeleton className="h-64 w-full rounded-xl" />
       </div>
@@ -83,7 +83,7 @@ const UserDetailPage: FC = () => {
     );
 
   return (
-    <div className="max-w-4xl m-auto space-y-6">
+    <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={user.username}
         description={`${user.firstname} ${user.lastname}`}
@@ -92,7 +92,14 @@ const UserDetailPage: FC = () => {
             <Badge variant={user.isActive !== false ? "success" : "error"} size="sm">
               {user.isActive !== false ? "Active" : "Disabled"}
             </Badge>
-            <Button variant="outline" size="sm" onClick={() => { setPwdDialogOpen(true); reset(); }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setPwdDialogOpen(true);
+                reset();
+              }}
+            >
               <Lock className="mr-1 h-4 w-4" />
               Change Password
             </Button>
@@ -174,7 +181,15 @@ const UserDetailPage: FC = () => {
         />
       )}
 
-      <Dialog open={pwdDialogOpen} onOpenChange={(o) => { if (!o) { setPwdDialogOpen(false); reset(); } }}>
+      <Dialog
+        open={pwdDialogOpen}
+        onOpenChange={(o) => {
+          if (!o) {
+            setPwdDialogOpen(false);
+            reset();
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>

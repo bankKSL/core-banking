@@ -1,4 +1,4 @@
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -82,7 +82,7 @@ const LoanForm: FC<LoanFormProps> = ({
     getValues,
     formState: { errors },
   } = useForm<FormFields>({
-    resolver: zodResolver(createLoanSchema) as any,
+    resolver: zodResolver(createLoanSchema) as Resolver<FormFields>,
     defaultValues: {
       clientId: loan?.clientId ?? clientId ?? 0,
       productId: loan?.loanProductId ?? 0,
@@ -202,15 +202,7 @@ const LoanForm: FC<LoanFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit((values) =>
-        onSubmit({
-          ...values,
-          originators: selectedOriginators.map((o) => ({ id: o.id, name: o.name })),
-        } as any),
-      )}
-      className="space-y-6"
-    >
+    <form onSubmit={handleSubmit((values) => onSubmit(values as any))} className="space-y-6">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {error}
@@ -344,7 +336,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Interest Type *</label>
             <Select
               value={String(watch("interestType") ?? 0)}
-              onValueChange={(v) => setValue("interestType", Number(v) as any)}
+              onValueChange={(v) => setValue("interestType", Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
@@ -360,7 +352,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Interest Rate Frequency</label>
             <Select
               value={String(watch("interestRateFrequencyType") ?? 3)}
-              onValueChange={(v) => setValue("interestRateFrequencyType", Number(v) as any)}
+              onValueChange={(v) => setValue("interestRateFrequencyType", Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
@@ -378,7 +370,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Interest Calculation Period Type *</label>
             <Select
               value={String(watch("interestCalculationPeriodType") ?? 0)}
-              onValueChange={(v) => setValue("interestCalculationPeriodType", Number(v) as any)}
+              onValueChange={(v) => setValue("interestCalculationPeriodType", Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
@@ -394,7 +386,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Amortization Type</label>
             <Select
               value={String(watch("amortizationType") ?? 1)}
-              onValueChange={(v) => setValue("amortizationType", Number(v) as any)}
+              onValueChange={(v) => setValue("amortizationType", Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
@@ -535,15 +527,15 @@ const LoanForm: FC<LoanFormProps> = ({
           <div
             className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
             onClick={() =>
-              setValue("allowPartialPeriodInterestCalcualtion", !watch("allowPartialPeriodInterestCalcualtion"))
+              setValue("allowPartialPeriodInterestCalculation", !watch("allowPartialPeriodInterestCalculation"))
             }
           >
             <Checkbox
-              id="allowPartialPeriodInterestCalcualtion"
-              checked={!!watch("allowPartialPeriodInterestCalcualtion")}
-              onCheckedChange={(v) => setValue("allowPartialPeriodInterestCalcualtion", v === true)}
+              id="allowPartialPeriodInterestCalculation"
+              checked={!!watch("allowPartialPeriodInterestCalculation")}
+              onCheckedChange={(v) => setValue("allowPartialPeriodInterestCalculation", v === true)}
             />
-            <label htmlFor="allowPartialPeriodInterestCalcualtion" className="block text-sm font-medium cursor-pointer">
+            <label htmlFor="allowPartialPeriodInterestCalculation" className="block text-sm font-medium cursor-pointer">
               Allow Partial Period Interest Calculation
             </label>
           </div>

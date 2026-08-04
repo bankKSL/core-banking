@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   useSavingsAccount,
   useApproveSavingsAccount,
@@ -34,6 +35,13 @@ const accountActionSchema = z.object({
 
 type AccountActionFormValues = z.infer<typeof accountActionSchema>;
 
+const CLOSE_PAYMENT_TYPES = [
+  { id: 1, name: "Cash" },
+  { id: 2, name: "Cheque" },
+  { id: 3, name: "Bank Transfer" },
+  { id: 4, name: "Card Payment" },
+];
+
 const AccountActionPage: FC = () => {
   const { accountType, accountId, command } = useParams<{ accountType: string; accountId: string; command: string }>();
   const navigate = useNavigate();
@@ -44,6 +52,10 @@ const AccountActionPage: FC = () => {
 
   const commandKey = command ?? "approve";
   const title = COMMAND_LABELS[commandKey] ?? `Execute ${commandKey}`;
+
+  const [withdrawBalance, setWithdrawBalance] = useState(false);
+  const [closePaymentTypeId, setClosePaymentTypeId] = useState("1");
+  const [postInterestValidation, setPostInterestValidation] = useState(false);
 
   const {
     register,
@@ -66,7 +78,12 @@ const AccountActionPage: FC = () => {
     if (commandKey !== "activate") payload.note = values.note || undefined;
     if (commandKey === "approve") payload.approvedOnDate = currentDate(values.actionDate);
     else if (commandKey === "activate") payload.activatedOnDate = values.actionDate;
-    else if (commandKey === "close") payload.closedOnDate = values.actionDate;
+    else if (commandKey === "close") {
+      payload.closedOnDate = values.actionDate;
+      payload.withdrawBalance = withdrawBalance;
+      if (withdrawBalance) payload.paymentTypeId = Number(closePaymentTypeId);
+      payload.postInterestValidationOnClosure = postInterestValidation;
+    }
 
     if (commandKey === "approve")
       await approveMutation.mutateAsync({ accountId: Number(accountId), payload: payload as any });
@@ -78,6 +95,8 @@ const AccountActionPage: FC = () => {
     const backRoute = accountType === "fixed" ? "/deposits/fixed" : "/deposits/saving-accounts";
     navigate(backRoute);
   };
+
+  const isClose = commandKey === "close";
 
   return (
     <div className="p-6 max-w-xl m-auto space-y-6">
@@ -112,6 +131,53 @@ const AccountActionPage: FC = () => {
                   <Textarea id="note" rows={4} {...register("note")} placeholder="Optional note..." />
                 )}
               </div>
+
+              {isClose && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="withdrawBalance"
+                      checked={withdrawBalance}
+                      onChange={(e) => setWithdrawBalance(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="withdrawBalance" className="text-sm font-medium">
+                      Withdraw Balance
+                    </label>
+                  </div>
+                  {withdrawBalance && (
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">Payment Type *</label>
+                      <Select value={closePaymentTypeId} onValueChange={setClosePaymentTypeId}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CLOSE_PAYMENT_TYPES.map((pt) => (
+                            <SelectItem key={pt.id} value={String(pt.id)}>
+                              {pt.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="postInterestValidation"
+                      checked={postInterestValidation}
+                      onChange={(e) => setPostInterestValidation(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="postInterestValidation" className="text-sm font-medium">
+                      Post Interest Validation on Closure
+                    </label>
+                  </div>
+                </>
+              )}
+
               <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
