@@ -30,6 +30,11 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
   const [paymentTypeId, setPaymentTypeId] = useState("1");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [note, setNote] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [checkNumber, setCheckNumber] = useState("");
+  const [routingCode, setRoutingCode] = useState("");
+  const [receiptNumber, setReceiptNumber] = useState("");
+  const [bankNumber, setBankNumber] = useState("");
 
   const isDeposit = type === "deposit";
   const mutation = isDeposit ? depositMutation : withdrawMutation;
@@ -46,13 +51,23 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
         dateFormat: "yyyy-MM-dd",
         locale: "en",
         note: note || undefined,
+        accountNumber: accountNumber || undefined,
+        checkNumber: checkNumber || undefined,
+        routingCode: routingCode || undefined,
+        receiptNumber: receiptNumber || undefined,
+        bankNumber: bankNumber || undefined,
       } as any,
     });
     setAmount("");
     setNote("");
+    setAccountNumber("");
+    setCheckNumber("");
+    setRoutingCode("");
+    setReceiptNumber("");
+    setBankNumber("");
     onOpenChange(false);
     onSuccess?.();
-  }, [accountId, amount, date, paymentTypeId, note, isDeposit, mutation, onOpenChange, onSuccess]);
+  }, [accountId, amount, date, paymentTypeId, note, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber, isDeposit, mutation, onOpenChange, onSuccess]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,6 +132,38 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
               onChange={(e) => setNote(e.target.value)}
               placeholder="Optional note"
             />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="accountNumber">
+                Account Number
+              </label>
+              <Input id="accountNumber" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="Optional" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="checkNumber">
+                Cheque Number
+              </label>
+              <Input id="checkNumber" value={checkNumber} onChange={(e) => setCheckNumber(e.target.value)} placeholder="Optional" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="routingCode">
+                Routing Code
+              </label>
+              <Input id="routingCode" value={routingCode} onChange={(e) => setRoutingCode(e.target.value)} placeholder="Optional" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="receiptNumber">
+                Receipt Number
+              </label>
+              <Input id="receiptNumber" value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} placeholder="Optional" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="bankNumber">
+                Bank Number
+              </label>
+              <Input id="bankNumber" value={bankNumber} onChange={(e) => setBankNumber(e.target.value)} placeholder="Optional" />
+            </div>
           </div>
           <Button
             onClick={handleSubmit}
