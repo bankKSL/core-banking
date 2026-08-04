@@ -101,7 +101,7 @@ const LoanTransactionFormPage: FC = () => {
     | undefined;
 
   return (
-    <div className="p-6 max-w-3xl m-auto">
+    <div className="p-6 max-w-4xl m-auto">
       <PageHeader
         title={label}
         description={

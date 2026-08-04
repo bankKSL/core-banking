@@ -69,7 +69,10 @@ const TaxComponentFormPage: FC = () => {
   });
 
   const glAccountTypeOptions = useMemo(() => template?.glAccountTypeOptions ?? [], [template]);
-  const glAccountOptions = useMemo(() => (Array.isArray(template?.glAccountOptions) ? template!.glAccountOptions : []), [template]);
+  const glAccountOptions = useMemo(
+    () => (Array.isArray(template?.glAccountOptions) ? template!.glAccountOptions : []),
+    [template],
+  );
 
   const debitAccountType = useMemo(
     () => glAccountTypeOptions.find((o) => o.id === (existingComponent?.debitAccountType?.id ?? null)),
@@ -86,7 +89,11 @@ const TaxComponentFormPage: FC = () => {
     reset({
       name: existingComponent.name,
       percentage: String(existingComponent.percentage),
-      startDate: formatDateInput(existingComponent.startDate ? existingComponent.startDate.split("-").map(Number) as unknown as number[] : null),
+      startDate: formatDateInput(
+        existingComponent.startDate
+          ? (existingComponent.startDate.split("-").map(Number) as unknown as number[])
+          : null,
+      ),
       debitAccountType: existingComponent.debitAccountType?.id ?? null,
       debitAccountId: existingComponent.debitAccount?.id ?? null,
       creditAccountType: existingComponent.creditAccountType?.id ?? null,
@@ -128,7 +135,7 @@ const TaxComponentFormPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-3xl m-auto space-y-6">
+      <div className="p-6 max-w-4xl m-auto space-y-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
         <Card>
@@ -145,7 +152,7 @@ const TaxComponentFormPage: FC = () => {
   const saveError = createMutation.error ?? updateMutation.error;
 
   return (
-    <div className="p-6 max-w-3xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Tax Component" : "New Tax Component"}
         actions={

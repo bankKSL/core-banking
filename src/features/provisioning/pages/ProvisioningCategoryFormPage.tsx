@@ -54,15 +54,14 @@ const ProvisioningCategoryFormPage: React.FC = () => {
       navigate("/provisioning/categories");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg =
-        error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save provisioning category.";
+      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save provisioning category.";
       setMutationError(msg);
     }
   };
 
   if (isEdit && !categories) {
     return (
-      <div className="p-6 max-w-3xl m-auto space-y-6 animate-pulse">
+      <div className="p-6 max-w-4xl m-auto space-y-6 animate-pulse">
         <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48" />
         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64" />
         <Card>
@@ -77,7 +76,7 @@ const ProvisioningCategoryFormPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-3xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Provisioning Category" : "New Provisioning Category"}
         description={isEdit ? "Update category details" : "Create a new provisioning category"}

@@ -94,7 +94,9 @@ const ChargeFormPage: FC = () => {
 
   const chargeAppliesToOptions: EnumOption[] = template?.chargeAppliesToOptions ?? [];
   const currencyOptions = template?.currencyOptions ?? [];
-  const glAccountOptions = Array.isArray(template?.incomeOrLiabilityAccountOptions) ? template.incomeOrLiabilityAccountOptions : [];
+  const glAccountOptions = Array.isArray(template?.incomeOrLiabilityAccountOptions)
+    ? template.incomeOrLiabilityAccountOptions
+    : [];
   const taxGroupOptions = Array.isArray(template?.taxGroupOptions) ? template.taxGroupOptions : [];
   const feeFrequencyOptions = Array.isArray(template?.feeFrequencyOptions) ? template.feeFrequencyOptions : [];
   const paymentTypeOptions = Array.isArray(template?.paymentTypeOptions) ? template.paymentTypeOptions : [];
@@ -217,7 +219,7 @@ const ChargeFormPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-3xl m-auto space-y-6">
+      <div className="p-6 max-w-4xl m-auto space-y-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
         <Card>
@@ -234,7 +236,7 @@ const ChargeFormPage: FC = () => {
   const saveError = createMutation.error ?? updateMutation.error;
 
   return (
-    <div className="p-6 max-w-3xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Charge" : "New Charge"}
         description={isEdit ? "Update charge definition" : "Define a new fee or penalty"}
@@ -378,7 +380,14 @@ const ChargeFormPage: FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">Amount *</label>
-                <Input type="number" step="0.01" min="0" {...register("amount")} placeholder="0.00" error={errors.amount?.message} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register("amount")}
+                  placeholder="0.00"
+                  error={errors.amount?.message}
+                />
               </div>
 
               {isPercentage && (

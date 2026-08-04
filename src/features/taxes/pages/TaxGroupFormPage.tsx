@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTaxGroup, useTaxGroupTemplate, useCreateTaxGroup, useUpdateTaxGroup, useTaxComponents } from "../hooks/useTaxes";
+import {
+  useTaxGroup,
+  useTaxGroupTemplate,
+  useCreateTaxGroup,
+  useUpdateTaxGroup,
+  useTaxComponents,
+} from "../hooks/useTaxes";
 import { parseFineractDate } from "../api/taxes";
 
 function formatDateInput(dateVal: number[] | null | undefined): string {
@@ -76,8 +82,8 @@ const TaxGroupFormPage: FC = () => {
       name: existingGroup.name,
       taxComponents: existingGroup.taxComponents.map((tc) => ({
         taxComponentId: tc.taxComponent.id,
-        startDate: formatDateInput(tc.startDate ? tc.startDate.split("-").map(Number) as unknown as number[] : null),
-        endDate: formatDateInput(tc.endDate ? tc.endDate.split("-").map(Number) as unknown as number[] : null),
+        startDate: formatDateInput(tc.startDate ? (tc.startDate.split("-").map(Number) as unknown as number[]) : null),
+        endDate: formatDateInput(tc.endDate ? (tc.endDate.split("-").map(Number) as unknown as number[]) : null),
       })),
     });
   }, [existingGroup, reset]);
@@ -111,7 +117,7 @@ const TaxGroupFormPage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-3xl m-auto space-y-6">
+      <div className="p-6 max-w-4xl m-auto space-y-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
         <Card>
@@ -128,7 +134,7 @@ const TaxGroupFormPage: FC = () => {
   const saveError = createMutation.error ?? updateMutation.error;
 
   return (
-    <div className="p-6 max-w-3xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? "Edit Tax Group" : "New Tax Group"}
         actions={

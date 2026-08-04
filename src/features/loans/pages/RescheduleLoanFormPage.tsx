@@ -66,7 +66,7 @@ const RescheduleLoanFormPage: FC = () => {
   );
 
   return (
-    <div className="p-6 max-w-3xl m-auto space-y-6">
+    <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
         title="New Reschedule Request"
         description="Request a repayment schedule adjustment for a loan"
@@ -122,11 +122,21 @@ const RescheduleLoanFormPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Reschedule From Date *</label>
-              <Input type="date" {...register("rescheduleFromDate")} disabled={isSubmitting} error={errors.rescheduleFromDate?.message} />
+              <Input
+                type="date"
+                {...register("rescheduleFromDate")}
+                disabled={isSubmitting}
+                error={errors.rescheduleFromDate?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Submitted On Date *</label>
-              <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} error={errors.submittedOnDate?.message} />
+              <Input
+                type="date"
+                {...register("submittedOnDate")}
+                disabled={isSubmitting}
+                error={errors.submittedOnDate?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Adjusted Due Date</label>
@@ -142,27 +152,15 @@ const RescheduleLoanFormPage: FC = () => {
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Grace on Principal</label>
-              <Input
-                type="number"
-                {...register("graceOnPrincipal", { valueAsNumber: true })}
-                disabled={isSubmitting}
-              />
+              <Input type="number" {...register("graceOnPrincipal", { valueAsNumber: true })} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Grace on Interest</label>
-              <Input
-                type="number"
-                {...register("graceOnInterest", { valueAsNumber: true })}
-                disabled={isSubmitting}
-              />
+              <Input type="number" {...register("graceOnInterest", { valueAsNumber: true })} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Extra Terms</label>
-              <Input
-                type="number"
-                {...register("extraTerms", { valueAsNumber: true })}
-                disabled={isSubmitting}
-              />
+              <Input type="number" {...register("extraTerms", { valueAsNumber: true })} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">New Interest Rate (%)</label>

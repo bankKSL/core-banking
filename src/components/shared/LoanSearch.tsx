@@ -69,7 +69,7 @@ export function LoanSearch({
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative space-y-1.5">
       <label className="block text-sm font-medium" htmlFor={name ?? "loanSearch"}>
         {label}
       </label>

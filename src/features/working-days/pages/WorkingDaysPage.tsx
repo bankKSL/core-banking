@@ -46,7 +46,12 @@ const workingDaysSchema = z.object({
 type WorkingDaysFormValues = z.infer<typeof workingDaysSchema>;
 
 const WorkingDaysPage: FC = () => {
-  const { data: config, isLoading: isConfigLoading, isError: isConfigError, refetch: refetchConfig } = useWorkingDaysConfig();
+  const {
+    data: config,
+    isLoading: isConfigLoading,
+    isError: isConfigError,
+    refetch: refetchConfig,
+  } = useWorkingDaysConfig();
   const { data: template, isLoading: isTemplateLoading } = useWorkingDaysTemplate();
   const updateMutation = useUpdateWorkingDays();
 
@@ -80,14 +85,21 @@ const WorkingDaysPage: FC = () => {
 
   const selectedDays = watch("selectedDays");
 
-  const toggleDay = useCallback((day: string) => {
-    const current = getValues("selectedDays");
-    if (current.includes(day)) {
-      setValue("selectedDays", current.filter((d) => d !== day), { shouldValidate: true });
-    } else {
-      setValue("selectedDays", [...current, day], { shouldValidate: true });
-    }
-  }, [getValues, setValue]);
+  const toggleDay = useCallback(
+    (day: string) => {
+      const current = getValues("selectedDays");
+      if (current.includes(day)) {
+        setValue(
+          "selectedDays",
+          current.filter((d) => d !== day),
+          { shouldValidate: true },
+        );
+      } else {
+        setValue("selectedDays", [...current, day], { shouldValidate: true });
+      }
+    },
+    [getValues, setValue],
+  );
 
   const isLoading = isConfigLoading || isTemplateLoading;
   const isSaving = updateMutation.isPending;
@@ -106,7 +118,7 @@ const WorkingDaysPage: FC = () => {
 
   if (isConfigError) {
     return (
-      <div className="p-6 max-w-3xl m-auto space-y-6">
+      <div className="p-6 max-w-4xl m-auto space-y-6">
         <PageHeader title="Working Days" description="Configure business working days and repayment rescheduling" />
         <ErrorState message="Failed to load working days configuration" onRetry={() => refetchConfig()} />
       </div>
@@ -114,16 +126,15 @@ const WorkingDaysPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-3xl m-auto space-y-6">
-      <PageHeader
-        title="Working Days"
-        description="Configure business working days and repayment rescheduling"
-      />
+    <div className="p-6 max-w-4xl m-auto space-y-6">
+      <PageHeader title="Working Days" description="Configure business working days and repayment rescheduling" />
 
       {updateMutation.isError && (
         <ErrorState
           title="Failed to update working days"
-          message={updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."}
+          message={
+            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+          }
           onRetry={() => updateMutation.reset()}
         />
       )}
@@ -189,7 +200,9 @@ const WorkingDaysPage: FC = () => {
                       </Select>
                     )}
                   />
-                  {errors.rescheduleTypeId && <p className="text-xs text-red-500 mt-1">{errors.rescheduleTypeId.message}</p>}
+                  {errors.rescheduleTypeId && (
+                    <p className="text-xs text-red-500 mt-1">{errors.rescheduleTypeId.message}</p>
+                  )}
                 </div>
 
                 <Separator />

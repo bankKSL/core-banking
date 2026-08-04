@@ -32,7 +32,7 @@ const EditClientPage: FC = () => {
 
   if (clientLoading || templateLoading) {
     return (
-      <div className="p-6 max-w-3xl">
+      <div className="p-6 max-w-4xl">
         <Skeleton className="h-8 w-48 mb-6" />
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
@@ -63,7 +63,7 @@ const EditClientPage: FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-3xl m-auto">
+    <div className="p-6 max-w-4xl m-auto">
       <PageHeader
         title="Edit Client"
         description={`Editing client #${client.id}`}
