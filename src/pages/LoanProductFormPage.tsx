@@ -375,13 +375,13 @@ const LoanProductFormPage: React.FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* ── Product Details ── */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Product Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
-            {/* Row 1: Name | Short Name */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Name *</label>
               <Input {...register("name")} error={errors.name?.message} />
@@ -390,17 +390,14 @@ const LoanProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">Short Name</label>
               <Input {...register("shortName")} error={errors.shortName?.message} />
             </div>
-            {/* Row 2 FULL: Description */}
             <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">Description</label>
               <Textarea {...register("description")} rows={3} placeholder="Brief product description" />
             </div>
-            {/* Row 3 FULL: External ID */}
             <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">External ID</label>
               <Input {...register("externalId")} error={errors.externalId?.message} />
             </div>
-            {/* Row 4: Fund | Currency Code */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Fund</label>
               <Select
@@ -424,7 +421,15 @@ const LoanProductFormPage: React.FC = () => {
               onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
               error={errors.currencyCode?.message}
             />
-            {/* Row 5: Principal | Interest Rate */}
+          </CardContent>
+        </Card>
+
+        {/* ── Loan Terms ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Loan Terms</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Principal *</label>
               <Input
@@ -448,7 +453,6 @@ const LoanProductFormPage: React.FC = () => {
                 error={errors.interestRatePerPeriod?.message}
               />
             </div>
-            {/* Row 5b: Min/Max Principal */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Principal</label>
               <Input
@@ -477,7 +481,6 @@ const LoanProductFormPage: React.FC = () => {
                 error={errors.maxPrincipal?.message}
               />
             </div>
-            {/* Row 6: Repayments | Every */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Number of Repayments *</label>
               <Input
@@ -495,7 +498,6 @@ const LoanProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">Repayment Every *</label>
               <Input type="number" {...register("repaymentEvery")} error={errors.repaymentEvery?.message} />
             </div>
-            {/* Row 6b: Min/Max Repayments */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Number of Repayments</label>
               <Input
@@ -522,7 +524,15 @@ const LoanProductFormPage: React.FC = () => {
                 error={errors.maxNumberOfRepayments?.message}
               />
             </div>
-            {/* Row 7: Repayment Frequency | Interest Type */}
+          </CardContent>
+        </Card>
+
+        {/* ── Repayment & Interest Settings ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Repayment & Interest Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Repayment Frequency *</label>
               <Select
@@ -559,7 +569,6 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* Row 8: Amortization | Interest Calculation Period */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Amortization Type</label>
               <Select
@@ -593,7 +602,6 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* Row 8b: Grace Settings */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Grace on Principal Payment</label>
               <Input type="number" {...register("graceOnPrincipalPayment")} />
@@ -610,7 +618,6 @@ const LoanProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">Grace on Arrears Ageing</label>
               <Input type="number" {...register("graceOnArrearsAgeing")} />
             </div>
-            {/* Row 8c: Allow Partial Period Interest */}
             <div
               className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
               onClick={() =>
@@ -626,26 +633,15 @@ const LoanProductFormPage: React.FC = () => {
                 Allow Partial Period Interest Calculation
               </label>
             </div>
-            {/* Row 8d: Days In Month Type */}
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Days In Month Type</label>
-              <Select
-                value={String(watch("daysInMonthType") ?? 1)}
-                onValueChange={(v) => setValue("daysInMonthType", Number(v))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(template?.daysInMonthTypeOptions ?? []).map((o) => (
-                    <SelectItem key={o.id} value={String(o.id)}>
-                      {o.value}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Row 9: Loan Schedule Type | Transaction Strategy */}
+          </CardContent>
+        </Card>
+
+        {/* ── Schedule & Calendar ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Schedule & Calendar</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Loan Schedule Type</label>
               <Select
@@ -689,7 +685,24 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* Row 10: Days In Year Type */}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">Days In Month Type</label>
+              <Select
+                value={String(watch("daysInMonthType") ?? 1)}
+                onValueChange={(v) => setValue("daysInMonthType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(template?.daysInMonthTypeOptions ?? []).map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Days In Year Type</label>
               <Select
@@ -708,8 +721,15 @@ const LoanProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div />
-            {/* ── Recalculation ── */}
+          </CardContent>
+        </Card>
+
+        {/* ── Interest Recalculation ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Interest Recalculation</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div
               className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
               onClick={() => setValue("isInterestRecalculationEnabled", !watch("isInterestRecalculationEnabled"))}
@@ -809,8 +829,15 @@ const LoanProductFormPage: React.FC = () => {
                 </div>
               </>
             )}
+          </CardContent>
+        </Card>
 
-            {/* ── Multi-Disburse ── */}
+        {/* ── Multi-Disburse ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Multi-Disburse</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div
               className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
               onClick={() => setValue("multiDisburseLoan", !watch("multiDisburseLoan"))}
@@ -855,8 +882,15 @@ const LoanProductFormPage: React.FC = () => {
                 )}
               </>
             )}
+          </CardContent>
+        </Card>
 
-            {/* ── Down Payment ── */}
+        {/* ── Down Payment ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Down Payment</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div
               className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
               onClick={() => setValue("enableDownPayment", !watch("enableDownPayment"))}
@@ -893,179 +927,184 @@ const LoanProductFormPage: React.FC = () => {
                 </div>
               </>
             )}
-
-            {/* ── Progressive-only sections ── */}
-            {isProgressive && (
-              <>
-                {/* Buydown Fee */}
-                <div
-                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-                  onClick={() => setValue("enableBuyDownFee", !watch("enableBuyDownFee"))}
-                >
-                  <Checkbox
-                    id="enableBuyDownFee"
-                    checked={!!watch("enableBuyDownFee")}
-                    onCheckedChange={(v) => setValue("enableBuyDownFee", v === true)}
-                  />
-                  <label htmlFor="enableBuyDownFee" className="block text-sm font-medium">
-                    Enable Buy Down Fee
-                  </label>
-                </div>
-                {watch("enableBuyDownFee") && (
-                  <>
-                    <div
-                      className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-                      onClick={() => setValue("merchantBuyDownFee", !watch("merchantBuyDownFee"))}
-                    >
-                      <Checkbox
-                        id="merchantBuyDownFee"
-                        checked={!!watch("merchantBuyDownFee")}
-                        onCheckedChange={(v) => setValue("merchantBuyDownFee", v === true)}
-                      />
-                      <label htmlFor="merchantBuyDownFee" className="block text-sm font-medium">
-                        Merchant Buy Down Fee
-                      </label>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Buy Down Fee Calculation Type</label>
-                      <Select
-                        value={watch("buyDownFeeCalculationType") ?? ""}
-                        onValueChange={(v) => setValue("buyDownFeeCalculationType", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(template?.buyDownFeeCalculationTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Buy Down Fee Strategy</label>
-                      <Select
-                        value={watch("buyDownFeeStrategy") ?? ""}
-                        onValueChange={(v) => setValue("buyDownFeeStrategy", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(template?.buyDownFeeStrategyOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Buy Down Fee Income Type</label>
-                      <Select
-                        value={watch("buyDownFeeIncomeType") ?? ""}
-                        onValueChange={(v) => setValue("buyDownFeeIncomeType", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(template?.buyDownFeeIncomeTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
-
-                {/* Income Capitalization */}
-                <div
-                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-                  onClick={() => setValue("enableIncomeCapitalization", !watch("enableIncomeCapitalization"))}
-                >
-                  <Checkbox
-                    id="enableIncomeCapitalization"
-                    checked={!!watch("enableIncomeCapitalization")}
-                    onCheckedChange={(v) => setValue("enableIncomeCapitalization", v === true)}
-                  />
-                  <label htmlFor="enableIncomeCapitalization" className="block text-sm font-medium">
-                    Enable Income Capitalization
-                  </label>
-                </div>
-                {watch("enableIncomeCapitalization") && (
-                  <>
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Capitalized Income Calculation Type</label>
-                      <Select
-                        value={watch("capitalizedIncomeCalculationType") ?? ""}
-                        onValueChange={(v) => setValue("capitalizedIncomeCalculationType", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(template?.capitalizedIncomeCalculationTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Capitalized Income Strategy</label>
-                      <Select
-                        value={watch("capitalizedIncomeStrategy") ?? ""}
-                        onValueChange={(v) => setValue("capitalizedIncomeStrategy", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(template?.capitalizedIncomeStrategyOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Capitalized Income Type</label>
-                      <Select
-                        value={watch("capitalizedIncomeType") ?? ""}
-                        onValueChange={(v) => setValue("capitalizedIncomeType", v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(template?.capitalizedIncomeTypeOptions ?? []).map((o) => (
-                            <SelectItem key={o.id} value={o.id}>
-                              {o.value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
-
-                {/* Payment/Credit Allocation Editor */}
-                <div className="col-span-2 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-400 text-center">
-                  Payment/Credit Allocation Editor — Custom child component (not yet implemented)
-                </div>
-              </>
-            )}
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-3 mt-6">
+        {/* ── Progressive-only sections ── */}
+        {isProgressive && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Progressive Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+              {/* Buydown Fee */}
+              <div
+                className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                onClick={() => setValue("enableBuyDownFee", !watch("enableBuyDownFee"))}
+              >
+                <Checkbox
+                  id="enableBuyDownFee"
+                  checked={!!watch("enableBuyDownFee")}
+                  onCheckedChange={(v) => setValue("enableBuyDownFee", v === true)}
+                />
+                <label htmlFor="enableBuyDownFee" className="block text-sm font-medium">
+                  Enable Buy Down Fee
+                </label>
+              </div>
+              {watch("enableBuyDownFee") && (
+                <>
+                  <div
+                    className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                    onClick={() => setValue("merchantBuyDownFee", !watch("merchantBuyDownFee"))}
+                  >
+                    <Checkbox
+                      id="merchantBuyDownFee"
+                      checked={!!watch("merchantBuyDownFee")}
+                      onCheckedChange={(v) => setValue("merchantBuyDownFee", v === true)}
+                    />
+                    <label htmlFor="merchantBuyDownFee" className="block text-sm font-medium">
+                      Merchant Buy Down Fee
+                    </label>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Buy Down Fee Calculation Type</label>
+                    <Select
+                      value={watch("buyDownFeeCalculationType") ?? ""}
+                      onValueChange={(v) => setValue("buyDownFeeCalculationType", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.buyDownFeeCalculationTypeOptions ?? []).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Buy Down Fee Strategy</label>
+                    <Select
+                      value={watch("buyDownFeeStrategy") ?? ""}
+                      onValueChange={(v) => setValue("buyDownFeeStrategy", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.buyDownFeeStrategyOptions ?? []).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Buy Down Fee Income Type</label>
+                    <Select
+                      value={watch("buyDownFeeIncomeType") ?? ""}
+                      onValueChange={(v) => setValue("buyDownFeeIncomeType", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.buyDownFeeIncomeTypeOptions ?? []).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {/* Income Capitalization */}
+              <div
+                className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                onClick={() => setValue("enableIncomeCapitalization", !watch("enableIncomeCapitalization"))}
+              >
+                <Checkbox
+                  id="enableIncomeCapitalization"
+                  checked={!!watch("enableIncomeCapitalization")}
+                  onCheckedChange={(v) => setValue("enableIncomeCapitalization", v === true)}
+                />
+                <label htmlFor="enableIncomeCapitalization" className="block text-sm font-medium">
+                  Enable Income Capitalization
+                </label>
+              </div>
+              {watch("enableIncomeCapitalization") && (
+                <>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Capitalized Income Calculation Type</label>
+                    <Select
+                      value={watch("capitalizedIncomeCalculationType") ?? ""}
+                      onValueChange={(v) => setValue("capitalizedIncomeCalculationType", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.capitalizedIncomeCalculationTypeOptions ?? []).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Capitalized Income Strategy</label>
+                    <Select
+                      value={watch("capitalizedIncomeStrategy") ?? ""}
+                      onValueChange={(v) => setValue("capitalizedIncomeStrategy", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.capitalizedIncomeStrategyOptions ?? []).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">Capitalized Income Type</label>
+                    <Select
+                      value={watch("capitalizedIncomeType") ?? ""}
+                      onValueChange={(v) => setValue("capitalizedIncomeType", v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(template?.capitalizedIncomeTypeOptions ?? []).map((o) => (
+                          <SelectItem key={o.id} value={o.id}>
+                            {o.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {/* Payment/Credit Allocation Editor */}
+              <div className="col-span-2 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-400 text-center">
+                Payment/Credit Allocation Editor — Custom child component (not yet implemented)
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/lending/products")}>
             Cancel
           </Button>
