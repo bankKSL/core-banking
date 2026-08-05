@@ -60,7 +60,10 @@ const loanProductSchema = z
     daysInYearType: z.coerce.number(),
     daysInMonthType: z.coerce.number(),
     isInterestRecalculationEnabled: z.boolean(),
-    interestRatePerPeriod: z.coerce.number().min(0, "Interest rate per period is required"),
+    interestRatePerPeriod: z.preprocess(
+      (v) => (v === "" || v === null ? undefined : v),
+      z.coerce.number("Interest rate per period is required").int().positive(),
+    ),
     minInterestRatePerPeriod: z.coerce.number().optional(),
     maxInterestRatePerPeriod: z.coerce.number().optional(),
     interestType: z.coerce.number(),
