@@ -238,13 +238,12 @@ const LoanForm: FC<LoanFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Rows 3-6: 2-column grid */}
+      {/* ── Loan Terms ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Loan Details</CardTitle>
+          <CardTitle className="text-base">Loan Terms</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* Row 3: Principal | Loan Term Frequency */}
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Principal *</label>
             <Input
@@ -264,8 +263,6 @@ const LoanForm: FC<LoanFormProps> = ({
               error={errors.loanTermFrequency?.message}
             />
           </div>
-
-          {/* Row 4: Loan Term Frequency Type | Number of Repayments */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Loan Term Frequency Type *</label>
             <Select
@@ -297,8 +294,15 @@ const LoanForm: FC<LoanFormProps> = ({
               error={errors.numberOfRepayments?.message}
             />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Row 5: Repayment Every | Repayment Frequency Type */}
+      {/* ── Repayment Schedule ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Repayment Schedule</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Repayment Every *</label>
             <Input
@@ -330,8 +334,15 @@ const LoanForm: FC<LoanFormProps> = ({
               <p className="text-xs text-red-500">{errors.repaymentFrequencyType.message}</p>
             )}
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Row 6: Interest Type | Interest Rate Frequency */}
+      {/* ── Interest ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Interest</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Interest Type *</label>
             <Select
@@ -364,8 +375,6 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          {/* Row 7: Interest Calculation Period | Amortization Type */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Interest Calculation Period Type *</label>
             <Select
@@ -398,8 +407,15 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Row 8: Grace Settings */}
+      {/* ── Grace Periods ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Grace Periods</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Grace on Principal Payment</label>
             <Input
@@ -436,18 +452,42 @@ const LoanForm: FC<LoanFormProps> = ({
               error={errors.graceOnArrearsAgeing?.message}
             />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Row 9: In Arrears Tolerance | Max Outstanding */}
+      {/* ── Limits & Tolerance ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Limits & Tolerance</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">In Arrears Tolerance</label>
-            <Input type="number" step="0.01" {...register("inArrearsTolerance")} disabled={isSubmitting} />
+            <Input
+              type="number"
+              step="0.01"
+              {...register("inArrearsTolerance")}
+              disabled={isSubmitting}
+            />
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Max Outstanding Loan Balance</label>
-            <Input type="number" step="0.01" {...register("maxOutstandingLoanBalance")} disabled={isSubmitting} />
+            <Input
+              type="number"
+              step="0.01"
+              {...register("maxOutstandingLoanBalance")}
+              disabled={isSubmitting}
+            />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Row 10: Submitted On Date | Expected Disbursement Date */}
+      {/* ── Dates ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Dates</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Submitted On Date *</label>
             <Input
@@ -466,15 +506,20 @@ const LoanForm: FC<LoanFormProps> = ({
               error={errors.expectedDisbursementDate?.message}
             />
           </div>
-
-          {/* Row 11: Expected First Repayment Date | Repayments Starting From */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 col-span-2">
             <label className="block text-sm font-medium">Repayments Starting From Date</label>
             <Input type="date" {...register("repaymentsStartingFromDate")} disabled={isSubmitting} />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Row 12: Transaction Processing Strategy */}
-          <div className="col-span-2 space-y-1.5">
+      {/* ── Processing ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Processing</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <div className="space-y-1.5 col-span-2">
             <label className="block text-sm font-medium">Transaction Processing Strategy</label>
             <Select
               value={watch("transactionProcessingStrategyCode") ?? "mifos-standard-strategy"}
@@ -513,8 +558,6 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          {/* Row 13: Allow Partial Interest Calculation */}
           <div
             className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
             onClick={() =>
