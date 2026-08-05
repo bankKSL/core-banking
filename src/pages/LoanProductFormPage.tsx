@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   createLoanProduct,
@@ -21,7 +20,7 @@ import {
   useLoanProductTemplate,
   useFunds,
 } from "@/features/loans";
-import type { LoanProductCreateRequest, LoanProductTemplate } from "@/features/loans";
+import type { LoanProductCreateRequest } from "@/features/loans";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 /** Extract string value from Finfact enum objects {id,code,value} or primitive */
@@ -31,91 +30,153 @@ function enumVal(v: any, fallback = ""): string {
   return String(v);
 }
 
-const loanProductSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  shortName: z.string().min(1, "Short name is required").max(4, "Max 4 chars"),
-  description: z.string().optional(),
-  externalId: z.string().optional(),
-  currencyCode: z.string().min(1, "Currency is required"),
-  digitsAfterDecimal: z.coerce.number().int().min(0).max(6),
-  principal: z.coerce.number().positive("Principal must be > 0"),
-  minPrincipal: z.coerce.number().optional(),
-  maxPrincipal: z.coerce.number().optional(),
-  numberOfRepayments: z.coerce.number().int().positive("Required"),
-  minNumberOfRepayments: z.coerce.number().optional(),
-  maxNumberOfRepayments: z.coerce.number().optional(),
-  repaymentEvery: z.coerce.number().int().positive("Required"),
-  repaymentFrequencyType: z.coerce.number(),
-  amortizationType: z.coerce.number(),
-  interestCalculationPeriodType: z.coerce.number(),
-  allowPartialPeriodInterestCalculation: z.boolean().optional(),
-  transactionProcessingStrategyCode: z.string().min(1, "Required"),
-  loanScheduleType: z.string().optional(),
-  daysInYearType: z.coerce.number(),
-  daysInMonthType: z.coerce.number(),
-  isInterestRecalculationEnabled: z.boolean(),
-  interestRatePerPeriod: z.coerce.number().min(0, "Required"),
-  minInterestRatePerPeriod: z.coerce.number().optional(),
-  maxInterestRatePerPeriod: z.coerce.number().optional(),
-  interestType: z.coerce.number(),
-  interestRateFrequencyType: z.coerce.number().optional(),
-  graceOnPrincipalPayment: z.coerce.number().optional(),
-  graceOnInterestPayment: z.coerce.number().optional(),
-  graceOnInterestCharged: z.coerce.number().optional(),
-  graceOnArrearsAgeing: z.coerce.number().optional(),
-  multiDisburseLoan: z.boolean().optional(),
-  maxTrancheCount: z.coerce.number().optional(),
-  outstandingLoanBalance: z.coerce.number().optional(),
-  canDefineInstallmentAmount: z.boolean().optional(),
-  installmentAmountInMultiplesOf: z.coerce.number().optional(),
-  interestRecalculationCompoundingMethod: z.coerce.number().optional(),
-  rescheduleStrategyMethod: z.coerce.number().optional(),
-  recalculationRestFrequencyType: z.coerce.number().optional(),
-  preClosureInterestCalculationStrategy: z.coerce.number().optional(),
-  enableDownPayment: z.boolean().optional(),
-  enableAutoRepaymentForDownPayment: z.boolean().optional(),
-  repaymentStartDateType: z.coerce.number().optional(),
-  enableBuyDownFee: z.boolean().optional(),
-  merchantBuyDownFee: z.boolean().optional(),
-  buyDownFeeCalculationType: z.string().optional(),
-  buyDownFeeStrategy: z.string().optional(),
-  buyDownFeeIncomeType: z.string().optional(),
-  enableIncomeCapitalization: z.boolean().optional(),
-  capitalizedIncomeCalculationType: z.string().optional(),
-  capitalizedIncomeStrategy: z.string().optional(),
-  capitalizedIncomeType: z.string().optional(),
-  chargeOffBehaviour: z.string().optional(),
-  enableAccrualActivityPosting: z.boolean().optional(),
-  interestRecognitionOnDisbursementDate: z.boolean().optional(),
-  isEqualAmortization: z.boolean().optional(),
-  canUseForTopup: z.boolean().optional(),
-  syncExpectedWithDisbursementDate: z.boolean().optional(),
-  disallowExpectedDisbursements: z.boolean().optional(),
-  allowApprovedDisbursedAmountsOverApplied: z.boolean().optional(),
-  holdGuaranteeFunds: z.boolean().optional(),
-  enableInstallmentLevelDelinquency: z.boolean().optional(),
-  includeInBorrowerCycle: z.boolean().optional(),
-  useBorrowerCycle: z.boolean().optional(),
-  overdueDaysForNpa: z.coerce.number().optional(),
-  minDaysBetweenDisbursalAndFirstRepayment: z.coerce.number().optional(),
-  principalThresholdForLastInstallment: z.coerce.number().optional(),
-  fixedPrincipalPercentagePerInstallment: z.coerce.number().optional(),
-  dueDaysForRepaymentEvent: z.coerce.number().optional(),
-  overdueDaysForRepaymentEvent: z.coerce.number().optional(),
-  overAppliedCalculationType: z.string().optional(),
-  overAppliedNumber: z.coerce.number().optional(),
-  minimumGap: z.coerce.number().optional(),
-  maximumGap: z.coerce.number().optional(),
-  delinquencyBucketId: z.coerce.number().optional(),
-  compoundingFrequencyType: z.coerce.number().optional(),
-  isArrearsBasedOnOriginalSchedule: z.boolean().optional(),
-  inArrearsTolerance: z.coerce.number().optional(),
-  fundId: z.coerce.number().optional(),
-  inMultiplesOf: z.coerce.number().optional(),
-  accountingRule: z.coerce.number(),
-  locale: z.string(),
-  dateFormat: z.string(),
-});
+const loanProductSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    shortName: z.string().min(1, "Short name is required").max(4, "Max 4 chars"),
+    description: z.string().optional(),
+    externalId: z.string().optional(),
+    currencyCode: z.string().min(1, "Currency is required"),
+    digitsAfterDecimal: z.coerce.number().int().min(0).max(6),
+    principal: z.coerce.number().positive("Principal must be > 0"),
+    minPrincipal: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
+    maxPrincipal: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
+    numberOfRepayments: z.coerce.number().int().positive("Number of repayments is required"),
+    minNumberOfRepayments: z.preprocess(
+      (v) => (v === "" || v === null ? undefined : v),
+      z.coerce.number().int().positive().optional(),
+    ),
+    maxNumberOfRepayments: z.preprocess(
+      (v) => (v === "" || v === null ? undefined : v),
+      z.coerce.number().int().positive().optional(),
+    ),
+    repaymentEvery: z.coerce.number().int().positive("Repayment every is required"),
+    repaymentFrequencyType: z.coerce.number(),
+    amortizationType: z.coerce.number(),
+    interestCalculationPeriodType: z.coerce.number(),
+    allowPartialPeriodInterestCalculation: z.boolean().optional(),
+    transactionProcessingStrategyCode: z.string().min(1, "Transaction processing strategy is required"),
+    loanScheduleType: z.string().optional(),
+    daysInYearType: z.coerce.number(),
+    daysInMonthType: z.coerce.number(),
+    isInterestRecalculationEnabled: z.boolean(),
+    interestRatePerPeriod: z.coerce.number().min(0, "Interest rate per period is required"),
+    minInterestRatePerPeriod: z.coerce.number().optional(),
+    maxInterestRatePerPeriod: z.coerce.number().optional(),
+    interestType: z.coerce.number(),
+    interestRateFrequencyType: z.coerce.number().optional(),
+    graceOnPrincipalPayment: z.coerce.number().optional(),
+    graceOnInterestPayment: z.coerce.number().optional(),
+    graceOnInterestCharged: z.coerce.number().optional(),
+    graceOnArrearsAgeing: z.coerce.number().optional(),
+    multiDisburseLoan: z.boolean().optional(),
+    maxTrancheCount: z.coerce.number().optional(),
+    outstandingLoanBalance: z.coerce.number().optional(),
+    canDefineInstallmentAmount: z.boolean().optional(),
+    installmentAmountInMultiplesOf: z.coerce.number().optional(),
+    interestRecalculationCompoundingMethod: z.coerce.number().optional(),
+    rescheduleStrategyMethod: z.coerce.number().optional(),
+    recalculationRestFrequencyType: z.coerce.number().optional(),
+    preClosureInterestCalculationStrategy: z.coerce.number().optional(),
+    enableDownPayment: z.boolean().optional(),
+    enableAutoRepaymentForDownPayment: z.boolean().optional(),
+    repaymentStartDateType: z.coerce.number().optional(),
+    enableBuyDownFee: z.boolean().optional(),
+    merchantBuyDownFee: z.boolean().optional(),
+    buyDownFeeCalculationType: z.string().optional(),
+    buyDownFeeStrategy: z.string().optional(),
+    buyDownFeeIncomeType: z.string().optional(),
+    enableIncomeCapitalization: z.boolean().optional(),
+    capitalizedIncomeCalculationType: z.string().optional(),
+    capitalizedIncomeStrategy: z.string().optional(),
+    capitalizedIncomeType: z.string().optional(),
+    chargeOffBehaviour: z.string().optional(),
+    enableAccrualActivityPosting: z.boolean().optional(),
+    interestRecognitionOnDisbursementDate: z.boolean().optional(),
+    isEqualAmortization: z.boolean().optional(),
+    canUseForTopup: z.boolean().optional(),
+    syncExpectedWithDisbursementDate: z.boolean().optional(),
+    disallowExpectedDisbursements: z.boolean().optional(),
+    allowApprovedDisbursedAmountsOverApplied: z.boolean().optional(),
+    holdGuaranteeFunds: z.boolean().optional(),
+    enableInstallmentLevelDelinquency: z.boolean().optional(),
+    includeInBorrowerCycle: z.boolean().optional(),
+    useBorrowerCycle: z.boolean().optional(),
+    overdueDaysForNpa: z.coerce.number().optional(),
+    minDaysBetweenDisbursalAndFirstRepayment: z.coerce.number().optional(),
+    principalThresholdForLastInstallment: z.coerce.number().optional(),
+    fixedPrincipalPercentagePerInstallment: z.coerce.number().optional(),
+    dueDaysForRepaymentEvent: z.coerce.number().optional(),
+    overdueDaysForRepaymentEvent: z.coerce.number().optional(),
+    overAppliedCalculationType: z.string().optional(),
+    overAppliedNumber: z.coerce.number().optional(),
+    minimumGap: z.coerce.number().optional(),
+    maximumGap: z.coerce.number().optional(),
+    delinquencyBucketId: z.coerce.number().optional(),
+    compoundingFrequencyType: z.coerce.number().optional(),
+    isArrearsBasedOnOriginalSchedule: z.boolean().optional(),
+    inArrearsTolerance: z.coerce.number().optional(),
+    fundId: z.coerce.number().optional(),
+    inMultiplesOf: z.coerce.number().optional(),
+    accountingRule: z.coerce.number(),
+    locale: z.string(),
+    dateFormat: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const { principal, minPrincipal, maxPrincipal } = data;
+    const hasMin = minPrincipal != null && !Number.isNaN(minPrincipal);
+    const hasMax = maxPrincipal != null && !Number.isNaN(maxPrincipal);
+    const hasPrincipal = principal != null && !Number.isNaN(principal);
+
+    if (hasMin && hasMax && minPrincipal > maxPrincipal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxPrincipal"],
+        message: "Max Principal must be greater than or equal to Min Principal",
+      });
+    }
+    if (hasPrincipal && hasMin && principal < minPrincipal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["principal"],
+        message: "Principal must not be less than Min Principal",
+      });
+    }
+    if (hasPrincipal && hasMax && principal > maxPrincipal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["principal"],
+        message: "Principal must not be greater than Max Principal",
+      });
+    }
+
+    const { numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments } = data;
+    const hasMinRep = minNumberOfRepayments != null && !Number.isNaN(minNumberOfRepayments);
+    const hasMaxRep = maxNumberOfRepayments != null && !Number.isNaN(maxNumberOfRepayments);
+    const hasRepayments = numberOfRepayments != null && !Number.isNaN(numberOfRepayments);
+
+    if (hasMinRep && hasMaxRep && minNumberOfRepayments > maxNumberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxNumberOfRepayments"],
+        message: "Max Number of Repayments must be greater than or equal to Min Number of Repayments",
+      });
+    }
+    if (hasRepayments && hasMinRep && numberOfRepayments < minNumberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["numberOfRepayments"],
+        message: "Number of Repayments must not be less than Min Number of Repayments",
+      });
+    }
+    if (hasRepayments && hasMaxRep && numberOfRepayments > maxNumberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["numberOfRepayments"],
+        message: "Number of Repayments must not be greater than Max Number of Repayments",
+      });
+    }
+  });
 
 type LoanProductFormValues = z.infer<typeof loanProductSchema>;
 
@@ -150,6 +211,7 @@ const LoanProductFormPage: React.FC = () => {
     setValue,
     watch,
     reset,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<LoanProductFormValues>({
     resolver: zodResolver(loanProductSchema) as any,
@@ -160,23 +222,23 @@ const LoanProductFormPage: React.FC = () => {
       currencyCode: "",
       digitsAfterDecimal: 2,
       principal: undefined,
-      numberOfRepayments: 0,
+      numberOfRepayments: undefined,
       repaymentEvery: 1,
       repaymentFrequencyType: 2,
       amortizationType: 1,
       interestType: 0,
       interestCalculationPeriodType: 1,
       transactionProcessingStrategyCode: "mifos-standard-strategy",
-      interestRatePerPeriod: 5,
+      interestRatePerPeriod: undefined,
       interestRateFrequencyType: 2,
-      daysInYearType: undefined,
-      daysInMonthType: undefined,
+      daysInYearType: 0,
+      daysInMonthType: 0,
       isInterestRecalculationEnabled: false,
       accountingRule: 1,
       locale: "en",
       dateFormat: "yyyy-MM-dd",
-      minInterestRatePerPeriod: 0,
-      maxInterestRatePerPeriod: 100,
+      minInterestRatePerPeriod: undefined,
+      maxInterestRatePerPeriod: undefined,
     },
   });
 
@@ -277,8 +339,6 @@ const LoanProductFormPage: React.FC = () => {
   const onSubmit = async (values: LoanProductFormValues) => {
     const payload: Record<string, any> = { ...values };
 
-    console.log({ payload });
-
     Object.keys(payload).forEach((k) => {
       if (payload[k] === undefined) delete payload[k];
     });
@@ -367,7 +427,17 @@ const LoanProductFormPage: React.FC = () => {
             {/* Row 5: Principal | Interest Rate */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Principal *</label>
-              <Input type="number" step="0.01" {...register("principal")} error={errors.principal?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("principal", {
+                  onChange: () => {
+                    trigger("minPrincipal");
+                    trigger("maxPrincipal");
+                  },
+                })}
+                error={errors.principal?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Interest Rate (%) *</label>
@@ -381,16 +451,45 @@ const LoanProductFormPage: React.FC = () => {
             {/* Row 5b: Min/Max Principal */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Principal</label>
-              <Input type="number" step="0.01" {...register("minPrincipal")} error={errors.minPrincipal?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("minPrincipal", {
+                  onChange: () => {
+                    trigger("principal");
+                    trigger("maxPrincipal");
+                  },
+                })}
+                error={errors.minPrincipal?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Principal</label>
-              <Input type="number" step="0.01" {...register("maxPrincipal")} error={errors.maxPrincipal?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("maxPrincipal", {
+                  onChange: () => {
+                    trigger("principal");
+                    trigger("minPrincipal");
+                  },
+                })}
+                error={errors.maxPrincipal?.message}
+              />
             </div>
             {/* Row 6: Repayments | Every */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Number of Repayments *</label>
-              <Input type="number" {...register("numberOfRepayments")} error={errors.numberOfRepayments?.message} />
+              <Input
+                type="number"
+                {...register("numberOfRepayments", {
+                  onChange: () => {
+                    trigger("minNumberOfRepayments");
+                    trigger("maxNumberOfRepayments");
+                  },
+                })}
+                error={errors.numberOfRepayments?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Repayment Every *</label>
@@ -399,11 +498,29 @@ const LoanProductFormPage: React.FC = () => {
             {/* Row 6b: Min/Max Repayments */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Number of Repayments</label>
-              <Input type="number" {...register("minNumberOfRepayments")} />
+              <Input
+                type="number"
+                {...register("minNumberOfRepayments", {
+                  onChange: () => {
+                    trigger("numberOfRepayments");
+                    trigger("maxNumberOfRepayments");
+                  },
+                })}
+                error={errors.minNumberOfRepayments?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Number of Repayments</label>
-              <Input type="number" {...register("maxNumberOfRepayments")} />
+              <Input
+                type="number"
+                {...register("maxNumberOfRepayments", {
+                  onChange: () => {
+                    trigger("numberOfRepayments");
+                    trigger("minNumberOfRepayments");
+                  },
+                })}
+                error={errors.maxNumberOfRepayments?.message}
+              />
             </div>
             {/* Row 7: Repayment Frequency | Interest Type */}
             <div className="space-y-1.5">
