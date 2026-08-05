@@ -3,6 +3,7 @@ import {
   fetchRescheduleTemplate,
   fetchRescheduleRequests,
   fetchRescheduleRequest,
+  fetchReschedulePreview,
   createRescheduleRequest,
   rescheduleRequestCommand,
 } from "../api/rescheduleLoans";
@@ -11,8 +12,9 @@ import { loanKeys } from "./useLoans";
 
 export const rescheduleLoanKeys = {
   all: ["rescheduleLoans"] as const,
-  list: () => ["rescheduleLoans", "list"] as const,
+  list: (params?: { command?: string; loanId?: number }) => ["rescheduleLoans", "list", params] as const,
   detail: (id: number | string) => ["rescheduleLoans", "detail", id] as const,
+  preview: (id: number | string) => ["rescheduleLoans", "preview", id] as const,
   template: ["rescheduleLoans", "template"] as const,
 };
 
@@ -20,14 +22,14 @@ export function useRescheduleTemplate() {
   return useQuery({
     queryKey: rescheduleLoanKeys.template,
     queryFn: () => fetchRescheduleTemplate(),
-    staleTime: 10 * 60_000,
+    staleTime: 5 * 60_000,
   });
 }
 
-export function useRescheduleRequests() {
+export function useRescheduleRequests(params?: { command?: string; loanId?: number }) {
   return useQuery({
-    queryKey: rescheduleLoanKeys.list(),
-    queryFn: () => fetchRescheduleRequests(),
+    queryKey: rescheduleLoanKeys.list(params),
+    queryFn: () => fetchRescheduleRequests(params),
     staleTime: 30_000,
   });
 }
@@ -36,6 +38,15 @@ export function useRescheduleRequest(scheduleId: number | string | undefined) {
   return useQuery({
     queryKey: rescheduleLoanKeys.detail(scheduleId!),
     queryFn: () => fetchRescheduleRequest(scheduleId!),
+    enabled: !!scheduleId,
+    staleTime: 30_000,
+  });
+}
+
+export function useReschedulePreview(scheduleId: number | string | undefined) {
+  return useQuery({
+    queryKey: rescheduleLoanKeys.preview(scheduleId!),
+    queryFn: () => fetchReschedulePreview(scheduleId!),
     enabled: !!scheduleId,
     staleTime: 30_000,
   });
@@ -65,7 +76,6 @@ export function useRescheduleRequestCommand() {
     }) => rescheduleRequestCommand(scheduleId, command, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: rescheduleLoanKeys.all });
-      // Approved rescheduling changes the underlying loan schedule
       qc.invalidateQueries({ queryKey: loanKeys.all });
     },
   });

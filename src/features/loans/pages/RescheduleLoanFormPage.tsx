@@ -9,6 +9,8 @@ import { LoanSearch } from "@/components/shared/LoanSearch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRescheduleTemplate, useCreateRescheduleRequest } from "../hooks/useRescheduleLoans";
 import { createRescheduleRequestSchema, type CreateRescheduleRequestFormValues } from "../schemas/loan.schema";
@@ -36,11 +38,15 @@ const RescheduleLoanFormPage: FC = () => {
       rescheduleFromDate: today(),
       rescheduleReasonId: 0,
       submittedOnDate: today(),
+      rescheduleReasonComment: "",
       adjustedDueDate: "",
       graceOnPrincipal: undefined,
       graceOnInterest: undefined,
       newInterestRate: undefined,
       extraTerms: undefined,
+      emi: undefined,
+      endDate: "",
+      recalculateInterest: false,
     },
   });
 
@@ -54,11 +60,15 @@ const RescheduleLoanFormPage: FC = () => {
         rescheduleFromDate: values.rescheduleFromDate,
         rescheduleReasonId: values.rescheduleReasonId,
         submittedOnDate: values.submittedOnDate,
+        rescheduleReasonComment: values.rescheduleReasonComment || undefined,
         adjustedDueDate: values.adjustedDueDate || undefined,
         graceOnPrincipal: values.graceOnPrincipal,
         graceOnInterest: values.graceOnInterest,
         newInterestRate: values.newInterestRate,
         extraTerms: values.extraTerms,
+        emi: values.emi,
+        endDate: values.endDate || undefined,
+        recalculateInterest: values.recalculateInterest,
       });
       navigate("/rescheduling");
     },
@@ -142,6 +152,18 @@ const RescheduleLoanFormPage: FC = () => {
               <label className="block text-sm font-medium">Adjusted Due Date</label>
               <Input type="date" {...register("adjustedDueDate")} disabled={isSubmitting} />
             </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="block text-sm font-medium">Reschedule Reason Comment</label>
+              <Textarea
+                {...register("rescheduleReasonComment")}
+                disabled={isSubmitting}
+                placeholder="Optional comment (max 500 characters)"
+                rows={3}
+              />
+              {errors.rescheduleReasonComment && (
+                <p className="text-xs text-red-500">{errors.rescheduleReasonComment.message}</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -171,6 +193,35 @@ const RescheduleLoanFormPage: FC = () => {
                 disabled={isSubmitting}
               />
             </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">New EMI Amount</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("emi", { valueAsNumber: true })}
+                disabled={isSubmitting}
+              />
+              {errors.emi && <p className="text-xs text-red-500">{errors.emi.message}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">End Date</label>
+              <Input type="date" {...register("endDate")} disabled={isSubmitting} />
+              {errors.endDate && <p className="text-xs text-red-500">{errors.endDate.message}</p>}
+            </div>
+            <div className="flex items-center gap-3 sm:col-span-2">
+              <Switch
+                id="recalculateInterest"
+                checked={watch("recalculateInterest") ?? false}
+                onCheckedChange={(checked) => setValue("recalculateInterest", checked)}
+                disabled={isSubmitting}
+              />
+              <label htmlFor="recalculateInterest" className="text-sm font-medium">
+                Recalculate Interest
+              </label>
+            </div>
+            {errors.graceOnPrincipal?.message && errors.graceOnPrincipal.message.includes("At least one") && (
+              <p className="text-xs text-red-500 sm:col-span-2">{errors.graceOnPrincipal.message}</p>
+            )}
           </CardContent>
         </Card>
 

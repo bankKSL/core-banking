@@ -270,6 +270,7 @@ export {
   useRescheduleTemplate,
   useRescheduleRequests,
   useRescheduleRequest,
+  useReschedulePreview,
   useCreateRescheduleRequest,
   useRescheduleRequestCommand,
 } from "./hooks/useRescheduleLoans";
@@ -283,6 +284,7 @@ export { default as LoanViewPage } from "./pages/LoanViewPage";
 export { default as LoanTransactionFormPage } from "./pages/LoanTransactionFormPage";
 export { default as RescheduleLoansPage } from "./pages/RescheduleLoansPage";
 export { default as RescheduleLoanFormPage } from "./pages/RescheduleLoanFormPage";
+export { default as RescheduleRequestDetailPage } from "./pages/RescheduleRequestDetailPage";
 
 // ─── Components ────────────────────────────────────────────
 export { default as LoanTable } from "./components/LoanTable";

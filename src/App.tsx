@@ -28,6 +28,7 @@ import {
   LoanTransactionFormPage,
   RescheduleLoansPage,
   RescheduleLoanFormPage,
+  RescheduleRequestDetailPage,
 } from "@/features/loans";
 import { GroupListPage, GroupFormPage, GroupDetailPage } from "@/features/groups";
 import { CenterListPage, CenterFormPage, CenterDetailPage } from "@/features/centers";
@@ -268,6 +269,7 @@ function App() {
                   <Route path="/loans/view/:id" element={<LoanViewPage />} />
                   <Route path="/rescheduling" element={<RescheduleLoansPage />} />
                   <Route path="/rescheduling/new" element={<RescheduleLoanFormPage />} />
+                  <Route path="/rescheduling/:id" element={<RescheduleRequestDetailPage />} />
                   <Route path="/loans/reassign" element={<LoanReassignmentPage />} />
                   <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
                   {/* Deposits */}

@@ -1,4 +1,4 @@
-import { type FC, useState } from "react";
+import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Plus, CalendarClock } from "lucide-react";
@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRescheduleRequests, useRescheduleRequestCommand } from "../hooks/useRescheduleLoans";
 import { RESCHEDULE_STATUS_CONFIG, RESCHEDULE_STATUS_ID_MAP } from "../constants/transactions";
 import type { LoanRescheduleRequest } from "../types/loan";
@@ -29,9 +30,27 @@ interface ActionFormValues {
   actionDate: string;
 }
 
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+] as const;
+
 const RescheduleLoansPage: FC = () => {
   const navigate = useNavigate();
-  const { data: requests = [], isLoading, isError, error, refetch } = useRescheduleRequests();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const apiCommand = statusFilter === "rejected" ? undefined : statusFilter === "all" ? undefined : statusFilter;
+  const { data: requests = [], isLoading, isError, error, refetch } = useRescheduleRequests(
+    apiCommand ? { command: apiCommand } : undefined,
+  );
+
+  const filteredRequests = useMemo(() => {
+    if (statusFilter !== "rejected") return requests;
+    return requests.filter((r) => r.status?.id === 500);
+  }, [requests, statusFilter]);
+
   const commandMutation = useRescheduleRequestCommand();
 
   const [action, setAction] = useState<{ req: LoanRescheduleRequest; command: "approve" | "reject" } | null>(null);
@@ -56,6 +75,18 @@ const RescheduleLoansPage: FC = () => {
   });
 
   const columns: ColumnDef<LoanRescheduleRequest>[] = [
+    {
+      key: "id",
+      header: "ID",
+      cell: (r) => (
+        <button
+          className="text-sm font-medium text-[#D32F2F] hover:underline"
+          onClick={() => navigate(`/rescheduling/${r.id}`)}
+        >
+          #{r.id}
+        </button>
+      ),
+    },
     {
       key: "loan",
       header: "Loan",
@@ -165,10 +196,24 @@ const RescheduleLoansPage: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-gray-400" />
-            Requests ({requests.length})
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-gray-400" />
+              Requests ({filteredRequests.length})
+            </CardTitle>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_FILTER_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -178,7 +223,7 @@ const RescheduleLoansPage: FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={requests} emptyState={{ message: "No reschedule requests found." }} />
+            <DataTable columns={columns} data={filteredRequests} emptyState={{ message: "No reschedule requests found." }} />
           )}
         </CardContent>
       </Card>

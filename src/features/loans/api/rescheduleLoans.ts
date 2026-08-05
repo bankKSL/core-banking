@@ -5,6 +5,7 @@ import type {
   RescheduleLoanCreateRequest,
   RescheduleLoanCommandRequest,
   LoanCommandResponse,
+  LoanRepaymentSchedule,
 } from "../types/loan";
 import { currentDate } from "@/lib/utils";
 
@@ -15,9 +16,10 @@ export async function fetchRescheduleTemplate(): Promise<RescheduleLoanTemplate>
   return data;
 }
 
-export async function fetchRescheduleRequests(): Promise<LoanRescheduleRequest[]> {
+export async function fetchRescheduleRequests(params?: { command?: string; loanId?: number }): Promise<LoanRescheduleRequest[]> {
   const { data } = await client.get<LoanRescheduleRequest[] | { pageItems: LoanRescheduleRequest[] }>(
     "/rescheduleloans",
+    { params },
   );
   if (Array.isArray(data)) return data;
   return data.pageItems ?? [];
@@ -28,12 +30,20 @@ export async function fetchRescheduleRequest(scheduleId: number | string): Promi
   return data;
 }
 
+export async function fetchReschedulePreview(scheduleId: number | string): Promise<LoanRepaymentSchedule> {
+  const { data } = await client.get<LoanRepaymentSchedule>(`/rescheduleloans/${scheduleId}`, {
+    params: { command: "previewLoanReschedule" },
+  });
+  return data;
+}
+
 export async function createRescheduleRequest(payload: RescheduleLoanCreateRequest): Promise<LoanCommandResponse> {
   const { data } = await client.post<LoanCommandResponse>("/rescheduleloans", {
     ...payload,
     rescheduleFromDate: currentDate(payload.rescheduleFromDate),
     submittedOnDate: currentDate(payload.submittedOnDate),
     adjustedDueDate: payload.adjustedDueDate ? currentDate(payload.adjustedDueDate) : undefined,
+    endDate: payload.endDate ? currentDate(payload.endDate) : undefined,
     dateFormat: "yyyy-MM-dd",
     locale: "en",
   });

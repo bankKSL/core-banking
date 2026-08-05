@@ -806,12 +806,38 @@ export interface LoanRescheduleRequest {
   rescheduleReasonId?: number;
   rescheduleReasonName?: string;
   rescheduleReasonCodeValue?: { id: number; name: string };
+  rescheduleReasonComment?: string;
   adjustedDueDate?: string | number[] | null;
   graceOnPrincipal?: number;
   graceOnInterest?: number;
   newInterestRate?: number;
   extraTerms?: number;
+  emi?: number;
+  endDate?: string | number[];
   recalculateInterest?: boolean;
+  timeline?: {
+    submittedOnDate?: string | number[];
+    submittedByUsername?: string;
+    submittedByFirstname?: string;
+    submittedByLastname?: string;
+    approvedOnDate?: string | number[] | null;
+    approvedByUsername?: string;
+    approvedByFirstname?: string;
+    approvedByLastname?: string;
+    rejectedOnDate?: string | number[] | null;
+    rejectedByUsername?: string;
+    rejectedByFirstname?: string;
+    rejectedByLastname?: string;
+  };
+  loanTermVariationsData?: Array<{
+    id: number;
+    termType: { id: number; code: string; value: string };
+    termVariationApplicableFrom: string | number[];
+    decimalValue: number;
+    dateValue: string | number[] | null;
+    isSpecificToInstallment: boolean;
+    isProcessed: boolean;
+  }>;
 }
 
 /** GET /rescheduleloans/template */
@@ -829,6 +855,10 @@ export interface RescheduleLoanCreateRequest {
   graceOnInterest?: number;
   newInterestRate?: number;
   extraTerms?: number;
+  emi?: number;
+  endDate?: string;
+  rescheduleReasonComment?: string;
+  recalculateInterest?: boolean;
   dateFormat?: string;
   locale?: string;
 }

@@ -159,17 +159,55 @@ export type CreateLoanGuarantorFormValues = z.infer<typeof createLoanGuarantorSc
 
 // ─── Loan Reschedule ─────────────────────────────────────────────
 
-export const createRescheduleRequestSchema = z.object({
-  loanId: z.number({ message: "Loan is required" }).int().positive(),
-  rescheduleFromDate: z.string({ message: "Reschedule from date is required" }).min(1),
-  rescheduleReasonId: z.number({ message: "Reason is required" }).int().positive(),
-  submittedOnDate: z.string({ message: "Submitted date is required" }).min(1),
-  adjustedDueDate: z.string().optional(),
-  graceOnPrincipal: z.number().int().min(0).optional(),
-  graceOnInterest: z.number().int().min(0).optional(),
-  newInterestRate: z.number().min(0).optional(),
-  extraTerms: z.number().int().min(0).optional(),
-});
+export const createRescheduleRequestSchema = z
+  .object({
+    loanId: z.number({ message: "Loan is required" }).int().positive(),
+    rescheduleFromDate: z.string({ message: "Reschedule from date is required" }).min(1),
+    rescheduleReasonId: z.number({ message: "Reason is required" }).int().positive(),
+    submittedOnDate: z.string({ message: "Submitted date is required" }).min(1),
+    rescheduleReasonComment: z.string().max(500).optional(),
+    adjustedDueDate: z.string().optional(),
+    graceOnPrincipal: z.number().int().min(1).optional(),
+    graceOnInterest: z.number().int().min(1).optional(),
+    newInterestRate: z.number().min(0).optional(),
+    extraTerms: z.number().int().min(1).optional(),
+    emi: z.number().positive().optional(),
+    endDate: z.string().optional(),
+    recalculateInterest: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const hasChange =
+      (data.graceOnPrincipal != null && data.graceOnPrincipal > 0) ||
+      (data.graceOnInterest != null && data.graceOnInterest > 0) ||
+      (data.extraTerms != null && data.extraTerms > 0) ||
+      (data.newInterestRate != null && data.newInterestRate > 0) ||
+      (data.adjustedDueDate != null && data.adjustedDueDate.length > 0) ||
+      (data.emi != null && data.emi > 0);
+
+    if (!hasChange) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnPrincipal"],
+        message: "At least one change (grace, extra terms, interest rate, due date, or EMI) must be provided",
+      });
+    }
+
+    if (data.emi != null && data.emi > 0 && (!data.endDate || data.endDate.length === 0)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message: "End date is required when EMI is specified",
+      });
+    }
+
+    if (data.endDate && data.endDate.length > 0 && (data.emi == null || data.emi <= 0)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["emi"],
+        message: "EMI amount is required when end date is specified",
+      });
+    }
+  });
 export type CreateRescheduleRequestFormValues = z.infer<typeof createRescheduleRequestSchema>;
 
 // ─── Loan Transaction ────────────────────────────────────────────
