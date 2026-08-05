@@ -42,8 +42,8 @@ const loanProductSchema = z.object({
   minPrincipal: z.coerce.number().optional(),
   maxPrincipal: z.coerce.number().optional(),
   numberOfRepayments: z.coerce.number().int().positive("Required"),
-  // minNumberOfRepayments: z.coerce.number().optional(),
-  // maxNumberOfRepayments: z.coerce.number().optional(),
+  minNumberOfRepayments: z.coerce.number().optional(),
+  maxNumberOfRepayments: z.coerce.number().optional(),
   repaymentEvery: z.coerce.number().int().positive("Required"),
   repaymentFrequencyType: z.coerce.number(),
   amortizationType: z.coerce.number(),
@@ -153,6 +153,7 @@ const LoanProductFormPage: React.FC = () => {
     formState: { errors, isSubmitting },
   } = useForm<LoanProductFormValues>({
     resolver: zodResolver(loanProductSchema) as any,
+    mode: "onChange",
     defaultValues: {
       name: "",
       shortName: "",
@@ -196,8 +197,8 @@ const LoanProductFormPage: React.FC = () => {
       minPrincipal: undefined,
       maxPrincipal: undefined,
       numberOfRepayments: p.numberOfRepayments ?? 12,
-      // minNumberOfRepayments: p.minNumberOfRepayments > 0 ? p.minNumberOfRepayments : undefined,
-      // maxNumberOfRepayments: p.maxNumberOfRepayments > 0 ? p.maxNumberOfRepayments : undefined,
+      minNumberOfRepayments: p.minNumberOfRepayments > 0 ? p.minNumberOfRepayments : undefined,
+      maxNumberOfRepayments: p.maxNumberOfRepayments > 0 ? p.maxNumberOfRepayments : undefined,
       repaymentEvery: p.repaymentEvery ?? 1,
       repaymentFrequencyType: p.repaymentFrequencyType?.id ?? 2,
       amortizationType: p.amortizationType?.id ?? 1,
@@ -378,14 +379,14 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             {/* Row 5b: Min/Max Principal */}
-            {/* <div className="space-y-1.5">
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Principal</label>
-              <Input type="number" step="0.01" {...register("minPrincipal")} />
+              <Input type="number" step="0.01" {...register("minPrincipal")} error={errors.minPrincipal?.message} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Principal</label>
-              <Input type="number" step="0.01" {...register("maxPrincipal")} />
-            </div> */}
+              <Input type="number" step="0.01" {...register("maxPrincipal")} error={errors.maxPrincipal?.message} />
+            </div>
             {/* Row 6: Repayments | Every */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Number of Repayments *</label>
@@ -396,14 +397,14 @@ const LoanProductFormPage: React.FC = () => {
               <Input type="number" {...register("repaymentEvery")} error={errors.repaymentEvery?.message} />
             </div>
             {/* Row 6b: Min/Max Repayments */}
-            {/* <div className="space-y-1.5">
+            <div className="space-y-1.5">
               <label className="block text-sm font-medium">Min Number of Repayments</label>
               <Input type="number" {...register("minNumberOfRepayments")} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Max Number of Repayments</label>
               <Input type="number" {...register("maxNumberOfRepayments")} />
-            </div> */}
+            </div>
             {/* Row 7: Repayment Frequency | Interest Type */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Repayment Frequency *</label>

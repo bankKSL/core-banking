@@ -84,19 +84,19 @@ const LoanForm: FC<LoanFormProps> = ({
   } = useForm<FormFields>({
     resolver: zodResolver(createLoanSchema) as Resolver<FormFields>,
     defaultValues: {
-      clientId: loan?.clientId ?? clientId ?? 0,
-      productId: loan?.loanProductId ?? 0,
-      principal: loan?.principal ?? 0,
-      loanTermFrequency: loan?.termFrequency ?? 0,
+      clientId: loan?.clientId ?? clientId ?? undefined,
+      productId: loan?.loanProductId ?? undefined,
+      principal: loan?.principal ?? undefined,
+      loanTermFrequency: loan?.termFrequency ?? undefined,
       loanTermFrequencyType: loan?.termPeriodFrequencyType?.id ?? 0,
-      numberOfRepayments: loan?.numberOfRepayments ?? 0,
-      repaymentEvery: loan?.repaymentEvery ?? 1,
+      numberOfRepayments: loan?.numberOfRepayments ?? undefined,
+      repaymentEvery: loan?.repaymentEvery ?? undefined,
       repaymentFrequencyType: loan?.repaymentFrequencyType?.id ?? 0,
-      interestRatePerPeriod: loan?.interestRatePerPeriod ?? 0,
-      interestRateFrequencyType: loan?.interestRateFrequencyType?.id ?? 0,
-      interestType: loan?.interestType?.id ?? 0,
-      amortizationType: loan?.amortizationType?.id ?? 0,
-      interestCalculationPeriodType: loan?.interestCalculationPeriodType?.id ?? 0,
+      interestRatePerPeriod: loan?.interestRatePerPeriod ?? undefined,
+      interestRateFrequencyType: loan?.interestRateFrequencyType?.id ?? undefined,
+      interestType: loan?.interestType?.id ?? undefined,
+      amortizationType: loan?.amortizationType?.id ?? undefined,
+      interestCalculationPeriodType: loan?.interestCalculationPeriodType?.id ?? undefined,
       expectedDisbursementDate: currentDate(loan?.expectedDisbursementDate) || currentDate(),
       submittedOnDate: currentDate(loan?.submittedOnDate) || currentDate(),
       transactionProcessingStrategyCode: loan?.transactionProcessingStrategyCode ?? "mifos-standard-strategy",
@@ -250,7 +250,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <Input
               type="number"
               step="0.01"
-              {...register("principal", { valueAsNumber: true })}
+              {...register("principal")}
               disabled={isSubmitting}
               error={errors.principal?.message}
             />
@@ -259,7 +259,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Loan Term Frequency</label>
             <Input
               type="number"
-              {...register("loanTermFrequency", { valueAsNumber: true })}
+              {...register("loanTermFrequency")}
               disabled={isSubmitting}
               error={errors.loanTermFrequency?.message}
             />
@@ -292,7 +292,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Number of Repayments *</label>
             <Input
               type="number"
-              {...register("numberOfRepayments", { valueAsNumber: true })}
+              {...register("numberOfRepayments")}
               disabled={isSubmitting}
               error={errors.numberOfRepayments?.message}
             />
@@ -303,7 +303,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Repayment Every *</label>
             <Input
               type="number"
-              {...register("repaymentEvery", { valueAsNumber: true })}
+              {...register("repaymentEvery")}
               disabled={isSubmitting}
               error={errors.repaymentEvery?.message}
             />
@@ -404,7 +404,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Grace on Principal Payment</label>
             <Input
               type="number"
-              {...register("graceOnPrincipalPayment", { valueAsNumber: true })}
+              {...register("graceOnPrincipalPayment")}
               disabled={isSubmitting}
               error={errors.graceOnPrincipalPayment?.message}
             />
@@ -413,7 +413,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Grace on Interest Payment</label>
             <Input
               type="number"
-              {...register("graceOnInterestPayment", { valueAsNumber: true })}
+              {...register("graceOnInterestPayment")}
               disabled={isSubmitting}
               error={errors.graceOnInterestPayment?.message}
             />
@@ -422,7 +422,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Grace on Interest Charged</label>
             <Input
               type="number"
-              {...register("graceOnInterestCharged", { valueAsNumber: true })}
+              {...register("graceOnInterestCharged")}
               disabled={isSubmitting}
               error={errors.graceOnInterestCharged?.message}
             />
@@ -431,29 +431,20 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">Grace on Arrears Ageing</label>
             <Input
               type="number"
-              {...register("graceOnArrearsAgeing", { valueAsNumber: true })}
+              {...register("graceOnArrearsAgeing")}
               disabled={isSubmitting}
+              error={errors.graceOnArrearsAgeing?.message}
             />
           </div>
 
           {/* Row 9: In Arrears Tolerance | Max Outstanding */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">In Arrears Tolerance</label>
-            <Input
-              type="number"
-              step="0.01"
-              {...register("inArrearsTolerance", { valueAsNumber: true })}
-              disabled={isSubmitting}
-            />
+            <Input type="number" step="0.01" {...register("inArrearsTolerance")} disabled={isSubmitting} />
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Max Outstanding Loan Balance</label>
-            <Input
-              type="number"
-              step="0.01"
-              {...register("maxOutstandingLoanBalance", { valueAsNumber: true })}
-              disabled={isSubmitting}
-            />
+            <Input type="number" step="0.01" {...register("maxOutstandingLoanBalance")} disabled={isSubmitting} />
           </div>
 
           {/* Row 10: Submitted On Date | Expected Disbursement Date */}

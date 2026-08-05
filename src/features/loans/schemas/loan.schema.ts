@@ -23,13 +23,31 @@ export const createLoanSchema = z
     fundId: z.number().int().optional().nullable(),
     linkAccountId: z.number().int().optional().nullable(),
     externalId: z.string().max(100).optional(),
-    graceOnPrincipalPayment: z.number().int().min(0).optional(),
-    graceOnInterestPayment: z.number().int().min(0).optional(),
-    graceOnInterestCharged: z.number().int().min(0).optional(),
-    graceOnArrearsAgeing: z.number().int().min(0).optional(),
-    inArrearsTolerance: z.number().min(0).optional(),
+    graceOnPrincipalPayment: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().int().min(0).optional(),
+    ),
+    graceOnInterestPayment: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().int().min(0).optional(),
+    ),
+    graceOnInterestCharged: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().int().min(0).optional(),
+    ),
+    graceOnArrearsAgeing: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().int().min(0).optional(),
+    ),
+    inArrearsTolerance: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().min(0).optional(),
+    ),
     allowPartialPeriodInterestCalculation: z.boolean().optional(),
-    maxOutstandingLoanBalance: z.number().optional(),
+    maxOutstandingLoanBalance: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().optional(),
+    ),
     dateFormat: z.string().default("yyyy-MM-dd"),
     locale: z.string().default("en"),
     charges: z.array(z.object({ chargeId: z.number(), amount: z.number() })).optional(),
