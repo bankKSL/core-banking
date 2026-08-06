@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { StandingInstructionStatusBadge } from "./StandingInstructionStatusBadge";
 import type { StandingInstruction } from "../types/standing-instruction.types";
@@ -22,51 +23,52 @@ interface StandingInstructionTableProps {
 }
 
 const StandingInstructionTable: React.FC<StandingInstructionTableProps> = ({ data, onRowClick, loading }) => {
+  const { t } = useTranslation();
   const columns: ColumnDef<StandingInstruction>[] = useMemo(
     () => [
-      { key: "name", header: "Name", accessorFn: (row) => row.name ?? "—" },
+      { key: "name", header: t("Name"), accessorFn: (row) => row.name ?? "—" },
       {
         key: "fromClient",
-        header: "From Client",
+        header: t("From Client"),
         accessorFn: (row) => row.fromClient?.displayName ?? "—",
       },
       {
         key: "fromAccount",
-        header: "From Account",
+        header: t("From Account"),
         accessorFn: (row) => row.fromAccount?.accountNo ?? "—",
       },
       {
         key: "toClient",
-        header: "To Client",
+        header: t("To Client"),
         accessorFn: (row) => row.toClient?.displayName ?? "—",
       },
       {
         key: "toAccount",
-        header: "To Account",
+        header: t("To Account"),
         accessorFn: (row) => row.toAccount?.accountNo ?? "—",
       },
       {
         key: "amount",
-        header: "Amount",
+        header: t("Amount"),
         accessorFn: (row) => formatAmount(row.amount),
       },
       {
         key: "status",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => <StandingInstructionStatusBadge status={row.status} />,
       },
       {
         key: "validFrom",
-        header: "Valid From",
+        header: t("Valid From"),
         accessorFn: (row) => formatDate(row.validFrom),
       },
       {
         key: "validTill",
-        header: "Valid Till",
+        header: t("Valid Till"),
         accessorFn: (row) => formatDate(row.validTill),
       },
     ],
-    [],
+    [t],
   );
 
   return (
@@ -75,7 +77,7 @@ const StandingInstructionTable: React.FC<StandingInstructionTableProps> = ({ dat
       data={data}
       onRowClick={onRowClick}
       loading={loading}
-      emptyState={{ message: "No standing instructions found." }}
+      emptyState={{ message: t("No standing instructions found.") }}
     />
   );
 };

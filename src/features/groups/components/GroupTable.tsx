@@ -1,5 +1,6 @@
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Pencil } from "lucide-react";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -12,34 +13,35 @@ interface GroupTableProps {
 }
 
 const GroupTable: FC<GroupTableProps> = ({ data, loading }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const columns: ColumnDef<Group>[] = [
     {
       key: "name",
-      header: "Group Name",
+      header: t("Group Name"),
       cell: (row) => <span className="font-medium text-gray-900 dark:text-gray-100">{row.name ?? "—"}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       sortable: false,
       cell: (row) => <GroupStatusBadge status={row.status} size="sm" />,
     },
     {
       key: "officeName",
-      header: "Office",
+      header: t("Office"),
       cell: (row) => row.officeName ?? "—",
     },
     {
       key: "hierarchy",
-      header: "Hierarchy",
+      header: t("Hierarchy"),
       sortable: false,
       cell: (row) => <span className="text-gray-500 dark:text-gray-400">{row.hierarchy ?? "—"}</span>,
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       sortable: false,
       headerClassName: "text-right",
       className: "text-right",
@@ -53,7 +55,7 @@ const GroupTable: FC<GroupTableProps> = ({ data, loading }) => {
           }}
         >
           <Pencil className="mr-1.5 h-3.5 w-3.5" />
-          Edit
+          {t("Edit")}
         </Button>
       ),
     },
@@ -65,7 +67,7 @@ const GroupTable: FC<GroupTableProps> = ({ data, loading }) => {
       data={data}
       loading={loading}
       idAccessor={(row) => String(row.id ?? "")}
-      emptyState={{ title: "No groups found", message: "Try adjusting your search, or create a new group." }}
+      emptyState={{ title: t("No groups found"), message: t("Try adjusting your search, or create a new group.") }}
       onRowClick={(row) => navigate(`/groups/edit/${row.id}`)}
     />
   );

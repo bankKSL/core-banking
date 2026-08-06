@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Link2, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -17,6 +18,7 @@ import {
 import type { FinancialActivityAccountData } from "@/features/accounting";
 
 const FinancialActivityMappingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { data: mappings = [], isLoading, isError, error, refetch } = useFinancialActivityAccounts();
   const { data: template } = useFinancialActivityAccountTemplate();
   const createMutation = useCreateFinancialActivityMapping();
@@ -33,7 +35,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
 
   const handleCreate = async () => {
     if (!financialActivityId || !glAccountId) {
-      setFormError("Both financial activity and GL account are required.");
+      setFormError(t("Both financial activity and GL account are required."));
       return;
     }
     setFormError("");
@@ -52,12 +54,12 @@ const FinancialActivityMappingsPage: React.FC = () => {
   const columns: ColumnDef<FinancialActivityAccountData>[] = [
     {
       key: "financialActivity",
-      header: "Financial Activity",
+      header: t("Financial Activity"),
       cell: (r) => <span className="font-medium">{r.financialActivityData?.name ?? `#${r.financialActivityId}`}</span>,
     },
     {
       key: "glAccount",
-      header: "GL Account",
+      header: t("GL Account"),
       cell: (r) => (
         <span className="text-sm">
           {r.glAccountData?.name ?? "—"}{" "}
@@ -67,7 +69,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
     },
     {
       key: "type",
-      header: "Account Type",
+      header: t("Account Type"),
       cell: (r) => <span className="text-sm">{r.glAccountData?.type?.value ?? "—"}</span>,
     },
     {
@@ -86,11 +88,11 @@ const FinancialActivityMappingsPage: React.FC = () => {
   if (isError) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Financial Activity Mappings" description="Map financial activities to GL accounts" />
+        <PageHeader title={t("Financial Activity Mappings")} description={t("Map financial activities to GL accounts")} />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
-          <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
+          <span className="text-sm">{t("Failed to load:")}: {error?.message ?? t("Unknown error")}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -100,11 +102,11 @@ const FinancialActivityMappingsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Financial Activity Mappings"
-        description="Map financial activities (e.g. Fund Source) to GL accounts"
+        title={t("Financial Activity Mappings")}
+        description={t("Map financial activities (e.g. Fund Source) to GL accounts")}
         actions={
           <Button onClick={() => setShowForm((s) => !s)} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Mapping
+            <Plus className="mr-2 h-4 w-4" /> {t("New Mapping")}
           </Button>
         }
       />
@@ -113,18 +115,18 @@ const FinancialActivityMappingsPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Link2 className="h-4 w-4" /> Create Mapping
+              <Link2 className="h-4 w-4" /> {t("Create Mapping")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-[1fr_1fr_auto] items-end gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Financial Activity *</label>
+              <label className="block text-sm font-medium">{t("Financial Activity")} *</label>
               <Select
                 value={financialActivityId ? String(financialActivityId) : ""}
                 onValueChange={(v) => setFinancialActivityId(Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select activity" />
+                  <SelectValue placeholder={t("Select activity")} />
                 </SelectTrigger>
                 <SelectContent>
                   {activityOptions.map((a) => (
@@ -136,10 +138,10 @@ const FinancialActivityMappingsPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">GL Account *</label>
+              <label className="block text-sm font-medium">{t("GL Account")} *</label>
               <Select value={glAccountId ? String(glAccountId) : ""} onValueChange={(v) => setGlAccountId(Number(v))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue placeholder={t("Select account")} />
                 </SelectTrigger>
                 <SelectContent>
                   {glAccountOptions?.map((a) => (
@@ -152,7 +154,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
             </div>
             <Button onClick={handleCreate} disabled={createMutation.isPending}>
               {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Create
+              {t("Create")}
             </Button>
             {formError && <p className="col-span-3 text-sm text-red-500">{formError}</p>}
           </CardContent>
@@ -161,7 +163,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Mappings</CardTitle>
+          <CardTitle>{t("All Mappings")}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -174,7 +176,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
             <DataTable
               columns={columns}
               data={mappings}
-              emptyState={{ message: "No mappings found." }}
+              emptyState={{ message: t("No mappings found.") }}
               minWidth={700}
             />
           )}
@@ -185,9 +187,9 @@ const FinancialActivityMappingsPage: React.FC = () => {
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Delete Mapping"
-        description={`Delete mapping for "${deleteTarget?.financialActivityData?.name}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Mapping")}
+        description={`${t("Delete mapping for")} "${deleteTarget?.financialActivityData?.name}"?`}
+        confirmLabel={t("Delete")}
         variant="destructive"
       />
     </div>

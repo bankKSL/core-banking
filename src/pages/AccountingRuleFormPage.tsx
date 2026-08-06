@@ -137,7 +137,7 @@ const AccountingRuleFormPage: React.FC = () => {
     selected: number[],
   ) => (
     <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border border-gray-200 p-3 dark:border-gray-700">
-      {options.length === 0 && <p className="text-sm text-gray-400">No tag options available.</p>}
+      {options.length === 0 && <p className="text-sm text-gray-400">{t("No tag options available.")}</p>}
       {options.map((t) => (
         <label key={t.id} className="flex items-center gap-2 text-sm">
           <Checkbox checked={selected.includes(t.id)} onCheckedChange={() => toggleTag(field, t.id)} />
@@ -150,32 +150,32 @@ const AccountingRuleFormPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Accounting Rule" : "Create Accounting Rule"}
-        description="Define a debit/credit template for non-accountant users."
+        title={isEdit ? t("Edit Accounting Rule") : t("Create Accounting Rule")}
+        description={t("Define a debit/credit template for non-accountant users.")}
         actions={
           <Button variant="outline" onClick={() => navigate("/accounting/rules")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Basic Information</CardTitle>
+          <CardTitle className="text-base">{t("Basic Information")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Rule Name *</Label>
+            <Label>{t("Rule Name")} *</Label>
             <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
           </div>
           <div className="space-y-1.5">
-            <Label>Office *</Label>
+            <Label>{t("Office")} *</Label>
             <Select
               value={form.officeId ? String(form.officeId) : ""}
               onValueChange={(v) => updateForm("officeId", Number(v))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select office" />
+                <SelectValue placeholder={t("Select office")} />
               </SelectTrigger>
               <SelectContent>
                 {offices.map((o) => (
@@ -188,12 +188,12 @@ const AccountingRuleFormPage: React.FC = () => {
             {errors.officeId && <p className="text-xs text-red-500">{errors.officeId}</p>}
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Description</Label>
+            <Label>{t("Description")}</Label>
             <Textarea
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
               rows={2}
-              placeholder="Optional description"
+              placeholder={t("Optional description")}
             />
           </div>
         </CardContent>
@@ -202,14 +202,14 @@ const AccountingRuleFormPage: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Debit Selection</CardTitle>
+            <CardTitle className="text-base">{t("Debit Selection")}</CardTitle>
             <Select value={debitMode} onValueChange={(v) => setDebitMode(v as SelectionMode)}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="account">Single Account</SelectItem>
-                <SelectItem value="tags">Tag Based</SelectItem>
+                <SelectItem value="account">{t("Single Account")}</SelectItem>
+                <SelectItem value="tags">{t("Tag Based")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -217,13 +217,13 @@ const AccountingRuleFormPage: React.FC = () => {
         <CardContent className="space-y-3">
           {debitMode === "account" ? (
             <div className="space-y-1.5">
-              <Label>Account to Debit *</Label>
+              <Label>{t("Account to Debit")} *</Label>
               <Select
                 value={form.accountToDebit ? String(form.accountToDebit) : ""}
                 onValueChange={(v) => updateForm("accountToDebit", Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue placeholder={t("Select account")} />
                 </SelectTrigger>
                 <SelectContent>
                   {accounts.map((a) => (
@@ -237,7 +237,7 @@ const AccountingRuleFormPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label>Debit Tags *</Label>
+              <Label>{t("Debit Tags")} *</Label>
               {renderTagMultiSelect("debitTagIds", debitTagOptions, form.debitTagIds)}
               {errors.debitTags && <p className="text-xs text-red-500">{errors.debitTags}</p>}
               <label className="flex items-center gap-2 text-sm">
@@ -245,7 +245,7 @@ const AccountingRuleFormPage: React.FC = () => {
                   checked={form.allowMultipleDebitEntries}
                   onCheckedChange={(c) => updateForm("allowMultipleDebitEntries", c === true)}
                 />
-                Allow multiple debit entries
+                {t("Allow multiple debit entries")}
               </label>
             </div>
           )}
@@ -255,14 +255,14 @@ const AccountingRuleFormPage: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Credit Selection</CardTitle>
+            <CardTitle className="text-base">{t("Credit Selection")}</CardTitle>
             <Select value={creditMode} onValueChange={(v) => setCreditMode(v as SelectionMode)}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="account">Single Account</SelectItem>
-                <SelectItem value="tags">Tag Based</SelectItem>
+                <SelectItem value="account">{t("Single Account")}</SelectItem>
+                <SelectItem value="tags">{t("Tag Based")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -270,13 +270,13 @@ const AccountingRuleFormPage: React.FC = () => {
         <CardContent className="space-y-3">
           {creditMode === "account" ? (
             <div className="space-y-1.5">
-              <Label>Account to Credit *</Label>
+              <Label>{t("Account to Credit")} *</Label>
               <Select
                 value={form.accountToCredit ? String(form.accountToCredit) : ""}
                 onValueChange={(v) => updateForm("accountToCredit", Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue placeholder={t("Select account")} />
                 </SelectTrigger>
                 <SelectContent>
                   {accounts.map((a) => (
@@ -290,7 +290,7 @@ const AccountingRuleFormPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label>Credit Tags *</Label>
+              <Label>{t("Credit Tags")} *</Label>
               {renderTagMultiSelect("creditTagIds", creditTagOptions, form.creditTagIds)}
               {errors.creditTags && <p className="text-xs text-red-500">{errors.creditTags}</p>}
               <label className="flex items-center gap-2 text-sm">
@@ -298,7 +298,7 @@ const AccountingRuleFormPage: React.FC = () => {
                   checked={form.allowMultipleCreditEntries}
                   onCheckedChange={(c) => updateForm("allowMultipleCreditEntries", c === true)}
                 />
-                Allow multiple credit entries
+                {t("Allow multiple credit entries")}
               </label>
             </div>
           )}
@@ -307,16 +307,16 @@ const AccountingRuleFormPage: React.FC = () => {
 
       <div className="flex justify-end gap-3">
         <Button variant="outline" type="button" onClick={() => navigate("/accounting/rules")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
         </Button>
         <Button onClick={handleSave} disabled={saving} className="bg-[#D32F2F] hover:bg-red-700">
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Rule"}
+              <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Save Changes") : t("Create Rule")}
             </>
           )}
         </Button>

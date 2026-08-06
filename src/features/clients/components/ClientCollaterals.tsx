@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Gem, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ interface ClientCollateralsProps {
 }
 
 const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: collaterals, isLoading } = useClientCollaterals(clientId);
   const { data: template } = useClientCollateralTemplate(clientId);
   const createMutation = useCreateClientCollateral();
@@ -94,17 +96,17 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
   const columns: ColumnDef<ClientCollateral>[] = [
     {
       key: "name",
-      header: "Collateral Type",
+      header: t("clients.collaterals.type"),
       accessorFn: (row) => <span className="text-sm font-medium">{row.name ?? `#${row.collateralId}`}</span>,
     },
     {
       key: "quantity",
-      header: "Quantity",
+      header: t("clients.collaterals.quantity"),
       accessorFn: (row) => <span className="text-sm font-mono">{row.quantity}</span>,
     },
     {
       key: "total",
-      header: "Total Value",
+      header: t("clients.collaterals.totalValue"),
       accessorFn: (row) => (
         <span className="text-sm font-mono">
           {row.total != null
@@ -115,7 +117,7 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("clients.collaterals.actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -148,11 +150,11 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Gem className="h-5 w-5" />
-          Collaterals
+          {t("clients.collaterals.title")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Add Collateral
+          {t("clients.collaterals.addCollateral")}
         </Button>
       </div>
       <Card>
@@ -162,7 +164,7 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
             data={collaterals ?? []}
             loading={isLoading}
             minWidth={600}
-            emptyState={{ icon: <Gem className="h-8 w-8 text-gray-300" />, message: "No collaterals." }}
+            emptyState={{ icon: <Gem className="h-8 w-8 text-gray-300" />, message: t("clients.collaterals.noCollaterals") }}
           />
         </CardContent>
       </Card>
@@ -170,16 +172,16 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Collateral" : "Add Collateral"}</DialogTitle>
+            <DialogTitle>{editingId ? t("clients.collaterals.editCollateral") : t("clients.collaterals.addCollateral")}</DialogTitle>
             <DialogDescription>
               {editingId
-                ? "Update quantity (collateral type cannot be changed)."
-                : "Select collateral type and enter quantity."}
+                ? t("clients.collaterals.updateDescription")
+                : t("clients.collaterals.selectDescription")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Collateral Type {editingId ? "" : "*"}</label>
+              <label className="block text-sm font-medium">{t("clients.collaterals.collateralType")} {editingId ? "" : "*"}</label>
               <Select
                 defaultValue={
                   editingId
@@ -194,7 +196,7 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
                 disabled={!!editingId}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("clients.collaterals.selectType")} />
                 </SelectTrigger>
                 <SelectContent>
                   {template?.collateralOptions?.map((o) => (
@@ -207,7 +209,7 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
               {errors.collateralId && <p className="text-xs text-red-500">{errors.collateralId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Quantity *</label>
+              <label className="block text-sm font-medium">{t("clients.collaterals.quantity")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -223,7 +225,7 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingId ? "Update" : "Create"}
+              {editingId ? t("clients.collaterals.update") : t("clients.collaterals.create")}
             </Button>
           </form>
         </DialogContent>
@@ -232,11 +234,11 @@ const ClientCollaterals: FC<ClientCollateralsProps> = ({ clientId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Collateral"
-        description="Are you sure? This cannot be undone."
+        title={t("clients.collaterals.deleteCollateral")}
+        description={t("clients.collaterals.deleteConfirmation")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("clients.collaterals.delete")}
         loading={deleteMutation.isPending}
       />
     </div>

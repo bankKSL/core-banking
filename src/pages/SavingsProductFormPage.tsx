@@ -113,6 +113,7 @@ const MONTHS = [
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
 
 function MonthDayPicker({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: string }) {
+  const { t } = useTranslation();
   const parts = value ? value.split(" ") : [];
   const day = parts[0] ?? "";
   const month = parts[1] ?? "";
@@ -120,10 +121,10 @@ function MonthDayPicker({ value, onChange, error }: { value: string; onChange: (
   return (
     <div className="col-span-2 grid grid-cols-2 gap-4">
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium">Day *</label>
+        <label className="block text-sm font-medium">{t("Day")} *</label>
         <Select value={day} onValueChange={(d) => onChange(`${d} ${month}`)}>
           <SelectTrigger>
-            <SelectValue placeholder="Day" />
+            <SelectValue placeholder={t("Day")} />
           </SelectTrigger>
           <SelectContent>
             {DAYS.map((d) => (
@@ -135,10 +136,10 @@ function MonthDayPicker({ value, onChange, error }: { value: string; onChange: (
         </Select>
       </div>
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium">Month *</label>
+        <label className="block text-sm font-medium">{t("Month")} *</label>
         <Select value={month} onValueChange={(m) => onChange(`${day} ${m}`)}>
           <SelectTrigger>
-            <SelectValue placeholder="Month" />
+            <SelectValue placeholder={t("Month")} />
           </SelectTrigger>
           <SelectContent>
             {MONTHS.map((m) => (
@@ -154,7 +155,7 @@ function MonthDayPicker({ value, onChange, error }: { value: string; onChange: (
           <p className="text-sm text-red-500">{error}</p>
         </div>
       )}
-      <p className="col-span-2 text-xs text-gray-500">Select the day and month when the annual fee is charged.</p>
+      <p className="col-span-2 text-xs text-gray-500">{t("Select the day and month when the annual fee is charged.")}</p>
     </div>
   );
 }
@@ -723,7 +724,7 @@ const SavingsProductFormPage: React.FC = () => {
             {isCashOrAccrual && (
               <>
                 <div className="col-span-2 border-t pt-4 mb-2">
-                  <p className="text-sm font-semibold text-gray-600">GL Account Mappings</p>
+                  <p className="text-sm font-semibold text-gray-600">{t("GL Account Mappings")}</p>
                 </div>
                 <GLField
                   label="Savings Reference"

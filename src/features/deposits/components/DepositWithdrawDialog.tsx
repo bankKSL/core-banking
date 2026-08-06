@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowDownCircle, ArrowUpCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -16,14 +17,8 @@ interface DepositWithdrawDialogProps {
   onSuccess?: () => void;
 }
 
-const PAYMENT_TYPES = [
-  { id: 1, name: "Cash" },
-  { id: 2, name: "Cheque" },
-  { id: 3, name: "Bank Transfer" },
-  { id: 4, name: "Card Payment" },
-];
-
 const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type, open, onOpenChange, onSuccess }) => {
+  const { t } = useTranslation();
   const depositMutation = useMakeDeposit();
   const withdrawMutation = useMakeWithdrawal();
   const [amount, setAmount] = useState("");
@@ -79,14 +74,14 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
             ) : (
               <ArrowUpCircle className="h-5 w-5 text-amber-500" />
             )}
-            {isDeposit ? "Make Deposit" : "Make Withdrawal"}
+            {isDeposit ? t("Make Deposit") : t("Make Withdrawal")}
           </DialogTitle>
-          <DialogDescription>Enter transaction details.</DialogDescription>
+          <DialogDescription>{t("Enter transaction details.")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-1.5">
             <label className="block text-sm font-medium" htmlFor="amount">
-              Amount *
+              {t("Amount")} *
             </label>
             <Input
               id="amount"
@@ -100,69 +95,68 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="block text-sm font-medium" htmlFor="paymentType">
-              Payment Type *
+              {t("Payment Type")} *
             </label>
             <Select value={paymentTypeId} onValueChange={setPaymentTypeId}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PAYMENT_TYPES.map((pt) => (
-                  <SelectItem key={pt.id} value={String(pt.id)}>
-                    {pt.name}
-                  </SelectItem>
-                ))}
+                <SelectItem value="1">{t("Cash")}</SelectItem>
+                <SelectItem value="2">{t("Cheque")}</SelectItem>
+                <SelectItem value="3">{t("Bank Transfer")}</SelectItem>
+                <SelectItem value="4">{t("Card Payment")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="block text-sm font-medium" htmlFor="date">
-              Transaction Date *
+              {t("Transaction Date")} *
             </label>
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="block text-sm font-medium" htmlFor="note">
-              Note
+              {t("Note")}
             </label>
             <Textarea
               id="note"
               rows={2}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Optional note"
+              placeholder={t("Optional note")}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="accountNumber">
-                Account Number
+                {t("Account Number")}
               </label>
-              <Input id="accountNumber" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="Optional" />
+              <Input id="accountNumber" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder={t("Optional")} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="checkNumber">
-                Cheque Number
+                {t("Cheque Number")}
               </label>
-              <Input id="checkNumber" value={checkNumber} onChange={(e) => setCheckNumber(e.target.value)} placeholder="Optional" />
+              <Input id="checkNumber" value={checkNumber} onChange={(e) => setCheckNumber(e.target.value)} placeholder={t("Optional")} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="routingCode">
-                Routing Code
+                {t("Routing Code")}
               </label>
-              <Input id="routingCode" value={routingCode} onChange={(e) => setRoutingCode(e.target.value)} placeholder="Optional" />
+              <Input id="routingCode" value={routingCode} onChange={(e) => setRoutingCode(e.target.value)} placeholder={t("Optional")} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="receiptNumber">
-                Receipt Number
+                {t("Receipt Number")}
               </label>
-              <Input id="receiptNumber" value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} placeholder="Optional" />
+              <Input id="receiptNumber" value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} placeholder={t("Optional")} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="bankNumber">
-                Bank Number
+                {t("Bank Number")}
               </label>
-              <Input id="bankNumber" value={bankNumber} onChange={(e) => setBankNumber(e.target.value)} placeholder="Optional" />
+              <Input id="bankNumber" value={bankNumber} onChange={(e) => setBankNumber(e.target.value)} placeholder={t("Optional")} />
             </div>
           </div>
           <Button
@@ -171,7 +165,7 @@ const DepositWithdrawDialog: FC<DepositWithdrawDialogProps> = ({ accountId, type
             className="bg-[#D32F2F] hover:bg-red-700"
           >
             {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isDeposit ? "Deposit" : "Withdraw"}
+            {isDeposit ? t("Deposit") : t("Withdraw")}
           </Button>
         </div>
       </DialogContent>

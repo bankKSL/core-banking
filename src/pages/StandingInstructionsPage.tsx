@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Repeat } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ function formatAmount(amount?: number): string {
 }
 
 const StandingInstructionsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -35,60 +37,60 @@ const StandingInstructionsPage: React.FC = () => {
 
   const columns: ColumnDef<StandingInstruction>[] = useMemo(
     () => [
-      { key: "name", header: "Name", accessorFn: (row) => row.name ?? "—" },
+      { key: "name", header: t("Name"), accessorFn: (row) => row.name ?? "—" },
       {
         key: "fromClient",
-        header: "From Client",
+        header: t("From Client"),
         accessorFn: (row) => row.fromClient?.displayName ?? "—",
       },
       {
         key: "fromAccount",
-        header: "From Account",
+        header: t("From Account"),
         accessorFn: (row) => row.fromAccount?.accountNo ?? "—",
       },
       {
         key: "toClient",
-        header: "To Client",
+        header: t("To Client"),
         accessorFn: (row) => row.toClient?.displayName ?? "—",
       },
       {
         key: "toAccount",
-        header: "To Account",
+        header: t("To Account"),
         accessorFn: (row) => row.toAccount?.accountNo ?? "—",
       },
       {
         key: "amount",
-        header: "Amount",
+        header: t("Amount"),
         accessorFn: (row) => formatAmount(row.amount),
       },
-      { key: "status", header: "Status", accessorFn: (row) => row.status ?? "—" },
+      { key: "status", header: t("Status"), accessorFn: (row) => row.status ?? "—" },
       {
         key: "validFrom",
-        header: "Valid From",
+        header: t("Valid From"),
         accessorFn: (row) => formatDate(row.validFrom),
       },
       {
         key: "validTill",
-        header: "Valid Till",
+        header: t("Valid Till"),
         accessorFn: (row) => formatDate(row.validTill),
       },
     ],
-    [],
+    [t],
   );
 
   if (isError) {
     return (
       <div className="p-6">
         <PageHeader
-          title="Standing Instructions"
-          description="Manage recurring transfer instructions"
+          title={t("Standing Instructions")}
+          description={t("Manage recurring transfer instructions")}
           actions={
             <Button onClick={() => navigate("/transfers/standing-instructions/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Instruction
+              <Plus className="mr-2 h-4 w-4" /> {t("New Instruction")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load standing instructions." onRetry={refetch} />
+        <ErrorState message={t("Failed to load standing instructions.")} onRetry={refetch} />
       </div>
     );
   }
@@ -96,11 +98,11 @@ const StandingInstructionsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Standing Instructions"
-        description="Manage recurring transfer instructions"
+        title={t("Standing Instructions")}
+        description={t("Manage recurring transfer instructions")}
         actions={
           <Button onClick={() => navigate("/transfers/standing-instructions/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Instruction
+            <Plus className="mr-2 h-4 w-4" /> {t("New Instruction")}
           </Button>
         }
       />
@@ -109,7 +111,7 @@ const StandingInstructionsPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Repeat className="h-5 w-5" />
-            Instructions
+            {t("Instructions")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -120,7 +122,7 @@ const StandingInstructionsPage: React.FC = () => {
               ))}
             </div>
           ) : instructions.length === 0 ? (
-            <EmptyState title="No standing instructions found." />
+            <EmptyState title={t("No standing instructions found.")} />
           ) : (
             <DataTable
               columns={columns}

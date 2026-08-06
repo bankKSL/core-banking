@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Undo2, ArrowLeftRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +18,7 @@ interface ClientTransactionsProps {
 }
 
 const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: txnsData, isLoading } = useClientTransactions(clientId);
   const undoMutation = useUndoClientTransaction();
   const [undoingId, setUndoingId] = useState<number | null>(null);
@@ -27,7 +29,7 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
     async (transactionId: number) => {
       setUndoingId(transactionId);
       try {
-        if (window.confirm("Are you sure you want to undo this transaction? This will reverse it.")) {
+        if (window.confirm(t("clients.transactions.undoConfirm"))) {
           await undoMutation.mutateAsync({ clientId, transactionId });
         }
       } finally {
@@ -38,15 +40,15 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
   );
 
   const columns: ColumnDef<ClientTransaction>[] = [
-    { key: "id", header: "ID", accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
+    { key: "id", header: t("clients.transactions.id"), accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
     {
       key: "date",
-      header: "Date",
+      header: t("clients.transactions.date"),
       accessorFn: (row) => <span className="text-sm">{formatClientDate(row.date ?? row.transactionDate)}</span>,
     },
     {
       key: "type",
-      header: "Type",
+      header: t("clients.transactions.type"),
       accessorFn: (row) => (
         <Badge variant="info" size="sm">
           {row.type?.value ?? row.type?.code ?? "—"}
@@ -55,7 +57,7 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t("clients.transactions.amount"),
       accessorFn: (row) => (
         <span className={`text-sm font-mono ${row.amount < 0 ? "text-red-500" : "text-green-600"}`}>
           {formatCurrency(Math.abs(row.amount), row.currency?.code)}
@@ -64,21 +66,21 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
     },
     {
       key: "reversed",
-      header: "Status",
+      header: t("clients.transactions.status"),
       accessorFn: (row) =>
         row.reversed ? (
           <Badge variant="error" size="sm">
-            Reversed
+            {t("clients.transactions.reversed")}
           </Badge>
         ) : (
           <Badge variant="success" size="sm">
-            Active
+            {t("clients.transactions.active")}
           </Badge>
         ),
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("clients.transactions.actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           {!row.reversed && (
@@ -90,7 +92,7 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
                 handleUndo(row.id);
               }}
               disabled={undoingId === row.id}
-              title="Undo transaction"
+              title={t("clients.transactions.undoTransaction")}
             >
               {undoingId === row.id ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -108,7 +110,7 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
     <div className="space-y-4">
       <h3 className="text-lg font-medium flex items-center gap-2">
         <ArrowLeftRight className="h-5 w-5" />
-        Transactions
+        {t("clients.transactions.title")}
       </h3>
       <Card>
         <CardContent className="p-0">
@@ -119,7 +121,7 @@ const ClientTransactions: FC<ClientTransactionsProps> = ({ clientId }) => {
             minWidth={700}
             emptyState={{
               icon: <ArrowLeftRight className="h-8 w-8 text-gray-300" />,
-              message: "No transactions found.",
+              message: t("clients.transactions.noTransactions"),
             }}
           />
         </CardContent>

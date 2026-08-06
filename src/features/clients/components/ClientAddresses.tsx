@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +43,7 @@ interface ClientAddressesProps {
 }
 
 const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: addresses, isLoading } = useClientAddresses(clientId);
   const { data: template } = useClientAddressTemplate();
   const createMutation = useCreateClientAddress();
@@ -107,12 +109,12 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
   const columns: ColumnDef<ClientAddress>[] = [
     {
       key: "addressType",
-      header: "Type",
+      header: t("clients.addresses.type"),
       accessorFn: (row) => <span className="text-sm font-medium">{row.addressType ?? "—"}</span>,
     },
     {
       key: "addressLine1",
-      header: "Address",
+      header: t("clients.addresses.address"),
       accessorFn: (row) => (
         <span className="text-sm">
           {row.addressLine1 ?? row.street ?? "—"}
@@ -122,26 +124,26 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
     },
     {
       key: "postalCode",
-      header: "Postal Code",
+      header: t("clients.addresses.postalCode"),
       accessorFn: (row) => <span className="text-sm">{row.postalCode ?? "—"}</span>,
     },
     {
       key: "isActive",
-      header: "Active",
+      header: t("clients.addresses.active"),
       accessorFn: (row) =>
         row.isActive ? (
           <Badge variant="success" size="sm">
-            Active
+            {t("clients.addresses.active")}
           </Badge>
         ) : (
           <Badge variant="default" size="sm">
-            Inactive
+            {t("clients.addresses.inactive")}
           </Badge>
         ),
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("clients.addresses.actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -174,11 +176,11 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Addresses
+          {t("clients.addresses.title")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Add Address
+          {t("clients.addresses.addAddress")}
         </Button>
       </div>
       <Card>
@@ -188,7 +190,7 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
             data={addresses ?? []}
             loading={isLoading}
             minWidth={600}
-            emptyState={{ icon: <MapPin className="h-8 w-8 text-gray-300" />, message: "No addresses found." }}
+            emptyState={{ icon: <MapPin className="h-8 w-8 text-gray-300" />, message: t("clients.addresses.noAddresses") }}
           />
         </CardContent>
       </Card>
@@ -196,19 +198,19 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingAddressId ? "Edit Address" : "Add Address"}</DialogTitle>
-            <DialogDescription>Enter address details.</DialogDescription>
+            <DialogTitle>{editingAddressId ? t("clients.addresses.editAddress") : t("clients.addresses.addAddress")}</DialogTitle>
+            <DialogDescription>{t("clients.addresses.enterDetails")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="block text-sm font-medium">Address Type</label>
+                <label className="block text-sm font-medium">{t("clients.addresses.addressType")}</label>
                 <Select
                   defaultValue={String(template?.addressTypeIdOptions?.[0]?.id ?? "")}
                   onValueChange={(v) => setValue("addressTypeId", Number(v))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Type" />
+                    <SelectValue placeholder={t("clients.addresses.type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {template?.addressTypeIdOptions?.map((o) => (
@@ -220,30 +222,30 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Street</label>
-                <Input {...register("street")} placeholder="Street address" />
+                <label className="block text-sm font-medium">{t("clients.addresses.street")}</label>
+                <Input {...register("street")} placeholder={t("clients.addresses.streetPlaceholder")} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Address Line 1</label>
+                <label className="block text-sm font-medium">{t("clients.addresses.addressLine1")}</label>
                 <Input {...register("addressLine1")} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Address Line 2</label>
+                <label className="block text-sm font-medium">{t("clients.addresses.addressLine2")}</label>
                 <Input {...register("addressLine2")} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">City</label>
+                <label className="block text-sm font-medium">{t("clients.addresses.city")}</label>
                 <Input {...register("city")} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>State/Province</Label>
+                <Label>{t("clients.addresses.stateProvince")}</Label>
                 <Select onValueChange={(v) => setValue("stateProvinceId", Number(v))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder={t("clients.addresses.select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {template?.stateProvinceIdOptions?.map((o) => (
@@ -255,10 +257,10 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
                 </Select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="block text-sm font-medium">Country</label>
+                <label className="block text-sm font-medium">{t("clients.addresses.country")}</label>
                 <Select onValueChange={(v) => setValue("countryId", Number(v))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder={t("clients.addresses.select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {template?.countryIdOptions?.map((o) => (
@@ -272,7 +274,7 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Postal Code</label>
+                <label className="block text-sm font-medium">{t("clients.addresses.postalCode")}</label>
                 <Input {...register("postalCode")} />
               </div>
             </div>
@@ -284,7 +286,7 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingAddressId ? "Update" : "Create"}
+              {editingAddressId ? t("clients.addresses.update") : t("clients.addresses.create")}
             </Button>
           </form>
         </DialogContent>
@@ -293,11 +295,11 @@ const ClientAddresses: FC<ClientAddressesProps> = ({ clientId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Address"
-        description="Are you sure? This cannot be undone."
+        title={t("clients.addresses.deleteAddress")}
+        description={t("clients.addresses.deleteConfirmation")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("clients.addresses.delete")}
         loading={deleteMutation.isPending}
       />
     </div>

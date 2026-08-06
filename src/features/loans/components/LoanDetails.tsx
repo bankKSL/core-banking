@@ -23,15 +23,15 @@ const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode
   </div>
 );
 
-const resolveStatus = (loan: Loan): string => {
+const resolveStatus = (loan: Loan, t: (key: string) => string): string => {
   if (loan.status?.code) return loan.status.code;
-  if (loan.status?.id != null) return LOAN_STATUS_ID_MAP[loan.status.id] ?? "Unknown";
-  return "Unknown";
+  if (loan.status?.id != null) return LOAN_STATUS_ID_MAP[loan.status.id] ?? t("Unknown");
+  return t("Unknown");
 };
 
 const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
   const { t } = useTranslation();
-  const status = resolveStatus(loan);
+  const status = resolveStatus(loan, t);
   const summary = loan.summary;
 
   return (

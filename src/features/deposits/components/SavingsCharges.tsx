@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Ban, Trash2, Receipt, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +39,7 @@ interface SavingsChargesProps {
 }
 
 const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
+  const { t } = useTranslation();
   const { data: chargesData, isLoading } = useSavingsCharges(accountId);
   const { data: template } = useSavingsChargesTemplate(accountId);
   const createMutation = useCreateSavingsCharge();
@@ -104,43 +106,43 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
   const columns: ColumnDef<SavingsCharge>[] = [
     {
       key: "name",
-      header: "Charge",
+      header: t("Charge"),
       accessorFn: (row) => <span className="text-sm font-medium">{row.name ?? `#${row.chargeId}`}</span>,
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t("Amount"),
       accessorFn: (row) => <span className="text-sm font-mono">{formatCurrency(row.amount, row.currency?.code)}</span>,
     },
     {
       key: "amountOutstanding",
-      header: "Outstanding",
+      header: t("Outstanding"),
       accessorFn: (row) => (
         <span className="text-sm font-mono">{formatCurrency(row.amountOutstanding, row.currency?.code)}</span>
       ),
     },
-    { key: "dueDate", header: "Due Date", accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span> },
+    { key: "dueDate", header: t("Due Date"), accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span> },
     {
       key: "isPaid",
-      header: "Status",
+      header: t("Status"),
       accessorFn: (row) =>
         row.isPaid ? (
           <Badge variant="success" size="sm">
-            Paid
+            {t("Paid")}
           </Badge>
         ) : row.isWaived ? (
           <Badge variant="default" size="sm">
-            Waived
+            {t("Waived")}
           </Badge>
         ) : (
           <Badge variant="warning" size="sm">
-            Pending
+            {t("Pending")}
           </Badge>
         ),
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           {!row.isPaid && !row.isWaived && (
@@ -151,7 +153,7 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
                 e.stopPropagation();
                 setPayId(row.id);
               }}
-              title="Pay"
+              title={t("Pay")}
             >
               <CheckCircle2 className="h-4 w-4 text-green-500" />
             </Button>
@@ -164,7 +166,7 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
                 e.stopPropagation();
                 setWaiveId(row.id);
               }}
-              title="Waive"
+              title={t("Waive")}
             >
               <Ban className="h-4 w-4 text-amber-500" />
             </Button>
@@ -191,11 +193,11 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Receipt className="h-5 w-5" />
-          Charges
+          {t("Charges")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Apply Charge
+          {t("Apply Charge")}
         </Button>
       </div>
       <Card>
@@ -205,7 +207,7 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
             data={charges}
             loading={isLoading}
             minWidth={700}
-            emptyState={{ icon: <Receipt className="h-8 w-8 text-gray-300" />, message: "No charges applied." }}
+            emptyState={{ icon: <Receipt className="h-8 w-8 text-gray-300" />, message: t("No charges applied.") }}
           />
         </CardContent>
       </Card>
@@ -213,15 +215,15 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Apply Charge</DialogTitle>
-            <DialogDescription>Select charge and enter amount.</DialogDescription>
+            <DialogTitle>{t("Apply Charge")}</DialogTitle>
+            <DialogDescription>{t("Select a charge type and enter amount.")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Charge *</Label>
+              <Label>{t("Charge")} *</Label>
               <Select onValueChange={(v) => setValue("chargeId", Number(v), { shouldValidate: true })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select charge" />
+                  <SelectValue placeholder={t("Select charge")} />
                 </SelectTrigger>
                 <SelectContent>
                   {template?.chargeOptions?.map((o) => (
@@ -234,15 +236,15 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
               {errors.chargeId && <p className="text-xs text-red-500">{errors.chargeId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Amount *</label>
+              <label className="block text-sm font-medium">{t("Amount")} *</label>
               <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} error={errors.amount?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Due Date</label>
+              <label className="block text-sm font-medium">{t("Due Date")}</label>
               <Input type="date" {...register("dueDate")} />
             </div>
             <Button type="submit" disabled={createMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
-              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Apply
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Apply")}
             </Button>
           </form>
         </DialogContent>
@@ -251,31 +253,31 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
       <ConfirmDialog
         open={!!payId}
         onOpenChange={() => setPayId(null)}
-        title="Pay Charge"
-        description="Pay this charge from the account balance?"
+        title={t("Pay Charge")}
+        description={t("Pay this charge from the account balance?")}
         onConfirm={handlePay}
         variant="default"
-        confirmLabel="Pay"
+        confirmLabel={t("Pay")}
         loading={payMutation.isPending}
       />
       <ConfirmDialog
         open={!!waiveId}
         onOpenChange={() => setWaiveId(null)}
-        title="Waive Charge"
-        description="Waive this charge? Amount will be forgiven."
+        title={t("Waive Charge")}
+        description={t("Waive this charge? Amount will be forgiven.")}
         onConfirm={handleWaive}
         variant="default"
-        confirmLabel="Waive"
+        confirmLabel={t("Waive")}
         loading={waiveMutation.isPending}
       />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Charge"
-        description="Are you sure?"
+        title={t("Delete Charge")}
+        description={t("Are you sure?")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
         loading={deleteMutation.isPending}
       />
     </div>

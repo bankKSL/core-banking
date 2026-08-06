@@ -109,7 +109,7 @@ const DepositAccountsPage: React.FC = () => {
               size="sm"
               className="h-8 w-8 text-emerald-600"
               onClick={() => navigate(`/deposits/savings-accounts/${r.id}/action/approve`)}
-              title="Approve"
+              title={t("Approve")}
             >
               <CheckCircle2 className="h-4 w-4" />
             </Button>
@@ -119,7 +119,7 @@ const DepositAccountsPage: React.FC = () => {
             size="sm"
             className="h-8 w-8 text-blue-600"
             onClick={() => navigate(`/deposits/saving-accounts/edit/${r.id}`)}
-            title="Edit"
+            title={t("Edit")}
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -128,7 +128,7 @@ const DepositAccountsPage: React.FC = () => {
             size="sm"
             className="h-8 w-8 text-emerald-600"
             onClick={() => navigate(`/deposits/saving-accounts/${r.id}/transactions/deposit`)}
-            title="Deposit"
+            title={t("Deposit")}
           >
             <ArrowDownCircle className="h-4 w-4" />
           </Button>
@@ -137,7 +137,7 @@ const DepositAccountsPage: React.FC = () => {
             size="sm"
             className="h-8 w-8 text-amber-600"
             onClick={() => navigate(`/deposits/saving-accounts/${r.id}/transactions/withdrawal`)}
-            title="Withdraw"
+            title={t("Withdraw")}
           >
             <ArrowUpCircle className="h-4 w-4" />
           </Button>
@@ -146,7 +146,7 @@ const DepositAccountsPage: React.FC = () => {
             size="sm"
             className="h-8 w-8"
             onClick={() => navigate(`/deposits/saving-accounts/${r.id}`)}
-            title="View"
+            title={t("View")}
           >
             <EyeIcon className="h-4 w-4" />
           </Button>

@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +42,7 @@ interface ClientFamilyMembersProps {
 }
 
 const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: members, isLoading } = useClientFamilyMembers(clientId);
   const { data: template } = useClientFamilyMemberTemplate(clientId);
   const createMutation = useCreateClientFamilyMember();
@@ -120,7 +122,7 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
   const columns: ColumnDef<ClientFamilyMember>[] = [
     {
       key: "firstName",
-      header: "Name",
+      header: t("clients.familyMembers.name"),
       accessorFn: (row) => (
         <span className="text-sm font-medium">
           {row.firstName} {row.lastName}
@@ -129,35 +131,35 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
     },
     {
       key: "relationship",
-      header: "Relationship",
+      header: t("clients.familyMembers.relationship"),
       accessorFn: (row) => <span className="text-sm">{row.relationship?.name ?? row.relationship?.value ?? "—"}</span>,
     },
     {
       key: "gender",
-      header: "Gender",
+      header: t("clients.familyMembers.gender"),
       accessorFn: (row) => <span className="text-sm">{row.gender?.name ?? row.gender?.value ?? "—"}</span>,
     },
-    { key: "age", header: "Age", accessorFn: (row) => <span className="text-sm">{row.age ?? "—"}</span> },
+    { key: "age", header: t("clients.familyMembers.age"), accessorFn: (row) => <span className="text-sm">{row.age ?? "—"}</span> },
     {
       key: "isDependent",
-      header: "Dependent",
+      header: t("clients.familyMembers.dependent"),
       accessorFn: (row) =>
         row.isDependent ? (
           <Badge variant="info" size="sm">
-            Yes
+            {t("clients.familyMembers.yes")}
           </Badge>
         ) : (
-          <span className="text-sm text-gray-400">No</span>
+          <span className="text-sm text-gray-400">{t("clients.familyMembers.no")}</span>
         ),
     },
     {
       key: "mobileNumber",
-      header: "Mobile",
+      header: t("clients.familyMembers.mobile"),
       accessorFn: (row) => <span className="text-sm">{row.mobileNumber ?? "—"}</span>,
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("clients.familyMembers.actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -190,11 +192,11 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Family Members
+          {t("clients.familyMembers.title")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Add Member
+          {t("clients.familyMembers.addMember")}
         </Button>
       </div>
       <Card>
@@ -204,7 +206,7 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
             data={members ?? []}
             loading={isLoading}
             minWidth={700}
-            emptyState={{ icon: <Users className="h-8 w-8 text-gray-300" />, message: "No family members." }}
+            emptyState={{ icon: <Users className="h-8 w-8 text-gray-300" />, message: t("clients.familyMembers.noMembers") }}
           />
         </CardContent>
       </Card>
@@ -212,26 +214,26 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Family Member" : "Add Family Member"}</DialogTitle>
-            <DialogDescription>Enter family member details.</DialogDescription>
+            <DialogTitle>{editingId ? t("clients.familyMembers.editMember") : t("clients.familyMembers.addMember")}</DialogTitle>
+            <DialogDescription>{t("clients.familyMembers.enterDetails")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">First Name *</label>
+                <label className="block text-sm font-medium">{t("clients.familyMembers.firstName")} *</label>
                 <Input {...register("firstName")} error={errors.firstName?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Last Name *</label>
+                <label className="block text-sm font-medium">{t("clients.familyMembers.lastName")} *</label>
                 <Input {...register("lastName")} error={errors.lastName?.message} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="block text-sm font-medium">Relationship *</label>
+                <label className="block text-sm font-medium">{t("clients.familyMembers.relationship")} *</label>
                 <Select onValueChange={(v) => setValue("relationshipId", Number(v), { shouldValidate: true })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder={t("clients.familyMembers.select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {template?.relationshipIdOptions?.map((o) => (
@@ -244,10 +246,10 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
                 {errors.relationshipId && <p className="text-xs text-red-500">{errors.relationshipId.message}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="block text-sm font-medium">Gender *</label>
+                <label className="block text-sm font-medium">{t("clients.familyMembers.gender")} *</label>
                 <Select onValueChange={(v) => setValue("genderId", Number(v), { shouldValidate: true })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder={t("clients.familyMembers.select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {template?.genderIdOptions?.map((o) => (
@@ -262,18 +264,18 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Date of Birth</label>
+                <label className="block text-sm font-medium">{t("clients.familyMembers.dateOfBirth")}</label>
                 <Input type="date" {...register("dateOfBirth")} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Mobile Number</label>
+                <label className="block text-sm font-medium">{t("clients.familyMembers.mobileNumber")}</label>
                 <Input {...register("mobileNumber")} />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Switch id="isDependent" onCheckedChange={(v) => setValue("isDependent", v)} />
               <label className="block text-sm font-medium" htmlFor="isDependent">
-                Is Dependent
+                {t("clients.familyMembers.isDependent")}
               </label>
             </div>
             <Button
@@ -284,7 +286,7 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingId ? "Update" : "Create"}
+              {editingId ? t("clients.familyMembers.update") : t("clients.familyMembers.create")}
             </Button>
           </form>
         </DialogContent>
@@ -293,11 +295,11 @@ const ClientFamilyMembers: FC<ClientFamilyMembersProps> = ({ clientId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Family Member"
-        description="Are you sure? This cannot be undone."
+        title={t("clients.familyMembers.deleteMember")}
+        description={t("clients.familyMembers.deleteConfirmation")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("clients.familyMembers.delete")}
         loading={deleteMutation.isPending}
       />
     </div>

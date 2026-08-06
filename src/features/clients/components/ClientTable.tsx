@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import type { Client } from "../types/client";
 import ClientStatusBadge from "./ClientStatusBadge";
@@ -13,29 +14,30 @@ interface ClientTableProps {
 
 const ClientTable: FC<ClientTableProps> = ({ data, loading, onRowClick }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const columns: ColumnDef<Client>[] = [
     {
       key: "id",
-      header: "Client ID",
+      header: t("clients.table.clientId"),
       accessorFn: (row) => <span className="font-mono text-xs font-medium">{row.id}</span>,
       sortable: true,
     },
     {
       key: "accountNo",
-      header: "Account No",
+      header: t("clients.table.accountNo"),
       accessorFn: (row) => <span className="text-sm">{row.accountNo ?? "—"}</span>,
       sortable: true,
     },
     {
       key: "externalId",
-      header: "External ID",
+      header: t("clients.table.externalId"),
       accessorFn: (row) => <span className="text-sm text-gray-500">{row.externalId ?? "—"}</span>,
       sortable: true,
     },
     {
       key: "displayName",
-      header: "Full Name",
+      header: t("clients.table.fullName"),
       accessorFn: (row) => (
         <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{getClientDisplayName(row)}</span>
       ),
@@ -43,30 +45,30 @@ const ClientTable: FC<ClientTableProps> = ({ data, loading, onRowClick }) => {
     },
     {
       key: "officeName",
-      header: "Office",
+      header: t("clients.table.office"),
       accessorFn: (row) => <span className="text-sm">{row.officeName ?? "—"}</span>,
       sortable: true,
     },
     {
       key: "staffName",
-      header: "Staff",
+      header: t("clients.table.staff"),
       accessorFn: (row) => <span className="text-sm">{row.staffName ?? "—"}</span>,
       sortable: true,
     },
     {
       key: "mobileNo",
-      header: "Mobile",
+      header: t("clients.table.mobile"),
       accessorFn: (row) => <span className="text-sm">{row.mobileNo ?? "—"}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("clients.table.status"),
       accessorFn: (row) => <ClientStatusBadge status={getClientStatus(row)} size="sm" />,
       sortable: true,
     },
     {
       key: "activationDate",
-      header: "Activation Date",
+      header: t("clients.table.activationDate"),
       accessorFn: (row) => (
         <span className="text-sm text-gray-600 dark:text-gray-400">{formatClientDate(row.activationDate)}</span>
       ),
@@ -91,7 +93,7 @@ const ClientTable: FC<ClientTableProps> = ({ data, loading, onRowClick }) => {
       idAccessor={(row) => String(row.id)}
       skeletonRowCount={8}
       emptyState={{
-        message: "No clients found. Try adjusting your search or filters.",
+        message: t("clients.table.noClients"),
       }}
       minWidth={900}
     />

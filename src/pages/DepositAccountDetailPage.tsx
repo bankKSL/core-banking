@@ -222,7 +222,7 @@ const DepositAccountDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-600">{t("Failed to load:")} {String(error)}</p>
+          <p className="text-red-600">{t("Failed to load:")}: {String(error)}</p>
           <Button variant="outline" className="mt-2" onClick={() => refetch()}>
             {t("Retry")}
           </Button>
@@ -343,8 +343,8 @@ const DepositAccountDetailPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={`Account ${a.accountNo}`}
-        description={`${a.savingsProductName ?? "Savings"} — ${a.clientName ?? `Client #${a.clientId}`}`}
+        title={`${t("Account")} ${a.accountNo}`}
+        description={`${a.savingsProductName ?? t("Savings")} — ${a.clientName ?? `${t("Client")} #${a.clientId}`}`}
         actions={
           <div className="flex items-center gap-2 flex-wrap ">
             {statusConfig && (
@@ -425,7 +425,7 @@ const DepositAccountDetailPage: React.FC = () => {
                    className="text-amber-600"
                  >
                    {t("Undo Approval")}
-                </Button>
+                 </Button>
               </>
             )}
             {isActive && (
@@ -449,7 +449,7 @@ const DepositAccountDetailPage: React.FC = () => {
                  >
                    <ArrowUpCircle className="mr-1 h-4 w-4" />
                    {t("Withdraw")}
-                </Button>
+                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -729,16 +729,16 @@ const DepositAccountDetailPage: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Withdrawal Fee (Transfers):</span>{" "}
-                  <span className="font-medium">{a.withdrawalFeeForTransfers ? "Yes" : "No"}</span>
+                  <span className="text-gray-500">{t("Withdrawal Fee (Transfers):")}</span>{" "}
+                  <span className="font-medium">{a.withdrawalFeeForTransfers ? t("Yes") : t("No")}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Allow Overdraft:</span>{" "}
-                  <span className="font-medium">{a.allowOverdraft ? "Yes" : "No"}</span>
+                  <span className="text-gray-500">{t("Allow Overdraft:")}</span>{" "}
+                  <span className="font-medium">{a.allowOverdraft ? t("Yes") : t("No")}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Withhold Tax:</span>{" "}
-                  <span className="font-medium">{a.withHoldTax ? "Yes" : "No"}</span>
+                  <span className="text-gray-500">{t("Withhold Tax:")}</span>{" "}
+                  <span className="font-medium">{a.withHoldTax ? t("Yes") : t("No")}</span>
                 </div>
               </CardContent>
             </Card>
@@ -785,7 +785,7 @@ const DepositAccountDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="holdDate">
-                Date *
+                {t("Date")} *
               </label>
               <Input id="holdDate" type="date" value={holdDate} onChange={(e) => setHoldDate(e.target.value)} />
             </div>
@@ -845,7 +845,7 @@ const DepositAccountDetailPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="fwAmount">
-                Amount *
+                {t("Amount")} *
               </label>
               <Input
                 id="fwAmount"

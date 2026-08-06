@@ -2,6 +2,7 @@ import { type FC, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Play, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -40,6 +41,7 @@ const reportFormSchema = z.object({
 type ReportRunFormValues = z.infer<typeof reportFormSchema>;
 
 const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange }) => {
+  const { t } = useTranslation();
   const [paramValues, setParamValues] = useState<Record<string, string>>({});
   const runReportMutation = useRunReport();
 
@@ -81,17 +83,17 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Run Report: {report?.reportName}</DialogTitle>
-          <DialogDescription>Set parameters and run the report</DialogDescription>
+          <DialogTitle>{t("Run Report")}: {report?.reportName}</DialogTitle>
+          <DialogDescription>{t("Set parameters and run the report")}</DialogDescription>
         </DialogHeader>
 
         {runReportMutation.isError && (
           <ErrorState
-            title="Failed to run report"
+            title={t("Failed to run report")}
             message={
               runReportMutation.error instanceof Error
                 ? runReportMutation.error.message
-                : "An unexpected error occurred."
+                : t("An unexpected error occurred.")
             }
             onRetry={() => runReportMutation.reset()}
           />
@@ -100,7 +102,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4 py-4">
             <div>
-              <label className="block text-sm font-medium">Output Type</label>
+              <label className="block text-sm font-medium">{t("Output Type")}</label>
               <Controller
                 name="outputType"
                 control={control}
@@ -123,7 +125,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
 
             {(report?.reportParameters ?? []).length > 0 && (
               <div className="space-y-3">
-                <label className="block text-sm font-medium">Parameters</label>
+                <label className="block text-sm font-medium">{t("Parameters")}</label>
                 {report?.reportParameters.map((param) => (
                   <div key={param.id} className="grid grid-cols-2 gap-2 items-center">
                     <label className="block text-sm font-medium">{param.parameterName}</label>
@@ -133,7 +135,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
                         onValueChange={(v) => handleParamChange(param.parameterName, v)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select value" />
+                          <SelectValue placeholder={t("Select value")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="option1">Option 1</SelectItem>
@@ -166,7 +168,7 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
                     {result.data.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={result.columnHeaders.length} className="text-center text-gray-500">
-                          No results
+                          {t("No results")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -186,16 +188,16 @@ const ReportRunDialog: FC<ReportRunDialogProps> = ({ report, open, onOpenChange 
 
           <DialogFooter>
             <Button variant="outline" onClick={() => handleOpenChange(false)}>
-              Close
+              {t("Close")}
             </Button>
             <Button type="submit" disabled={runReportMutation.isPending}>
               {runReportMutation.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Running…
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Running…")}
                 </>
               ) : (
                 <>
-                  <Play className="mr-2 h-4 w-4" /> Run
+                  <Play className="mr-2 h-4 w-4" /> {t("Run")}
                 </>
               )}
             </Button>

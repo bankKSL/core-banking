@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Lock, Loader2, Pencil } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -25,6 +26,7 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { currentDate } from "@/lib/utils";
 
 const AccountingClosuresPage: React.FC = () => {
+  const { t } = useTranslation();
   const [officeFilter, setOfficeFilter] = useState<string>("all");
   const {
     data: closures = [],
@@ -48,7 +50,7 @@ const AccountingClosuresPage: React.FC = () => {
 
   const handleCreate = async () => {
     if (!officeId || !closingDate) {
-      setFormError("Office and closing date are required.");
+      setFormError(t("Office and closing date are required."));
       return;
     }
     setFormError("");
@@ -78,31 +80,31 @@ const AccountingClosuresPage: React.FC = () => {
   };
 
   const columns: ColumnDef<GLClosureData>[] = [
-    { key: "id", header: "ID", cell: (r) => <span className="font-mono text-xs">{r.id}</span> },
-    { key: "officeName", header: "Office", cell: (r) => <span className="font-medium">{r.officeName}</span> },
+    { key: "id", header: t("ID"), cell: (r) => <span className="font-mono text-xs">{r.id}</span> },
+    { key: "officeName", header: t("Office"), cell: (r) => <span className="font-medium">{r.officeName}</span> },
     {
       key: "closingDate",
-      header: "Closing Date",
+      header: t("Closing Date"),
       cell: (r) => <span className="text-sm">{r.closingDate ?? "—"}</span>,
     },
-    { key: "comments", header: "Comments", cell: (r) => <span className="text-sm">{r.comments || "—"}</span> },
+    { key: "comments", header: t("Comments"), cell: (r) => <span className="text-sm">{r.comments || "—"}</span> },
     {
       key: "deleted",
-      header: "Status",
+      header: t("Status"),
       cell: (r) =>
         r.deleted ? (
           <Badge variant="error" size="sm">
-            Deleted
+            {t("Deleted")}
           </Badge>
         ) : (
           <Badge variant="success" size="sm">
-            Locked
+            {t("Locked")}
           </Badge>
         ),
     },
     {
       key: "createdByUsername",
-      header: "Created By",
+      header: t("Created By"),
       cell: (r) => <span className="text-sm text-gray-500">{r.createdByUsername ?? "—"}</span>,
     },
     {
@@ -132,11 +134,11 @@ const AccountingClosuresPage: React.FC = () => {
   if (isError) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Accounting Closures" description="Lock journal entry posting per office" />
+        <PageHeader title={t("Accounting Closures")} description={t("Lock journal entry posting per office")} />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
-          <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
+          <span className="text-sm">{t("Failed to load:")}: {error?.message ?? t("Unknown error")}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -146,11 +148,11 @@ const AccountingClosuresPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Accounting Closures"
-        description="Lock journal entry posting before a given date per office"
+        title={t("Accounting Closures")}
+        description={t("Lock journal entry posting before a given date per office")}
         actions={
           <Button onClick={() => setShowForm((s) => !s)} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Closure
+            <Plus className="mr-2 h-4 w-4" /> {t("New Closure")}
           </Button>
         }
       />
@@ -159,7 +161,7 @@ const AccountingClosuresPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Lock className="h-4 w-4" /> Create Closure
+              <Lock className="h-4 w-4" /> {t("Create Closure")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
@@ -168,26 +170,26 @@ const AccountingClosuresPage: React.FC = () => {
               onChange={(v) => setOfficeId(Number(v))}
             />
             <div className="space-y-1.5">
-              <Label>Closing Date *</Label>
+              <Label>{t("Closing Date")} *</Label>
               <Input type="date" value={closingDate} onChange={(e) => setClosingDate(e.target.value)} />
             </div>
             <div className="col-span-2 space-y-1.5">
-              <Label>Comments</Label>
+              <Label>{t("Comments")}</Label>
               <Textarea
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
                 rows={2}
-                placeholder="e.g. Month-end closure"
+                placeholder={t("e.g. Month-end closure")}
               />
             </div>
             {formError && <p className="col-span-2 text-sm text-red-500">{formError}</p>}
             <div className="col-span-2 flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleCreate} disabled={createMutation.isPending}>
                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Closure
+                {t("Create Closure")}
               </Button>
             </div>
           </CardContent>
@@ -196,11 +198,11 @@ const AccountingClosuresPage: React.FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Closures</CardTitle>
+          <CardTitle>{t("Closures")}</CardTitle>
           <OfficeSelect
             value={officeFilter}
             onChange={setOfficeFilter}
-            includeAll="All Offices"
+            includeAll={t("All Offices")}
           />
         </CardHeader>
         <CardContent>
@@ -214,7 +216,7 @@ const AccountingClosuresPage: React.FC = () => {
             <DataTable
               columns={columns}
               data={closures}
-              emptyState={{ message: "No closures found." }}
+              emptyState={{ message: t("No closures found.") }}
               minWidth={800}
             />
           )}
@@ -225,31 +227,31 @@ const AccountingClosuresPage: React.FC = () => {
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Delete Closure"
-        description={`Delete closure for "${deleteTarget?.officeName}" (${deleteTarget?.closingDate})? Only the latest closure per office can be deleted.`}
-        confirmLabel="Delete"
+        title={t("Delete Closure")}
+        description={`${t("Delete closure for")} "${deleteTarget?.officeName}" (${deleteTarget?.closingDate})? ${t("Only the latest closure per office can be deleted.")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
       />
 
       <Dialog open={!!editTarget} onOpenChange={() => setEditTarget(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Closure Comments</DialogTitle>
-            <DialogDescription>Only comments may be edited on an accounting closure.</DialogDescription>
+            <DialogTitle>{t("Edit Closure Comments")}</DialogTitle>
+            <DialogDescription>{t("Only comments may be edited on an accounting closure.")}</DialogDescription>
           </DialogHeader>
           <Textarea
             value={editComments}
             onChange={(e) => setEditComments(e.target.value)}
             rows={3}
-            placeholder="Comments"
+            placeholder={t("Comments")}
           />
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setEditTarget(null)}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button onClick={handleEdit} disabled={updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t("Save")}
             </Button>
           </DialogFooter>
         </DialogContent>

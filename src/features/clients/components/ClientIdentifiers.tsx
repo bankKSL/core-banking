@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +37,7 @@ interface ClientIdentifiersProps {
 }
 
 const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: identifiers, isLoading } = useClientIdentifiers(clientId);
   const { data: template } = useClientIdentifierTemplate(clientId);
   const createMutation = useCreateClientIdentifier();
@@ -94,22 +96,22 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
   const columns: ColumnDef<ClientIdentifier>[] = [
     {
       key: "documentType",
-      header: "Document Type",
+      header: t("clients.identifiers.documentType"),
       accessorFn: (row) => <span className="text-sm font-medium">{row.documentType?.name ?? "—"}</span>,
     },
     {
       key: "documentKey",
-      header: "Document Key",
+      header: t("clients.identifiers.documentKey"),
       accessorFn: (row) => <span className="text-sm font-mono">{row.documentKey}</span>,
     },
     {
       key: "description",
-      header: "Description",
+      header: t("clients.identifiers.description"),
       accessorFn: (row) => <span className="text-sm text-gray-500">{row.description ?? "—"}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("clients.identifiers.status"),
       accessorFn: (row) =>
         row.status ? (
           <Badge variant={row.status === "active" ? "success" : "default"} size="sm">
@@ -121,7 +123,7 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("clients.identifiers.actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -154,11 +156,11 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Fingerprint className="h-5 w-5" />
-          Identifiers
+          {t("clients.identifiers.title")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Add Identifier
+          {t("clients.identifiers.addIdentifier")}
         </Button>
       </div>
       <Card>
@@ -170,7 +172,7 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
             minWidth={600}
             emptyState={{
               icon: <Fingerprint className="h-8 w-8 text-gray-300" />,
-              message: "No identifiers found. Click 'Add Identifier' to create one.",
+              message: t("clients.identifiers.noIdentifiers"),
             }}
           />
         </CardContent>
@@ -179,18 +181,18 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Identifier" : "Add Identifier"}</DialogTitle>
-            <DialogDescription>Manage client identification documents.</DialogDescription>
+            <DialogTitle>{editingId ? t("clients.identifiers.editIdentifier") : t("clients.identifiers.addIdentifier")}</DialogTitle>
+            <DialogDescription>{t("clients.identifiers.manageDescription")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Document Type</label>
+              <label className="block text-sm font-medium">{t("clients.identifiers.documentType")}</label>
               <Select
                 defaultValue={String(template?.allowedDocumentTypes?.[0]?.id ?? "")}
                 onValueChange={(v) => setValue("documentTypeId", Number(v), { shouldValidate: true })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select document type" />
+                  <SelectValue placeholder={t("clients.identifiers.selectDocumentType")} />
                 </SelectTrigger>
                 <SelectContent>
                   {template?.allowedDocumentTypes?.map((dt) => (
@@ -203,16 +205,16 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
               {errors.documentTypeId && <p className="text-xs text-red-500">{errors.documentTypeId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Document Key</label>
+              <label className="block text-sm font-medium">{t("clients.identifiers.documentKey")}</label>
               <Input
                 {...register("documentKey")}
-                placeholder="e.g. passport number"
+                placeholder={t("clients.identifiers.documentKeyPlaceholder")}
                 error={errors.documentKey?.message}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
-              <Input {...register("description")} placeholder="Optional notes" />
+              <label className="block text-sm font-medium">{t("clients.identifiers.description")}</label>
+              <Input {...register("description")} placeholder={t("clients.identifiers.optionalNotes")} />
             </div>
             <Button
               type="submit"
@@ -222,7 +224,7 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingId ? "Update" : "Create"}
+              {editingId ? t("clients.identifiers.update") : t("clients.identifiers.create")}
             </Button>
           </form>
         </DialogContent>
@@ -231,11 +233,11 @@ const ClientIdentifiers: FC<ClientIdentifiersProps> = ({ clientId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Identifier"
-        description="Are you sure you want to delete this identifier? This cannot be undone."
+        title={t("clients.identifiers.deleteIdentifier")}
+        description={t("clients.identifiers.deleteConfirmation")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("clients.identifiers.delete")}
         loading={deleteMutation.isPending}
       />
     </div>

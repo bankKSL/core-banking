@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CheckCircle2,
   XCircle,
@@ -68,6 +69,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
   const acceptTransferMutation = useAcceptClientTransfer();
   const rejectTransferMutation = useRejectClientTransfer();
   const withdrawTransferMutation = useWithdrawClientTransfer();
+  const { t } = useTranslation();
 
   const [command, setCommand] = useState<string | null>(null);
   const [closeDate, setCloseDate] = useState(new Date().toISOString().split("T")[0]);
@@ -206,7 +208,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <XCircle className="mr-1 h-4 w-4" />
-              Reject
+              {t("clients.commands.reject")}
             </Button>
             <Button
               variant="outline"
@@ -215,32 +217,32 @@ const ClientCommands: FC<ClientCommandsProps> = ({
               className="text-amber-600 border-amber-200 hover:bg-amber-50"
             >
               <Ban className="mr-1 h-4 w-4" />
-              Withdraw
+              {t("clients.commands.withdraw")}
             </Button>
           </>
         )}
         {isActive && (
           <Button variant="outline" size="sm" onClick={() => setCloseDialogOpen(true)} className="text-gray-600">
             <LogOut className="mr-1 h-4 w-4" />
-            Close
+            {t("clients.commands.close")}
           </Button>
         )}
         {isClosed && (
           <Button variant="outline" size="sm" onClick={() => setCommand("reactivate")}>
             <Power className="mr-1 h-4 w-4" />
-            Reactivate
+            {t("clients.commands.reactivate")}
           </Button>
         )}
         {isRejected && (
           <Button variant="outline" size="sm" onClick={() => setCommand("undoreject")}>
             <Undo2 className="mr-1 h-4 w-4" />
-            Undo Reject
+            {t("clients.commands.undoReject")}
           </Button>
         )}
         {isWithdrawn && (
           <Button variant="outline" size="sm" onClick={() => setCommand("undowithdraw")}>
             <RotateCcw className="mr-1 h-4 w-4" />
-            Undo Withdraw
+            {t("clients.commands.undoWithdraw")}
           </Button>
         )}
 
@@ -249,7 +251,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
           <>
             <Button variant="outline" size="sm" onClick={() => setStaffDialogOpen(true)}>
               <UserPlus className="mr-1 h-4 w-4" />
-              {currentStaffId ? "Change Staff" : "Assign Staff"}
+              {currentStaffId ? t("clients.commands.changeStaff") : t("clients.commands.assignStaff")}
             </Button>
             {currentStaffId && (
               <Button
@@ -260,7 +262,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
                 disabled={anyLoading}
               >
                 <UserX className="mr-1 h-4 w-4" />
-                Unassign Staff
+                {t("clients.commands.unassignStaff")}
               </Button>
             )}
           </>
@@ -270,7 +272,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
         {isActive && (
           <Button variant="outline" size="sm" onClick={() => setSavingsDialogOpen(true)}>
             <PiggyBank className="mr-1 h-4 w-4" />
-            Update Savings
+            {t("clients.commands.updateSavings")}
           </Button>
         )}
 
@@ -278,7 +280,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
         {isActive && !isTransferInProgress && (
           <Button variant="outline" size="sm" onClick={() => setTransferDialogOpen(true)}>
             <ArrowLeftRight className="mr-1 h-4 w-4" />
-            Propose Transfer
+            {t("clients.commands.proposeTransfer")}
           </Button>
         )}
         {isTransferInProgress && (
@@ -291,7 +293,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
               disabled={anyLoading}
             >
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              Accept Transfer
+              {t("clients.commands.acceptTransfer")}
             </Button>
             <Button
               variant="outline"
@@ -301,7 +303,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
               disabled={anyLoading}
             >
               <XCircle className="mr-1 h-4 w-4" />
-              Reject Transfer
+              {t("clients.commands.rejectTransfer")}
             </Button>
             <Button
               variant="outline"
@@ -311,7 +313,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
               disabled={anyLoading}
             >
               <Ban className="mr-1 h-4 w-4" />
-              Withdraw Transfer
+              {t("clients.commands.withdrawTransfer")}
             </Button>
           </>
         )}
@@ -321,19 +323,19 @@ const ClientCommands: FC<ClientCommandsProps> = ({
       <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Close Client</DialogTitle>
-            <DialogDescription>Enter closure date for {displayName}.</DialogDescription>
+            <DialogTitle>{t("clients.commands.closeClient")}</DialogTitle>
+            <DialogDescription>{t("clients.commands.closeDescription", { name: displayName })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="closeDate">
-                Closure Date
+                {t("clients.commands.closureDate")}
               </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
             <Button onClick={() => handleCommand("close")} disabled={closeMutation.isPending} variant="destructive">
               {closeMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Close Client
+              {t("clients.commands.closeClient")}
             </Button>
           </div>
         </DialogContent>
@@ -343,15 +345,15 @@ const ClientCommands: FC<ClientCommandsProps> = ({
       <Dialog open={staffDialogOpen} onOpenChange={setStaffDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{currentStaffId ? "Change Staff" : "Assign Staff"}</DialogTitle>
-            <DialogDescription>Select a loan officer to assign to {displayName}.</DialogDescription>
+            <DialogTitle>{currentStaffId ? t("clients.commands.changeStaff") : t("clients.commands.assignStaff")}</DialogTitle>
+            <DialogDescription>{t("clients.commands.assignStaffDescription", { name: displayName })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Staff (Loan Officer)</label>
+              <label className="block text-sm font-medium">{t("clients.commands.staffLoanOfficer")}</label>
               <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select staff" />
+                  <SelectValue placeholder={t("clients.commands.selectStaff")} />
                 </SelectTrigger>
                 <SelectContent>
                   {template?.staffOptions?.map((s) => (
@@ -364,7 +366,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
             </div>
             <Button onClick={handleAssignStaff} disabled={!selectedStaffId || assignStaffMutation.isPending}>
               {assignStaffMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Assign
+              {t("clients.commands.assign")}
             </Button>
           </div>
         </DialogContent>
@@ -374,25 +376,25 @@ const ClientCommands: FC<ClientCommandsProps> = ({
       <Dialog open={savingsDialogOpen} onOpenChange={setSavingsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Default Savings Account</DialogTitle>
-            <DialogDescription>Enter the savings account ID to set as default for {displayName}.</DialogDescription>
+            <DialogTitle>{t("clients.commands.updateDefaultSavingsAccount")}</DialogTitle>
+            <DialogDescription>{t("clients.commands.savingsDescription", { name: displayName })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="savingsAccountId">
-                Savings Account ID
+                {t("clients.commands.savingsAccountId")}
               </label>
               <Input
                 id="savingsAccountId"
                 type="number"
                 value={savingsAccountId}
                 onChange={(e) => setSavingsAccountId(e.target.value)}
-                placeholder="Savings account ID"
+                placeholder={t("clients.commands.savingsAccountPlaceholder")}
               />
             </div>
             <Button onClick={handleUpdateSavings} disabled={!savingsAccountId || updateSavingsMutation.isPending}>
               {updateSavingsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update
+              {t("clients.commands.update")}
             </Button>
           </div>
         </DialogContent>
@@ -402,15 +404,15 @@ const ClientCommands: FC<ClientCommandsProps> = ({
       <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Propose Transfer</DialogTitle>
-            <DialogDescription>Transfer {displayName} to another office.</DialogDescription>
+            <DialogTitle>{t("clients.commands.proposeTransfer")}</DialogTitle>
+            <DialogDescription>{t("clients.commands.transferDescription", { name: displayName })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Destination Office</label>
+              <label className="block text-sm font-medium">{t("clients.commands.destinationOffice")}</label>
               <Select value={destinationOfficeId} onValueChange={setDestinationOfficeId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
+                  <SelectValue placeholder={t("clients.commands.selectOffice")} />
                 </SelectTrigger>
                 <SelectContent>
                   {template?.officeOptions?.map((o) => (
@@ -423,7 +425,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="transferDate">
-                Transfer Date
+                {t("clients.commands.transferDate")}
               </label>
               <Input
                 id="transferDate"
@@ -434,13 +436,13 @@ const ClientCommands: FC<ClientCommandsProps> = ({
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="transferNote">
-                Note
+                {t("clients.commands.note")}
               </label>
               <Input
                 id="transferNote"
                 value={transferNote}
                 onChange={(e) => setTransferNote(e.target.value)}
-                placeholder="Optional note"
+                placeholder={t("clients.commands.optionalNote")}
               />
             </div>
             <Button
@@ -448,7 +450,7 @@ const ClientCommands: FC<ClientCommandsProps> = ({
               disabled={!destinationOfficeId || proposeTransferMutation.isPending}
             >
               {proposeTransferMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Propose Transfer
+              {t("clients.commands.proposeTransfer")}
             </Button>
           </div>
         </DialogContent>
@@ -459,8 +461,8 @@ const ClientCommands: FC<ClientCommandsProps> = ({
         <ConfirmDialog
           open={!!command}
           onOpenChange={() => setCommand(null)}
-          title={`${command === "reject" ? "Reject" : command === "withdraw" ? "Withdraw" : command === "reactivate" ? "Reactivate" : command === "undoreject" ? "Undo Reject" : "Undo Withdraw"} Client`}
-          description={`Are you sure you want to ${command} ${displayName}?`}
+          title={`${command === "reject" ? t("clients.commands.reject") : command === "withdraw" ? t("clients.commands.withdraw") : command === "reactivate" ? t("clients.commands.reactivate") : command === "undoreject" ? t("clients.commands.undoReject") : t("clients.commands.undoWithdraw")} ${t("clients.commands.client")}`}
+          description={t("clients.commands.confirmAction", { action: command, name: displayName })}
           onConfirm={() => handleCommand(command)}
           variant={command === "reject" || command === "withdraw" ? "destructive" : "default"}
           confirmLabel={command.charAt(0).toUpperCase() + command.slice(1)}

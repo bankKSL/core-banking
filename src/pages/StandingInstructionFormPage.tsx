@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,15 +24,15 @@ import {
 import type { Office, ClientSummary, MiniAccount } from "@/features/transfers";
 
 const ACCOUNT_TYPES = [
-  { id: 1, label: "Loans" },
-  { id: 2, label: "Savings" },
+  { id: 1, labelKey: "Loans" },
+  { id: 2, labelKey: "Savings" },
 ];
 
-const TRANSFER_TYPES = [{ id: 1, label: "Normal" }];
-const INSTRUCTION_TYPES = [{ id: 1, label: "Open" }];
-const PRIORITIES = [{ id: 2, label: "Urgent" }];
-const RECURRENCE_TYPES = [{ id: 1, label: "Periodic" }];
-const STATUS_OPTIONS = [{ id: 1, label: "Active" }];
+const TRANSFER_TYPES = [{ id: 1, labelKey: "Normal" }];
+const INSTRUCTION_TYPES = [{ id: 1, labelKey: "Open" }];
+const PRIORITIES = [{ id: 2, labelKey: "Urgent" }];
+const RECURRENCE_TYPES = [{ id: 1, labelKey: "Periodic" }];
+const STATUS_OPTIONS = [{ id: 1, labelKey: "Active" }];
 
 interface SideState {
   officeId: number | null;
@@ -52,23 +53,24 @@ function formatDateInput(dateVal: number[] | undefined): string {
   return d.toISOString().split("T")[0];
 }
 
-const standingInstructionSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  amount: z
-    .string()
-    .min(1, "Amount is required")
-    .refine((v) => parseFloat(v) > 0, "Amount must be positive"),
-  validFrom: z.string().min(1, "Valid from date is required"),
-  validTill: z.string().optional(),
-});
-
-type StandingInstructionFormValues = z.infer<typeof standingInstructionSchema>;
-
 const StandingInstructionFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const isEdit = !!id;
+
+  const standingInstructionSchema = z.object({
+    name: z.string().min(1, t("Name is required")),
+    amount: z
+      .string()
+      .min(1, t("Amount is required"))
+      .refine((v) => parseFloat(v) > 0, t("Amount must be positive")),
+    validFrom: z.string().min(1, t("Valid from date is required")),
+    validTill: z.string().optional(),
+  });
+
+  type StandingInstructionFormValues = z.infer<typeof standingInstructionSchema>;
 
   const [from, setFrom] = useState<SideState>(useSideState());
   const [to, setTo] = useState<SideState>(useSideState());
@@ -251,13 +253,13 @@ const StandingInstructionFormPage: React.FC = () => {
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium">Office *</label>
+          <label className="block text-sm font-medium">{t("Office")} *</label>
           <Select
             value={state.officeId ? String(state.officeId) : ""}
             onValueChange={(v) => updateSide(side, "officeId", Number(v))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select office" />
+              <SelectValue placeholder={t("Select office")} />
             </SelectTrigger>
             <SelectContent>
               {officesList.map((o) => (
@@ -269,14 +271,14 @@ const StandingInstructionFormPage: React.FC = () => {
           </Select>
         </div>
         <div>
-          <label className="block text-sm font-medium">Client *</label>
+          <label className="block text-sm font-medium">{t("Client")} *</label>
           <Select
             value={state.clientId ? String(state.clientId) : ""}
             onValueChange={(v) => updateSide(side, "clientId", Number(v))}
             disabled={!state.officeId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.officeId ? "Select client" : "Select office first"} />
+              <SelectValue placeholder={state.officeId ? t("Select client") : t("Select office first")} />
             </SelectTrigger>
             <SelectContent>
               {currentClients.map((c: ClientSummary) => (
@@ -288,33 +290,33 @@ const StandingInstructionFormPage: React.FC = () => {
           </Select>
         </div>
         <div>
-          <label className="block text-sm font-medium">Account Type *</label>
+          <label className="block text-sm font-medium">{t("Account Type")} *</label>
           <Select
             value={state.accountType ? String(state.accountType) : ""}
             onValueChange={(v) => updateSide(side, "accountType", Number(v))}
             disabled={!state.clientId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.clientId ? "Select type" : "Select client first"} />
+              <SelectValue placeholder={state.clientId ? t("Select type") : t("Select client first")} />
             </SelectTrigger>
             <SelectContent>
-              {ACCOUNT_TYPES.map((t) => (
-                <SelectItem key={t.id} value={String(t.id)}>
-                  {t.label}
+              {ACCOUNT_TYPES.map((at) => (
+                <SelectItem key={at.id} value={String(at.id)}>
+                  {t(at.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <label className="block text-sm font-medium">Account *</label>
+          <label className="block text-sm font-medium">{t("Account")} *</label>
           <Select
             value={state.accountId ? String(state.accountId) : ""}
             onValueChange={(v) => updateSide(side, "accountId", Number(v))}
             disabled={!state.accountType}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.accountType ? "Select account" : "Select type first"} />
+              <SelectValue placeholder={state.accountType ? t("Select account") : t("Select type first")} />
             </SelectTrigger>
             <SelectContent>
               {currentAccounts.map((a: MiniAccount) => (
@@ -332,11 +334,11 @@ const StandingInstructionFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Standing Instruction" : "New Standing Instruction"}
-        description="Create or edit a recurring transfer instruction"
+        title={isEdit ? t("Edit Standing Instruction") : t("New Standing Instruction")}
+        description={t("Create or edit a recurring transfer instruction")}
         actions={
           <Button variant="outline" onClick={() => navigate("/transfers/standing-instructions")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -345,44 +347,44 @@ const StandingInstructionFormPage: React.FC = () => {
         {/* Name */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Instruction Details</CardTitle>
+            <CardTitle>{t("Instruction Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input
                 {...register("name")}
-                placeholder="e.g. Monthly savings transfer"
+                placeholder={t("e.g. Monthly savings transfer")}
                 error={errors.name?.message}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Transfer Type</label>
+                <label className="block text-sm font-medium">{t("Transfer Type")}</label>
                 <Select value={String(transferType)} onValueChange={(v) => setTransferType(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {TRANSFER_TYPES.map((t) => (
-                      <SelectItem key={t.id} value={String(t.id)}>
-                        {t.label}
+                    {TRANSFER_TYPES.map((tt) => (
+                      <SelectItem key={tt.id} value={String(tt.id)}>
+                        {t(tt.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium">Instruction Type</label>
+                <label className="block text-sm font-medium">{t("Instruction Type")}</label>
                 <Select value={String(instructionType)} onValueChange={(v) => setInstructionType(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {INSTRUCTION_TYPES.map((t) => (
-                      <SelectItem key={t.id} value={String(t.id)}>
-                        {t.label}
+                    {INSTRUCTION_TYPES.map((it) => (
+                      <SelectItem key={it.id} value={String(it.id)}>
+                        {t(it.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -392,7 +394,7 @@ const StandingInstructionFormPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Amount *</label>
+                <label className="block text-sm font-medium">{t("Amount")} *</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -402,7 +404,7 @@ const StandingInstructionFormPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">Priority</label>
+                <label className="block text-sm font-medium">{t("Priority")}</label>
                 <Select value={String(priority)} onValueChange={(v) => setPriority(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -410,7 +412,7 @@ const StandingInstructionFormPage: React.FC = () => {
                   <SelectContent>
                     {PRIORITIES.map((p) => (
                       <SelectItem key={p.id} value={String(p.id)}>
-                        {p.label}
+                        {t(p.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -420,7 +422,7 @@ const StandingInstructionFormPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium">Recurrence Type</label>
+                <label className="block text-sm font-medium">{t("Recurrence Type")}</label>
                 <Select value={String(recurrenceType)} onValueChange={(v) => setRecurrenceType(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -428,14 +430,14 @@ const StandingInstructionFormPage: React.FC = () => {
                   <SelectContent>
                     {RECURRENCE_TYPES.map((r) => (
                       <SelectItem key={r.id} value={String(r.id)}>
-                        {r.label}
+                        {t(r.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium">Status</label>
+                <label className="block text-sm font-medium">{t("Status")}</label>
                 <Select value={String(status)} onValueChange={(v) => setStatus(Number(v))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -443,7 +445,7 @@ const StandingInstructionFormPage: React.FC = () => {
                   <SelectContent>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s.id} value={String(s.id)}>
-                        {s.label}
+                        {t(s.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -453,11 +455,11 @@ const StandingInstructionFormPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Valid From <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium">{t("Valid From")} <span className="text-red-500">*</span></label>
                 <Input type="date" {...register("validFrom")} error={errors.validFrom?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Valid Till</label>
+                <label className="block text-sm font-medium">{t("Valid Till")}</label>
                 <Input type="date" {...register("validTill")} error={errors.validTill?.message} />
               </div>
             </div>
@@ -468,13 +470,13 @@ const StandingInstructionFormPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
             <CardHeader>
-              <CardTitle>From</CardTitle>
+              <CardTitle>{t("From")}</CardTitle>
             </CardHeader>
             <CardContent>{renderSide("from", from)}</CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>To</CardTitle>
+              <CardTitle>{t("To")}</CardTitle>
             </CardHeader>
             <CardContent>{renderSide("to", to)}</CardContent>
           </Card>
@@ -482,16 +484,16 @@ const StandingInstructionFormPage: React.FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/transfers/standing-instructions")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={!isValid || mutation.isPending}>
             {mutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Instruction" : "Create Instruction"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Instruction") : t("Create Instruction")}
               </>
             )}
           </Button>

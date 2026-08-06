@@ -89,8 +89,8 @@ const InterestRateChartFormPage: React.FC = () => {
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.fromDate.trim()) e.fromDate = "From date is required";
+    if (!form.name.trim()) e.name = t("Name is required");
+    if (!form.fromDate.trim()) e.fromDate = t("From date is required");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -174,10 +174,10 @@ const InterestRateChartFormPage: React.FC = () => {
   const periodOptions = template?.periodTypes ?? [];
 
   const slabColumns: ColumnDef<InterestRateChartSlab>[] = [
-    { key: "description", header: "Description", cell: (r) => r.description || "—" },
+    { key: "description", header: t("Description"), cell: (r) => r.description || "—" },
     {
       key: "periodType",
-      header: "Period Type",
+      header: t("Period Type"),
       cell: (r) => r.periodType?.value ?? String(r.periodType?.id ?? ""),
     },
     { key: "fromPeriod", header: t("From Period") },
@@ -234,7 +234,7 @@ const InterestRateChartFormPage: React.FC = () => {
             <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
           </div>
           <div className="col-span-2 space-y-1.5">
-            <label className="block text-sm font-medium">Description</label>
+            <label className="block text-sm font-medium">{t("Description")}</label>
             <Textarea
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
@@ -291,7 +291,7 @@ const InterestRateChartFormPage: React.FC = () => {
         <Button onClick={handleSave} disabled={saving} className="bg-[#D32F2F] hover:bg-red-700">
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
             </>
           ) : (
             <>

@@ -1,4 +1,5 @@
 import { type FC } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowLeftRight, RotateCcw, Undo2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,16 +18,17 @@ interface SavingsTransactionsProps {
 }
 
 const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUndo, onReverse }) => {
+  const { t } = useTranslation();
   const columns: ColumnDef<SavingsTransaction>[] = [
-    { key: "id", header: "ID", accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
+    { key: "id", header: t("ID"), accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
     {
       key: "date",
-      header: "Date",
+      header: t("Date"),
       accessorFn: (row) => <span className="text-sm">{row.date ?? row.transactionDate ?? "—"}</span>,
     },
     {
       key: "type",
-      header: "Type",
+      header: t("Type"),
       accessorFn: (row: SavingsTransaction) => (
         <Badge variant={row.transactionType.transactionTypeEnum === "WITHDRAWAL" ? "error" : "info"} size="sm">
           {row.transactionType.value ?? "—"}
@@ -35,7 +37,7 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUnd
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t("Amount"),
       accessorFn: (row) => (
         <span className={`text-sm font-mono ${row.entryType === "DEBIT" ? "text-red-500" : "text-green-600"}`}>
           {formatCurrency(row.currency?.code, Math.abs(row.amount))}
@@ -44,15 +46,15 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUnd
     },
     {
       key: "reversed",
-      header: "Status",
+      header: t("Status"),
       accessorFn: (row) =>
         row.reversed ? (
           <Badge variant="error" size="sm">
-            Reversed
+            {t("Reversed")}
           </Badge>
         ) : (
           <Badge variant="success" size="sm">
-            Active
+            {t("Active")}
           </Badge>
         ),
     },
@@ -63,12 +65,12 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUnd
         !row.reversed ? (
           <div className="flex items-center gap-1">
             {onUndo && (
-              <Button variant="ghost" size="sm" onClick={() => onUndo(row.id)} title="Undo">
+              <Button variant="ghost" size="sm" onClick={() => onUndo(row.id)} title={t("Undo")}>
                 <Undo2 className="h-4 w-4" />
               </Button>
             )}
             {onReverse && (
-              <Button variant="ghost" size="sm" onClick={() => onReverse(row.id)} title="Reverse">
+              <Button variant="ghost" size="sm" onClick={() => onReverse(row.id)} title={t("Reverse")}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
             )}
@@ -81,7 +83,7 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUnd
     <div className="space-y-4">
       <h3 className="text-lg font-medium flex items-center gap-2">
         <ArrowLeftRight className="h-5 w-5" />
-        Transactions
+        {t("Transactions")}
       </h3>
       <Card>
         <CardContent className="p-0">
@@ -89,7 +91,7 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({ transactions, onUnd
             columns={columns}
             data={transactions}
             minWidth={700}
-            emptyState={{ icon: <ArrowLeftRight className="h-8 w-8 text-gray-300" />, message: "No transactions." }}
+            emptyState={{ icon: <ArrowLeftRight className="h-8 w-8 text-gray-300" />, message: t("No transactions.") }}
           />
         </CardContent>
       </Card>

@@ -1,5 +1,6 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -11,6 +12,7 @@ import { useExternalAssetOwners } from "../hooks/useExternalAssetOwners";
 import type { ExternalAssetOwner } from "../types/externalAssetOwner";
 
 const ExternalAssetOwnerListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: owners = [], isLoading } = useExternalAssetOwners();
   const [search, setSearch] = useState("");
@@ -22,10 +24,10 @@ const ExternalAssetOwnerListPage: FC = () => {
   }, [owners, search]);
 
   const columns: ColumnDef<ExternalAssetOwner>[] = [
-    { key: "id", header: "ID", cell: (r) => <span className="font-medium">{r.id}</span> },
+    { key: "id", header: t("ID"), cell: (r) => <span className="font-medium">{r.id}</span> },
     {
       key: "externalId",
-      header: "External ID",
+      header: t("External ID"),
       cell: (r) => <span className="font-mono text-sm">{r.externalId}</span>,
     },
     {
@@ -44,21 +46,21 @@ const ExternalAssetOwnerListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="External Asset Owners"
-        description="Manage external investors who purchase loans from the bank"
+        title={t("External Asset Owners")}
+        description={t("Manage external investors who purchase loans from the bank")}
         actions={
           <Button onClick={() => navigate("/external-asset-owners/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> Create Owner
+            <Plus className="mr-2 h-4 w-4" /> {t("Create Owner")}
           </Button>
         }
       />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Owners</CardTitle>
+          <CardTitle>{t("All Owners")}</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by external ID..."
+              placeholder={t("Search by external ID...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -76,7 +78,7 @@ const ExternalAssetOwnerListPage: FC = () => {
             <DataTable
               columns={columns}
               data={filtered}
-              emptyState={{ message: "No external asset owners found." }}
+              emptyState={{ message: t("No external asset owners found.") }}
               minWidth={500}
             />
           )}

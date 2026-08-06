@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 const CalendarList: React.FC<CalendarListProps> = ({ entityType, entityId }) => {
+  const { t } = useTranslation();
   const { data: calendars, isLoading } = useCalendars(entityType, entityId);
   const deleteMutation = useDeleteCalendar();
 
@@ -57,21 +59,21 @@ const CalendarList: React.FC<CalendarListProps> = ({ entityType, entityId }) => 
 
   const columns: ColumnDef<CalendarData>[] = useMemo(
     () => [
-      { key: "title", header: "Title", accessorFn: (row) => row.title },
-      { key: "type", header: "Type", accessorFn: (row) => row.type?.value ?? "—" },
+      { key: "title", header: t("Title"), accessorFn: (row) => row.title },
+      { key: "type", header: t("Type"), accessorFn: (row) => row.type?.value ?? "—" },
       {
         key: "startDate",
-        header: "Start Date",
+        header: t("Start Date"),
         accessorFn: (row) => formatDate(row.startDate),
       },
       {
         key: "recurrence",
-        header: "Recurrence",
-        accessorFn: (row) => row.humanReadable ?? (row.repeating ? "Repeating" : "None"),
+        header: t("Recurrence"),
+        accessorFn: (row) => row.humanReadable ?? (row.repeating ? t("Repeating") : t("None")),
       },
       {
         key: "nextDates",
-        header: "Next 3 Dates",
+        header: t("Next 3 Dates"),
         accessorFn: (row) => {
           const dates = row.nextTenRecurringDates ?? row.recurringDates ?? [];
           const next3 = dates.slice(0, 3);
@@ -81,7 +83,7 @@ const CalendarList: React.FC<CalendarListProps> = ({ entityType, entityId }) => 
       },
       {
         key: "actions",
-        header: "Actions",
+        header: t("Actions"),
         sortable: false,
         cell: (row) => (
           <div className="flex items-center gap-2">
@@ -99,14 +101,14 @@ const CalendarList: React.FC<CalendarListProps> = ({ entityType, entityId }) => 
         ),
       },
     ],
-    [handleEdit],
+    [handleEdit, t],
   );
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Create Calendar
+          <Plus className="mr-2 h-4 w-4" /> {t("Create Calendar")}
         </Button>
       </div>
 
@@ -114,7 +116,7 @@ const CalendarList: React.FC<CalendarListProps> = ({ entityType, entityId }) => 
         columns={columns}
         data={list}
         loading={isLoading}
-        emptyState={{ message: "No calendars found." }}
+        emptyState={{ message: t("No calendars found.") }}
       />
 
       <CalendarFormDialog
@@ -129,9 +131,9 @@ const CalendarList: React.FC<CalendarListProps> = ({ entityType, entityId }) => 
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
         onConfirm={handleDelete}
-        title="Delete Calendar"
-        description={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Calendar")}
+        description={t('Are you sure you want to delete "{{title}}"? This action cannot be undone.', { title: deleteTarget?.title })}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
       />

@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Upload, Trash2, Download, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,6 +41,7 @@ interface ClientDocumentsProps {
 }
 
 const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: documents, isLoading } = useClientDocuments(clientId);
   const createMutation = useCreateClientDocument();
   const updateMutation = useUpdateClientDocument();
@@ -121,22 +123,22 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
   );
 
   const columns: ColumnDef<ClientDocument>[] = [
-    { key: "name", header: "Name", accessorFn: (row) => <span className="text-sm font-medium">{row.name}</span> },
+    { key: "name", header: t("clients.documents.name"), accessorFn: (row) => <span className="text-sm font-medium">{row.name}</span> },
     {
       key: "fileName",
-      header: "File Name",
+      header: t("clients.documents.fileName"),
       accessorFn: (row) => <span className="text-sm font-mono">{row.fileName ?? "—"}</span>,
     },
-    { key: "size", header: "Size", accessorFn: (row) => <span className="text-sm">{formatFileSize(row.size)}</span> },
-    { key: "type", header: "Type", accessorFn: (row) => <span className="text-sm">{row.type ?? "—"}</span> },
+    { key: "size", header: t("clients.documents.size"), accessorFn: (row) => <span className="text-sm">{formatFileSize(row.size)}</span> },
+    { key: "type", header: t("clients.documents.type"), accessorFn: (row) => <span className="text-sm">{row.type ?? "—"}</span> },
     {
       key: "description",
-      header: "Description",
+      header: t("clients.documents.description"),
       accessorFn: (row) => <span className="text-sm text-gray-500 truncate max-w-50">{row.description ?? "—"}</span>,
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("clients.documents.actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -180,11 +182,11 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Documents
+          {t("clients.documents.title")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Upload className="mr-1 h-4 w-4" />
-          Upload Document
+          {t("clients.documents.uploadDocument")}
         </Button>
       </div>
       <Card>
@@ -194,7 +196,7 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
             data={documents ?? []}
             loading={isLoading}
             minWidth={700}
-            emptyState={{ icon: <FileText className="h-8 w-8 text-gray-300" />, message: "No documents uploaded." }}
+            emptyState={{ icon: <FileText className="h-8 w-8 text-gray-300" />, message: t("clients.documents.noDocuments") }}
           />
         </CardContent>
       </Card>
@@ -202,19 +204,19 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingDoc ? "Edit Document" : "Upload Document"}</DialogTitle>
+            <DialogTitle>{editingDoc ? t("clients.documents.editDocument") : t("clients.documents.uploadDocument")}</DialogTitle>
             <DialogDescription>
-              {editingDoc ? "Update document metadata." : "Upload a new document for this client."}
+              {editingDoc ? t("clients.documents.updateMetadata") : t("clients.documents.uploadDescription")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("clients.documents.name")} *</label>
               <Input {...register("name")} error={errors.name?.message} />
             </div>
             {!editingDoc && (
               <div className="flex flex-col gap-1.5">
-                <label className="block text-sm font-medium">File *</label>
+                <label className="block text-sm font-medium">{t("clients.documents.file")} *</label>
                 <Input
                   type="file"
                   ref={fileInputRef}
@@ -225,7 +227,7 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
             )}
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="description">
-                Description
+                {t("clients.documents.description")}
               </label>
               <Textarea id="description" {...register("description")} rows={3} />
             </div>
@@ -237,7 +239,7 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingDoc ? "Update" : "Upload"}
+              {editingDoc ? t("clients.documents.update") : t("clients.documents.upload")}
             </Button>
           </form>
         </DialogContent>
@@ -246,11 +248,11 @@ const ClientDocuments: FC<ClientDocumentsProps> = ({ clientId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Document"
-        description="Are you sure you want to delete this document? This cannot be undone."
+        title={t("clients.documents.deleteDocument")}
+        description={t("clients.documents.deleteConfirmation")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("clients.documents.delete")}
         loading={deleteMutation.isPending}
       />
     </div>

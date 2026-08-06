@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -27,6 +28,7 @@ const weekDayOptions = [
 ];
 
 const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, entityId, open, onOpenChange, calendar }) => {
+  const { t } = useTranslation();
   const isEdit = !!calendar;
   const { data: template } = useCalendarTemplate(entityType, entityId);
   const createMutation = useCreateCalendar();
@@ -82,17 +84,17 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Calendar" : "New Calendar"}</DialogTitle>
+          <DialogTitle>{isEdit ? t("Edit Calendar") : t("New Calendar")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Title *</label>
-            <Input {...register("title")} placeholder="e.g. Weekly Collection" error={errors.title?.message as string} />
+            <label className="block text-sm font-medium">{t("Title")} *</label>
+            <Input {...register("title")} placeholder={t("e.g. Weekly Collection")} error={errors.title?.message as string} />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Type *</label>
+            <label className="block text-sm font-medium">{t("Type")} *</label>
             <Select value={watchTypeId ? String(watchTypeId) : ""} onValueChange={(v) => setValue("typeId", Number(v))}>
-              <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("Select type")} /></SelectTrigger>
               <SelectContent>
                 {calendarTypeOptions.map((o) => (
                   <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
@@ -101,33 +103,33 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Description</label>
-            <Input {...register("description")} placeholder="Optional" />
+            <label className="block text-sm font-medium">{t("Description")}</label>
+            <Input {...register("description")} placeholder={t("Optional")} />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Location</label>
-            <Input {...register("location")} placeholder="Optional" />
+            <label className="block text-sm font-medium">{t("Location")}</label>
+            <Input {...register("location")} placeholder={t("Optional")} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Start Date *</label>
+              <label className="block text-sm font-medium">{t("Start Date")} *</label>
               <Input type="date" {...register("startDate")} error={errors.startDate?.message as string} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">End Date</label>
+              <label className="block text-sm font-medium">{t("End Date")}</label>
               <Input type="date" {...register("endDate")} />
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox checked={repeating} onCheckedChange={(c) => setValue("repeating", c === true)} />
-            <label className="block text-sm font-medium mb-0">Repeating</label>
+            <label className="block text-sm font-medium mb-0">{t("Repeating")}</label>
           </div>
           {repeating && (
             <div className="grid grid-cols-3 gap-4 pl-6">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Frequency</label>
+                <label className="block text-sm font-medium">{t("Frequency")}</label>
                   <Select value={String(watch("frequency") ?? "")} onValueChange={(v) => setValue("frequency", Number(v) as any)}>
-                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("Select")} /></SelectTrigger>
                   <SelectContent>
                     {(template?.frequencyOptions ?? []).map((o) => (
                       <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
@@ -136,13 +138,13 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Interval</label>
+                <label className="block text-sm font-medium">{t("Interval")}</label>
                 <Input type="number" min="1" {...register("interval", { valueAsNumber: true })} placeholder="1" />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Repeats On</label>
+                <label className="block text-sm font-medium">{t("Repeats On")}</label>
                 <Select value={String(watch("repeatsOnDay") ?? "")} onValueChange={(v) => setValue("repeatsOnDay", Number(v) as any)}>
-                  <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("Day")} /></SelectTrigger>
                   <SelectContent>
                     {weekDayOptions.map((o) => (
                       <SelectItem key={o.id} value={String(o.id)}>{o.value}</SelectItem>
@@ -153,10 +155,10 @@ const CalendarFormDialog: React.FC<CalendarFormDialogProps> = ({ entityType, ent
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>{t("Cancel")}</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEdit ? "Update" : "Create"}
+              {isEdit ? t("Update") : t("Create")}
             </Button>
           </DialogFooter>
         </form>

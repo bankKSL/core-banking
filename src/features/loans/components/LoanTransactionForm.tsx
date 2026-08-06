@@ -1,5 +1,6 @@
 import { useEffect, type FC } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
   isSubmitting,
   error,
 }) => {
+  const { t } = useTranslation();
   const defaultDate = new Date().toISOString().split("T")[0];
   const { register, handleSubmit, setValue, watch, reset } = useForm<TransactionFormValues>({
     defaultValues: {
@@ -80,9 +82,9 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
   const balanceWarning =
     needsAmount && amount != null && outstanding != null
       ? amount > outstanding
-        ? "Payment amount exceeds outstanding balance"
+        ? t("Payment amount exceeds outstanding balance")
         : amount < outstanding
-          ? "Partial payment will not close the loan"
+          ? t("Partial payment will not close the loan")
           : null
       : null;
 
@@ -103,7 +105,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
       {loanSummary?.outstandingLoanBalance != null && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Current Balance</CardTitle>
+            <CardTitle className="text-base">{t("Current Balance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
@@ -123,10 +125,10 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">
                 {transactionType === "approve"
-                  ? "Approval Date"
+                  ? t("Approval Date")
                   : transactionType === "disburse" || transactionType === "disburseToSavings"
-                    ? "Disbursement Date"
-                    : "Transaction Date"}
+                    ? t("Disbursement Date")
+                    : t("Transaction Date")}
               </label>
               <Input
                 type="date"
@@ -143,7 +145,7 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
           )}
           {needsAmount && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Amount</label>
+              <label className="block text-sm font-medium">{t("Amount")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -154,14 +156,14 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
           )}
           {needsPaymentType && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Payment Type</label>
+              <label className="block text-sm font-medium">{t("Payment Type")}</label>
               <Select
                 value={watch("paymentTypeId") ? String(watch("paymentTypeId")) : ""}
                 onValueChange={(v) => setValue("paymentTypeId", Number(v))}
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select payment type" />
+                  <SelectValue placeholder={t("Select payment type")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(paymentTypeOptions ?? []).map((pt) => (
@@ -178,23 +180,23 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
       {needsPaymentDetails && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Payment Details</CardTitle>
+            <CardTitle className="text-base">{t("Payment Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Receipt Number</label>
+              <label className="block text-sm font-medium">{t("Receipt Number")}</label>
               <Input {...register("receiptNumber")} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Bank Number</label>
+              <label className="block text-sm font-medium">{t("Bank Number")}</label>
               <Input {...register("bankNumber")} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Check Number</label>
+              <label className="block text-sm font-medium">{t("Check Number")}</label>
               <Input {...register("checkNumber")} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Routing Code</label>
+              <label className="block text-sm font-medium">{t("Routing Code")}</label>
               <Input {...register("routingCode")} disabled={isSubmitting} />
             </div>
           </CardContent>
@@ -202,10 +204,10 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
       )}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Note</CardTitle>
+            <CardTitle className="text-base">{t("Note")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Textarea {...register("note")} disabled={isSubmitting} placeholder="Optional note..." rows={3} />
+          <Textarea {...register("note")} disabled={isSubmitting} placeholder={t("Optional note...")} rows={3} />
         </CardContent>
       </Card>
       <div className="flex items-center gap-3">
@@ -218,14 +220,14 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
           {isSubmitting ? (
             <span className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Processing...
+              {t("Processing...")}
             </span>
           ) : (
-            `Submit ${label}`
+            `${t("Submit")} ${label}`
           )}
         </Button>
         <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => window.history.back()}>
-          Cancel
+          {t("Cancel")}
         </Button>
       </div>
     </form>

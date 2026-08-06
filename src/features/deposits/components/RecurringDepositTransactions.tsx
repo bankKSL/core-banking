@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Undo2, ArrowLeftRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +17,7 @@ interface RecurringDepositTransactionsProps {
 }
 
 const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ accountId }) => {
+  const { t } = useTranslation();
   const { data: txnsData, isLoading } = useRecurringDepositTransactions(accountId);
   const undoMutation = useUndoRecurringDepositTransaction();
   const [undoingId, setUndoingId] = useState<number | null>(null);
@@ -26,26 +28,26 @@ const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ a
     async (transactionId: number) => {
       setUndoingId(transactionId);
       try {
-        if (window.confirm("Undo this transaction? It will be reversed.")) {
+        if (window.confirm(t("Undo this transaction? It will be reversed."))) {
           await undoMutation.mutateAsync({ accountId, transactionId });
         }
       } finally {
         setUndoingId(null);
       }
     },
-    [accountId, undoMutation],
+    [accountId, undoMutation, t],
   );
 
   const columns: ColumnDef<RecurringDepositTransaction>[] = [
-    { key: "id", header: "ID", accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
+    { key: "id", header: t("ID"), accessorFn: (row) => <span className="font-mono text-xs">{row.id}</span> },
     {
       key: "date",
-      header: "Date",
+      header: t("Date"),
       accessorFn: (row) => <span className="text-sm">{row.date ?? row.transactionDate ?? "—"}</span>,
     },
     {
       key: "type",
-      header: "Type",
+      header: t("Type"),
       accessorFn: (row) => (
         <Badge variant="info" size="sm">
           {row.type?.value ?? row.type?.code ?? "—"}
@@ -54,7 +56,7 @@ const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ a
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t("Amount"),
       accessorFn: (row) => (
         <span className={`text-sm font-mono ${row.amount < 0 ? "text-red-500" : "text-green-600"}`}>
           {formatCurrency(row.currency?.code, Math.abs(row.amount))}
@@ -63,21 +65,21 @@ const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ a
     },
     {
       key: "reversed",
-      header: "Status",
+      header: t("Status"),
       accessorFn: (row) =>
         row.reversed ? (
           <Badge variant="error" size="sm">
-            Reversed
+            {t("Reversed")}
           </Badge>
         ) : (
           <Badge variant="success" size="sm">
-            Active
+            {t("Active")}
           </Badge>
         ),
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           {!row.reversed && (
@@ -89,7 +91,7 @@ const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ a
                 handleUndo(row.id);
               }}
               disabled={undoingId === row.id}
-              title="Undo"
+              title={t("Undo")}
             >
               {undoingId === row.id ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -107,7 +109,7 @@ const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ a
     <div className="space-y-4">
       <h3 className="text-lg font-medium flex items-center gap-2">
         <ArrowLeftRight className="h-5 w-5" />
-        Transactions
+        {t("Transactions")}
       </h3>
       <Card>
         <CardContent className="p-0">
@@ -116,7 +118,7 @@ const RecurringDepositTransactions: FC<RecurringDepositTransactionsProps> = ({ a
             data={transactions}
             loading={isLoading}
             minWidth={700}
-            emptyState={{ icon: <ArrowLeftRight className="h-8 w-8 text-gray-300" />, message: "No transactions." }}
+            emptyState={{ icon: <ArrowLeftRight className="h-8 w-8 text-gray-300" />, message: t("No transactions.") }}
           />
         </CardContent>
       </Card>
