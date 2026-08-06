@@ -28,7 +28,7 @@ export function NetworkErrorBanner() {
   };
 
   return (
-    <div className="fixed inset-x-0 top-0 z-[90] flex justify-center px-4 pt-3">
+    <div className="fixed inset-x-0 top-0 z-90 flex justify-center px-4 pt-3">
       <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-white px-4 py-3 text-sm shadow-lg dark:border-amber-800 dark:bg-gray-900">
         <WifiOff className="h-5 w-5 shrink-0 text-amber-600" />
         <div className="min-w-0">

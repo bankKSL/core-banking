@@ -1,4 +1,5 @@
 import { type FC, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,6 +43,7 @@ const datatableFormSchema = z.object({
 type DatatableFormValues = z.input<typeof datatableFormSchema>;
 
 const DatatableFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const createMutation = useCreateDatatable();
 
@@ -89,11 +91,11 @@ const DatatableFormPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="New Datatable"
-        description="Create or register a new datatable"
+        title={t("New Datatable")}
+        description={t("Create or register a new datatable")}
         actions={
           <Button variant="outline" onClick={() => navigate("/datatables")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -101,9 +103,9 @@ const DatatableFormPage: FC = () => {
       {createMutation.isError && (
         <div className="mb-6">
           <ErrorState
-            title="Failed to create datatable"
+            title={t("Failed to create datatable")}
             message={
-              createMutation.error instanceof Error ? createMutation.error.message : "An unexpected error occurred."
+              createMutation.error instanceof Error ? createMutation.error.message : t("An unexpected error occurred.")
             }
             onRetry={() => createMutation.reset()}
           />
@@ -113,11 +115,11 @@ const DatatableFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Datatable Details</CardTitle>
+            <CardTitle>{t("Datatable Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Datatable Name *</label>
+              <label className="block text-sm font-medium">{t("Datatable Name")} *</label>
               <Input
                 {...register("datatableName")}
                 placeholder="e.g. extra_client_details"
@@ -126,14 +128,14 @@ const DatatableFormPage: FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium">App Table *</label>
+              <label className="block text-sm font-medium">{t("App Table")} *</label>
               <Controller
                 control={control}
                 name="apptableName"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger id="apptableName">
-                      <SelectValue placeholder="Select app table" />
+                      <SelectValue placeholder={t("Select app table")} />
                     </SelectTrigger>
                     <SelectContent>
                       {APPTABLE_OPTIONS.map((opt) => (
@@ -156,21 +158,21 @@ const DatatableFormPage: FC = () => {
                   <Checkbox id="multiRow" checked={field.value} onCheckedChange={field.onChange} />
                 )}
               />
-              <label className="block text-sm font-medium cursor-pointer">Allow multiple rows per entity</label>
+              <label className="block text-sm font-medium cursor-pointer">{t("Allow multiple rows per entity")}</label>
             </div>
           </CardContent>
         </Card>
 
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Columns</CardTitle>
+            <CardTitle>{t("Columns")}</CardTitle>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => append({ name: "", type: "String", length: 0, mandatory: false })}
             >
-              <Plus className="h-4 w-4 mr-1" /> Add Column
+              <Plus className="h-4 w-4 mr-1" /> {t("Add Column")}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -187,7 +189,7 @@ const DatatableFormPage: FC = () => {
                 </Button>
 
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-sm font-medium">Name *</label>
+                  <label className="block text-sm font-medium">{t("Name")} *</label>
                   <Input
                     {...register(`columns.${index}.name`)}
                     placeholder={`Column ${index + 1}`}
@@ -196,7 +198,7 @@ const DatatableFormPage: FC = () => {
                 </div>
 
                 <div className="w-40 space-y-1.5">
-                  <label className="block text-sm font-medium">Type</label>
+                  <label className="block text-sm font-medium">{t("Type")}</label>
                   <Controller
                     control={control}
                     name={`columns.${index}.type`}
@@ -219,7 +221,7 @@ const DatatableFormPage: FC = () => {
 
                 {columnsWatch?.[index]?.type !== "Text" && columnsWatch?.[index]?.type !== "Dropdown" && (
                   <div className="w-24 space-y-1.5">
-                    <label className="block text-sm font-medium">Length</label>
+                    <label className="block text-sm font-medium">{t("Length")}</label>
                     <Input
                       type="number"
                       min="0"
@@ -237,7 +239,7 @@ const DatatableFormPage: FC = () => {
                       <Checkbox id={`mandatory-${field.name}`} checked={field.value} onCheckedChange={field.onChange} />
                     )}
                   />
-                  <label className="block text-sm font-medium cursor-pointer">Mandatory</label>
+                  <label className="block text-sm font-medium cursor-pointer">{t("Mandatory")}</label>
                 </div>
               </div>
             ))}
@@ -248,7 +250,7 @@ const DatatableFormPage: FC = () => {
 
             {fields.length === 0 && !errors.columns?.root && (
               <p className="text-sm text-gray-500 text-center py-4">
-                No columns defined. Click "Add Column" to add one.
+                {t('No columns defined. Click "Add Column" to add one.')}
               </p>
             )}
           </CardContent>
@@ -256,16 +258,16 @@ const DatatableFormPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/datatables")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending}>
             {createMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Creating…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> Create Datatable
+                <Save className="mr-2 h-4 w-4" /> {t("Create Datatable")}
               </>
             )}
           </Button>

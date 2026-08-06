@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export function LoanOriginatorPicker({
   onlyActive = true,
   error,
 }: LoanOriginatorPickerProps) {
+  const { t } = useTranslation();
   const { data: originators = [], isLoading } = useLoanOriginators();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -54,7 +56,7 @@ export function LoanOriginatorPicker({
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium">Originators</label>
+      <label className="block text-sm font-medium">{t("Originators")}</label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -64,7 +66,7 @@ export function LoanOriginatorPicker({
             className="w-full justify-between font-normal"
           >
             {value.length === 0 ? (
-              <span className="text-gray-500">Select originators…</span>
+              <span className="text-gray-500">{t("Select originators…")}</span>
             ) : (
               <span className="flex flex-wrap gap-1">
                 {value.map((o) => (
@@ -83,7 +85,7 @@ export function LoanOriginatorPicker({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search originators…"
+              placeholder={t("Search originators…")}
               className="border-0 shadow-none focus-visible:ring-0 px-0"
             />
             {query && (
@@ -99,7 +101,7 @@ export function LoanOriginatorPicker({
               </div>
             ) : options.length === 0 ? (
               <p className="px-3 py-8 text-center text-sm text-gray-400">
-                {originators.length === 0 ? "No originators defined." : "No matching originators."}
+                {originators.length === 0 ? t("No originators defined.") : t("No matching originators.")}
               </p>
             ) : (
               options.map((o) => {

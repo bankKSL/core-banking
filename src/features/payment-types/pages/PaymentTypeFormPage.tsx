@@ -1,5 +1,6 @@
 import { type FC, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +25,7 @@ const paymentTypeFormSchema = z.object({
 type PaymentTypeFormValues = z.infer<typeof paymentTypeFormSchema>;
 
 const PaymentTypeFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -98,14 +100,14 @@ const PaymentTypeFormPage: FC = () => {
     return (
       <div className="p-6 max-w-2xl m-auto">
         <PageHeader
-          title="Payment Type"
+          title={t("Payment Type")}
           actions={
             <Button variant="outline" onClick={() => navigate("/payment-types")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load payment type." />
+        <ErrorState message={t("Failed to load payment type.")} />
       </div>
     );
   }
@@ -115,18 +117,18 @@ const PaymentTypeFormPage: FC = () => {
   return (
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Payment Type" : "New Payment Type"}
+        title={isEdit ? t("Edit Payment Type") : t("New Payment Type")}
         actions={
           <Button variant="outline" onClick={() => navigate("/payment-types")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
-          title="Failed to save payment type"
-          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
+          title={t("Failed to save payment type")}
+          message={saveError instanceof Error ? saveError.message : t("An unexpected error occurred.")}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();
@@ -136,26 +138,26 @@ const PaymentTypeFormPage: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{isEdit ? "Edit Payment Type" : "New Payment Type"}</CardTitle>
+          <CardTitle>{isEdit ? t("Edit Payment Type") : t("New Payment Type")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">
-                Name <span className="text-red-500">*</span>
+                {t("Name")} <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register("name")}
-                placeholder="Enter payment type name"
+                placeholder={t("Enter payment type name")}
                 error={errors.name?.message}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
+              <label className="block text-sm font-medium">{t("Description")}</label>
               <Input
                 {...register("description")}
-                placeholder="Enter description"
+                placeholder={t("Enter description")}
               />
             </div>
 
@@ -171,11 +173,11 @@ const PaymentTypeFormPage: FC = () => {
                   />
                 )}
               />
-              <label className="block text-sm font-medium">Cash Payment</label>
+              <label className="block text-sm font-medium">{t("Cash Payment")}</label>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Position</label>
+              <label className="block text-sm font-medium">{t("Position")}</label>
               <Input
                 type="number"
                 {...register("position", { valueAsNumber: true })}
@@ -184,10 +186,10 @@ const PaymentTypeFormPage: FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Code Name</label>
+              <label className="block text-sm font-medium">{t("Code Name")}</label>
               <Input
                 {...register("codeName")}
-                placeholder="Enter code name"
+                placeholder={t("Enter code name")}
                 disabled={isEdit && (existing?.isSystemDefined ?? false)}
               />
             </div>
@@ -200,7 +202,7 @@ const PaymentTypeFormPage: FC = () => {
                   disabled
                 />
                 <label className="block text-sm font-medium text-gray-500">
-                  System Defined
+                  {t("System Defined")}
                 </label>
               </div>
             )}
@@ -211,10 +213,10 @@ const PaymentTypeFormPage: FC = () => {
                 variant="outline"
                 onClick={() => navigate("/payment-types")}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : isEdit ? "Update" : "Create"}
+                {isSubmitting ? t("Saving...") : isEdit ? t("Update") : t("Create")}
               </Button>
             </div>
           </form>

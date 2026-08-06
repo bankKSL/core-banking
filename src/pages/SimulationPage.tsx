@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Play, Clock, CheckCircle, XCircle, Zap, Loader2, BarChart3, FileJson } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -61,6 +62,7 @@ const actionColorSpec: Record<string, { bg: string; text: string; label: string 
 };
 
 const SimulationPage: React.FC = () => {
+  const { t } = useTranslation();
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [inputJson, setInputJson] = useState(DEFAULT_INPUT_JSON);
   const [result, setResult] = useState<SimulationResult | null>(null);
@@ -161,11 +163,11 @@ const SimulationPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Simulation" description="Test your formula with sample inputs" />
+      <PageHeader title={t("Simulation")} description={t("Test your formula with sample inputs")} />
       <Card>
         <CardContent className="pt-6">
           <div className="max-w-md">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Select Campaign</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">{t("Select Campaign")}</label>
             <Select
               value={selectedCampaignId}
               onValueChange={(v) => {
@@ -175,7 +177,7 @@ const SimulationPage: React.FC = () => {
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose a campaign to simulate..." />
+                <SelectValue placeholder={t("Choose a campaign to simulate...")} />
               </SelectTrigger>
               <SelectContent>
                 {campaigns.map((c) => (
@@ -194,9 +196,9 @@ const SimulationPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <FileJson className="h-4 w-4" />
-              Input Data
+              {t("Input Data")}
             </CardTitle>
-            <CardDescription>JSON payload for simulation</CardDescription>
+            <CardDescription>{t("JSON payload for simulation")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
@@ -223,12 +225,12 @@ const SimulationPage: React.FC = () => {
               {isRunning ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Running Simulation...
+                  {t("Running Simulation...")}
                 </>
               ) : (
                 <>
                   <Play className="mr-2 h-4 w-4" />
-                  Run Simulation
+                  {t("Run Simulation")}
                 </>
               )}
             </Button>
@@ -240,9 +242,9 @@ const SimulationPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Results
+              {t("Results")}
             </CardTitle>
-            <CardDescription>Simulation output & performance</CardDescription>
+            <CardDescription>{t("Simulation output & performance")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {isRunning && (
@@ -253,28 +255,28 @@ const SimulationPage: React.FC = () => {
             {!isRunning && !result && (
               <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                 <Play className="h-10 w-10 mb-2" />
-                <p className="text-sm">Select a campaign and run the simulation</p>
+                <p className="text-sm">{t("Select a campaign and run the simulation")}</p>
               </div>
             )}
             {!isRunning && result && (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Match Status</span>
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Match Status")}</span>
                   {result.matched ? (
                     <Badge variant="success" size="md">
                       <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                      Matched
+                      {t("Matched")}
                     </Badge>
                   ) : (
                     <Badge variant="error" size="md">
                       <XCircle className="h-3.5 w-3.5 mr-1" />
-                      Not Matched
+                      {t("Not Matched")}
                     </Badge>
                   )}
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Calculated Value</span>
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Calculated Value")}</span>
                   <code className="text-lg font-mono font-bold text-gray-900 dark:text-gray-100">
                     {result.formulaResult}
                   </code>
@@ -282,10 +284,10 @@ const SimulationPage: React.FC = () => {
                 <Separator />
                 <div>
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400 block mb-2">
-                    Actions Triggered ({result.actions.length})
+                    {t("Actions Triggered")} ({result.actions.length})
                   </span>
                   {result.actions.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">No actions triggered</p>
+                    <p className="text-xs text-gray-400 italic">{t("No actions triggered")}</p>
                   ) : (
                     <div className="space-y-1.5">
                       {result.actions.map((a) => {
@@ -317,15 +319,15 @@ const SimulationPage: React.FC = () => {
                 <div>
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1 mb-2">
                     <Clock className="h-3.5 w-3.5" />
-                    Performance
+                    {t("Performance")}
                   </span>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2 rounded bg-gray-50 dark:bg-gray-900">
-                      <span className="text-gray-500">Duration</span>
+                      <span className="text-gray-500">{t("Duration")}</span>
                       <p className="font-mono font-bold text-gray-900 dark:text-gray-100">{result.duration} ms</p>
                     </div>
                     <div className="p-2 rounded bg-gray-50 dark:bg-gray-900">
-                      <span className="text-gray-500">Steps</span>
+                      <span className="text-gray-500">{t("Steps")}</span>
                       <p className="font-mono font-bold text-gray-900 dark:text-gray-100">{result.steps.length}</p>
                     </div>
                   </div>

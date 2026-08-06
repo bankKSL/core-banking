@@ -1,4 +1,5 @@
 import { type FC, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -117,6 +118,7 @@ const LoanForm: FC<LoanFormProps> = ({
     },
   });
 
+  const { t } = useTranslation();
   const productIdVal = watch("productId");
   const clientIdVal = watch("clientId");
   const [selectedOriginators, setSelectedOriginators] = useState<LoanOriginator[]>([]);
@@ -219,7 +221,7 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* Row 1 (full width) — Client Search */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Client & Product</CardTitle>
+          <CardTitle className="text-base">{t("Client & Product")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-2">
           <div className="col-span-1">
@@ -248,11 +250,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Loan Terms ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Loan Terms</CardTitle>
+          <CardTitle className="text-base">{t("Loan Terms")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Principal *</label>
+            <label className="block text-sm font-medium">{t("Principal")} *</label>
             <Input
               type="number"
               step="0.01"
@@ -262,7 +264,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Loan Term Frequency</label>
+            <label className="block text-sm font-medium">{t("Loan Term Frequency")}</label>
             <Input
               type="number"
               {...register("loanTermFrequency")}
@@ -271,7 +273,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Loan Term Frequency Type *</label>
+            <label className="block text-sm font-medium">{t("Loan Term Frequency Type")} *</label>
             <Select
               value={String(watch("loanTermFrequencyType") ?? 2)}
               onValueChange={(v) => syncFrequencyType(Number(v))}
@@ -293,7 +295,7 @@ const LoanForm: FC<LoanFormProps> = ({
             )}
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Number of Repayments *</label>
+            <label className="block text-sm font-medium">{t("Number of Repayments")} *</label>
             <Input
               type="number"
               {...register("numberOfRepayments")}
@@ -307,11 +309,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Repayment Schedule ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Repayment Schedule</CardTitle>
+          <CardTitle className="text-base">{t("Repayment Schedule")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Repayment Every *</label>
+            <label className="block text-sm font-medium">{t("Repayment Every")} *</label>
             <Input
               type="number"
               {...register("repaymentEvery")}
@@ -320,7 +322,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Repayment Frequency Type *</label>
+            <label className="block text-sm font-medium">{t("Repayment Frequency Type")} *</label>
             <Select
               value={String(watch("repaymentFrequencyType"))}
               onValueChange={(v) => syncFrequencyType(Number(v))}
@@ -347,11 +349,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Interest ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Interest</CardTitle>
+          <CardTitle className="text-base">{t("Interest")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Interest Type *</label>
+            <label className="block text-sm font-medium">{t("Interest Type")} *</label>
             <Select
               value={String(watch("interestType") ?? 0)}
               onValueChange={(v) => setValue("interestType", Number(v))}
@@ -361,13 +363,13 @@ const LoanForm: FC<LoanFormProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Declining Balance</SelectItem>
-                <SelectItem value="1">Flat</SelectItem>
+                <SelectItem value="0">{t("Declining Balance")}</SelectItem>
+                <SelectItem value="1">{t("Flat")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Interest Rate Frequency</label>
+            <label className="block text-sm font-medium">{t("Interest Rate Frequency")}</label>
             <Select
               value={String(watch("interestRateFrequencyType") ?? 3)}
               onValueChange={(v) => setValue("interestRateFrequencyType", Number(v))}
@@ -377,13 +379,13 @@ const LoanForm: FC<LoanFormProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="2">Per Month</SelectItem>
-                <SelectItem value="3">Per Year</SelectItem>
+                <SelectItem value="2">{t("Per Month")}</SelectItem>
+                <SelectItem value="3">{t("Per Year")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Interest Calculation Period Type *</label>
+            <label className="block text-sm font-medium">{t("Interest Calculation Period Type")} *</label>
             <Select
               value={String(watch("interestCalculationPeriodType") ?? 0)}
               onValueChange={(v) => setValue("interestCalculationPeriodType", Number(v))}
@@ -393,13 +395,13 @@ const LoanForm: FC<LoanFormProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Daily</SelectItem>
-                <SelectItem value="1">Same as Repayment</SelectItem>
+                <SelectItem value="0">{t("Daily")}</SelectItem>
+                <SelectItem value="1">{t("Same as Repayment")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Amortization Type</label>
+            <label className="block text-sm font-medium">{t("Amortization Type")}</label>
             <Select
               value={String(watch("amortizationType") ?? 1)}
               onValueChange={(v) => setValue("amortizationType", Number(v))}
@@ -409,8 +411,8 @@ const LoanForm: FC<LoanFormProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Equal Principal</SelectItem>
-                <SelectItem value="1">Equal Installments</SelectItem>
+                <SelectItem value="0">{t("Equal Principal")}</SelectItem>
+                <SelectItem value="1">{t("Equal Installments")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -420,11 +422,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Grace Periods ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Grace Periods</CardTitle>
+          <CardTitle className="text-base">{t("Grace Periods")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Grace on Principal Payment</label>
+            <label className="block text-sm font-medium">{t("Grace on Principal Payment")}</label>
             <Input
               type="number"
               {...register("graceOnPrincipalPayment")}
@@ -433,7 +435,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Grace on Interest Payment</label>
+            <label className="block text-sm font-medium">{t("Grace on Interest Payment")}</label>
             <Input
               type="number"
               {...register("graceOnInterestPayment")}
@@ -442,7 +444,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Grace on Interest Charged</label>
+            <label className="block text-sm font-medium">{t("Grace on Interest Charged")}</label>
             <Input
               type="number"
               {...register("graceOnInterestCharged")}
@@ -451,7 +453,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Grace on Arrears Ageing</label>
+            <label className="block text-sm font-medium">{t("Grace on Arrears Ageing")}</label>
             <Input
               type="number"
               {...register("graceOnArrearsAgeing")}
@@ -465,11 +467,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Limits & Tolerance ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Limits & Tolerance</CardTitle>
+          <CardTitle className="text-base">{t("Limits & Tolerance")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">In Arrears Tolerance</label>
+            <label className="block text-sm font-medium">{t("In Arrears Tolerance")}</label>
             <Input
               type="number"
               step="0.01"
@@ -478,7 +480,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Max Outstanding Loan Balance</label>
+            <label className="block text-sm font-medium">{t("Max Outstanding Loan Balance")}</label>
             <Input
               type="number"
               step="0.01"
@@ -492,11 +494,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Dates ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Dates</CardTitle>
+          <CardTitle className="text-base">{t("Dates")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Submitted On Date *</label>
+            <label className="block text-sm font-medium">{t("Submitted On Date")} *</label>
             <Input
               type="date"
               {...register("submittedOnDate")}
@@ -505,7 +507,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Expected Disbursement Date *</label>
+            <label className="block text-sm font-medium">{t("Expected Disbursement Date")} *</label>
             <Input
               type="date"
               {...register("expectedDisbursementDate")}
@@ -514,7 +516,7 @@ const LoanForm: FC<LoanFormProps> = ({
             />
           </div>
           <div className="space-y-1.5 col-span-2">
-            <label className="block text-sm font-medium">Repayments Starting From Date</label>
+            <label className="block text-sm font-medium">{t("Repayments Starting From Date")}</label>
             <Input type="date" {...register("repaymentsStartingFromDate")} disabled={isSubmitting} />
           </div>
         </CardContent>
@@ -523,11 +525,11 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* ── Processing ── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Processing</CardTitle>
+          <CardTitle className="text-base">{t("Processing")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1.5 col-span-2">
-            <label className="block text-sm font-medium">Transaction Processing Strategy</label>
+            <label className="block text-sm font-medium">{t("Transaction Processing Strategy")}</label>
             <Select
               value={watch("transactionProcessingStrategyCode") ?? "mifos-standard-strategy"}
               onValueChange={(v) => setValue("transactionProcessingStrategyCode", v)}
@@ -545,20 +547,20 @@ const LoanForm: FC<LoanFormProps> = ({
                   ))
                 ) : (
                   <>
-                    <SelectItem value="mifos-standard-strategy">Mifos Standard Strategy</SelectItem>
-                    <SelectItem value="heavensfamily-strategy">Heavensfamily Strategy</SelectItem>
-                    <SelectItem value="early-repayment-strategy">Early Repayment Strategy</SelectItem>
+                    <SelectItem value="mifos-standard-strategy">{t("Mifos Standard Strategy")}</SelectItem>
+                    <SelectItem value="heavensfamily-strategy">{t("Heavensfamily Strategy")}</SelectItem>
+                    <SelectItem value="early-repayment-strategy">{t("Early Repayment Strategy")}</SelectItem>
                     <SelectItem value="advance-payment-allocation-strategy">
-                      Advance Payment Allocation Strategy
+                      {t("Advance Payment Allocation Strategy")}
                     </SelectItem>
                     <SelectItem value="principal-interest-penalty-fees-order-strategy">
-                      P-I-Penalty-Fees Order
+                      {t("P-I-Penalty-Fees Order")}
                     </SelectItem>
                     <SelectItem value="interest-principal-penalty-fees-order-strategy">
-                      I-P-Penalty-Fees Order
+                      {t("I-P-Penalty-Fees Order")}
                     </SelectItem>
                     <SelectItem value="penalties-fees-interest-principal-order-strategy">
-                      Penalties-Fees-I-P Order
+                      {t("Penalties-Fees-I-P Order")}
                     </SelectItem>
                   </>
                 )}
@@ -577,7 +579,7 @@ const LoanForm: FC<LoanFormProps> = ({
               onCheckedChange={(v) => setValue("allowPartialPeriodInterestCalculation", v === true)}
             />
             <label htmlFor="allowPartialPeriodInterestCalculation" className="block text-sm font-medium cursor-pointer">
-              Allow Partial Period Interest Calculation
+              {t("Allow Partial Period Interest Calculation")}
             </label>
           </div>
         </CardContent>
@@ -586,21 +588,21 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* Additional Options Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Additional Options</CardTitle>
+          <CardTitle className="text-base">{t("Additional Options")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Fund</label>
+            <label className="block text-sm font-medium">{t("Fund")}</label>
             <Select
               value={watch("fundId") ? String(watch("fundId")) : "0"}
               onValueChange={(v) => setValue("fundId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select fund" />
+                <SelectValue placeholder={t("Select fund")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">None</SelectItem>
+                <SelectItem value="0">{t("None")}</SelectItem>
                 {(fundOptions ?? []).map((o) => (
                   <SelectItem key={o.id} value={String(o.id)}>
                     {o.name}
@@ -610,17 +612,17 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Loan Officer</label>
+            <label className="block text-sm font-medium">{t("Loan Officer")}</label>
             <Select
               value={watch("loanOfficerId") ? String(watch("loanOfficerId")) : "0"}
               onValueChange={(v) => setValue("loanOfficerId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select loan officer" />
+                <SelectValue placeholder={t("Select loan officer")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">None</SelectItem>
+                <SelectItem value="0">{t("None")}</SelectItem>
                 {(loanOfficerOptions ?? []).map((o) => (
                   <SelectItem key={o.id} value={String(o.id)}>
                     {o.displayName ?? o.name ?? `Officer #${o.id}`}
@@ -630,17 +632,17 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Loan Purpose</label>
+            <label className="block text-sm font-medium">{t("Loan Purpose")}</label>
             <Select
               value={watch("loanPurposeId") ? String(watch("loanPurposeId")) : "0"}
               onValueChange={(v) => setValue("loanPurposeId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select loan purpose" />
+                <SelectValue placeholder={t("Select loan purpose")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">None</SelectItem>
+                <SelectItem value="0">{t("None")}</SelectItem>
                 {(loanPurposeOptions ?? []).map((o) => (
                   <SelectItem key={o.id} value={String(o.id)}>
                     {o.name}
@@ -650,17 +652,17 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Link Account</label>
+            <label className="block text-sm font-medium">{t("Link Account")}</label>
             <Select
               value={watch("linkAccountId") ? String(watch("linkAccountId")) : "0"}
               onValueChange={(v) => setValue("linkAccountId", v === "0" ? undefined : Number(v))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select linked savings account" />
+                <SelectValue placeholder={t("Select linked savings account")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">None</SelectItem>
+                <SelectItem value="0">{t("None")}</SelectItem>
                 {(accountLinkingOptions ?? []).map((o) => (
                   <SelectItem key={o.id} value={String(o.id)}>
                     {o.accountNo ?? o.productName ?? `Account #${o.id}`}
@@ -670,11 +672,11 @@ const LoanForm: FC<LoanFormProps> = ({
             </Select>
           </div>
           <div className="col-span-2 space-y-1.5">
-            <label className="block text-sm font-medium">External ID</label>
+            <label className="block text-sm font-medium">{t("External ID")}</label>
             <Input
               {...register("externalId")}
               disabled={isSubmitting}
-              placeholder="External reference"
+              placeholder={t("External reference")}
               className="max-w-sm"
             />
           </div>
@@ -685,7 +687,7 @@ const LoanForm: FC<LoanFormProps> = ({
       {mode === "create" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Originators</CardTitle>
+            <CardTitle className="text-base">{t("Originators")}</CardTitle>
           </CardHeader>
           <CardContent>
             <LoanOriginatorPicker
@@ -693,9 +695,9 @@ const LoanForm: FC<LoanFormProps> = ({
               onChange={setSelectedOriginators}
               disabled={isSubmitting}
             />
-            <p className="mt-2 text-xs text-gray-500">
-              Link the external party (merchant, broker, affiliate, platform) that sourced this application.
-            </p>
+              <p className="mt-2 text-xs text-gray-500">
+                {t("Link the external party (merchant, broker, affiliate, platform) that sourced this application.")}
+              </p>
           </CardContent>
         </Card>
       )}
@@ -703,16 +705,16 @@ const LoanForm: FC<LoanFormProps> = ({
       {/* Actions */}
       <div className="flex items-center justify-end gap-3">
         <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {mode === "create" ? "Creating..." : "Saving..."}
-            </span>
-          ) : mode === "create" ? (
-            "Create Loan"
-          ) : (
-            "Save Changes"
-          )}
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {mode === "create" ? t("Creating...") : t("Saving...")}
+              </span>
+            ) : mode === "create" ? (
+              t("Create Loan")
+            ) : (
+              t("Save Changes")
+            )}
         </Button>
         {onPreviewSchedule && (
           <Button
@@ -721,18 +723,18 @@ const LoanForm: FC<LoanFormProps> = ({
             disabled={isSubmitting || previewLoading}
             onClick={() => onPreviewSchedule(getValues())}
           >
-            {previewLoading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Calculating...
-              </span>
-            ) : (
-              "Preview Schedule"
-            )}
+              {previewLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t("Calculating...")}
+                </span>
+              ) : (
+                t("Preview Schedule")
+              )}
           </Button>
         )}
         <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => window.history.back()}>
-          Cancel
+          {t("Cancel")}
         </Button>
       </div>
     </form>

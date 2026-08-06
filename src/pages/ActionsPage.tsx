@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, Zap } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -14,41 +15,42 @@ interface FlatAction extends CampaignAction {
   campaignStatus: Campaign["status"];
 }
 
-const actionColorMapSpec: Record<ActionType, { bg: string; text: string; label: string }> = {
-  set_interest_rate: {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-800 dark:text-blue-400",
-    label: "Set Interest Rate",
-  },
-  apply_cashback: {
-    bg: "bg-emerald-100 dark:bg-emerald-900/30",
-    text: "text-emerald-800 dark:text-emerald-400",
-    label: "Apply Cashback",
-  },
-  waive_fee: {
-    bg: "bg-amber-100 dark:bg-amber-900/30",
-    text: "text-amber-800 dark:text-amber-400",
-    label: "Waive Fee",
-  },
-  add_reward_points: {
-    bg: "bg-purple-100 dark:bg-purple-900/30",
-    text: "text-purple-800 dark:text-purple-400",
-    label: "Add Reward Points",
-  },
-  apply_penalty: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-800 dark:text-red-400",
-    label: "Apply Penalty",
-  },
-  adjust_limit: {
-    bg: "bg-indigo-100 dark:bg-indigo-900/30",
-    text: "text-indigo-800 dark:text-indigo-400",
-    label: "Adjust Limit",
-  },
-};
-
 const ActionsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
+
+  const actionColorMapSpec: Record<ActionType, { bg: string; text: string; label: string }> = {
+    set_interest_rate: {
+      bg: "bg-blue-100 dark:bg-blue-900/30",
+      text: "text-blue-800 dark:text-blue-400",
+      label: t("Set Interest Rate"),
+    },
+    apply_cashback: {
+      bg: "bg-emerald-100 dark:bg-emerald-900/30",
+      text: "text-emerald-800 dark:text-emerald-400",
+      label: t("Apply Cashback"),
+    },
+    waive_fee: {
+      bg: "bg-amber-100 dark:bg-amber-900/30",
+      text: "text-amber-800 dark:text-amber-400",
+      label: t("Waive Fee"),
+    },
+    add_reward_points: {
+      bg: "bg-purple-100 dark:bg-purple-900/30",
+      text: "text-purple-800 dark:text-purple-400",
+      label: t("Add Reward Points"),
+    },
+    apply_penalty: {
+      bg: "bg-red-100 dark:bg-red-900/30",
+      text: "text-red-800 dark:text-red-400",
+      label: t("Apply Penalty"),
+    },
+    adjust_limit: {
+      bg: "bg-indigo-100 dark:bg-indigo-900/30",
+      text: "text-indigo-800 dark:text-indigo-400",
+      label: t("Adjust Limit"),
+    },
+  };
 
   const allActions: FlatAction[] = useMemo(() => {
     return campaigns.flatMap((c) =>
@@ -76,12 +78,12 @@ const ActionsPage: React.FC = () => {
   const actionColumns: ColumnDef<FlatAction>[] = [
     {
       key: "campaignName",
-      header: "Campaign Name",
+      header: t("Campaign Name"),
       cell: (row) => <span className="font-medium text-gray-900 dark:text-gray-100">{row.campaignName}</span>,
     },
     {
       key: "type",
-      header: "Action Type",
+      header: t("Action Type"),
       cell: (row) => {
         const spec = actionColorMapSpec[row.type];
         return (
@@ -95,12 +97,12 @@ const ActionsPage: React.FC = () => {
     },
     {
       key: "target",
-      header: "Target",
+      header: t("Target"),
       cell: (row) => <span className="text-sm">{row.target}</span>,
     },
     {
       key: "value",
-      header: "Value",
+      header: t("Value"),
       cell: (row) => (
         <code className="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded font-mono font-semibold">
           {row.value}
@@ -109,14 +111,14 @@ const ActionsPage: React.FC = () => {
     },
     {
       key: "description",
-      header: "Description",
+      header: t("Description"),
       cell: (row) => (
         <span className="text-sm text-gray-600 dark:text-gray-400 max-w-75 truncate block">{row.description}</span>
       ),
     },
     {
       key: "campaignStatus",
-      header: "Campaign Status",
+      header: t("Campaign Status"),
       cell: (row) => <StatusBadge status={row.campaignStatus} size="sm" />,
     },
   ];
@@ -131,7 +133,7 @@ const ActionsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Actions" description="Campaign Actions Configuration" />
+      <PageHeader title={t("Actions")} description={t("Campaign Actions Configuration")} />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {Object.entries(actionColorMapSpec).map(([type, spec]) => (
@@ -148,12 +150,12 @@ const ActionsPage: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Zap className="h-5 w-5 text-[#D32F2F]" />
-            All Actions ({filteredActions.length})
+            {t("All Actions")} ({filteredActions.length})
           </CardTitle>
           <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search actions..."
+              placeholder={t("Search actions...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -165,8 +167,8 @@ const ActionsPage: React.FC = () => {
             columns={actionColumns}
             data={filteredActions}
             emptyState={{
-              title: "No actions found",
-              message: search ? "Try adjusting your search query." : "No campaign actions have been configured yet.",
+              title: t("No actions found"),
+              message: search ? t("Try adjusting your search query.") : t("No campaign actions have been configured yet."),
             }}
           />
         </CardContent>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Calendar, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ function formatDate(dateVal: number[] | null | undefined): string {
 }
 
 const HolidayListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [officeId, setOfficeId] = useState<number | null>(null);
   const [fromDate, setFromDate] = useState("");
@@ -74,29 +76,29 @@ const HolidayListPage: React.FC = () => {
 
   const columns: ColumnDef<Holiday>[] = useMemo(
     () => [
-      { key: "name", header: "Name", accessorFn: (row) => row.name ?? "—" },
+      { key: "name", header: t("Name"), accessorFn: (row) => row.name ?? "—" },
       {
         key: "fromDate",
-        header: "From Date",
+        header: t("From Date"),
         accessorFn: (row) => formatDate(row.fromDate),
       },
       {
         key: "toDate",
-        header: "To Date",
+        header: t("To Date"),
         accessorFn: (row) => formatDate(row.toDate),
       },
       {
         key: "status",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => {
           const statusCode = HOLIDAY_STATUS_MAP[row.status?.id] ?? "unknown";
-          const label = row.status?.value ?? row.status?.code ?? "Unknown";
+          const label = row.status?.value ?? row.status?.code ?? t("Unknown");
           return <StatusBadge status={statusCode} label={label} />;
         },
       },
       {
         key: "offices",
-        header: "Offices",
+        header: t("Offices"),
         accessorFn: (row) => String(row.offices?.length ?? 0),
       },
       {
@@ -111,28 +113,28 @@ const HolidayListPage: React.FC = () => {
               onClick={(e) => handleActivate(e, row.id)}
               disabled={activateMutation.isPending}
             >
-              <CheckCircle className="mr-1 h-3 w-3" /> Activate
+              <CheckCircle className="mr-1 h-3 w-3" /> {t("Activate")}
             </Button>
           );
         },
       },
     ],
-    [activateMutation, handleActivate],
+    [activateMutation, handleActivate, t],
   );
 
   if (isError) {
     return (
       <div className="p-6">
         <PageHeader
-          title="Holidays"
-          description="Manage bank holidays"
+          title={t("Holidays")}
+          description={t("Manage bank holidays")}
           actions={
             <Button onClick={() => navigate("/holidays/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Holiday
+              <Plus className="mr-2 h-4 w-4" /> {t("New Holiday")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load holidays." onRetry={refetch} />
+        <ErrorState message={t("Failed to load holidays.")} onRetry={refetch} />
       </div>
     );
   }
@@ -140,11 +142,11 @@ const HolidayListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Holidays"
-        description="Manage bank holidays"
+        title={t("Holidays")}
+        description={t("Manage bank holidays")}
         actions={
           <Button onClick={() => navigate("/holidays/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Holiday
+            <Plus className="mr-2 h-4 w-4" /> {t("New Holiday")}
           </Button>
         }
       />
@@ -153,7 +155,7 @@ const HolidayListPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Holidays
+            {t("Holidays")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -162,7 +164,7 @@ const HolidayListPage: React.FC = () => {
             data={holidays}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No holidays found." }}
+            emptyState={{ message: t("No holidays found.") }}
           />
         </CardContent>
       </Card>

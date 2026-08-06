@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PauseCircle, Plus, Loader2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,6 +16,7 @@ interface InterestPauseCardProps {
 }
 
 const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
+  const { t } = useTranslation();
   const pausesQuery = useInterestPauses(loanId);
   const pauses = pausesQuery.data ?? [];
 
@@ -53,24 +55,24 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <PauseCircle className="h-4 w-4 text-gray-400" />
-            Interest Pauses ({pauses.length})
+            {t("Interest Pauses")} ({pauses.length})
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openAdd}>
             <Plus className="mr-1 h-4 w-4" />
-            Add Pause
+            {t("Add Pause")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {pauses.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No interest pauses for this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No interest pauses for this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
-                  <TableHead>Created By</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Start Date")}</TableHead>
+                  <TableHead>{t("End Date")}</TableHead>
+                  <TableHead>{t("Created By")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -96,13 +98,13 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Interest Pause</DialogTitle>
-            <DialogDescription>Pause interest accrual for a period.</DialogDescription>
+            <DialogTitle>{t("Add Interest Pause")}</DialogTitle>
+            <DialogDescription>{t("Pause interest accrual for a period.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="pauseStartDate">
-                Start Date *
+                {t("Start Date")} *
               </label>
               <Input
                 id="pauseStartDate"
@@ -114,7 +116,7 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="pauseEndDate">
-                End Date *
+                {t("End Date")} *
               </label>
               <Input
                 id="pauseEndDate"
@@ -126,11 +128,11 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAddOpen(false)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleCreate} disabled={isMutating || !startDate || !endDate}>
                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Pause
+                {t("Add Pause")}
               </Button>
             </div>
           </div>
@@ -141,9 +143,9 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Interest Pause"
-        description="Remove this interest pause from the loan? This cannot be undone."
-        confirmLabel="Delete"
+        title={t("Delete Interest Pause")}
+        description={t("Remove this interest pause from the loan? This cannot be undone.")}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}

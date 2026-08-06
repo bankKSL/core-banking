@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Users, Landmark, PiggyBank, Settings, DollarSign, Calendar, ArrowUpRight, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -118,6 +119,7 @@ const resolveStatusString = (loan: Loan): string => {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [clientCount, setClientCount] = useState(0);
   const [activeLoans, setActiveLoans] = useState(0);
@@ -191,29 +193,29 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Dashboard" description="Core Banking System Overview" actions={<></>} />
+      <PageHeader title={t("Dashboard")} description={t("Core Banking System Overview")} actions={<></>} />
 
       {/* ─── Widget Cards ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Clients"
+          title={t("Total Clients")}
           value={loading ? "—" : clientCount.toLocaleString()}
           icon={Users}
           variant="default"
         />
         <StatCard
-          title="Active Loans"
+          title={t("Active Loans")}
           value={loading ? "—" : activeLoans.toLocaleString()}
           icon={Landmark}
           variant="success"
         />
         <StatCard
-          title="Savings Accounts"
+          title={t("Savings Accounts")}
           value={loading ? "—" : savingsCount.toLocaleString()}
           icon={PiggyBank}
           variant="default"
         />
-        <StatCard title="API Configuration" value={loading ? "—" : "Connected"} icon={Settings} variant="default" />
+        <StatCard title={t("API Configuration")} value={loading ? "—" : t("Connected")} icon={Settings} variant="default" />
       </div>
 
       {/* ─── Donut Charts Row ───────────────────────────────────── */}
@@ -222,7 +224,7 @@ const Dashboard: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <DollarSign className="h-4 w-4 text-emerald-500" />
-              Loan Portfolio
+              {t("Loan Portfolio")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -239,7 +241,7 @@ const Dashboard: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <PiggyBank className="h-4 w-4 text-blue-500" />
-              Savings
+              {t("Savings")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -259,10 +261,10 @@ const Dashboard: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Calendar className="h-4 w-4 text-amber-500" />
-            Pending Loan Approvals
+            {t("Pending Loan Approvals")}
           </CardTitle>
           <Button variant="ghost" size="sm" onClick={() => navigate("/loans")} className="text-xs">
-            View All
+            {t("View All")}
             <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
           </Button>
         </CardHeader>
@@ -274,17 +276,17 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
           ) : pendingLoans.length === 0 ? (
-            <p className="px-6 pb-4 text-sm text-gray-400">No pending loan approvals.</p>
+            <p className="px-6 pb-4 text-sm text-gray-400">{t("No pending loan approvals.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Account No</TableHead>
-                  <TableHead>Client Name</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Principal</TableHead>
-                  <TableHead>Submitted On</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t("Account No")}</TableHead>
+                  <TableHead>{t("Client Name")}</TableHead>
+                  <TableHead>{t("Product")}</TableHead>
+                  <TableHead className="text-right">{t("Principal")}</TableHead>
+                  <TableHead>{t("Submitted On")}</TableHead>
+                  <TableHead>{t("Status")}</TableHead>
                   <TableHead className="w-10" />
                 </TableRow>
               </TableHeader>

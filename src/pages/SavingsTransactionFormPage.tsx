@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +39,7 @@ const transactionSchema = z.object({
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 const SavingsTransactionFormPage: FC = () => {
+  const { t } = useTranslation();
   const { id, command } = useParams<{ id: string; command: string }>();
   const navigate = useNavigate();
   const { data: account, isLoading: accountLoading } = useSavingsAccount(id ?? undefined);
@@ -45,7 +47,7 @@ const SavingsTransactionFormPage: FC = () => {
   const withdrawMutation = useMakeWithdrawal();
 
   const isDeposit = command === "deposit";
-  const title = isDeposit ? "Make Deposit" : "Make Withdrawal";
+  const title = isDeposit ? t("Make Deposit") : t("Make Withdrawal");
 
   const {
     register,
@@ -118,7 +120,7 @@ const SavingsTransactionFormPage: FC = () => {
         actions={
           <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/saving-accounts/${id}`)}>
             <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -138,7 +140,7 @@ const SavingsTransactionFormPage: FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="amount">
-                Transaction Amount *
+                {t("Transaction Amount")} *
               </label>
               <Input
                 id="amount"
@@ -152,7 +154,7 @@ const SavingsTransactionFormPage: FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="transactionDate">
-                Transaction Date *
+                {t("Transaction Date")} *
               </label>
               <Input
                 id="transactionDate"
@@ -163,7 +165,7 @@ const SavingsTransactionFormPage: FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="paymentTypeId">
-                Payment Type *
+                {t("Payment Type")} *
               </label>
               <div>
                 <Select
@@ -171,7 +173,7 @@ const SavingsTransactionFormPage: FC = () => {
                   onValueChange={(v) => setValue("paymentTypeId", v, { shouldValidate: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select payment type" />
+                    <SelectValue placeholder={t("Select payment type")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Select payment type</SelectItem>
@@ -185,14 +187,14 @@ const SavingsTransactionFormPage: FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="note">
-                Note
+                {t("Note")}
               </label>
-              <Textarea id="note" rows={3} {...register("note")} placeholder="Optional note..." />
+              <Textarea id="note" rows={3} {...register("note")} placeholder={t("Optional note...")} />
             </div>
             <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Save className="mr-2 h-4 w-4" />
-              {isDeposit ? "Deposit" : "Withdraw"}
+              {isDeposit ? t("Deposit") : t("Withdraw")}
             </Button>
           </form>
         </CardContent>

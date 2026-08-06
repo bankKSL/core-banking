@@ -1,6 +1,7 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -17,6 +18,7 @@ import type { Teller } from "../types/teller";
 const STATUS_LABELS: Record<number, string> = { 100: "Pending", 300: "Active", 400: "Inactive", 600: "Closed" };
 
 const TellerListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [officeFilter, setOfficeFilter] = useState<string>("all");
   const {
@@ -35,11 +37,11 @@ const TellerListPage: FC = () => {
   }, [tellers, search]);
 
   const columns: ColumnDef<Teller>[] = [
-    { key: "name", header: "Name", cell: (r) => <span className="font-medium">{r.name}</span> },
-    { key: "officeName", header: "Office", cell: (r) => r.officeName ?? "—" },
+    { key: "name", header: t("Name"), cell: (r) => <span className="font-medium">{r.name}</span> },
+    { key: "officeName", header: t("Office"), cell: (r) => r.officeName ?? "—" },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => (
         <Badge variant={r.status === 300 ? "success" : r.status === 600 ? "default" : "info"} size="sm">
           {STATUS_LABELS[r.status] ?? r.status}
@@ -48,10 +50,10 @@ const TellerListPage: FC = () => {
     },
     {
       key: "startDate",
-      header: "Start Date",
+      header: t("Start Date"),
       cell: (r) => (r.startDate ? new Date(r.startDate).toLocaleDateString() : "—"),
     },
-    { key: "endDate", header: "End Date", cell: (r) => (r.endDate ? new Date(r.endDate).toLocaleDateString() : "—") },
+    { key: "endDate", header: t("End Date"), cell: (r) => (r.endDate ? new Date(r.endDate).toLocaleDateString() : "—") },
     {
       key: "actions",
       header: "",
@@ -74,22 +76,22 @@ const TellerListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Tellers"
-        description="Manage teller counters and cashier assignments"
+        title={t("Tellers")}
+        description={t("Manage teller counters and cashier assignments")}
         actions={
           <Button onClick={() => navigate("/tellers/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> Create Teller
+            <Plus className="mr-2 h-4 w-4" /> {t("Create Teller")}
           </Button>
         }
       />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Tellers</CardTitle>
+          <CardTitle>{t("All Tellers")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search tellers..."
+                placeholder={t("Search tellers...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -98,7 +100,7 @@ const TellerListPage: FC = () => {
             <OfficeSelect
               value={officeFilter}
               onChange={setOfficeFilter}
-              includeAll="All Offices"
+              includeAll={t("All Offices")}
             />
           </div>
         </CardHeader>
@@ -110,7 +112,7 @@ const TellerListPage: FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={filtered} emptyState={{ message: "No tellers found." }} minWidth={700} />
+            <DataTable columns={columns} data={filtered} emptyState={{ message: t("No tellers found.") }} minWidth={700} />
           )}
         </CardContent>
       </Card>
@@ -123,10 +125,10 @@ const TellerListPage: FC = () => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete Teller"
-        description={`Delete "${deleteTarget?.name}"? Fails if cashiers are assigned.`}
+        title={t("Delete Teller")}
+        description={t(`Delete "${deleteTarget?.name}"? Fails if cashiers are assigned.`)}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
       />
     </div>
   );

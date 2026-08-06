@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, TrendingUp, Globe, RefreshCw, Plus, Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
@@ -53,6 +54,7 @@ const emptyRate: Omit<ExchangeRate, "id" | "lastUpdated"> = {
 };
 
 const ExchangeRatePage: React.FC = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<ExchangeRate[]>(exchangeRates);
   const [search, setSearch] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
@@ -157,13 +159,13 @@ const ExchangeRatePage: React.FC = () => {
   const columns: ColumnDef<ExchangeRate>[] = [
     {
       key: "currencyCode",
-      header: "Code",
+      header: t("Code"),
       sortable: true,
       accessorFn: (r) => <span className="font-semibold text-gray-900 dark:text-white">{r.currencyCode}</span>,
     },
     {
       key: "currencyName",
-      header: "Currency",
+      header: t("Currency"),
       sortable: true,
       accessorFn: (r) => (
         <div className="flex flex-col">
@@ -174,7 +176,7 @@ const ExchangeRatePage: React.FC = () => {
     },
     {
       key: "buyRate",
-      header: "Buy Rate",
+      header: t("Buy Rate"),
       sortable: true,
       accessorFn: (r) => (
         <span className="font-mono text-sm text-green-600 dark:text-green-400">
@@ -184,7 +186,7 @@ const ExchangeRatePage: React.FC = () => {
     },
     {
       key: "sellRate",
-      header: "Sell Rate",
+      header: t("Sell Rate"),
       sortable: true,
       accessorFn: (r) => (
         <span className="font-mono text-sm text-red-600 dark:text-red-400">
@@ -194,7 +196,7 @@ const ExchangeRatePage: React.FC = () => {
     },
     {
       key: "midRate",
-      header: "Mid Rate",
+      header: t("Mid Rate"),
       sortable: true,
       accessorFn: (r) => (
         <span className="font-mono text-sm">
@@ -204,19 +206,19 @@ const ExchangeRatePage: React.FC = () => {
     },
     {
       key: "spreadPercent",
-      header: "Spread",
+      header: t("Spread"),
       sortable: true,
       accessorFn: (r) => <span className="text-sm">{r.spreadPercent.toFixed(2)}%</span>,
     },
     {
       key: "source",
-      header: "Source",
+      header: t("Source"),
       sortable: true,
       accessorFn: (r) => <Badge className={sourceColors[r.source]}>{sourceLabels[r.source]}</Badge>,
     },
     {
       key: "isActive",
-      header: "Status",
+      header: t("Status"),
       sortable: true,
       accessorFn: (r) => <StatusBadge status={r.isActive ? "active" : "inactive"} />,
     },
@@ -225,35 +227,35 @@ const ExchangeRatePage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Exchange Rates"
-        description="Manage foreign exchange rates across currencies"
+        title={t("Exchange Rates")}
+        description={t("Manage foreign exchange rates across currencies")}
         actions={
           <>
             <Button variant="outline" onClick={handleRefreshRates}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Refresh Rates
+              <RefreshCw className="mr-2 h-4 w-4" /> {t("Refresh Rates")}
             </Button>
             <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" /> Add Rate
+              <Plus className="mr-2 h-4 w-4" /> {t("Add Rate")}
             </Button>
           </>
         }
       />
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Currencies" value={stats.total} icon={Globe} variant="default" />
-        <StatCard title="Active" value={stats.active} icon={TrendingUp} variant="success" />
-        <StatCard title="Avg Spread" value={`${stats.avgSpread}%`} icon={ArrowUpDown} variant="warning" />
-        <StatCard title="Last Updated" value={stats.lastUpdated} icon={RefreshCw} variant="default" />
+        <StatCard title={t("Total Currencies")} value={stats.total} icon={Globe} variant="default" />
+        <StatCard title={t("Active")} value={stats.active} icon={TrendingUp} variant="success" />
+        <StatCard title={t("Avg Spread")} value={`${stats.avgSpread}%`} icon={ArrowUpDown} variant="warning" />
+        <StatCard title={t("Last Updated")} value={stats.lastUpdated} icon={RefreshCw} variant="default" />
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Rates</CardTitle>
+          <CardTitle>{t("All Rates")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
-                placeholder="Search currency..."
+                placeholder={t("Search currency...")}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -270,14 +272,14 @@ const ExchangeRatePage: React.FC = () => {
               }}
             >
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="All Sources" />
+                <SelectValue placeholder={t("All Sources")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
-                <SelectItem value="central_bank">Central Bank</SelectItem>
-                <SelectItem value="commercial_bank">Commercial Bank</SelectItem>
-                <SelectItem value="market">Market</SelectItem>
-                <SelectItem value="manual">Manual</SelectItem>
+                <SelectItem value="all">{t("All Sources")}</SelectItem>
+                <SelectItem value="central_bank">{t("Central Bank")}</SelectItem>
+                <SelectItem value="commercial_bank">{t("Commercial Bank")}</SelectItem>
+                <SelectItem value="market">{t("Market")}</SelectItem>
+                <SelectItem value="manual">{t("Manual")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -287,7 +289,7 @@ const ExchangeRatePage: React.FC = () => {
             columns={columns}
             data={paginated}
             onRowClick={openEdit}
-            emptyState={{ message: "No exchange rates found" }}
+            emptyState={{ message: t("No exchange rates found") }}
           />
           {filtered.length > PAGE_SIZE && (
             <div className="mt-4">
@@ -307,9 +309,9 @@ const ExchangeRatePage: React.FC = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Exchange Rate" : "Add Exchange Rate"}</DialogTitle>
+            <DialogTitle>{editingId ? t("Edit Exchange Rate") : t("Add Exchange Rate")}</DialogTitle>
             <DialogDescription>
-              {editingId ? "Update the rate details below." : "Add a new currency exchange rate."}
+              {editingId ? t("Update the rate details below.") : t("Add a new currency exchange rate.")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
@@ -327,15 +329,15 @@ const ExchangeRatePage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Country</label>
+              <label className="text-sm font-medium">{t("Country")}</label>
               <Input className="mt-1" value={form.country} disabled />
             </div>
             <div>
-              <label className="text-sm font-medium">Symbol</label>
+              <label className="text-sm font-medium">{t("Symbol")}</label>
               <Input className="mt-1" value={form.symbol} disabled />
             </div>
             <div>
-              <label className="text-sm font-medium">Buy Rate</label>
+              <label className="text-sm font-medium">{t("Buy Rate")}</label>
               <Input
                 className="mt-1"
                 type="number"
@@ -345,7 +347,7 @@ const ExchangeRatePage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Sell Rate</label>
+              <label className="text-sm font-medium">{t("Sell Rate")}</label>
               <Input
                 className="mt-1"
                 type="number"
@@ -355,7 +357,7 @@ const ExchangeRatePage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Mid Rate</label>
+              <label className="text-sm font-medium">{t("Mid Rate")}</label>
               <Input
                 className="mt-1"
                 type="number"
@@ -365,7 +367,7 @@ const ExchangeRatePage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Spread %</label>
+              <label className="text-sm font-medium">{t("Spread %")}</label>
               <Input
                 className="mt-1"
                 type="number"
@@ -375,7 +377,7 @@ const ExchangeRatePage: React.FC = () => {
               />
             </div>
             <div className="col-span-2">
-              <label className="text-sm font-medium">Source</label>
+              <label className="text-sm font-medium">{t("Source")}</label>
               <Select
                 value={form.source}
                 onValueChange={(v: ExchangeRate["source"]) => setForm({ ...form, source: v })}
@@ -384,10 +386,10 @@ const ExchangeRatePage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="central_bank">Central Bank</SelectItem>
-                  <SelectItem value="commercial_bank">Commercial Bank</SelectItem>
-                  <SelectItem value="market">Market</SelectItem>
-                  <SelectItem value="manual">Manual</SelectItem>
+                <SelectItem value="central_bank">{t("Central Bank")}</SelectItem>
+                <SelectItem value="commercial_bank">{t("Commercial Bank")}</SelectItem>
+                <SelectItem value="market">{t("Market")}</SelectItem>
+                <SelectItem value="manual">{t("Manual")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -400,15 +402,15 @@ const ExchangeRatePage: React.FC = () => {
                 className="h-4 w-4 rounded border-gray-300 text-[#D32F2F] focus:ring-[#D32F2F]"
               />
               <label htmlFor="fx-active" className="text-sm font-medium">
-                Active
+                {t("Active")}
               </label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t("Cancel")}
             </Button>
-            <Button onClick={handleSave}>{editingId ? "Save Changes" : "Add Rate"}</Button>
+            <Button onClick={handleSave}>{editingId ? t("Save Changes") : t("Add Rate")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -419,8 +421,8 @@ const ExchangeRatePage: React.FC = () => {
         onOpenChange={(v) => {
           if (!v) setDeleteTarget(null);
         }}
-        title="Delete Exchange Rate"
-        description={`Are you sure you want to delete ${deleteTarget?.currencyCode} — ${deleteTarget?.currencyName}? This action cannot be undone.`}
+        title={t("Delete Exchange Rate")}
+        description={`${t("Are you sure you want to delete")} ${deleteTarget?.currencyCode} — ${deleteTarget?.currencyName}? ${t("This action cannot be undone.")}`}
         onConfirm={handleDelete}
         variant="destructive"
       />

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Undo2, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -19,6 +20,7 @@ const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(n);
 
 const JournalEntriesPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [officeFilter, setOfficeFilter] = useState<string>("all");
@@ -49,7 +51,7 @@ const JournalEntriesPage: React.FC = () => {
   const totalRecords = data?.totalFilteredRecords ?? 0;
 
   const handleReverse = async (entry: JournalEntryData) => {
-    if (!window.confirm(`Reverse journal entry ${entry.transactionId}?`)) return;
+    if (!window.confirm(t("Reverse journal entry {{transactionId}}?", { transactionId: entry.transactionId }))) return;
     setReversingId(entry.transactionId);
     try {
       await reverseMutation.mutateAsync({ transactionId: entry.transactionId, officeId: entry.officeId });
@@ -61,18 +63,18 @@ const JournalEntriesPage: React.FC = () => {
   const columns: ColumnDef<JournalEntryData>[] = [
     {
       key: "transactionId",
-      header: "Transaction ID",
+      header: t("Transaction ID"),
       cell: (r) => <code className="text-xs font-mono">{r.transactionId}</code>,
     },
     {
       key: "transactionDate",
-      header: "Date",
+      header: t("Date"),
       cell: (r) => <span className="text-sm">{r.transactionDate ?? "—"}</span>,
     },
-    { key: "officeName", header: "Office" },
+    { key: "officeName", header: t("Office") },
     {
       key: "glAccountName",
-      header: "GL Account",
+      header: t("GL Account"),
       cell: (r) => (
         <span className="text-sm">
           {r.glAccountName} <code className="text-xs text-gray-400">({r.glAccountCode})</code>
@@ -81,7 +83,7 @@ const JournalEntriesPage: React.FC = () => {
     },
     {
       key: "entryType",
-      header: "Type",
+      header: t("Type"),
       cell: (r) => (
         <Badge variant={r.entryType?.code?.includes("DEBIT") ? "info" : "default"} size="sm">
           {r.entryType?.value ?? "—"}
@@ -90,40 +92,40 @@ const JournalEntriesPage: React.FC = () => {
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t("Amount"),
       cell: (r) => <span className="font-mono text-sm">{formatCurrency(r.amount, r.currency?.code)}</span>,
     },
     {
       key: "manualEntry",
-      header: "Source",
+      header: t("Source"),
       cell: (r) =>
         r.manualEntry ? (
           <Badge variant="warning" size="sm">
-            Manual
+            {t("Manual")}
           </Badge>
         ) : (
           <Badge variant="default" size="sm">
-            System
+            {t("System")}
           </Badge>
         ),
     },
     {
       key: "reversed",
-      header: "Status",
+      header: t("Status"),
       cell: (r) =>
         r.reversed ? (
           <Badge variant="error" size="sm">
-            Reversed
+            {t("Reversed")}
           </Badge>
         ) : (
           <Badge variant="success" size="sm">
-            Posted
+            {t("Posted")}
           </Badge>
         ),
     },
     {
       key: "createdByUserName",
-      header: "Created By",
+      header: t("Created By"),
       cell: (r) => <span className="text-sm text-gray-500">{r.createdByUserName ?? "—"}</span>,
     },
     {
@@ -139,7 +141,7 @@ const JournalEntriesPage: React.FC = () => {
               handleReverse(r);
             }}
             disabled={reversingId === r.transactionId}
-            title="Reverse entry"
+            title={t("Reverse entry")}
           >
             {reversingId === r.transactionId ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -154,32 +156,32 @@ const JournalEntriesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Journal Entries"
-        description="View and create manual journal entries"
+        title={t("Journal Entries")}
+        description={t("View and create manual journal entries")}
         actions={
           <Button onClick={() => navigate("/accounting/journal-entries/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Journal Entry
+            <Plus className="mr-2 h-4 w-4" /> {t("New Journal Entry")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Entries</CardTitle>
+          <CardTitle>{t("Entries")}</CardTitle>
           <div className="flex items-end gap-3">
             <div className="space-y-1">
-              <label className="block text-sm font-medium">Office</label>
+              <label className="block text-sm font-medium">{t("Office")}</label>
               <OfficeSelect
                 value={officeFilter}
                 onChange={(v) => {
                   setOfficeFilter(v);
                   setPage(1);
                 }}
-                includeAll="All Offices"
+                includeAll={t("All Offices")}
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-sm font-medium">From</label>
+              <label className="block text-sm font-medium">{t("From")}</label>
               <Input
                 type="date"
                 value={fromDate}
@@ -191,7 +193,7 @@ const JournalEntriesPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-sm font-medium">To</label>
+              <label className="block text-sm font-medium">{t("To")}</label>
               <Input
                 type="date"
                 value={toDate}
@@ -203,7 +205,7 @@ const JournalEntriesPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-sm font-medium">Source</label>
+              <label className="block text-sm font-medium">{t("Source")}</label>
               <Select
                 value={manualOnly}
                 onValueChange={(v) => {
@@ -215,8 +217,8 @@ const JournalEntriesPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="manual">Manual</SelectItem>
+                  <SelectItem value="all">{t("All")}</SelectItem>
+                  <SelectItem value="manual">{t("Manual")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -231,9 +233,9 @@ const JournalEntriesPage: React.FC = () => {
             </div>
           ) : isError ? (
             <div className="flex items-center gap-3 text-red-600">
-              <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
+              <span className="text-sm">{t("Failed to load:")} {error?.message ?? t("Unknown error")}</span>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Retry
+                {t("Retry")}
               </Button>
             </div>
           ) : (
@@ -241,7 +243,7 @@ const JournalEntriesPage: React.FC = () => {
               <DataTable
                 columns={columns}
                 data={entries}
-                emptyState={{ message: "No journal entries found." }}
+                emptyState={{ message: t("No journal entries found.") }}
                 minWidth={1100}
               />
               {totalRecords > ACCOUNTING_PAGE_SIZE && (

@@ -1,5 +1,6 @@
 import { type FC, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { Search, Users, UsersRound, Banknote, PiggyBank, Inbox } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -35,19 +36,13 @@ const ENTITY_ROUTES: Record<string, string> = {
   savings: "/deposits/saving-accounts",
 };
 
-const ENTITY_LABELS: Record<string, string> = {
-  clients: "Clients",
-  groups: "Groups",
-  loans: "Loans",
-  savings: "Savings",
-};
-
 interface SearchFormValues {
   query: string;
   exactMatch: boolean;
 }
 
 const SearchPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedResources, setSelectedResources] = useState<string[]>(["clients", "groups", "loans", "savings"]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,16 +92,23 @@ const SearchPage: FC = () => {
 
   const resultCount = data?.length ?? 0;
 
+  const ENTITY_LABELS: Record<string, string> = {
+    clients: t("Clients"),
+    groups: t("Groups"),
+    loans: t("Loans"),
+    savings: t("Savings"),
+  };
+
   const emptyState = useMemo(() => {
-    if (!searchQuery) return { icon: <Search className="h-12 w-12" />, title: "Search", message: "Enter a search term to find clients, groups, loans, or savings accounts." };
-    return { icon: <Inbox className="h-12 w-12" />, title: "No results found", message: "Try adjusting your search term or filters." };
-  }, [searchQuery]);
+    if (!searchQuery) return { icon: <Search className="h-12 w-12" />, title: t("Search"), message: t("Enter a search term to find clients, groups, loans, or savings accounts.") };
+    return { icon: <Inbox className="h-12 w-12" />, title: t("No results found"), message: t("Try adjusting your search term or filters.") };
+  }, [searchQuery, t]);
 
   if (isError) {
     return (
       <div className="p-6">
-        <PageHeader title="Global Search" description="Search across clients, groups, loans, and savings accounts" />
-        <ErrorState title="Search failed" message="Failed to perform search." onRetry={refetch} />
+        <PageHeader title={t("Global Search")} description={t("Search across clients, groups, loans, and savings accounts")} />
+        <ErrorState title={t("Search failed")} message={t("Failed to perform search.")} onRetry={refetch} />
       </div>
     );
   }
@@ -114,8 +116,8 @@ const SearchPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Global Search"
-        description="Search across clients, groups, loans, and savings accounts"
+        title={t("Global Search")}
+        description={t("Search across clients, groups, loans, and savings accounts")}
       />
 
       <Card>
@@ -124,7 +126,7 @@ const SearchPage: FC = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <Input
-                placeholder="Search by name, account number, or external ID..."
+                placeholder={t("Search by name, account number, or external ID...")}
                 {...register("query")}
                 className="pl-10 pr-20"
               />
@@ -133,7 +135,7 @@ const SearchPage: FC = () => {
                 size="sm"
                 className="absolute right-1 top-1/2 -translate-y-1/2"
               >
-                Search
+                {t("Search")}
               </Button>
             </div>
 
@@ -170,7 +172,7 @@ const SearchPage: FC = () => {
                   )}
                 />
                 <Label htmlFor="exact-match" className="text-sm text-gray-500 cursor-pointer">
-                  Exact match
+                  {t("Exact match")}
                 </Label>
               </div>
             </div>
@@ -216,8 +218,8 @@ const SearchPage: FC = () => {
           <CardContent>
             <div className="flex flex-col items-center justify-center py-16 px-4">
               <Search className="h-12 w-12 text-gray-300 dark:text-gray-600" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Search</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter a search term to find clients, groups, loans, or savings accounts.</p>
+              <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">{t("Search")}</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("Enter a search term to find clients, groups, loans, or savings accounts.")}</p>
             </div>
           </CardContent>
         </Card>
@@ -235,7 +237,7 @@ const SearchPage: FC = () => {
                     <Icon className="h-5 w-5" />
                     {label}
                     <span className="ml-auto text-sm font-normal text-gray-500">
-                      {items.length} result{items.length !== 1 ? "s" : ""}
+                      {items.length} {t("result", { count: items.length })}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -243,7 +245,7 @@ const SearchPage: FC = () => {
                   <div className="divide-y divide-gray-100 dark:divide-gray-800">
                     {items.map((item, idx) => {
                       const parentLabel = item.parentName
-                        ? `${item.parentType?.toLowerCase() === "client" ? "Client" : "Group"}: ${item.parentName}`
+                        ? `${item.parentType?.toLowerCase() === "client" ? t("Client") : t("Group")}: ${item.parentName}`
                         : null;
                       return (
                         <div
@@ -264,7 +266,7 @@ const SearchPage: FC = () => {
                               </span>
                             </div>
                             <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-                              {item.entityExternalId && <span>ID: {item.entityExternalId}</span>}
+                              {item.entityExternalId && <span>{t("ID")}: {item.entityExternalId}</span>}
                               {item.entityStatus?.value && (
                                 <>
                                   <span className="text-gray-300">|</span>

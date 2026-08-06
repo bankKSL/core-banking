@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ const CHARGE_APPLIES_TO_LABELS: Record<number, string> = {
 };
 
 const ChargeListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: charges = [], isLoading, isError, refetch } = useCharges();
   const deleteMutation = useDeleteCharge();
@@ -40,39 +42,39 @@ const ChargeListPage: React.FC = () => {
     () => [
       {
         key: "name",
-        header: "Name",
+        header: t("Name"),
         accessorFn: (row) => <span className="font-medium">{row.name}</span>,
       },
       {
         key: "type",
-        header: "Type",
+        header: t("Type"),
         accessorFn: (row) =>
-          row.penalty ? <Badge variant="error" size="sm">Penalty</Badge> : <Badge variant="info" size="sm">Fee</Badge>,
+          row.penalty ? <Badge variant="error" size="sm">{t("Penalty")}</Badge> : <Badge variant="info" size="sm">{t("Fee")}</Badge>,
       },
       {
         key: "chargeAppliesTo",
-        header: "Applies To",
+        header: t("Applies To"),
         accessorFn: (row) => CHARGE_APPLIES_TO_LABELS[row.chargeAppliesTo?.id] ?? row.chargeAppliesTo?.value ?? "—",
       },
       {
         key: "chargeTimeType",
-        header: "Time",
+        header: t("Time"),
         accessorFn: (row) => row.chargeTimeType?.value ?? "—",
       },
       {
         key: "chargeCalculationType",
-        header: "Calculation",
+        header: t("Calculation"),
         accessorFn: (row) => row.chargeCalculationType?.value ?? "—",
       },
       {
         key: "amount",
-        header: "Amount",
+        header: t("Amount"),
         accessorFn: (row) =>
           `${row.amount?.toLocaleString("en-US", { minimumFractionDigits: 2 })} ${row.currencyCode ?? ""}`,
       },
       {
         key: "active",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => (row.active ? <StatusBadge status="active" /> : <StatusBadge status="inactive" />),
       },
       {
@@ -88,7 +90,7 @@ const ChargeListPage: React.FC = () => {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const handleRowClick = useCallback(
@@ -102,15 +104,15 @@ const ChargeListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Charges"
-          description="Define fees and penalties"
+          title={t("Charges")}
+          description={t("Define fees and penalties")}
           actions={
             <Button onClick={() => navigate("/charges/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Charge
+              <Plus className="mr-2 h-4 w-4" /> {t("New Charge")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load charges." onRetry={refetch} />
+        <ErrorState message={t("Failed to load charges.")} onRetry={refetch} />
       </div>
     );
   }
@@ -118,18 +120,18 @@ const ChargeListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Charges"
-        description="Define fees and penalties for loans, savings, client accounts"
+        title={t("Charges")}
+        description={t("Define fees and penalties for loans, savings, client accounts")}
         actions={
           <Button onClick={() => navigate("/charges/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Charge
+            <Plus className="mr-2 h-4 w-4" /> {t("New Charge")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Charges</CardTitle>
+          <CardTitle>{t("All Charges")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -137,7 +139,7 @@ const ChargeListPage: React.FC = () => {
             data={charges}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No charges defined." }}
+            emptyState={{ message: t("No charges defined.") }}
           />
         </CardContent>
       </Card>
@@ -145,9 +147,9 @@ const ChargeListPage: React.FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
-        title="Delete Charge"
-        description="Are you sure you want to delete this charge?"
-        confirmLabel="Delete"
+        title={t("Delete Charge")}
+        description={t("Are you sure you want to delete this charge?")}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

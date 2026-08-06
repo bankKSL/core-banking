@@ -1,5 +1,6 @@
 import { type FC, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,6 +41,7 @@ const centerFormSchema = z
 type CenterFormValues = z.infer<typeof centerFormSchema>;
 
 const CenterFormPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
@@ -138,20 +140,20 @@ const CenterFormPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto">
       <PageHeader
-        title={isEditMode ? "Edit Center" : "Create Center"}
-        description={isEditMode ? `Editing center ${center?.name ?? `#${id}`}` : "Register a new center"}
+        title={isEditMode ? t("Edit Center") : t("Create Center")}
+        description={isEditMode ? `${t("Editing center")} ${center?.name ?? `#${id}`}` : t("Register a new center")}
         actions={
           <Button variant="outline" onClick={() => navigate("/centers")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Centers
+            {t("Back to Centers")}
           </Button>
         }
       />
       {(createMutation.isError || updateMutation.isError) && (
         <div className="mb-4">
           <ErrorState
-            title="Failed to save center"
-            message={error ?? "An unexpected error occurred."}
+            title={t("Failed to save center")}
+            message={error ?? t("An unexpected error occurred.")}
             onRetry={() => {
               createMutation.reset();
               updateMutation.reset();
@@ -162,15 +164,15 @@ const CenterFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>{isEditMode ? "Center Details" : "New Center"}</CardTitle>
+            <CardTitle>{isEditMode ? t("Center Details") : t("New Center")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input
                 {...register("name")}
                 disabled={isSubmitting}
-                placeholder="e.g. Downtown Center"
+                placeholder={t("e.g. Downtown Center")}
                 error={errors.name?.message}
               />
             </div>
@@ -184,7 +186,7 @@ const CenterFormPage: FC = () => {
 
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="staffId">
-                Staff
+                {t("Staff")}
               </label>
               <Select
                 value={watch("staffId") ? String(watch("staffId")) : ""}
@@ -192,7 +194,7 @@ const CenterFormPage: FC = () => {
                 disabled={isSubmitting}
               >
                 <SelectTrigger id="staffId">
-                  <SelectValue placeholder="Select staff" />
+                  <SelectValue placeholder={t("Select staff")} />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredStaff.map((staff) => (
@@ -206,8 +208,8 @@ const CenterFormPage: FC = () => {
 
             {!isEditMode && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">External ID</label>
-                <Input {...register("externalId")} disabled={isSubmitting} placeholder="Optional" />
+                <label className="block text-sm font-medium">{t("External ID")}</label>
+                <Input {...register("externalId")} disabled={isSubmitting} placeholder={t("Optional")} />
               </div>
             )}
 
@@ -220,14 +222,14 @@ const CenterFormPage: FC = () => {
                   disabled={isSubmitting}
                 />
                 <label className="block text-sm font-medium cursor-pointer" htmlFor="active">
-                  Active
+                  {t("Active")}
                 </label>
               </div>
             )}
 
             {!isEditMode && active && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Activation Date *</label>
+                <label className="block text-sm font-medium">{t("Activation Date")} *</label>
                 <Input
                   type="date"
                   {...register("activationDate")}
@@ -239,7 +241,7 @@ const CenterFormPage: FC = () => {
 
             {!isEditMode && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Submitted On Date</label>
+                <label className="block text-sm font-medium">{t("Submitted On Date")}</label>
                 <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
               </div>
             )}
@@ -251,16 +253,16 @@ const CenterFormPage: FC = () => {
             {isSubmitting ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {isEditMode ? "Saving..." : "Creating..."}
+                {isEditMode ? t("Saving...") : t("Creating...")}
               </span>
             ) : isEditMode ? (
-              "Save Changes"
+              t("Save Changes")
             ) : (
-              "Create Center"
+              t("Create Center")
             )}
           </Button>
           <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => navigate("/centers")}>
-            Cancel
+            {t("Cancel")}
           </Button>
         </div>
       </form>

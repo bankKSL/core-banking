@@ -4,6 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,7 @@ const taxComponentFormSchema = z.object({
 type TaxComponentFormValues = z.input<typeof taxComponentFormSchema>;
 
 const TaxComponentFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -154,18 +156,18 @@ const TaxComponentFormPage: FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Tax Component" : "New Tax Component"}
+        title={isEdit ? t("Edit Tax Component") : t("New Tax Component")}
         actions={
           <Button variant="outline" onClick={() => navigate("/taxes/components")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
-          title="Failed to save tax component"
-          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
+          title={t("Failed to save tax component")}
+          message={saveError instanceof Error ? saveError.message : t("An unexpected error occurred.")}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();
@@ -176,17 +178,17 @@ const TaxComponentFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t("Basic Information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input {...register("name")} placeholder="e.g. VAT" error={errors.name?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Percentage *</label>
+                <label className="block text-sm font-medium">{t("Percentage")} *</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -199,7 +201,7 @@ const TaxComponentFormPage: FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Start Date</label>
+                <label className="block text-sm font-medium">{t("Start Date")}</label>
                 <Input type="date" {...register("startDate")} />
               </div>
             </div>
@@ -208,12 +210,12 @@ const TaxComponentFormPage: FC = () => {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>GL Account Mapping (Optional)</CardTitle>
+            <CardTitle>{t("GL Account Mapping (Optional)")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Debit Account Type</label>
+                <label className="block text-sm font-medium">{t("Debit Account Type")}</label>
                 <Controller
                   name="debitAccountType"
                   control={control}
@@ -224,7 +226,7 @@ const TaxComponentFormPage: FC = () => {
                       disabled={isEdit}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {glAccountTypeOptions.map((o) => (
@@ -239,7 +241,7 @@ const TaxComponentFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Debit Account</label>
+                <label className="block text-sm font-medium">{t("Debit Account")}</label>
                 <Controller
                   name="debitAccountId"
                   control={control}
@@ -250,7 +252,7 @@ const TaxComponentFormPage: FC = () => {
                       disabled={isEdit}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {glAccountOptions.map((a) => (
@@ -267,7 +269,7 @@ const TaxComponentFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Credit Account Type</label>
+                <label className="block text-sm font-medium">{t("Credit Account Type")}</label>
                 <Controller
                   name="creditAccountType"
                   control={control}
@@ -278,7 +280,7 @@ const TaxComponentFormPage: FC = () => {
                       disabled={isEdit}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {glAccountTypeOptions.map((o) => (
@@ -293,7 +295,7 @@ const TaxComponentFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Credit Account</label>
+                <label className="block text-sm font-medium">{t("Credit Account")}</label>
                 <Controller
                   name="creditAccountId"
                   control={control}
@@ -304,7 +306,7 @@ const TaxComponentFormPage: FC = () => {
                       disabled={isEdit}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {glAccountOptions.map((a) => (
@@ -323,16 +325,16 @@ const TaxComponentFormPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/taxes/components")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Component" : "Create Component"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Component") : t("Create Component")}
               </>
             )}
           </Button>

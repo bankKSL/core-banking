@@ -1,5 +1,6 @@
 import { type FC, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -44,6 +45,7 @@ const chargeFormSchema = z.object({
 type ChargeFormValues = z.input<typeof chargeFormSchema>;
 
 const ChargeFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -238,19 +240,19 @@ const ChargeFormPage: FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Charge" : "New Charge"}
-        description={isEdit ? "Update charge definition" : "Define a new fee or penalty"}
+        title={isEdit ? t("Edit Charge") : t("New Charge")}
+        description={isEdit ? t("Update charge definition") : t("Define a new fee or penalty")}
         actions={
           <Button variant="outline" onClick={() => navigate("/charges")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
-          title="Failed to save charge"
-          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
+          title={t("Failed to save charge")}
+          message={saveError instanceof Error ? saveError.message : t("An unexpected error occurred.")}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();
@@ -261,17 +263,17 @@ const ChargeFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t("Basic Information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
-              <Input {...register("name")} placeholder="e.g. Processing Fee" error={errors.name?.message} />
+              <label className="block text-sm font-medium">{t("Name")} *</label>
+              <Input {...register("name")} placeholder={t("e.g. Processing Fee")} error={errors.name?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Charge Applies To *</label>
+                <label className="block text-sm font-medium">{t("Charge Applies To")} *</label>
                 <Controller
                   name="chargeAppliesTo"
                   control={control}
@@ -286,7 +288,7 @@ const ChargeFormPage: FC = () => {
                       disabled={isEdit}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {chargeAppliesToOptions.map((o) => (
@@ -302,14 +304,14 @@ const ChargeFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Currency *</label>
+                <label className="block text-sm font-medium">{t("Currency")} *</label>
                 <Controller
                   name="currencyCode"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select currency" />
+                        <SelectValue placeholder={t("Select currency")} />
                       </SelectTrigger>
                       <SelectContent>
                         {currencyOptions.map((c) => (
@@ -327,7 +329,7 @@ const ChargeFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Time Type *</label>
+                <label className="block text-sm font-medium">{t("Time Type")} *</label>
                 <Controller
                   name="chargeTimeType"
                   control={control}
@@ -337,7 +339,7 @@ const ChargeFormPage: FC = () => {
                       onValueChange={(v) => field.onChange(Number(v))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select time" />
+                        <SelectValue placeholder={t("Select time")} />
                       </SelectTrigger>
                       <SelectContent>
                         {timeTypeOptions.map((o) => (
@@ -352,7 +354,7 @@ const ChargeFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Calculation Type *</label>
+                <label className="block text-sm font-medium">{t("Calculation Type")} *</label>
                 <Controller
                   name="chargeCalculationType"
                   control={control}
@@ -362,7 +364,7 @@ const ChargeFormPage: FC = () => {
                       onValueChange={(v) => field.onChange(Number(v))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select calculation" />
+                        <SelectValue placeholder={t("Select calculation")} />
                       </SelectTrigger>
                       <SelectContent>
                         {calcTypeOptions.map((o) => (
@@ -379,7 +381,7 @@ const ChargeFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Amount *</label>
+                <label className="block text-sm font-medium">{t("Amount")} *</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -393,12 +395,12 @@ const ChargeFormPage: FC = () => {
               {isPercentage && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Min Cap</label>
-                    <Input type="number" step="0.01" min="0" {...register("minCap")} placeholder="Optional" />
+                    <label className="block text-sm font-medium">{t("Min Cap")}</label>
+                    <Input type="number" step="0.01" min="0" {...register("minCap")} placeholder={t("Optional")} />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Max Cap</label>
-                    <Input type="number" step="0.01" min="0" {...register("maxCap")} placeholder="Optional" />
+                    <label className="block text-sm font-medium">{t("Max Cap")}</label>
+                    <Input type="number" step="0.01" min="0" {...register("maxCap")} placeholder={t("Optional")} />
                   </div>
                 </>
               )}
@@ -406,14 +408,14 @@ const ChargeFormPage: FC = () => {
 
             {isLoan && (
               <div>
-                <label className="block text-sm font-medium">Payment Mode *</label>
+                <label className="block text-sm font-medium">{t("Payment Mode")} *</label>
                 <Controller
                   name="chargePaymentMode"
                   control={control}
                   render={({ field }) => (
                     <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.chargePaymetModeOptions ?? []).map((o) => (
@@ -443,7 +445,7 @@ const ChargeFormPage: FC = () => {
                     />
                   )}
                 />
-                Penalty
+                {t("Penalty")}
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <Controller
@@ -453,23 +455,23 @@ const ChargeFormPage: FC = () => {
                     <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />
                   )}
                 />
-                Active
+                {t("Active")}
               </label>
             </div>
 
-            {chargeTimeType === 1 && <p className="text-xs text-gray-500">Disbursement charges cannot be penalties.</p>}
+            {chargeTimeType === 1 && <p className="text-xs text-gray-500">{t("Disbursement charges cannot be penalties.")}</p>}
           </CardContent>
         </Card>
 
         {isPeriodic && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Fee Schedule</CardTitle>
+              <CardTitle>{t("Fee Schedule")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">Fee Frequency</label>
+                  <label className="block text-sm font-medium">{t("Fee Frequency")}</label>
                   <Controller
                     name="feeFrequency"
                     control={control}
@@ -479,7 +481,7 @@ const ChargeFormPage: FC = () => {
                         onValueChange={(v) => field.onChange(v ? Number(v) : null)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select" />
+                          <SelectValue placeholder={t("Select")} />
                         </SelectTrigger>
                         <SelectContent>
                           {feeFrequencyOptions.map((o) => (
@@ -496,11 +498,11 @@ const ChargeFormPage: FC = () => {
                 {isMonthlyOrAnnual && (
                   <>
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Fee Interval (months)</label>
-                      <Input type="number" min="1" max="12" {...register("feeInterval")} placeholder="e.g. 1" />
+                      <label className="block text-sm font-medium">{t("Fee Interval (months)")}</label>
+                      <Input type="number" min="1" max="12" {...register("feeInterval")} placeholder={t("e.g. 1")} />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Day of Month</label>
+                      <label className="block text-sm font-medium">{t("Day of Month")}</label>
                       <Input type="number" min="1" max="31" {...register("feeOnMonthDay")} placeholder="DD" />
                     </div>
                   </>
@@ -512,12 +514,12 @@ const ChargeFormPage: FC = () => {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Accounting & Configuration</CardTitle>
+            <CardTitle>{t("Accounting & Configuration")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">GL Income Account</label>
+                <label className="block text-sm font-medium">{t("GL Income Account")}</label>
                 <Controller
                   name="incomeAccountId"
                   control={control}
@@ -527,7 +529,7 @@ const ChargeFormPage: FC = () => {
                       onValueChange={(v) => field.onChange(v ? Number(v) : null)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Optional" />
+                        <SelectValue placeholder={t("Optional")} />
                       </SelectTrigger>
                       <SelectContent>
                         {glAccountOptions?.map((a) => (
@@ -542,7 +544,7 @@ const ChargeFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Tax Group</label>
+                <label className="block text-sm font-medium">{t("Tax Group")}</label>
                 <Controller
                   name="taxGroupId"
                   control={control}
@@ -552,12 +554,12 @@ const ChargeFormPage: FC = () => {
                       onValueChange={(v) => field.onChange(v ? Number(v) : null)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Optional" />
+                        <SelectValue placeholder={t("Optional")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {taxGroupOptions.map((t) => (
-                          <SelectItem key={t.id} value={String(t.id)}>
-                            {t.name}
+                        {taxGroupOptions.map((item) => (
+                          <SelectItem key={item.id} value={String(item.id)}>
+                            {item.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -577,11 +579,11 @@ const ChargeFormPage: FC = () => {
                       <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />
                     )}
                   />
-                  <label className="block text-sm font-medium mb-0">Restrict to Payment Type</label>
+                  <label className="block text-sm font-medium mb-0">{t("Restrict to Payment Type")}</label>
                 </div>
                 {watch("enablePaymentType") && (
                   <div>
-                    <label className="block text-sm font-medium">Payment Type</label>
+                    <label className="block text-sm font-medium">{t("Payment Type")}</label>
                     <Controller
                       name="paymentTypeId"
                       control={control}
@@ -591,7 +593,7 @@ const ChargeFormPage: FC = () => {
                           onValueChange={(v) => field.onChange(v ? Number(v) : null)}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select" />
+                            <SelectValue placeholder={t("Select")} />
                           </SelectTrigger>
                           <SelectContent>
                             {paymentTypeOptions.map((p) => (
@@ -614,12 +616,12 @@ const ChargeFormPage: FC = () => {
                       <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />
                     )}
                   />
-                  <label className="block text-sm font-medium mb-0">Enable Free Withdrawal</label>
+                  <label className="block text-sm font-medium mb-0">{t("Enable Free Withdrawal")}</label>
                 </div>
                 {watch("enableFreeWithdrawalCharge") && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium">Free Withdrawal Frequency</label>
+                      <label className="block text-sm font-medium">{t("Free Withdrawal Frequency")}</label>
                       <Controller
                         name="freeWithdrawalFrequency"
                         control={control}
@@ -643,16 +645,16 @@ const ChargeFormPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/charges")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Charge" : "Create Charge"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Charge") : t("Create Charge")}
               </>
             )}
           </Button>

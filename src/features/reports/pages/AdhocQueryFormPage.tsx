@@ -1,4 +1,5 @@
 import { type FC, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +27,7 @@ const adhocQueryFormSchema = z.object({
 type AdhocQueryFormValues = z.infer<typeof adhocQueryFormSchema>;
 
 const AdhocQueryFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -111,11 +113,11 @@ const AdhocQueryFormPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Adhoc Query" : "New Adhoc Query"}
-        description="Create or edit an adhoc query definition"
+        title={isEdit ? t("Edit Adhoc Query") : t("New Adhoc Query")}
+        description={t("Create or edit an adhoc query definition")}
         actions={
           <Button variant="outline" onClick={() => navigate("/adhoc-queries")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -124,13 +126,13 @@ const AdhocQueryFormPage: FC = () => {
         {(createMutation.isError || updateMutation.isError) && (
           <div className="mb-6">
             <ErrorState
-              title="Failed to save adhoc query"
+              title={t("Failed to save adhoc query")}
               message={
                 createMutation.error instanceof Error
                   ? createMutation.error.message
                   : updateMutation.error instanceof Error
                     ? updateMutation.error.message
-                    : "An unexpected error occurred."
+                    : t("An unexpected error occurred.")
               }
               onRetry={() => {
                 createMutation.reset();
@@ -142,21 +144,21 @@ const AdhocQueryFormPage: FC = () => {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Query Details</CardTitle>
+            <CardTitle>{t("Query Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input
                 {...register("name")}
-                placeholder="e.g. Active Loans Report"
+                placeholder={t("e.g. Active Loans Report")}
                 disabled={isLoaded}
                 error={errors.name?.message}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Query *</label>
+              <label className="block text-sm font-medium">{t("Query")} *</label>
               <Textarea
                 {...register("query")}
                 placeholder="SELECT ..."
@@ -168,18 +170,18 @@ const AdhocQueryFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Table Name</label>
-                <Input {...register("tableName")} placeholder="e.g. m_loan" disabled={isLoaded} />
+                <label className="block text-sm font-medium">{t("Table Name")}</label>
+                <Input {...register("tableName")} placeholder={t("e.g. m_loan")} disabled={isLoaded} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Table Fields</label>
-                <Input {...register("tableFields")} placeholder="e.g. id, display_name" disabled={isLoaded} />
+                <label className="block text-sm font-medium">{t("Table Fields")}</label>
+                <Input {...register("tableFields")} placeholder={t("e.g. id, display_name")} disabled={isLoaded} />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Email</label>
-              <Input type="email" {...register("email")} placeholder="recipient@example.com" disabled={isLoaded} />
+              <label className="block text-sm font-medium">{t("Email")}</label>
+              <Input type="email" {...register("email")} placeholder={t("recipient@example.com")} disabled={isLoaded} />
             </div>
 
             <div className="flex items-center gap-2">
@@ -190,23 +192,23 @@ const AdhocQueryFormPage: FC = () => {
                   <Checkbox id="isActive" checked={field.value} onCheckedChange={field.onChange} disabled={isLoaded} />
                 )}
               />
-              <label className="block text-sm font-medium">Active</label>
+              <label className="block text-sm font-medium">{t("Active")}</label>
             </div>
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/adhoc-queries")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={!canSave}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Query" : "Create Query"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Query") : t("Create Query")}
               </>
             )}
           </Button>

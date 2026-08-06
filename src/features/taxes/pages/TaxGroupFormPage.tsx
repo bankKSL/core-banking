@@ -4,6 +4,7 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +41,7 @@ const taxGroupFormSchema = z.object({
 type TaxGroupFormValues = z.input<typeof taxGroupFormSchema>;
 
 const TaxGroupFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -136,18 +138,18 @@ const TaxGroupFormPage: FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Tax Group" : "New Tax Group"}
+        title={isEdit ? t("Edit Tax Group") : t("New Tax Group")}
         actions={
           <Button variant="outline" onClick={() => navigate("/taxes/groups")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
-          title="Failed to save tax group"
-          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
+          title={t("Failed to save tax group")}
+          message={saveError instanceof Error ? saveError.message : t("An unexpected error occurred.")}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();
@@ -158,11 +160,11 @@ const TaxGroupFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t("Basic Information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input {...register("name")} placeholder="e.g. Standard Tax" error={errors.name?.message} />
             </div>
           </CardContent>
@@ -170,14 +172,14 @@ const TaxGroupFormPage: FC = () => {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Tax Components</CardTitle>
+            <CardTitle>{t("Tax Components")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-start gap-4 p-4 border rounded-lg">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium">Tax Component</label>
+                    <label className="block text-sm font-medium">{t("Tax Component")}</label>
                     <Controller
                       name={`taxComponents.${index}.taxComponentId`}
                       control={control}
@@ -187,7 +189,7 @@ const TaxGroupFormPage: FC = () => {
                           onValueChange={(v) => controllerField.onChange(Number(v))}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select" />
+                            <SelectValue placeholder={t("Select")} />
                           </SelectTrigger>
                           <SelectContent>
                             {componentOptions.map((c) => (
@@ -202,13 +204,13 @@ const TaxGroupFormPage: FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Start Date</label>
+                    <label className="block text-sm font-medium">{t("Start Date")}</label>
                     <Input type="date" {...register(`taxComponents.${index}.startDate`)} />
                   </div>
 
                   {isEdit && (
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">End Date</label>
+                      <label className="block text-sm font-medium">{t("End Date")}</label>
                       <Input type="date" {...register(`taxComponents.${index}.endDate`)} />
                     </div>
                   )}
@@ -231,23 +233,23 @@ const TaxGroupFormPage: FC = () => {
               variant="outline"
               onClick={() => append({ taxComponentId: 0, startDate: "", endDate: "" })}
             >
-              <Plus className="mr-2 h-4 w-4" /> Add Component
+              <Plus className="mr-2 h-4 w-4" /> {t("Add Component")}
             </Button>
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/taxes/groups")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Group" : "Create Group"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Group") : t("Create Group")}
               </>
             )}
           </Button>

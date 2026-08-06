@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +21,7 @@ const businessDateSchema = z.object({
 type BusinessDateFormValues = z.infer<typeof businessDateSchema>;
 
 const BusinessDatePage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: businessDates = [], isLoading } = useBusinessDates();
   const updateMutation = useUpdateBusinessDate();
@@ -56,21 +58,21 @@ const BusinessDatePage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Business Date"
-        description="View and update system business dates"
+        title={t("Business Date")}
+        description={t("View and update system business dates")}
         actions={
           <Button variant="outline" onClick={() => navigate("/configuration")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
 
       {updateMutation.isError && (
         <ErrorState
-          title="Failed to update business date"
+          title={t("Failed to update business date")}
           message={
-            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+            updateMutation.error instanceof Error ? updateMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => updateMutation.reset()}
         />
@@ -80,7 +82,7 @@ const BusinessDatePage: FC = () => {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Current Business Dates
+            {t("Current Business Dates")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -91,7 +93,7 @@ const BusinessDatePage: FC = () => {
               ))}
             </div>
           ) : businessDates.length === 0 ? (
-            <p className="text-sm text-gray-500">No business dates configured.</p>
+            <p className="text-sm text-gray-500">{t("No business dates configured.")}</p>
           ) : (
             <div className="space-y-4">
               {businessDates.map((bd) => (
@@ -107,7 +109,7 @@ const BusinessDatePage: FC = () => {
                     {bd.description && <p className="text-xs text-gray-500 mt-0.5">{bd.description}</p>}
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handleEdit(bd.type, bd.date)}>
-                    Update
+                    {t("Update")}
                   </Button>
                 </div>
               ))}
@@ -120,11 +122,11 @@ const BusinessDatePage: FC = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Update {editType}</CardTitle>
+              <CardTitle className="text-base">{t("Update")} {editType}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Date</label>
+                <label className="block text-sm font-medium">{t("Date")}</label>
                 <Input type="date" {...register("editDate")} error={errors.editDate?.message} />
               </div>
               <div className="flex justify-end gap-3">
@@ -135,12 +137,12 @@ const BusinessDatePage: FC = () => {
                     reset({ editDate: "" });
                   }}
                 >
-                  Cancel
+                  {t("Cancel")}
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
                   {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
-                  Update
+                  {t("Update")}
                 </Button>
               </div>
             </CardContent>

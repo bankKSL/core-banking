@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClientSchema, type CreateClientFormValues } from "../schemas/client.schema";
 import type { ClientTemplate, Client } from "../types/client";
+import { useTranslation } from "react-i18next";
 
 function normalizeDateForForm(value: unknown): string {
   if (!value) return "";
@@ -33,6 +34,7 @@ interface ClientFormProps {
 }
 
 const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitting, error, mode }) => {
+  const { t } = useTranslation();
   const defaultDate = new Date().toISOString().split("T")[0];
 
   const {
@@ -129,7 +131,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 1: Legal Form */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Legal Form</CardTitle>
+          <CardTitle className="text-base">{t("Legal Form")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
@@ -140,7 +142,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               onClick={() => setValue("legalFormId", 1, { shouldValidate: true })}
               disabled={isSubmitting}
             >
-              Person
+              {t("Person")}
             </Button>
             <Button
               type="button"
@@ -149,7 +151,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               onClick={() => setValue("legalFormId", 2, { shouldValidate: true })}
               disabled={isSubmitting}
             >
-              Entity
+              {t("Entity")}
             </Button>
           </div>
         </CardContent>
@@ -158,12 +160,12 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 2: Basic Information */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Basic Information</CardTitle>
+          <CardTitle className="text-base">{t("Basic Information")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex flex-col gap-1.5">
             <label className="block text-sm font-medium" htmlFor="officeId">
-              Office *
+              {t("Office")} *
             </label>
             <Select
               disabled={isSubmitting || mode === "edit"}
@@ -171,7 +173,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               onValueChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
             >
               <SelectTrigger className={errors.officeId ? "border-red-300" : ""}>
-                <SelectValue placeholder="Select office" />
+                <SelectValue placeholder={t("Select office")} />
               </SelectTrigger>
               <SelectContent>
                 {template?.officeOptions?.map((o) => (
@@ -184,14 +186,14 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             {errors.officeId && <p className="text-xs text-red-500">{errors.officeId.message}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="block text-sm font-medium">Staff (Loan Officer)</label>
+            <label className="block text-sm font-medium">{t("Staff (Loan Officer)")}</label>
             <Select
               disabled={isSubmitting}
               value={client?.staffId ? String(client.staffId) : undefined}
               onValueChange={(v) => setValue("staffId", Number(v))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select staff" />
+                <SelectValue placeholder={t("Select staff")} />
               </SelectTrigger>
               <SelectContent>
                 {template?.staffOptions?.map((s) => (
@@ -203,30 +205,30 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Account No</label>
+            <label className="block text-sm font-medium">{t("Account No")}</label>
             <Input
               {...register("accountNo")}
               disabled={isSubmitting}
-              placeholder="Auto-generated if empty"
+              placeholder={t("Auto-generated if empty")}
               maxLength={20}
               error={errors.accountNo?.message}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">External ID</label>
+            <label className="block text-sm font-medium">{t("External ID")}</label>
             <Input {...register("externalId")} disabled={isSubmitting} maxLength={100} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="block text-sm font-medium">Client Type</label>
+            <label className="block text-sm font-medium">{t("Client Type")}</label>
             <Select
               disabled={isSubmitting}
               onValueChange={(v) => setValue("clientTypeId", v === "" ? null : Number(v))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder={t("Select type")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="">{t("None")}</SelectItem>
                 {template?.clientTypeOptions?.map((t) => (
                   <SelectItem key={t.id} value={String(t.id)}>
                     {t.name}
@@ -236,16 +238,16 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="block text-sm font-medium">Client Classification</label>
+            <label className="block text-sm font-medium">{t("Client Classification")}</label>
             <Select
               disabled={isSubmitting}
               onValueChange={(v) => setValue("clientClassificationId", v === "" ? null : Number(v))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select classification" />
+                <SelectValue placeholder={t("Select classification")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="">{t("None")}</SelectItem>
                 {template?.clientClassificationOptions?.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
                     {c.name}
@@ -260,31 +262,31 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 3: Name (changes based on Legal Form) */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{isPerson ? "Person Name" : "Entity Name"}</CardTitle>
+          <CardTitle className="text-base">{isPerson ? t("Person Name") : t("Entity Name")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {isPerson ? (
             <>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">First Name *</label>
+                <label className="block text-sm font-medium">{t("First Name")} *</label>
                 <Input {...register("firstname")} disabled={isSubmitting} error={errors.firstname?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Middle Name</label>
+                <label className="block text-sm font-medium">{t("Middle Name")}</label>
                 <Input {...register("middlename")} disabled={isSubmitting} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Last Name *</label>
+                <label className="block text-sm font-medium">{t("Last Name")} *</label>
                 <Input {...register("lastname")} disabled={isSubmitting} error={errors.lastname?.message} />
               </div>
             </>
           ) : (
             <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-              <label className="block text-sm font-medium">Full Name *</label>
+              <label className="block text-sm font-medium">{t("Full Name")} *</label>
               <Input
                 {...register("fullname")}
                 disabled={isSubmitting}
-                placeholder="Organization name"
+                placeholder={t("Organization name")}
                 error={errors.fullname?.message}
               />
             </div>
@@ -295,30 +297,30 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 4: Contact */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Contact</CardTitle>
+          <CardTitle className="text-base">{t("Contact")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Mobile No</label>
+            <label className="block text-sm font-medium">{t("Mobile No")}</label>
             <Input
               {...register("mobileNo")}
               disabled={isSubmitting}
-              placeholder="+1234567890"
+              placeholder={t("+1234567890")}
               error={errors.mobileNo?.message}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Email Address</label>
+            <label className="block text-sm font-medium">{t("Email Address")}</label>
             <Input
               type="email"
               {...register("emailAddress")}
               disabled={isSubmitting}
-              placeholder="client@example.com"
+              placeholder={t("client@example.com")}
               error={errors.emailAddress?.message}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Date of Birth</label>
+            <label className="block text-sm font-medium">{t("Date of Birth")}</label>
             <Input type="date" {...register("dateOfBirth")} disabled={isSubmitting} />
           </div>
         </CardContent>
@@ -327,18 +329,18 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 5: Demographics */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Demographics</CardTitle>
+          <CardTitle className="text-base">{t("Demographics")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label className="block text-sm font-medium">Gender</label>
+            <label className="block text-sm font-medium">{t("Gender")}</label>
             <Select
               disabled={isSubmitting}
               value={client?.gender?.id ? String(client.gender.id) : undefined}
               onValueChange={(v) => setValue("genderId", Number(v))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select gender" />
+                <SelectValue placeholder={t("Select gender")} />
               </SelectTrigger>
               <SelectContent>
                 {template?.genderOptions?.map((g) => (
@@ -357,7 +359,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               defaultChecked={client?.isStaff ?? false}
             />
             <label className="block text-sm font-medium" htmlFor="isStaff">
-              Is Staff?
+              {t("Is Staff?")}
             </label>
           </div>
         </CardContent>
@@ -366,7 +368,7 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 6: Activation */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Activation</CardTitle>
+          <CardTitle className="text-base">{t("Activation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
@@ -376,17 +378,17 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               onCheckedChange={(v) => setValue("active", v)}
               defaultChecked={mode === "create" ? true : (client?.active ?? false)}
             />
-            <Label htmlFor="active">Active (required)</Label>
+            <Label htmlFor="active">{t("Active (required)")}</Label>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {mode === "create" && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Submitted On Date</label>
+                <label className="block text-sm font-medium">{t("Submitted On Date")}</label>
                 <Input type="date" {...register("submittedOnDate")} disabled={isSubmitting} />
               </div>
             )}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Activation Date {active ? "*" : ""}</label>
+              <label className="block text-sm font-medium">{t("Activation Date")} {active ? "*" : ""}</label>
               <Input
                 type="date"
                 {...register("activationDate")}
@@ -402,20 +404,20 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {!isPerson && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Entity Details</CardTitle>
+            <CardTitle className="text-base">{t("Entity Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Constitution</label>
+              <label className="block text-sm font-medium">{t("Constitution")}</label>
               <Select
                 disabled={isSubmitting}
                 onValueChange={(v) => setValue("clientNonPersonDetails.constitutionId", v === "" ? null : Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select constitution" />
+                  <SelectValue placeholder={t("Select constitution")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">{t("None")}</SelectItem>
                   {template?.clientNonPersonConstitutionOptions?.map((c) => (
                     <SelectItem key={c.id} value={String(c.id)}>
                       {c.name}
@@ -425,11 +427,11 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Incorporation Number</label>
+              <label className="block text-sm font-medium">{t("Incorporation Number")}</label>
               <Input {...register("clientNonPersonDetails.incorpNumber")} disabled={isSubmitting} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Main Business Line</label>
+              <label className="block text-sm font-medium">{t("Main Business Line")}</label>
               <Select
                 disabled={isSubmitting}
                 onValueChange={(v) =>
@@ -437,10 +439,10 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select business line" />
+                  <SelectValue placeholder={t("Select business line")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">{t("None")}</SelectItem>
                   {template?.clientNonPersonMainBusinessLineOptions?.map((b) => (
                     <SelectItem key={b.id} value={String(b.id)}>
                       {b.name}
@@ -450,11 +452,11 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
               </Select>
             </div>
             <div className="space-y-1.5 lg:col-span-2">
-              <label className="block text-sm font-medium">Remarks</label>
+              <label className="block text-sm font-medium">{t("Remarks")}</label>
               <Input {...register("clientNonPersonDetails.remarks")} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Incorporation Validity Till</label>
+              <label className="block text-sm font-medium">{t("Incorporation Validity Till")}</label>
               <Input
                 type="date"
                 {...register("clientNonPersonDetails.incorpValidityTillDate")}
@@ -469,20 +471,20 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {template?.savingsProductOptions && template.savingsProductOptions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Financial</CardTitle>
+            <CardTitle className="text-base">{t("Financial")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-1.5 max-w-xs">
-              <label className="block text-sm font-medium">Savings Product</label>
+              <label className="block text-sm font-medium">{t("Savings Product")}</label>
               <Select
                 disabled={isSubmitting}
                 onValueChange={(v) => setValue("savingsProductId", v === "" ? null : Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="None (skip)" />
+                  <SelectValue placeholder={t("None (skip)")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None (skip)</SelectItem>
+                  <SelectItem value="">{t("None (skip)")}</SelectItem>
                   {template.savingsProductOptions.map((p) => (
                     <SelectItem key={p.id} value={String(p.id)}>
                       {p.name}
@@ -498,16 +500,16 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
       {/* Section 9: Group */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Group</CardTitle>
+          <CardTitle className="text-base">{t("Group")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-1.5 max-w-xs">
-            <label className="block text-sm font-medium">Group ID</label>
+            <label className="block text-sm font-medium">{t("Group ID")}</label>
             <Input
               type="number"
               {...register("groupId", { valueAsNumber: true })}
               disabled={isSubmitting}
-              placeholder="Optional group ID"
+              placeholder={t("Optional group ID")}
             />
           </div>
         </CardContent>
@@ -519,16 +521,16 @@ const ClientForm: FC<ClientFormProps> = ({ template, client, onSubmit, isSubmitt
           {isSubmitting ? (
             <span className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              {mode === "create" ? "Creating..." : "Saving..."}
+              {mode === "create" ? t("Creating...") : t("Saving...")}
             </span>
           ) : mode === "create" ? (
-            "Create Client"
+            t("Create Client")
           ) : (
-            "Save Changes"
+            t("Save Changes")
           )}
         </Button>
         <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => window.history.back()}>
-          Cancel
+          {t("Cancel")}
         </Button>
       </div>
     </form>

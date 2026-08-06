@@ -22,6 +22,7 @@ import {
   Power,
   Pencil,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
 const RecurringDepositDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: rd, isLoading, isError, error, refetch } = useRecurringDepositAccount(id);
   const commandMutation = useRecurringDepositCommand();
   const makeTxnMutation = useMakeRecurringDepositTransaction();
@@ -175,9 +177,9 @@ const RecurringDepositDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-600">Failed to load: {String(error)}</p>
+          <p className="text-red-600">{t("Failed to load")}: {String(error)}</p>
           <Button variant="outline" className="mt-2" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -218,7 +220,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                 >
                   {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Approve
+                  {t("Approve")}
                 </Button>
                 <Button
                   variant="outline"
@@ -228,7 +230,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   className="text-red-600"
                 >
                   <XCircle className="mr-1 h-4 w-4" />
-                  Reject
+                  {t("Reject")}
                 </Button>
                 <Button
                   variant="outline"
@@ -238,7 +240,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   className="text-amber-600"
                 >
                   <Ban className="mr-1 h-4 w-4" />
-                  Withdraw
+                  {t("Withdraw")}
                 </Button>
               </>
             )}
@@ -252,11 +254,11 @@ const RecurringDepositDetailPage: React.FC = () => {
                   className="text-emerald-600"
                 >
                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Activate
+                  {t("Activate")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => runCommand("undoapproval")} disabled={acting}>
                   <Undo2 className="mr-1 h-4 w-4" />
-                  Undo Approval
+                  {t("Undo Approval")}
                 </Button>
               </>
             )}
@@ -269,7 +271,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   disabled={acting}
                 >
                   <Calculator className="mr-1 h-4 w-4" />
-                  Calc Interest
+                  {t("Calc Interest")}
                 </Button>
                 <Button
                   variant="outline"
@@ -286,7 +288,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   disabled={acting}
                 >
                   <Calculator className="mr-1 h-4 w-4" />
-                  Premature Calc
+                  {t("Premature Calc")}
                 </Button>
                 <Button
                   variant="outline"
@@ -295,19 +297,19 @@ const RecurringDepositDetailPage: React.FC = () => {
                   disabled={acting}
                 >
                   <DollarSign className="mr-1 h-4 w-4" />
-                  Post Interest
+                  {t("Post Interest")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setDepositDialogOpen(true)}>
                   <PiggyBank className="mr-1 h-4 w-4" />
-                  Deposit
+                  {t("Deposit")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setWithdrawalDialogOpen(true)}>
                   <Ban className="mr-1 h-4 w-4" />
-                  Withdraw
+                  {t("Withdraw")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setUpdateAmountDialogOpen(true)}>
                   <Repeat className="mr-1 h-4 w-4" />
-                  Update Amount
+                  {t("Update Amount")}
                 </Button>
                 <Button
                   variant="outline"
@@ -319,7 +321,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   className="text-amber-600"
                 >
                   <XCircle className="mr-1 h-4 w-4" />
-                  Premature Close
+                  {t("Premature Close")}
                 </Button>
                 <Button
                   variant="outline"
@@ -331,7 +333,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   className="text-gray-600"
                 >
                   <LogOut className="mr-1 h-4 w-4" />
-                  Close
+                  {t("Close")}
                 </Button>
               </>
             )}
@@ -342,11 +344,11 @@ const RecurringDepositDetailPage: React.FC = () => {
               className="text-blue-600"
             >
               <Pencil className="mr-1 h-4 w-4" />
-              Edit
+              {t("Edit")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/recurring")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -356,15 +358,15 @@ const RecurringDepositDetailPage: React.FC = () => {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="general">
             <Info className="h-4 w-4 mr-1" />
-            General
+            {t("General")}
           </TabsTrigger>
           <TabsTrigger value="transactions">
             <ArrowLeftRight className="h-4 w-4 mr-1" />
-            Transactions
+            {t("Transactions")}
           </TabsTrigger>
           <TabsTrigger value="schedule">
             <Calendar className="h-4 w-4 mr-1" />
-            Installment Schedule
+            {t("Installment Schedule")}
           </TabsTrigger>
         </TabsList>
         <Separator className="my-4" />
@@ -374,49 +376,49 @@ const RecurringDepositDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Wallet className="h-4 w-4 text-emerald-500" />
-                  Account Info
+                  {t("Account Info")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<Hash className="h-4 w-4" />}
-                  label="Account No"
+                  label={t("Account No")}
                   value={<code className="text-xs">{rd.accountNo}</code>}
                 />
                 <InfoRow
                   icon={<User className="h-4 w-4" />}
-                  label="Client"
+                  label={t("Client")}
                   value={rd.clientName ?? `#${rd.clientId}`}
                 />
-                <InfoRow icon={<Wallet className="h-4 w-4" />} label="Product" value={rd.depositProductName ?? "—"} />
+                <InfoRow icon={<Wallet className="h-4 w-4" />} label={t("Product")} value={rd.depositProductName ?? "—"} />
                 <InfoRow
                   icon={<Repeat className="h-4 w-4" />}
-                  label="Recurring Amount"
+                  label={t("Recurring Amount")}
                   value={formatCurrency(rd.recurringDepositAmount ?? 0, rd.currency?.code)}
                 />
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
-                  label="Frequency"
-                  value={`Every ${rd.recurringDepositFrequency ?? 1} ${rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? ""}`}
+                  label={t("Frequency")}
+                  value={`${t("Every")} ${rd.recurringDepositFrequency ?? 1} ${rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? ""}`}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
-                  label="Balance"
+                  label={t("Balance")}
                   value={formatCurrency(rd.accountBalance ?? 0, rd.currency?.code)}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
-                  label="Maturity Amount"
+                  label={t("Maturity Amount")}
                   value={formatCurrency(rd.maturityAmount ?? 0, rd.currency?.code)}
                 />
                 <InfoRow
                   icon={<Percent className="h-4 w-4" />}
-                  label="Interest Rate"
+                  label={t("Interest Rate")}
                   value={`${rd.interestRate ?? rd.nominalAnnualInterestRate ?? 0}%`}
                 />
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
-                  label="Period"
+                  label={t("Period")}
                   value={`${rd.depositPeriod ?? "—"} ${rd.depositPeriodFrequencyType?.value?.toLowerCase() ?? ""}`}
                 />
               </CardContent>
@@ -425,38 +427,38 @@ const RecurringDepositDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-400" />
-                  Timeline
+                  {t("Timeline")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Submitted"
+                  label={t("Submitted")}
                   value={formatDate(rd.timeline?.submittedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Approved"
+                  label={t("Approved")}
                   value={formatDate(rd.timeline?.approvedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Activated"
+                  label={t("Activated")}
                   value={formatDate(rd.timeline?.activatedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Closed"
+                  label={t("Closed")}
                   value={formatDate(rd.timeline?.closedOnDate)}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
-                  label="Expected Maturity"
+                  label={t("Expected Maturity")}
                   value={formatDate(rd.expectedMaturityDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="First Deposit"
+                  label={t("First Deposit")}
                   value={formatDate(rd.expectedFirstDepositOnDate)}
                 />
               </CardContent>
@@ -465,24 +467,24 @@ const RecurringDepositDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base">
                   <DollarSign className="inline mr-2 h-4 w-4" />
-                  Interest Configuration
+                  {t("Interest Configuration")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Compounding:</span>{" "}
+                  <span className="text-gray-500">{t("Compounding:")}</span>{" "}
                   <span className="font-medium">{rd.interestCompoundingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Posting:</span>{" "}
+                  <span className="text-gray-500">{t("Posting:")}</span>{" "}
                   <span className="font-medium">{rd.interestPostingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Calculation:</span>{" "}
+                  <span className="text-gray-500">{t("Calculation:")}</span>{" "}
                   <span className="font-medium">{rd.interestCalculationType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Days/Year:</span>{" "}
+                  <span className="text-gray-500">{t("Days/Year:")}</span>{" "}
                   <span className="font-medium">{rd.interestCalculationDaysInYearType?.value ?? "—"}</span>
                 </div>
               </CardContent>
@@ -497,7 +499,7 @@ const RecurringDepositDetailPage: React.FC = () => {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-gray-400" />
-                Expected Installment Schedule
+                {t("Expected Installment Schedule")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -508,15 +510,15 @@ const RecurringDepositDetailPage: React.FC = () => {
                 const freq = rd.recurringDepositFrequency ?? 1;
                 const installments = period > 0 && freq > 0 ? Math.floor(period / freq) : 0;
                 if (installments === 0)
-                  return <p className="px-6 py-8 text-center text-sm text-gray-400">No installment data available.</p>;
+                  return <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No installment data available.")}</p>;
                 return (
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>#</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead className="text-right">Balance After</TableHead>
+                        <TableHead>{t("Due Date")}</TableHead>
+                        <TableHead className="text-right">{t("Amount")}</TableHead>
+                        <TableHead className="text-right">{t("Balance After")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -556,8 +558,8 @@ const RecurringDepositDetailPage: React.FC = () => {
       <Dialog open={prematureDialogOpen} onOpenChange={setPrematureDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Premature Amount Calculation</DialogTitle>
-            <DialogDescription>Estimated premature closure amount for RD {rd?.accountNo}.</DialogDescription>
+            <DialogTitle>{t("Premature Amount Calculation")}</DialogTitle>
+            <DialogDescription>{t("Estimated premature closure amount for RD")} {rd?.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="py-6 text-center">
             <p className="text-3xl font-bold text-emerald-600">
@@ -572,7 +574,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                   )
                 : "—"}
             </p>
-            <p className="text-sm text-gray-500 mt-2">Estimated premature maturity amount</p>
+            <p className="text-sm text-gray-500 mt-2">{t("Estimated premature maturity amount")}</p>
             {prematureResult?.changes ? (
               <div className="mt-4 text-left text-sm space-y-1">
                 {Object.entries(prematureResult.changes as Record<string, unknown>).map(([k, v]) => (
@@ -585,7 +587,7 @@ const RecurringDepositDetailPage: React.FC = () => {
             ) : null}
           </div>
           <Button variant="outline" onClick={() => setPrematureDialogOpen(false)}>
-            Close
+            {t("Close")}
           </Button>
         </DialogContent>
       </Dialog>
@@ -594,19 +596,19 @@ const RecurringDepositDetailPage: React.FC = () => {
       <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isPremature ? "Premature Close" : "Close at Maturity"}</DialogTitle>
-            <DialogDescription>Enter closure date for RD {rd.accountNo}.</DialogDescription>
+            <DialogTitle>{isPremature ? t("Premature Close") : t("Close at Maturity")}</DialogTitle>
+            <DialogDescription>{t("Enter closure date for RD")} {rd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="closeDate">
-                Closure Date
+                {t("Closure Date")}
               </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
             <Button onClick={handleClose} disabled={acting} variant="destructive">
               {acting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isPremature ? "Premature Close" : "Close"}
+              {isPremature ? t("Premature Close") : t("Close")}
             </Button>
           </div>
         </DialogContent>
@@ -616,21 +618,21 @@ const RecurringDepositDetailPage: React.FC = () => {
       <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Make Installment Deposit</DialogTitle>
-            <DialogDescription>Deposit funds to RD {rd.accountNo}.</DialogDescription>
+            <DialogTitle>{t("Make Installment Deposit")}</DialogTitle>
+            <DialogDescription>{t("Deposit funds to RD")} {rd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Amount</label>
+              <label className="block text-sm font-medium">{t("Amount")}</label>
               <Input type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Date</label>
+              <label className="block text-sm font-medium">{t("Date")}</label>
               <Input type="date" value={depositDate} onChange={(e) => setDepositDate(e.target.value)} />
             </div>
             <Button onClick={handleDeposit} disabled={!depositAmount || makeTxnMutation.isPending}>
               {makeTxnMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Deposit
+              {t("Deposit")}
             </Button>
           </div>
         </DialogContent>
@@ -640,16 +642,16 @@ const RecurringDepositDetailPage: React.FC = () => {
       <Dialog open={withdrawalDialogOpen} onOpenChange={setWithdrawalDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Make Withdrawal</DialogTitle>
-            <DialogDescription>Withdraw funds from RD {rd.accountNo}.</DialogDescription>
+            <DialogTitle>{t("Make Withdrawal")}</DialogTitle>
+            <DialogDescription>{t("Withdraw funds from RD")} {rd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Amount</label>
+              <label className="block text-sm font-medium">{t("Amount")}</label>
               <Input type="number" value={withdrawalAmount} onChange={(e) => setWithdrawalAmount(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Date</label>
+              <label className="block text-sm font-medium">{t("Date")}</label>
               <Input type="date" value={withdrawalDate} onChange={(e) => setWithdrawalDate(e.target.value)} />
             </div>
             <Button
@@ -658,7 +660,7 @@ const RecurringDepositDetailPage: React.FC = () => {
               variant="destructive"
             >
               {makeTxnMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Withdraw
+              {t("Withdraw")}
             </Button>
           </div>
         </DialogContent>
@@ -668,12 +670,12 @@ const RecurringDepositDetailPage: React.FC = () => {
       <Dialog open={updateAmountDialogOpen} onOpenChange={setUpdateAmountDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Recurring Deposit Amount</DialogTitle>
-            <DialogDescription>Change the recurring installment amount.</DialogDescription>
+            <DialogTitle>{t("Update Recurring Deposit Amount")}</DialogTitle>
+            <DialogDescription>{t("Change the recurring installment amount.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">New Recurring Amount</label>
+              <label className="block text-sm font-medium">{t("New Recurring Amount")}</label>
               <Input
                 type="number"
                 value={newRecurringAmount}
@@ -682,12 +684,12 @@ const RecurringDepositDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Effective Date</label>
+              <label className="block text-sm font-medium">{t("Effective Date")}</label>
               <Input type="date" value={effectiveDate} onChange={(e) => setEffectiveDate(e.target.value)} />
             </div>
             <Button onClick={handleUpdateAmount} disabled={!newRecurringAmount || commandMutation.isPending}>
               {commandMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update Amount
+              {t("Update Amount")}
             </Button>
           </div>
         </DialogContent>

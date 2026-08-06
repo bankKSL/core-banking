@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,25 +11,26 @@ import { useTaxComponents } from "../hooks/useTaxes";
 import type { TaxComponent } from "../api/taxes";
 import type { ColumnDef } from "@/components/shared/DataTable";
 
-const columns: ColumnDef<TaxComponent>[] = [
-  { key: "name", header: "Name" },
-  { key: "percentage", header: "Percentage", accessorFn: (row) => `${row.percentage}%` },
-  { key: "startDate", header: "Start Date" },
-  {
-    key: "debitAccount",
-    header: "Debit Account",
-    accessorFn: (row) => row.debitAccount ? `${row.debitAccount.name} (${row.debitAccount.glCode})` : "-",
-  },
-  {
-    key: "creditAccount",
-    header: "Credit Account",
-    accessorFn: (row) => row.creditAccount ? `${row.creditAccount.name} (${row.creditAccount.glCode})` : "-",
-  },
-];
-
 const TaxComponentListPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: components, isLoading, isError, refetch, isRefetching } = useTaxComponents();
+
+  const columns: ColumnDef<TaxComponent>[] = [
+    { key: "name", header: t("Name") },
+    { key: "percentage", header: t("Percentage"), accessorFn: (row) => `${row.percentage}%` },
+    { key: "startDate", header: t("Start Date") },
+    {
+      key: "debitAccount",
+      header: t("Debit Account"),
+      accessorFn: (row) => row.debitAccount ? `${row.debitAccount.name} (${row.debitAccount.glCode})` : "-",
+    },
+    {
+      key: "creditAccount",
+      header: t("Credit Account"),
+      accessorFn: (row) => row.creditAccount ? `${row.creditAccount.name} (${row.creditAccount.glCode})` : "-",
+    },
+  ];
 
   const handleRowClick = useCallback(
     (row: TaxComponent) => {
@@ -41,14 +43,14 @@ const TaxComponentListPage = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Tax Components"
+          title={t("Tax Components")}
           actions={
             <Button onClick={() => navigate("/taxes/components/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Component
+              <Plus className="mr-2 h-4 w-4" /> {t("New Component")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load tax components." onRetry={refetch} />
+        <ErrorState message={t("Failed to load tax components.")} onRetry={refetch} />
       </div>
     );
   }
@@ -56,17 +58,17 @@ const TaxComponentListPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Tax Components"
+        title={t("Tax Components")}
         actions={
           <Button onClick={() => navigate("/taxes/components/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Component
+            <Plus className="mr-2 h-4 w-4" /> {t("New Component")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Components</CardTitle>
+          <CardTitle>{t("Components")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable

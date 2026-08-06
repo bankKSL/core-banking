@@ -10,8 +10,10 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useUpdateClient } from "../hooks/useUpdateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
+import { useTranslation } from "react-i18next";
 
 const EditClientPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: client, isLoading: clientLoading, isError, refetch } = useClient(id);
@@ -54,8 +56,8 @@ const EditClientPage: FC = () => {
     return (
       <div className="p-6">
         <ErrorState
-          title="Client not found"
-          message="Could not load client data for editing."
+          title={t("Client not found")}
+          message={t("Could not load client data for editing.")}
           onRetry={() => refetch()}
         />
       </div>
@@ -65,12 +67,12 @@ const EditClientPage: FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto">
       <PageHeader
-        title="Edit Client"
-        description={`Editing client #${client.id}`}
+        title={t("Edit Client")}
+        description={t("Editing client #{{id}}", { id: client.id })}
         actions={
           <Button variant="outline" onClick={() => navigate(`/clients/${client.id}`)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Details
+            {t("Back to Details")}
           </Button>
         }
       />

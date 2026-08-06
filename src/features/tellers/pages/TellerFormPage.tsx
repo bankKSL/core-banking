@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const tellerSchema = z.object({
 type TellerFormValues = z.infer<typeof tellerSchema>;
 
 const TellerFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -96,19 +98,19 @@ const TellerFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Teller" : "Create Teller"}
-        description={isEdit ? `Editing teller #${id}` : "Register a new teller counter"}
+        title={isEdit ? t("Edit Teller") : t("Create Teller")}
+        description={isEdit ? t(`Editing teller #${id}`) : t("Register a new teller counter")}
         actions={
           <Button variant="outline" onClick={() => navigate("/tellers")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Teller Details</CardTitle>
+            <CardTitle className="text-base">{t("Teller Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <OfficeSelect
@@ -117,18 +119,18 @@ const TellerFormPage: FC = () => {
               error={errors.officeId?.message}
             />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Teller Name *</label>
-              <Input {...register("name")} placeholder="e.g. Main Branch Teller 1" error={errors.name?.message} />
+              <label className="block text-sm font-medium">{t("Teller Name *")}</label>
+              <Input {...register("name")} placeholder={t("e.g. Main Branch Teller 1")} error={errors.name?.message} />
             </div>
             <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" {...register("description")} placeholder="Optional description" rows={2} />
+              <Label htmlFor="description">{t("Description")}</Label>
+              <Textarea id="description" {...register("description")} placeholder={t("Optional description")} rows={2} />
             </div>
             <div>
-              <Label>Status *</Label>
+              <Label>{t("Status *")}</Label>
               <Select value={watch("status")} onValueChange={(v) => setValue("status", v, { shouldValidate: true })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={t("Select status")} />
                 </SelectTrigger>
                 <SelectContent>
                   {TELLER_STATUS_OPTIONS.map((o) => (
@@ -141,11 +143,11 @@ const TellerFormPage: FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Start Date *</label>
+                <label className="block text-sm font-medium">{t("Start Date *")}</label>
                 <Input type="date" {...register("startDate")} error={errors.startDate?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">End Date</label>
+                <label className="block text-sm font-medium">{t("End Date")}</label>
                 <Input type="date" {...register("endDate")} />
               </div>
             </div>
@@ -154,12 +156,12 @@ const TellerFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/tellers")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Teller"}
+            {isEdit ? t("Save Changes") : t("Create Teller")}
           </Button>
         </div>
       </form>

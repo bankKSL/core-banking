@@ -1,4 +1,5 @@
 import { type FC, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -57,6 +58,7 @@ const shareProductSchema = z.object({
 type ShareProductFormValues = z.infer<typeof shareProductSchema>;
 
 const ShareProductFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -196,7 +198,7 @@ const ShareProductFormPage: FC = () => {
       navigate("/shares/products");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save share product.";
+      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to save share product.");
       setMutationError(msg);
     }
   };
@@ -213,11 +215,11 @@ const ShareProductFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Share Product" : "New Share Product"}
-        description={isEdit ? `Editing product #${id}` : "Create a new share product"}
+        title={isEdit ? t("Edit Share Product") : t("New Share Product")}
+        description={isEdit ? `${t("Editing product")} #${id}` : t("Create a new share product")}
         actions={
           <Button variant="outline" onClick={() => navigate("/shares/products")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -227,27 +229,27 @@ const ShareProductFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Basic Details</CardTitle>
+            <CardTitle className="text-base">{t("Basic Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Name *</label>
-                <Input {...register("name")} placeholder="e.g. Ordinary Shares" error={errors.name?.message} />
+                <label className="block text-sm font-medium">{t("Name")} *</label>
+                <Input {...register("name")} placeholder={t("e.g. Ordinary Shares")} error={errors.name?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Short Name * (max 4 chars)</label>
+                <label className="block text-sm font-medium">{t("Short Name")} * {t("(max 4 chars)")}</label>
                 <Input
                   {...register("shortName")}
-                  placeholder="e.g. ORD"
+                  placeholder={t("e.g. ORD")}
                   maxLength={4}
                   error={errors.shortName?.message}
                 />
               </div>
             </div>
             <div>
-              <Label htmlFor="description">Description *</Label>
-              <Textarea id="description" {...register("description")} placeholder="Product description" rows={2} />
+              <Label htmlFor="description">{t("Description")} *</Label>
+              <Textarea id="description" {...register("description")} placeholder={t("Product description")} rows={2} />
               {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
             </div>
           </CardContent>
@@ -255,7 +257,7 @@ const ShareProductFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Currency & Units</CardTitle>
+            <CardTitle className="text-base">{t("Currency & Units")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
@@ -265,11 +267,11 @@ const ShareProductFormPage: FC = () => {
                 error={errors.currencyCode?.message}
               />
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Digits After Decimal</label>
+                <label className="block text-sm font-medium">{t("Digits After Decimal")}</label>
                 <Input type="number" {...register("digitsAfterDecimal")} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">In Multiples Of</label>
+                <label className="block text-sm font-medium">{t("In Multiples Of")}</label>
                 <Input type="number" {...register("inMultiplesOf")} />
               </div>
             </div>
@@ -278,34 +280,34 @@ const ShareProductFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Share Details</CardTitle>
+            <CardTitle className="text-base">{t("Share Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Total Shares *</label>
+                <label className="block text-sm font-medium">{t("Total Shares")} *</label>
                 <Input type="number" {...register("totalShares")} error={errors.totalShares?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Shares Issued</label>
+                <label className="block text-sm font-medium">{t("Shares Issued")}</label>
                 <Input type="number" {...register("sharesIssued")} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Unit Price *</label>
+                <label className="block text-sm font-medium">{t("Unit Price")} *</label>
                 <Input type="number" step="0.01" {...register("unitPrice")} error={errors.unitPrice?.message} />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Minimum Shares</label>
+                <label className="block text-sm font-medium">{t("Minimum Shares")}</label>
                 <Input type="number" {...register("minimumShares")} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Nominal Shares *</label>
+                <label className="block text-sm font-medium">{t("Nominal Shares")} *</label>
                 <Input type="number" {...register("nominalShares")} error={errors.nominalShares?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Maximum Shares</label>
+                <label className="block text-sm font-medium">{t("Maximum Shares")}</label>
                 <Input type="number" {...register("maximumShares")} />
               </div>
             </div>
@@ -314,22 +316,22 @@ const ShareProductFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Restrictions & Dividends</CardTitle>
+            <CardTitle className="text-base">{t("Restrictions & Dividends")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Lock-in Period Frequency</label>
+                <label className="block text-sm font-medium">{t("Lock-in Period Frequency")}</label>
                 <Input type="number" {...register("lockinPeriodFrequency")} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Lock-in Period Type</label>
+                <label className="block text-sm font-medium">{t("Lock-in Period Type")}</label>
                 <Select
                   value={watch("lockinPeriodFrequencyType")}
                   onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(template?.lockinPeriodFrequencyTypeOptions ?? []).map((o) => (
@@ -341,14 +343,14 @@ const ShareProductFormPage: FC = () => {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Minimum Active Period (Days)</label>
+                <label className="block text-sm font-medium">{t("Minimum Active Period (Days)")}</label>
                 <Input type="number" {...register("minimumActivePeriodForDividends")} />
               </div>
             </div>
             <div>
               <Checkbox
                 id="allowDividendCalculationForInactiveClients"
-                label="Allow dividend calculation for inactive clients"
+                label={t("Allow dividend calculation for inactive clients")}
                 checked={watch("allowDividendCalculationForInactiveClients")}
                 onCheckedChange={(v) => setValue("allowDividendCalculationForInactiveClients", v === true)}
               />
@@ -358,7 +360,7 @@ const ShareProductFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Accounting</CardTitle>
+            <CardTitle className="text-base">{t("Accounting")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <AccountingRuleSelect
@@ -370,19 +372,19 @@ const ShareProductFormPage: FC = () => {
             {showGLAccounts && (
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-md">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Share Reference GL</label>
+                  <label className="block text-sm font-medium">{t("Share Reference GL")}</label>
                   <Input type="number" {...register("shareReferenceId")} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Share Suspense GL</label>
+                  <label className="block text-sm font-medium">{t("Share Suspense GL")}</label>
                   <Input type="number" {...register("shareSuspenseId")} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Share Equity GL</label>
+                  <label className="block text-sm font-medium">{t("Share Equity GL")}</label>
                   <Input type="number" {...register("shareEquityId")} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Income from Fee GL</label>
+                  <label className="block text-sm font-medium">{t("Income from Fee GL")}</label>
                   <Input type="number" {...register("incomeFromFeeAccountId")} />
                 </div>
               </div>
@@ -392,18 +394,18 @@ const ShareProductFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Market Price Periods</CardTitle>
+            <CardTitle className="text-base">{t("Market Price Periods")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.length === 0 && <p className="text-sm text-gray-500">No market price periods defined.</p>}
+            {fields.length === 0 && <p className="text-sm text-gray-500">{t("No market price periods defined.")}</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-4">
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-sm font-medium">From Date</label>
+                  <label className="block text-sm font-medium">{t("From Date")}</label>
                   <Input type="date" {...register(`marketPricePeriods.${index}.fromDate`)} />
                 </div>
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-sm font-medium">Share Value</label>
+                  <label className="block text-sm font-medium">{t("Share Value")}</label>
                   <Input type="number" step="0.01" {...register(`marketPricePeriods.${index}.shareValue`)} />
                 </div>
                 <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
@@ -412,14 +414,14 @@ const ShareProductFormPage: FC = () => {
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={() => append({ fromDate: "", shareValue: "" })}>
-              <Plus className="mr-2 h-4 w-4" /> Add Period
+              <Plus className="mr-2 h-4 w-4" /> {t("Add Period")}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Charges</CardTitle>
+            <CardTitle className="text-base">{t("Charges")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -442,7 +444,7 @@ const ShareProductFormPage: FC = () => {
                 />
               ))}
               {(template?.chargeOptions ?? []).length === 0 && (
-                <p className="text-sm text-gray-500">No charges available.</p>
+                <p className="text-sm text-gray-500">{t("No charges available.")}</p>
               )}
             </div>
           </CardContent>
@@ -450,14 +452,14 @@ const ShareProductFormPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/shares/products")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {(createMutation.isPending || updateMutation.isPending) && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Product"}
+            {isEdit ? t("Save Changes") : t("Create Product")}
           </Button>
         </div>
       </form>

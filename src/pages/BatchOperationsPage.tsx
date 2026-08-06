@@ -1,4 +1,5 @@
 import React, { type FC } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +20,7 @@ const batchSchema = z.object({
 type BatchFormValues = z.infer<typeof batchSchema>;
 
 const BatchOperationsPage: FC = () => {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -64,19 +66,19 @@ const BatchOperationsPage: FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Batch API Operations" description="Execute multiple API requests in a single batch call." />
+      <PageHeader title={t("Batch API Operations")} description={t("Execute multiple API requests in a single batch call.")} />
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Terminal className="h-5 w-5 text-[#D32F2F]" />
-            Batch Request
+            {t("Batch Request")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={onSubmit} className="space-y-4">
             <Textarea
-              label="Batch Request (JSON Array)"
+              label={t("Batch Request (JSON Array)")}
               placeholder={`[\n  {\n    "requestId": 1,\n    "relativeUrl": "/api/v2/clients/1",\n    "method": "GET"\n  }\n]`}
               rows={10}
               {...register("batchInput")}
@@ -86,7 +88,7 @@ const BatchOperationsPage: FC = () => {
 
             <Checkbox
               id="enclose-transaction"
-              label="Enclose in Transaction"
+              label={t("Enclose in Transaction")}
               checked={enclosingTransaction}
               onCheckedChange={(checked) => setValue("enclosingTransaction", checked === true)}
             />
@@ -101,10 +103,10 @@ const BatchOperationsPage: FC = () => {
               {mutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  {t("Submitting...")}
                 </>
               ) : (
-                "Submit"
+                t("Submit")
               )}
             </Button>
           </form>
@@ -114,7 +116,7 @@ const BatchOperationsPage: FC = () => {
       {results.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Results</CardTitle>
+            <CardTitle className="text-lg">{t("Results")}</CardTitle>
           </CardHeader>
           <CardContent>
             <pre className="overflow-auto rounded-md bg-gray-50 p-4 text-sm dark:bg-gray-900">

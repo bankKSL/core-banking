@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, Megaphone } from "lucide-react";
@@ -21,6 +22,7 @@ import {
 } from "../hooks/useCampaigns";
 
 const CampaignFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -132,12 +134,12 @@ const CampaignFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit SMS Campaign" : "Create SMS Campaign"}
-        description={isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new SMS marketing campaign"}
+        title={isEdit ? t("Edit SMS Campaign") : t("Create SMS Campaign")}
+        description={isEdit ? t('Editing "{{name}}"', { name: campaign?.campaignName }) : t("Create a new SMS marketing campaign")}
         actions={
           <Button variant="outline" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -146,12 +148,12 @@ const CampaignFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Megaphone className="h-5 w-5" />
-              Campaign Details
+              {t("Campaign Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Campaign Name *</label>
+              <label className="block text-sm font-medium">{t("Campaign Name")} *</label>
               <Input
                 {...register("campaignName")}
                 placeholder="e.g. Loan Arrears Reminder"
@@ -161,7 +163,7 @@ const CampaignFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Campaign Type *</label>
+                <label className="block text-sm font-medium">{t("Campaign Type")} *</label>
                 <Select
                   value={watch("campaignType")}
                   onValueChange={(v) => setValue("campaignType", v, { shouldValidate: true })}
@@ -180,7 +182,7 @@ const CampaignFormPage: FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Trigger Type *</label>
+                <label className="block text-sm font-medium">{t("Trigger Type")} *</label>
                 <Select
                   value={watch("triggerType")}
                   onValueChange={(v) => setValue("triggerType", v, { shouldValidate: true })}
@@ -201,15 +203,15 @@ const CampaignFormPage: FC = () => {
 
             <div className="flex items-center gap-2">
               <Switch checked={isNotification} onCheckedChange={(v) => setValue("isNotification", v)} />
-              <label className="block text-sm font-medium">Is Notification (no provider needed)</label>
+              <label className="block text-sm font-medium">{t("Is Notification (no provider needed)")}</label>
             </div>
 
             {!isNotification && campaignType === "1" && (
               <div>
-                <label className="block text-sm font-medium">SMS Provider</label>
+                <label className="block text-sm font-medium">{t("SMS Provider")}</label>
                 <Select value={watch("providerId")} onValueChange={(v) => setValue("providerId", v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select provider" />
+                    <SelectValue placeholder={t("Select provider")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(template?.smsProviderOptions ?? []).map((o) => (
@@ -223,13 +225,13 @@ const CampaignFormPage: FC = () => {
             )}
 
             <div>
-              <label className="block text-sm font-medium">Business Rule *</label>
+              <label className="block text-sm font-medium">{t("Business Rule")} *</label>
               <Select
                 value={watch("runReportId")}
                 onValueChange={(v) => setValue("runReportId", v, { shouldValidate: true })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select business rule" />
+                  <SelectValue placeholder={t("Select business rule")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.businessRulesOptions ?? []).map((o) => (
@@ -244,14 +246,14 @@ const CampaignFormPage: FC = () => {
 
             {isDirectOrSchedule && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Param Value (JSON)</label>
+                <label className="block text-sm font-medium">{t("Param Value (JSON)")}</label>
                 <Input {...register("paramValue")} placeholder='e.g. {"officeId":1}' />
-                <p className="text-xs text-gray-500 mt-1">JSON key-value pairs matching report parameters.</p>
+                <p className="text-xs text-gray-500 mt-1">{t("JSON key-value pairs matching report parameters.")}</p>
               </div>
             )}
 
             <div>
-              <Label htmlFor="message">Message *</Label>
+              <Label htmlFor="message">{t("Message")} *</Label>
               <Textarea
                 id="message"
                 {...register("message")}
@@ -259,7 +261,7 @@ const CampaignFormPage: FC = () => {
                 rows={3}
               />
               {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message.message}</p>}
-              <p className="text-xs text-gray-500 mt-1">Max 480 characters. Use {`{paramName}`} placeholders.</p>
+              <p className="text-xs text-gray-500 mt-1">{t("Max 480 characters. Use {paramName} placeholders.")}</p>
             </div>
           </CardContent>
         </Card>
@@ -267,15 +269,15 @@ const CampaignFormPage: FC = () => {
         {isSchedule && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Schedule</CardTitle>
+              <CardTitle className="text-base">{t("Schedule")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">Frequency *</label>
+                  <label className="block text-sm font-medium">{t("Frequency")} *</label>
                   <Select value={watch("frequency")} onValueChange={(v) => setValue("frequency", v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder={t("Select frequency")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.frequencyTypeOptions ?? []).map((o) => (
@@ -287,16 +289,16 @@ const CampaignFormPage: FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Interval *</label>
+                  <label className="block text-sm font-medium">{t("Interval")} *</label>
                   <Input {...register("interval")} placeholder="e.g. 1" />
                 </div>
               </div>
               {watch("frequency") === "2" && (
                 <div>
-                  <label className="block text-sm font-medium">Repeats On Day</label>
+                  <label className="block text-sm font-medium">{t("Repeats On Day")}</label>
                   <Select value={watch("repeatsOnDay")} onValueChange={(v) => setValue("repeatsOnDay", v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select day" />
+                      <SelectValue placeholder={t("Select day")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.weekDays ?? []).map((o) => (
@@ -309,7 +311,7 @@ const CampaignFormPage: FC = () => {
                 </div>
               )}
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Recurrence Start Date *</label>
+                <label className="block text-sm font-medium">{t("Recurrence Start Date")} *</label>
                 <Input type="datetime-local" {...register("recurrenceStartDate")} />
               </div>
             </CardContent>
@@ -319,12 +321,12 @@ const CampaignFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Campaign"}
+            {isEdit ? t("Save Changes") : t("Create Campaign")}
           </Button>
         </div>
       </form>

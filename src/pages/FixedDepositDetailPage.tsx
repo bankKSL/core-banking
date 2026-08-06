@@ -20,6 +20,7 @@ import {
   PiggyBank,
   Trash2,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ const formatDate = (d?: string) => (d ? new Date(d).toLocaleDateString() : "—"
 const FixedDepositDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: fd, isLoading, isError, error, refetch } = useFixedDepositAccount(id);
   const makeTxnMutation = useMakeFixedDepositTransaction();
   const deleteMutation = useDeleteFixedDepositAccount();
@@ -218,9 +220,9 @@ const FixedDepositDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-600">Failed to load: {String(error)}</p>
+          <p className="text-red-600">{t("Failed to load")}: {String(error)}</p>
           <Button variant="outline" className="mt-2" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -261,7 +263,7 @@ const FixedDepositDetailPage: React.FC = () => {
                 >
                   {actionLoading && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Approve
+                  {t("Approve")}
                 </Button>
                 <Button
                   variant="outline"
@@ -271,7 +273,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   className="text-red-600"
                 >
                   <XCircle className="mr-1 h-4 w-4" />
-                  Reject
+                  {t("Reject")}
                 </Button>
                 <Button
                   variant="outline"
@@ -281,7 +283,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   className="text-amber-600"
                 >
                   <Ban className="mr-1 h-4 w-4" />
-                  Withdraw
+                  {t("Withdraw")}
                 </Button>
                 <Button
                   variant="outline"
@@ -294,7 +296,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   className="text-red-600"
                 >
                   <Trash2 className="mr-1 h-4 w-4" />
-                  Delete
+                  {t("Delete")}
                 </Button>
               </>
             )}
@@ -308,7 +310,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   className="text-emerald-600"
                 >
                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Activate
+                  {t("Activate")}
                 </Button>
                 <Button
                   variant="outline"
@@ -317,7 +319,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   disabled={actionLoading}
                 >
                   <Undo2 className="mr-1 h-4 w-4" />
-                  Undo Approval
+                  {t("Undo Approval")}
                 </Button>
               </>
             )}
@@ -325,19 +327,19 @@ const FixedDepositDetailPage: React.FC = () => {
               <>
                 <Button variant="outline" size="sm" onClick={handleCalculateInterest} disabled={actionLoading}>
                   <Calculator className="mr-1 h-4 w-4" />
-                  Calc Interest
+                  {t("Calc Interest")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handlePostInterest} disabled={actionLoading}>
                   <DollarSign className="mr-1 h-4 w-4" />
-                  Post Interest
+                  {t("Post Interest")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setDepositDialogOpen(true)}>
                   <PiggyBank className="mr-1 h-4 w-4" />
-                  Deposit
+                  {t("Deposit")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setWithdrawalDialogOpen(true)}>
                   <Ban className="mr-1 h-4 w-4" />
-                  Withdraw
+                  {t("Withdraw")}
                 </Button>
                 <Button
                   variant="outline"
@@ -349,7 +351,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   className="text-amber-600"
                 >
                   <XCircle className="mr-1 h-4 w-4" />
-                  Premature Close
+                  {t("Premature Close")}
                 </Button>
                 <Button
                   variant="outline"
@@ -361,19 +363,19 @@ const FixedDepositDetailPage: React.FC = () => {
                   className="text-gray-600"
                 >
                   <LogOut className="mr-1 h-4 w-4" />
-                  Close at Maturity
+                  {t("Close at Maturity")}
                 </Button>
               </>
             )}
             {isRejectedOrWithdrawn && (
               <Button variant="outline" size="sm" onClick={() => navigate("/deposits/fixed")}>
                 <ArrowLeft className="mr-1 h-4 w-4" />
-                Back
+                {t("Back")}
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/fixed")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -383,15 +385,15 @@ const FixedDepositDetailPage: React.FC = () => {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="general">
             <Info className="h-4 w-4 mr-1" />
-            General
+            {t("General")}
           </TabsTrigger>
           <TabsTrigger value="transactions">
             <ArrowLeftRight className="h-4 w-4 mr-1" />
-            Transactions
+            {t("Transactions")}
           </TabsTrigger>
           <TabsTrigger value="charges">
             <DollarSign className="h-4 w-4 mr-1" />
-            Charges
+            {t("Charges")}
           </TabsTrigger>
         </TabsList>
         <Separator className="my-4" />
@@ -402,44 +404,44 @@ const FixedDepositDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Wallet className="h-4 w-4 text-emerald-500" />
-                  Account Info
+                  {t("Account Info")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<Hash className="h-4 w-4" />}
-                  label="Account No"
+                  label={t("Account No")}
                   value={<code className="text-xs">{fd.accountNo}</code>}
                 />
                 <InfoRow
                   icon={<User className="h-4 w-4" />}
-                  label="Client"
+                  label={t("Client")}
                   value={fd.clientName ?? `#${fd.clientId}`}
                 />
-                <InfoRow icon={<Wallet className="h-4 w-4" />} label="Product" value={fd.depositProductName ?? "—"} />
+                <InfoRow icon={<Wallet className="h-4 w-4" />} label={t("Product")} value={fd.depositProductName ?? "—"} />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
-                  label="Deposit Amount"
+                  label={t("Deposit Amount")}
                   value={formatCurrency(fd.depositAmount, fd.currency?.code)}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
-                  label="Maturity Amount"
+                  label={t("Maturity Amount")}
                   value={formatCurrency(fd.maturityAmount ?? 0, fd.currency?.code)}
                 />
                 <InfoRow
                   icon={<Percent className="h-4 w-4" />}
-                  label="Interest Rate"
+                  label={t("Interest Rate")}
                   value={`${fd.nominalAnnualInterestRate ?? fd.interestRate ?? 0}%`}
                 />
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
-                  label="Period"
+                  label={t("Period")}
                   value={`${fd.depositPeriod ?? "—"} ${fd.depositPeriodFrequencyType?.value?.toLowerCase() ?? ""}`}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
-                  label="Balance"
+                  label={t("Balance")}
                   value={formatCurrency(fd.accountBalance ?? 0, fd.currency?.code)}
                 />
               </CardContent>
@@ -449,38 +451,38 @@ const FixedDepositDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-400" />
-                  Timeline
+                  {t("Timeline")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Submitted"
+                  label={t("Submitted")}
                   value={formatDate(fd.timeline?.submittedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Approved"
+                  label={t("Approved")}
                   value={formatDate(fd.timeline?.approvedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Activated"
+                  label={t("Activated")}
                   value={formatDate(fd.timeline?.activatedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Matured"
+                  label={t("Matured")}
                   value={formatDate(fd.timeline?.maturedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Closed"
+                  label={t("Closed")}
                   value={formatDate(fd.timeline?.closedOnDate)}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
-                  label="Maturity Date"
+                  label={t("Maturity Date")}
                   value={formatDate(fd.maturityDate)}
                 />
               </CardContent>
@@ -490,24 +492,24 @@ const FixedDepositDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base">
                   <DollarSign className="inline mr-2 h-4 w-4" />
-                  Interest Configuration
+                  {t("Interest Configuration")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Compounding:</span>{" "}
+                  <span className="text-gray-500">{t("Compounding:")}</span>{" "}
                   <span className="font-medium">{fd.interestCompoundingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Posting:</span>{" "}
+                  <span className="text-gray-500">{t("Posting:")}</span>{" "}
                   <span className="font-medium">{fd.interestPostingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Calculation:</span>{" "}
+                  <span className="text-gray-500">{t("Calculation:")}</span>{" "}
                   <span className="font-medium">{fd.interestCalculationType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Days/Year:</span>{" "}
+                  <span className="text-gray-500">{t("Days/Year:")}</span>{" "}
                   <span className="font-medium">{fd.interestCalculationDaysInYearType?.value ?? "—"}</span>
                 </div>
               </CardContent>
@@ -527,21 +529,21 @@ const FixedDepositDetailPage: React.FC = () => {
       <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{onAccountClosureId === "200" ? "Premature Close" : "Close at Maturity"}</DialogTitle>
-            <DialogDescription>Enter closure details for FD {fd.accountNo}.</DialogDescription>
+            <DialogTitle>{onAccountClosureId === "200" ? t("Premature Close") : t("Close at Maturity")}</DialogTitle>
+            <DialogDescription>{t("Enter closure details for FD")} {fd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="closeDate">
-                Closure Date
+                {t("Closure Date")}
               </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Closure Action</label>
+              <label className="block text-sm font-medium">{t("Closure Action")}</label>
               <Select value={onAccountClosureId} onValueChange={setOnAccountClosureId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select action" />
+                  <SelectValue placeholder={t("Select action")} />
                 </SelectTrigger>
                 <SelectContent>
                   {MATURITY_INSTRUCTION_OPTIONS.map((o) => (
@@ -555,14 +557,14 @@ const FixedDepositDetailPage: React.FC = () => {
             {onAccountClosureId === "200" && (
               <div className="flex flex-col gap-1.5">
                 <label className="block text-sm font-medium" htmlFor="toSavingsAccountId">
-                  Transfer to Savings Account ID
+                  {t("Transfer to Savings Account ID")}
                 </label>
                 <Input
                   id="toSavingsAccountId"
                   type="number"
                   value={toSavingsAccountId}
                   onChange={(e) => setToSavingsAccountId(e.target.value)}
-                  placeholder="Savings account ID"
+                  placeholder={t("Savings account ID")}
                 />
               </div>
             )}
@@ -571,7 +573,7 @@ const FixedDepositDetailPage: React.FC = () => {
                 <Button variant="outline" onClick={handleCalculatePrematureAmount} disabled={actionLoading}>
                   {actionLoading && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
                   <Calculator className="mr-1 h-4 w-4" />
-                  Preview Amount
+                  {t("Preview Amount")}
                 </Button>
               )}
               <Button
@@ -580,7 +582,7 @@ const FixedDepositDetailPage: React.FC = () => {
                 variant="destructive"
               >
                 {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {onAccountClosureId === "200" ? "Premature Close" : "Close"}
+                {onAccountClosureId === "200" ? t("Premature Close") : t("Close")}
               </Button>
             </div>
           </div>
@@ -591,13 +593,13 @@ const FixedDepositDetailPage: React.FC = () => {
       <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Make Deposit</DialogTitle>
-            <DialogDescription>Add funds to FD {fd.accountNo}.</DialogDescription>
+            <DialogTitle>{t("Make Deposit")}</DialogTitle>
+            <DialogDescription>{t("Add funds to FD")} {fd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="depositAmount">
-                Amount
+                {t("Amount")}
               </label>
               <Input
                 id="depositAmount"
@@ -608,7 +610,7 @@ const FixedDepositDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="depositDate">
-                Date
+                {t("Date")}
               </label>
               <Input
                 id="depositDate"
@@ -619,7 +621,7 @@ const FixedDepositDetailPage: React.FC = () => {
             </div>
             <Button onClick={handleDeposit} disabled={!depositAmount || makeTxnMutation.isPending}>
               {makeTxnMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Deposit
+              {t("Deposit")}
             </Button>
           </div>
         </DialogContent>
@@ -629,13 +631,13 @@ const FixedDepositDetailPage: React.FC = () => {
       <Dialog open={withdrawalDialogOpen} onOpenChange={setWithdrawalDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Make Withdrawal</DialogTitle>
-            <DialogDescription>Withdraw funds from FD {fd.accountNo}.</DialogDescription>
+            <DialogTitle>{t("Make Withdrawal")}</DialogTitle>
+            <DialogDescription>{t("Withdraw funds from FD")} {fd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="withdrawalAmount">
-                Amount
+                {t("Amount")}
               </label>
               <Input
                 id="withdrawalAmount"
@@ -646,7 +648,7 @@ const FixedDepositDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="withdrawalDate">
-                Date
+                {t("Date")}
               </label>
               <Input
                 id="withdrawalDate"
@@ -661,7 +663,7 @@ const FixedDepositDetailPage: React.FC = () => {
               variant="destructive"
             >
               {makeTxnMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Withdraw
+              {t("Withdraw")}
             </Button>
           </div>
         </DialogContent>

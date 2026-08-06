@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,90 +32,91 @@ function formatDate(iso: string): string {
   });
 }
 
-const columns: ColumnDef<ExecutionLog>[] = [
-  {
-    key: "executionId",
-    header: "Execution ID",
-    cell: (row) => <code className="text-xs font-mono text-gray-700 dark:text-gray-300">{row.executionId}</code>,
-  },
-  {
-    key: "campaignName",
-    header: "Campaign",
-    cell: (row) => <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{row.campaignName}</span>,
-  },
-  {
-    key: "matched",
-    header: "Matched",
-    cell: (row) =>
-      row.matched ? (
-        <Badge variant="success" size="sm" rounded>
-          Yes
-        </Badge>
-      ) : (
-        <Badge variant="default" size="sm" rounded>
-          No
-        </Badge>
-      ),
-  },
-  {
-    key: "duration",
-    header: "Duration",
-    cell: (row) => <span className="text-sm text-gray-600 dark:text-gray-400">{row.duration} ms</span>,
-  },
-  {
-    key: "status",
-    header: "Status",
-    cell: (row) => <StatusBadge status={row.status} size="sm" />,
-  },
-  {
-    key: "request",
-    header: "Request",
-    cell: (row) => (
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <code className="text-xs font-mono text-gray-600 dark:text-gray-400 cursor-default max-w-50 truncate inline-block">
-              {truncateJson(row.request)}
-            </code>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" align="start" className="max-w-105 break-all font-mono text-xs leading-relaxed">
-            {row.request}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    key: "response",
-    header: "Response",
-    cell: (row) => (
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <code className="text-xs font-mono text-gray-600 dark:text-gray-400 cursor-default max-w-50 truncate inline-block">
-              {truncateJson(row.response)}
-            </code>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" align="start" className="max-w-105 break-all font-mono text-xs leading-relaxed">
-            {row.response}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    key: "timestamp",
-    header: "Timestamp",
-    cell: (row) => (
-      <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatDate(row.timestamp)}</span>
-    ),
-  },
-];
-
 const ExecutionLogsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const columns: ColumnDef<ExecutionLog>[] = useMemo(() => [
+    {
+      key: "executionId",
+      header: t("Execution ID"),
+      cell: (row) => <code className="text-xs font-mono text-gray-700 dark:text-gray-300">{row.executionId}</code>,
+    },
+    {
+      key: "campaignName",
+      header: t("Campaign"),
+      cell: (row) => <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{row.campaignName}</span>,
+    },
+    {
+      key: "matched",
+      header: t("Matched"),
+      cell: (row) =>
+        row.matched ? (
+          <Badge variant="success" size="sm" rounded>
+            {t("Yes")}
+          </Badge>
+        ) : (
+          <Badge variant="default" size="sm" rounded>
+            {t("No")}
+          </Badge>
+        ),
+    },
+    {
+      key: "duration",
+      header: t("Duration"),
+      cell: (row) => <span className="text-sm text-gray-600 dark:text-gray-400">{row.duration} ms</span>,
+    },
+    {
+      key: "status",
+      header: t("Status"),
+      cell: (row) => <StatusBadge status={row.status} size="sm" />,
+    },
+    {
+      key: "request",
+      header: t("Request"),
+      cell: (row) => (
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <code className="text-xs font-mono text-gray-600 dark:text-gray-400 cursor-default max-w-50 truncate inline-block">
+                {truncateJson(row.request)}
+              </code>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="start" className="max-w-105 break-all font-mono text-xs leading-relaxed">
+              {row.request}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ),
+    },
+    {
+      key: "response",
+      header: t("Response"),
+      cell: (row) => (
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <code className="text-xs font-mono text-gray-600 dark:text-gray-400 cursor-default max-w-50 truncate inline-block">
+                {truncateJson(row.response)}
+              </code>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="start" className="max-w-105 break-all font-mono text-xs leading-relaxed">
+              {row.response}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ),
+    },
+    {
+      key: "timestamp",
+      header: t("Timestamp"),
+      cell: (row) => (
+        <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatDate(row.timestamp)}</span>
+      ),
+    },
+  ], [t]);
 
   const filtered = useMemo(() => {
     let result = [...executionLogs];
@@ -147,16 +149,16 @@ const ExecutionLogsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Execution Logs" description="View real-time execution logs for formula engine evaluations." />
+      <PageHeader title={t("Execution Logs")} description={t("View real-time execution logs for formula engine evaluations.")} />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Execution Logs</CardTitle>
+          <CardTitle>{t("Execution Logs")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search logs…"
+                placeholder={t("Search logs…")}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -184,13 +186,13 @@ const ExecutionLogsPage: React.FC = () => {
               }}
             >
               <SelectTrigger className="w-36">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("Status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="success">Success</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="skipped">Skipped</SelectItem>
+                <SelectItem value="all">{t("All")}</SelectItem>
+                <SelectItem value="success">{t("Success")}</SelectItem>
+                <SelectItem value="failed">{t("Failed")}</SelectItem>
+                <SelectItem value="skipped">{t("Skipped")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -200,8 +202,8 @@ const ExecutionLogsPage: React.FC = () => {
             columns={columns}
             data={paginated}
             emptyState={{
-              title: "No execution logs found",
-              message: "Try adjusting your search or filters.",
+              title: t("No execution logs found"),
+              message: t("Try adjusting your search or filters."),
             }}
           />
           <Pagination

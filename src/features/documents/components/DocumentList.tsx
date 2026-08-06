@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback, useRef } from "react";
 import { Upload, Trash2, Download, FileText, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -36,6 +37,7 @@ interface DocumentListProps {
 }
 
 const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
+  const { t } = useTranslation();
   const { data: documents, isLoading } = useDocuments(entityType, entityId);
   const createMutation = useCreateDocument();
   const updateMutation = useUpdateDocument();
@@ -118,24 +120,24 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
   );
 
   const columns: ColumnDef<Document>[] = [
-    { key: "name", header: "Name", accessorFn: (row) => <span className="text-sm font-medium">{row.name}</span> },
+    { key: "name", header: t("Name"), accessorFn: (row) => <span className="text-sm font-medium">{row.name}</span> },
     {
       key: "fileName",
-      header: "File Name",
+      header: t("File Name"),
       accessorFn: (row) => <span className="text-sm font-mono">{row.fileName ?? "\u2014"}</span>,
     },
-    { key: "size", header: "Size", accessorFn: (row) => <span className="text-sm">{formatFileSize(row.size)}</span> },
-    { key: "type", header: "Type", accessorFn: (row) => <span className="text-sm">{row.type ?? "\u2014"}</span> },
+    { key: "size", header: t("Size"), accessorFn: (row) => <span className="text-sm">{formatFileSize(row.size)}</span> },
+    { key: "type", header: t("Type"), accessorFn: (row) => <span className="text-sm">{row.type ?? "\u2014"}</span> },
     {
       key: "description",
-      header: "Description",
+      header: t("Description"),
       accessorFn: (row) => (
         <span className="text-sm text-gray-500 truncate max-w-50">{row.description ?? "\u2014"}</span>
       ),
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       accessorFn: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -179,11 +181,11 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Documents
+          {t("Documents")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Upload className="mr-1 h-4 w-4" />
-          Upload Document
+          {t("Upload Document")}
         </Button>
       </div>
       <Card>
@@ -193,7 +195,7 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
             data={documents ?? []}
             loading={isLoading}
             minWidth={700}
-            emptyState={{ icon: <FileText className="h-8 w-8 text-gray-300" />, message: "No documents uploaded." }}
+            emptyState={{ icon: <FileText className="h-8 w-8 text-gray-300" />, message: t("No documents uploaded.") }}
           />
         </CardContent>
       </Card>
@@ -201,17 +203,17 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingDoc ? "Edit Document" : "Upload Document"}</DialogTitle>
-            <DialogDescription>{editingDoc ? "Update document metadata." : "Upload a new document."}</DialogDescription>
+            <DialogTitle>{editingDoc ? t("Edit Document") : t("Upload Document")}</DialogTitle>
+            <DialogDescription>{editingDoc ? t("Update document metadata.") : t("Upload a new document.")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input {...register("name")} error={errors.name?.message} />
             </div>
             {!editingDoc && (
               <div className="flex flex-col gap-1.5">
-                <label className="block text-sm font-medium">File *</label>
+                <label className="block text-sm font-medium">{t("File")} *</label>
                 <Input
                   type="file"
                   ref={fileInputRef}
@@ -222,7 +224,7 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
             )}
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="description">
-                Description
+                {t("Description")}
               </label>
               <Textarea id="description" {...register("description")} rows={3} />
             </div>
@@ -234,7 +236,7 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingDoc ? "Update" : "Upload"}
+              {editingDoc ? t("Update") : t("Upload")}
             </Button>
           </form>
         </DialogContent>
@@ -243,11 +245,11 @@ const DocumentList: FC<DocumentListProps> = ({ entityType, entityId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Document"
-        description="Are you sure you want to delete this document? This cannot be undone."
+        title={t("Delete Document")}
+        description={t("Are you sure you want to delete this document? This cannot be undone.")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
         loading={deleteMutation.isPending}
       />
     </div>

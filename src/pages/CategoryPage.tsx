@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,29 +22,8 @@ import { categories as initialCategories } from "@/mock/data";
 import type { Category } from "@/types";
 import { cn } from "@/lib/utils";
 
-const TYPE_LABELS: Record<Category["type"], string> = {
-  interest: "Interest",
-  fee: "Fee",
-  cashback: "Cashback",
-  reward: "Reward",
-  penalty: "Penalty",
-  loan: "Loan",
-  deposit: "Deposit",
-};
-
-const TYPE_COLORS: Record<Category["type"], string> = {
-  interest: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  fee: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-  cashback: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  reward: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  penalty: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  loan: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
-  deposit: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-};
-
-const EMPTY_FORM = { name: "", type: "interest" as Category["type"], description: "" };
-
 const CategoryPage: React.FC = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -51,6 +31,26 @@ const CategoryPage: React.FC = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const TYPE_LABELS: Record<Category["type"], string> = {
+    interest: t("Interest"),
+    fee: t("Fee"),
+    cashback: t("Cashback"),
+    reward: t("Reward"),
+    penalty: t("Penalty"),
+    loan: t("Loan"),
+    deposit: t("Deposit"),
+  };
+
+  const TYPE_COLORS: Record<Category["type"], string> = {
+    interest: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+    fee: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+    cashback: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+    reward: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+    penalty: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    loan: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
+    deposit: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+  };
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -78,8 +78,8 @@ const CategoryPage: React.FC = () => {
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.description.trim()) e.description = "Description is required";
+    if (!form.name.trim()) e.name = t("Name is required");
+    if (!form.description.trim()) e.description = t("Description is required");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -119,12 +119,12 @@ const CategoryPage: React.FC = () => {
   const columns: ColumnDef<Category>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t("Name"),
       cell: (row) => <span className="font-medium text-gray-900 dark:text-gray-100">{row.name}</span>,
     },
     {
       key: "type",
-      header: "Type",
+      header: t("Type"),
       cell: (row) => (
         <span
           className={cn("inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium", TYPE_COLORS[row.type])}
@@ -133,15 +133,15 @@ const CategoryPage: React.FC = () => {
         </span>
       ),
     },
-    { key: "description", header: "Description" },
+    { key: "description", header: t("Description") },
     {
       key: "isActive",
-      header: "Status",
+      header: t("Status"),
       cell: (row) => <StatusBadge status={row.isActive ? "active" : "inactive"} />,
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       cell: (row) => (
         <div className="flex items-center gap-1">
           <Button
@@ -174,23 +174,23 @@ const CategoryPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Category Management"
-        description="Manage campaign categories and their types"
+        title={t("Category Management")}
+        description={t("Manage campaign categories and their types")}
         actions={
           <Button onClick={openCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            New Category
+            {t("New Category")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Categories</CardTitle>
+          <CardTitle>{t("Categories")}</CardTitle>
           <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search categories..."
+              placeholder={t("Search categories...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -198,7 +198,7 @@ const CategoryPage: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={filtered} emptyState={{ message: "No categories found" }} />
+          <DataTable columns={columns} data={filtered} emptyState={{ message: t("No categories found") }} />
         </CardContent>
       </Card>
 
@@ -206,21 +206,21 @@ const CategoryPage: React.FC = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Category" : "New Category"}</DialogTitle>
+            <DialogTitle>{editingId ? t("Edit Category") : t("New Category")}</DialogTitle>
             <DialogDescription>
-              {editingId ? "Update the category details below." : "Fill in the details to create a new category."}
+              {editingId ? t("Update the category details below.") : t("Fill in the details to create a new category.")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <Input
-              label="Name"
-              placeholder="Category name"
+              label={t("Name")}
+              placeholder={t("Category name")}
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               error={errors.name}
             />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">Type</label>
+              <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">{t("Type")}</label>
               <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v as Category["type"] }))}>
                 <SelectTrigger>
                   <SelectValue />
@@ -235,8 +235,8 @@ const CategoryPage: React.FC = () => {
               </Select>
             </div>
             <Textarea
-              label="Description"
-              placeholder="Brief description"
+              label={t("Description")}
+              placeholder={t("Brief description")}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               error={errors.description}
@@ -244,9 +244,9 @@ const CategoryPage: React.FC = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t("Cancel")}
             </Button>
-            <Button onClick={handleSave}>{editingId ? "Save Changes" : "Create"}</Button>
+            <Button onClick={handleSave}>{editingId ? t("Save Changes") : t("Create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -256,13 +256,15 @@ const CategoryPage: React.FC = () => {
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Delete Category"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Category")}
+        description={t('Are you sure you want to delete "{{name}}"? This action cannot be undone.', { name: deleteTarget?.name })}
+        confirmLabel={t("Delete")}
         variant="destructive"
       />
     </div>
   );
 };
+
+const EMPTY_FORM = { name: "", type: "interest" as Category["type"], description: "" };
 
 export default CategoryPage;

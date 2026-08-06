@@ -13,6 +13,7 @@ import {
   Clock,
   ChartArea,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,6 +54,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
 const FixedDepositProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: product, isLoading, isError, error, refetch } = useFixedDepositProduct(id ? Number(id) : undefined);
 
   if (isLoading) {
@@ -81,15 +83,15 @@ const FixedDepositProductDetailPage: React.FC = () => {
     return (
       <div className="p-6 max-w-6xl m-auto">
         <PageHeader
-          title="Error loading product"
-          description={error?.message ?? "An unexpected error occurred."}
+          title={t("Error loading product")}
+          description={error?.message ?? t("An unexpected error occurred.")}
           actions={
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => navigate("/deposits/fixed-products")}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
               </Button>
               <Button variant="outline" onClick={() => refetch()}>
-                Retry
+                {t("Retry")}
               </Button>
             </div>
           }
@@ -102,11 +104,11 @@ const FixedDepositProductDetailPage: React.FC = () => {
     return (
       <div className="p-6 max-w-6xl m-auto">
         <PageHeader
-          title="Product Not Found"
-          description="The requested fixed deposit product does not exist."
+          title={t("Product Not Found")}
+          description={t("The requested fixed deposit product does not exist.")}
           actions={
             <Button variant="outline" onClick={() => navigate("/deposits/fixed-products")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
@@ -124,13 +126,13 @@ const FixedDepositProductDetailPage: React.FC = () => {
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate("/deposits/fixed-products")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
             <Button
               onClick={() => navigate(`/deposits/fixed-products/edit/${id}`)}
               className="bg-[#D32F2F] hover:bg-red-700"
             >
-              <Pencil className="mr-2 h-4 w-4" /> Edit
+              <Pencil className="mr-2 h-4 w-4" /> {t("Edit")}
             </Button>
           </div>
         }
@@ -141,21 +143,21 @@ const FixedDepositProductDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Landmark className="h-5 w-5 text-[#D32F2F]" />
-              Basic Info
+              {t("Basic Info")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Product Name" value={p.name} />
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Short Name" value={p.shortName ?? "—"} />
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Description" value={p.description ?? "—"} />
+            <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Product Name")} value={p.name} />
+            <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Short Name")} value={p.shortName ?? "—"} />
+            <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Description")} value={p.description ?? "—"} />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Currency"
+              label={t("Currency")}
               value={p.currency?.displaySymbol ?? p.currency?.code ?? "—"}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Deposit Amount"
+              label={t("Deposit Amount")}
               value={p.depositAmount?.toLocaleString() ?? "—"}
             />
           </CardContent>
@@ -165,30 +167,30 @@ const FixedDepositProductDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Percent className="h-5 w-5 text-[#D32F2F]" />
-              Interest Settings
+              {t("Interest Settings")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
-              label="Compounding Period"
+              label={t("Compounding Period")}
               value={
                 COMPOUNDING_LABELS[p.interestCompoundingPeriodType?.id] ?? enumVal(p.interestCompoundingPeriodType, "—")
               }
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
-              label="Posting Period"
+              label={t("Posting Period")}
               value={POSTING_LABELS[p.interestPostingPeriodType?.id] ?? enumVal(p.interestPostingPeriodType, "—")}
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
-              label="Calculation Method"
+              label={t("Calculation Method")}
               value={CALCULATION_LABELS[p.interestCalculationType?.id] ?? enumVal(p.interestCalculationType, "—")}
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
-              label="Days in Year"
+              label={t("Days in Year")}
               value={
                 DAYS_IN_YEAR_LABELS[p.interestCalculationDaysInYearType?.id] ??
                 enumVal(p.interestCalculationDaysInYearType, "—")
@@ -201,18 +203,18 @@ const FixedDepositProductDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="h-5 w-5 text-[#D32F2F]" />
-              Deposit Terms
+              {t("Deposit Terms")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<Clock className="h-4 w-4" />}
-              label="Min Deposit Term"
+              label={t("Min Deposit Term")}
               value={`${p.minDepositTerm} ${p.minDepositTermType?.description ?? ""}`}
             />
             <InfoRow
               icon={<Clock className="h-4 w-4" />}
-              label="Max Deposit Term"
+              label={t("Max Deposit Term")}
               value={p.maxDepositTerm != null ? `${p.maxDepositTerm} ${p.maxDepositTermType?.description ?? ""}` : "—"}
             />
           </CardContent>
@@ -222,25 +224,25 @@ const FixedDepositProductDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Shield className="h-5 w-5 text-[#D32F2F]" />
-              Pre-Closure Settings
+              {t("Pre-Closure Settings")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<Shield className="h-4 w-4" />}
-              label="Penal Applicable"
-              value={p.preClosurePenalApplicable ? "Yes" : "No"}
+              label={t("Penal Applicable")}
+              value={p.preClosurePenalApplicable ? t("Yes") : t("No")}
             />
             {p.preClosurePenalApplicable && (
               <>
                 <InfoRow
                   icon={<Percent className="h-4 w-4" />}
-                  label="Penal Interest (%)"
+                  label={t("Penal Interest (%)")}
                   value={p.preClosurePenalInterest != null ? `${p.preClosurePenalInterest}%` : "—"}
                 />
                 <InfoRow
                   icon={<FileText className="h-4 w-4" />}
-                  label="Penal Interest On"
+                  label={t("Penal Interest On")}
                   value={p.preClosurePenalInterestOnType?.description ?? "—"}
                 />
               </>
@@ -252,18 +254,18 @@ const FixedDepositProductDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileText className="h-5 w-5 text-[#D32F2F]" />
-              Tax & Accounting
+              {t("Tax & Accounting")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<FileText className="h-4 w-4" />}
-              label="Withhold Tax"
-              value={p.withHoldTax ? "Yes" : "No"}
+              label={t("Withhold Tax")}
+              value={p.withHoldTax ? t("Yes") : t("No")}
             />
             <InfoRow
               icon={<FileText className="h-4 w-4" />}
-              label="Accounting Rule"
+              label={t("Accounting Rule")}
               value={p.accountingRule?.description ?? "—"}
             />
           </CardContent>
@@ -275,23 +277,23 @@ const FixedDepositProductDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <ChartArea className="h-5 w-5 text-[#D32F2F]" />
-              Interest Rate Chart{p.activeChart.name ? ` — ${p.activeChart.name}` : ""}
+              {t("Interest Rate Chart")}{p.activeChart.name ? ` — ${p.activeChart.name}` : ""}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-gray-500 mb-3">
-              From {p.activeChart.fromDate ? new Date(p.activeChart.fromDate).toLocaleDateString() : "—"}
-              {p.activeChart.endDate ? ` to ${new Date(p.activeChart.endDate).toLocaleDateString()}` : ""}
+              {t("From")} {p.activeChart.fromDate ? new Date(p.activeChart.fromDate).toLocaleDateString() : "—"}
+              {p.activeChart.endDate ? ` ${t("to")} ${new Date(p.activeChart.endDate).toLocaleDateString()}` : ""}
             </p>
             <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Description</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Period Type</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">From</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">To</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">Annual Rate</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">{t("Description")}</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">{t("Period Type")}</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">{t("From")}</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">{t("To")}</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">{t("Annual Rate")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y dark:divide-gray-700">

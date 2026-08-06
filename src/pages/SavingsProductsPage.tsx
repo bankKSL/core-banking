@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, Pencil, Eye, AlertTriangle, Building2, Percent, DollarSign } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
@@ -15,6 +16,7 @@ const formatCurrency = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
 const SavingsProductsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: products = [], isLoading, isError, error, refetch } = useSavingsProducts();
   const [search, setSearch] = useState("");
@@ -38,22 +40,22 @@ const SavingsProductsPage: React.FC = () => {
   const columns: ColumnDef<SavingsProduct>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t("Name"),
       cell: (r) => <span className="font-semibold">{r.name}</span>,
     },
     {
       key: "shortName",
-      header: "Code",
+      header: t("Code"),
       cell: (r) => <code className="text-xs">{r.shortName ?? "—"}</code>,
     },
     {
       key: "currency",
-      header: "Currency",
+      header: t("Currency"),
       cell: (r) => <span className="text-sm">{r.currency.displaySymbol ?? r.currency.code}</span>,
     },
     {
       key: "nominalAnnualInterestRate",
-      header: "Interest Rate",
+      header: t("Interest Rate"),
       cell: (r) => <span className="text-sm font-mono font-semibold">{r.nominalAnnualInterestRate}%</span>,
     },
     {
@@ -76,19 +78,19 @@ const SavingsProductsPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Savings Products"
-          description="Manage savings product definitions"
+          title={t("Savings Products")}
+          description={t("Manage savings product definitions")}
           actions={
             <Button onClick={() => navigate("/deposits/products/new")} className="bg-[#D32F2F] hover:bg-red-700">
-              <Plus className="mr-2 h-4 w-4" /> New Product
+              <Plus className="mr-2 h-4 w-4" /> {t("New Product")}
             </Button>
           }
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span className="text-sm">Failed to load savings products. {error?.message ?? "Please try again."}</span>
+          <span className="text-sm">{t("Failed to load savings products.")} {error?.message ?? t("Please try again.")}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -97,15 +99,15 @@ const SavingsProductsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Savings Products"
-        description="Manage savings product definitions"
-        actions={
-          <Button onClick={() => navigate("/deposits/products/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Product
-          </Button>
-        }
-      />
+        <PageHeader
+          title={t("Savings Products")}
+          description={t("Manage savings product definitions")}
+          actions={
+            <Button onClick={() => navigate("/deposits/products/new")} className="bg-[#D32F2F] hover:bg-red-700">
+              <Plus className="mr-2 h-4 w-4" /> {t("New Product")}
+            </Button>
+          }
+        />
 
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -115,20 +117,20 @@ const SavingsProductsPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard title="Total Products" value={stats.total} icon={Building2} />
-          <StatCard title="Avg Interest Rate" value={`${stats.avgRate.toFixed(2)}%`} variant="success" />
-          <StatCard title="Currencies" value={stats.uniqueCurrencies} icon={DollarSign} />
-          <StatCard title="Min Opening Balance" value={formatCurrency(stats.totalMinBalance)} variant="warning" />
+          <StatCard title={t("Total Products")} value={stats.total} icon={Building2} />
+          <StatCard title={t("Avg Interest Rate")} value={`${stats.avgRate.toFixed(2)}%`} variant="success" />
+          <StatCard title={t("Currencies")} value={stats.uniqueCurrencies} icon={DollarSign} />
+          <StatCard title={t("Min Opening Balance")} value={formatCurrency(stats.totalMinBalance)} variant="warning" />
         </div>
       )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Products</CardTitle>
+          <CardTitle>{t("All Products")}</CardTitle>
           <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search products..."
+              placeholder={t("Search products...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -143,7 +145,7 @@ const SavingsProductsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={filtered} emptyState={{ message: "No savings products found" }} />
+            <DataTable columns={columns} data={filtered} emptyState={{ message: t("No savings products found") }} />
           )}
         </CardContent>
       </Card>

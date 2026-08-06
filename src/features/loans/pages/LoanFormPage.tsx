@@ -1,6 +1,7 @@
 import { type FC, useCallback, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -21,6 +22,7 @@ import type { Loan, LoanCreateRequest, LoanRepaymentSchedule, LoanTemplate } fro
 import { currentDate } from "@/lib/utils";
 
 const LoanFormPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -123,11 +125,11 @@ const LoanFormPage: FC = () => {
       if (isEditMode && id) {
         delete payload.originators;
         await updateMutation.mutateAsync({ loanId: Number(id), payload: payload as Partial<LoanCreateRequest> });
-        toastSuccess("Loan updated successfully");
+        toastSuccess(t("Loan updated successfully"));
         navigate(`/loans/view/${id}`);
       } else {
         const result = await createMutation.mutateAsync(payload as unknown as LoanCreateRequest);
-        toastSuccess("Loan application submitted successfully");
+        toastSuccess(t("Loan application submitted successfully"));
         navigate(`/loans/view/${result.resourceId ?? result.loanId}`);
       }
     },
@@ -142,18 +144,18 @@ const LoanFormPage: FC = () => {
     return (
       <div className="p-6 max-w-6xl m-auto">
         <PageHeader
-          title="Edit Loan"
-          description={`Editing loan ${loan.accountNo ?? `#${id}`}`}
+          title={t("Edit Loan")}
+          description={`${t("Editing loan")} ${loan.accountNo ?? `#${id}`}`}
           actions={
             <Button variant="outline" onClick={() => navigate(`/loans/view/${id}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Loan
+              {t("Back to Loan")}
             </Button>
           }
         />
         <ErrorState
-          title="Loan cannot be modified"
-          message={`This loan is in "${loan.status?.value ?? "Unknown"}" state. Loan applications can only be modified while their status is "Submitted and pending approval".`}
+          title={t("Loan cannot be modified")}
+          message={`${t("This loan is in")} "${loan.status?.value ?? t("Unknown")}" ${t("state. Loan applications can only be modified while their status is")} "Submitted and pending approval".`}
           onRetry={() => navigate(`/loans/view/${id}`)}
         />
       </div>
@@ -183,22 +185,22 @@ const LoanFormPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto">
       <PageHeader
-        title={isEditMode ? "Edit Loan" : "Create Loan"}
+        title={isEditMode ? t("Edit Loan") : t("Create Loan")}
         description={
-          isEditMode ? `Editing loan ${loan?.accountNo ?? `#${id}`}` : "Register a new loan application in Finfact"
+          isEditMode ? `${t("Editing loan")} ${loan?.accountNo ?? `#${id}`}` : t("Register a new loan application in Finfact")
         }
         actions={
           <Button variant="outline" onClick={() => navigate(isEditMode ? `/loans/view/${id}` : "/loans")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            {isEditMode ? "Back to Loan" : "Back to Loans"}
+            {isEditMode ? t("Back to Loan") : t("Back to Loans")}
           </Button>
         }
       />
       {createMutation.isError && (
         <div className="mb-4">
           <ErrorState
-            title="Failed to save loan"
-            message={createMutation.error?.message ?? "An unexpected error occurred."}
+            title={t("Failed to save loan")}
+            message={createMutation.error?.message ?? t("An unexpected error occurred.")}
             onRetry={() => createMutation.reset()}
           />
         </div>
@@ -206,9 +208,9 @@ const LoanFormPage: FC = () => {
       {previewMutation.isError && (
         <div className="mb-4">
           <ErrorState
-            title="Failed to calculate schedule"
+            title={t("Failed to calculate schedule")}
             message={
-              previewMutation.error instanceof Error ? previewMutation.error.message : "Please check the form values."
+              previewMutation.error instanceof Error ? previewMutation.error.message : t("Please check the form values.")
             }
             onRetry={() => previewMutation.reset()}
           />
@@ -239,8 +241,8 @@ const LoanFormPage: FC = () => {
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle>Repayment Schedule Preview</DialogTitle>
-            <DialogDescription>Projected installments based on the current form values.</DialogDescription>
+            <DialogTitle>{t("Repayment Schedule Preview")}</DialogTitle>
+            <DialogDescription>{t("Projected installments based on the current form values.")}</DialogDescription>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto">
             <LoanScheduleTable periods={previewSchedule?.periods ?? []} />

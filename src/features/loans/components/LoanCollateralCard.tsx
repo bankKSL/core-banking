@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Gem, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
@@ -27,6 +28,7 @@ interface LoanCollateralCardProps {
 }
 
 const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode = "USD", collateral: initial }) => {
+  const { t } = useTranslation();
   const collateralQuery = useLoanCollateral(initial ? undefined : loanId);
   const items = initial ?? collateralQuery.data ?? [];
 
@@ -89,24 +91,24 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Gem className="h-4 w-4 text-gray-400" />
-            Collateral ({items.length})
+            {t("Collateral")} ({items.length})
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openCreate}>
             <Plus className="mr-1 h-4 w-4" />
-            Add Collateral
+            {t("Add Collateral")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {items.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No collateral linked to this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No collateral linked to this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Type")}</TableHead>
+                  <TableHead>{t("Description")}</TableHead>
+                  <TableHead className="text-right">{t("Value")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -137,20 +139,20 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Collateral" : "Add Collateral"}</DialogTitle>
+            <DialogTitle>{editing ? t("Edit Collateral") : t("Add Collateral")}</DialogTitle>
             <DialogDescription>
-              {editing ? "Update the collateral details." : "Link a collateral item to this loan."}
+              {editing ? t("Update the collateral details.") : t("Link a collateral item to this loan.")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Collateral Type *</label>
+              <label className="block text-sm font-medium">{t("Collateral Type")} *</label>
               <Select
                 value={selectedTypeId ? String(selectedTypeId) : ""}
                 onValueChange={(v) => setValue("collateralTypeId", Number(v), { shouldValidate: true })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("Select type")} />
                 </SelectTrigger>
                 <SelectContent>
                   {typeOptions.map((opt) => (
@@ -163,7 +165,7 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
               {errors.collateralTypeId && <p className="text-xs text-red-500">{errors.collateralTypeId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Value *</label>
+              <label className="block text-sm font-medium">{t("Value")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -173,16 +175,16 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
+              <label className="block text-sm font-medium">{t("Description")}</label>
               <Input {...register("description")} disabled={isMutating} />
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={isMutating}>
                 {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {editing ? "Save Changes" : "Add Collateral"}
+                {editing ? t("Save Changes") : t("Add Collateral")}
               </Button>
             </div>
           </form>
@@ -193,9 +195,9 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Collateral"
-        description={`Remove this collateral item (${typeName(deleteTarget ?? { id: 0, value: 0 })}) from the loan?`}
-        confirmLabel="Delete"
+        title={t("Delete Collateral")}
+        description={`${t("Remove this collateral item")} (${typeName(deleteTarget ?? { id: 0, value: 0 })}) ${t("from the loan?")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={async () => {

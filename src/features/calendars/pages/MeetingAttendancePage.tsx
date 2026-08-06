@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -27,6 +28,7 @@ const ATTENDANCE_OPTIONS = [
 type AttendanceFormValues = Record<string, number>;
 
 const MeetingAttendancePage: FC = () => {
+  const { t } = useTranslation();
   const { entityType, entityId, meetingId } = useParams<{
     entityType: string;
     entityId: string;
@@ -87,7 +89,7 @@ const MeetingAttendancePage: FC = () => {
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
-        <PageHeader title="Meeting Attendance" description="Loading..." />
+        <PageHeader title={t("Meeting Attendance")} description={t("Loading...")} />
         <Card>
           <CardContent className="py-8">
             <div className="space-y-4">
@@ -105,14 +107,14 @@ const MeetingAttendancePage: FC = () => {
     return (
       <div className="p-6 space-y-6">
         <PageHeader
-          title="Meeting Attendance"
+          title={t("Meeting Attendance")}
           actions={
             <Button variant="outline" onClick={() => navigate(-1)}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
-        <ErrorState title="Failed to load meeting" message="Failed to load meeting attendance." onRetry={refetch} />
+        <ErrorState title={t("Failed to load meeting")} message={t("Failed to load meeting attendance.")} onRetry={refetch} />
       </div>
     );
   }
@@ -120,20 +122,20 @@ const MeetingAttendancePage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Meeting Attendance"
-        description={meetingDate ? `Attendance for meeting on ${meetingDate}` : ""}
+        title={t("Meeting Attendance")}
+        description={meetingDate ? t("Attendance for meeting on {{date}}", { date: meetingDate }) : ""}
         actions={
           <Button variant="outline" onClick={() => navigate(-1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {updateMutation.isError && (
         <ErrorState
-          title="Failed to save attendance"
+          title={t("Failed to save attendance")}
           message={
-            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+            updateMutation.error instanceof Error ? updateMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => updateMutation.reset()}
         />
@@ -141,13 +143,13 @@ const MeetingAttendancePage: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Client Attendance</CardTitle>
+          <CardTitle>{t("Client Attendance")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-3">
               {(!meeting?.clientsAttendance || meeting.clientsAttendance.length === 0) ? (
-                <p className="text-sm text-gray-500">No attendance records found.</p>
+                <p className="text-sm text-gray-500">{t("No attendance records found.")}</p>
               ) : (
                 meeting.clientsAttendance.map((att) => (
                   <div key={att.id} className="flex items-center justify-between gap-4 py-2 border-b last:border-0">
@@ -166,7 +168,7 @@ const MeetingAttendancePage: FC = () => {
                           <SelectContent>
                             {ATTENDANCE_OPTIONS.map((opt) => (
                               <SelectItem key={opt.id} value={String(opt.id)}>
-                                {opt.label}
+                                {t(opt.label)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -182,11 +184,11 @@ const MeetingAttendancePage: FC = () => {
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
                       </>
                     ) : (
                       <>
-                        <Save className="mr-2 h-4 w-4" /> Save Attendance
+                        <Save className="mr-2 h-4 w-4" /> {t("Save Attendance")}
                       </>
                     )}
                   </Button>

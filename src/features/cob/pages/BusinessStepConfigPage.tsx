@@ -1,5 +1,6 @@
 import { type FC, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { ArrowLeft, Save, Loader2, GripVertical, ListOrdered, Plus, X, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -21,6 +22,7 @@ interface JobFormValues {
 }
 
 const BusinessStepConfigPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: jobNamesData } = useJobNames();
   const [orderedSteps, setOrderedSteps] = useState<OrderedStep[]>([]);
@@ -92,12 +94,12 @@ const BusinessStepConfigPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Business Step Configuration"
-        description="Configure the order of business steps executed during COB processing"
+        title={t("Business Step Configuration")}
+        description={t("Configure the order of business steps executed during COB processing")}
         actions={
           <Button variant="outline" onClick={() => navigate("/cob/dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -106,7 +108,7 @@ const BusinessStepConfigPage: FC = () => {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <ListOrdered className="h-5 w-5" />
-            Step Order
+            {t("Step Order")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -117,7 +119,7 @@ const BusinessStepConfigPage: FC = () => {
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select job" />
+                    <SelectValue placeholder={t("Select job")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(jobNamesData?.businessJobs ?? ["LOAN_COB"]).map((job) => (
@@ -170,7 +172,7 @@ const BusinessStepConfigPage: FC = () => {
                   <span className="flex-1 text-sm font-medium">
                     {BUSINESS_STEP_LABELS[step.stepName] ?? step.stepName}
                   </span>
-                  <Badge size="sm">Step {step.order}</Badge>
+                  <Badge size="sm">{t("Step")} {step.order}</Badge>
                   <button
                     type="button"
                     onClick={() => removeStep(step.stepName)}
@@ -184,7 +186,7 @@ const BusinessStepConfigPage: FC = () => {
               {orderedSteps.length === 0 && (
                 <div className="flex items-center gap-2 p-4 text-sm text-gray-500">
                   <AlertCircle className="h-4 w-4" />
-                  No steps configured. Add steps from the available list below.
+                  {t("No steps configured. Add steps from the available list below.")}
                 </div>
               )}
             </div>
@@ -192,7 +194,7 @@ const BusinessStepConfigPage: FC = () => {
 
           {unusedSteps.length > 0 && (
             <div className="pt-2">
-              <p className="text-xs text-gray-500 mb-2">Available steps to add:</p>
+              <p className="text-xs text-gray-500 mb-2">{t("Available steps to add:")}</p>
               <div className="flex flex-wrap gap-2">
                 {unusedSteps.map((step) => (
                   <button
@@ -216,7 +218,7 @@ const BusinessStepConfigPage: FC = () => {
           <Button onClick={handleSave} disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
             {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            Save Configuration
+            {t("Save Configuration")}
           </Button>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FileText, Upload, Loader2, Download, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,6 +29,7 @@ function formatFileType(mime: string): string {
 }
 
 const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
+  const { t } = useTranslation();
   const documentsQuery = useLoanDocuments(loanId);
   const documents = documentsQuery.data ?? [];
 
@@ -89,25 +91,25 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <FileText className="h-4 w-4 text-gray-400" />
-            Documents ({documents.length})
+            {t("Documents")} ({documents.length})
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openUpload}>
             <Upload className="mr-1 h-4 w-4" />
-            Upload Document
+            {t("Upload Document")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {documents.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No documents attached to this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No documents attached to this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Size</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Name")}</TableHead>
+                  <TableHead>{t("Description")}</TableHead>
+                  <TableHead className="text-right">{t("Size")}</TableHead>
+                  <TableHead>{t("Type")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -139,13 +141,13 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>Attach a document to this loan.</DialogDescription>
+            <DialogTitle>{t("Upload Document")}</DialogTitle>
+            <DialogDescription>{t("Attach a document to this loan.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="uploadFile">
-                File *
+                {t("File")} *
               </label>
               <Input
                 id="uploadFile"
@@ -160,7 +162,7 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="uploadName">
-                Name *
+                {t("Name")} *
               </label>
               <Input
                 id="uploadName"
@@ -171,7 +173,7 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="uploadDescription">
-                Description
+                {t("Description")}
               </label>
               <Input
                 id="uploadDescription"
@@ -182,11 +184,11 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setUploadOpen(false)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleUpload} disabled={isMutating || !uploadFile || !uploadName.trim()}>
                 {uploadMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Upload
+                {t("Upload")}
               </Button>
             </div>
           </div>
@@ -197,9 +199,9 @@ const LoanDocumentsCard: FC<LoanDocumentsCardProps> = ({ loanId }) => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Document"
-        description={`Remove ${deleteTarget?.name} from this loan? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Document")}
+        description={`${t("Remove")} ${deleteTarget?.name} ${t("from this loan? This cannot be undone.")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}

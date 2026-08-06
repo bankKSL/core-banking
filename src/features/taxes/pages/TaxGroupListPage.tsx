@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,18 +11,22 @@ import { useTaxGroups } from "../hooks/useTaxes";
 import type { TaxGroup } from "../api/taxes";
 import type { ColumnDef } from "@/components/shared/DataTable";
 
-const columns: ColumnDef<TaxGroup>[] = [
-  { key: "name", header: "Name" },
-  {
-    key: "taxComponents",
-    header: "Components",
-    accessorFn: (row) => `${row.taxComponents.length} component${row.taxComponents.length !== 1 ? "s" : ""}`,
-  },
-];
-
 const TaxGroupListPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: groups, isLoading, isError, refetch, isRefetching } = useTaxGroups();
+
+  const columns: ColumnDef<TaxGroup>[] = [
+    { key: "name", header: t("Name") },
+    {
+      key: "taxComponents",
+      header: t("Components"),
+      accessorFn: (row) => {
+        const count = row.taxComponents.length;
+        return `${count} ${count === 1 ? t("component") : t("components")}`;
+      },
+    },
+  ];
 
   const handleRowClick = useCallback(
     (row: TaxGroup) => {
@@ -34,14 +39,14 @@ const TaxGroupListPage = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Tax Groups"
+          title={t("Tax Groups")}
           actions={
             <Button onClick={() => navigate("/taxes/groups/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Group
+              <Plus className="mr-2 h-4 w-4" /> {t("New Group")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load tax groups." onRetry={refetch} />
+        <ErrorState message={t("Failed to load tax groups.")} onRetry={refetch} />
       </div>
     );
   }
@@ -49,17 +54,17 @@ const TaxGroupListPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Tax Groups"
+        title={t("Tax Groups")}
         actions={
           <Button onClick={() => navigate("/taxes/groups/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Group
+            <Plus className="mr-2 h-4 w-4" /> {t("New Group")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Groups</CardTitle>
+          <CardTitle>{t("Groups")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable

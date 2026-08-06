@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -11,6 +12,7 @@ import { useShareProducts, SHARES_PAGE_SIZE } from "../";
 import type { ShareProduct } from "../api/shares";
 
 const ShareProductListPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, refetch } = useShareProducts({ offset: (page - 1) * SHARES_PAGE_SIZE, limit: SHARES_PAGE_SIZE });
@@ -22,31 +24,31 @@ const ShareProductListPage = () => {
 
   const columns: ColumnDef<ShareProduct>[] = useMemo(
     () => [
-      { key: "name", header: "Name", sortable: true },
-      { key: "shortName", header: "Short Name" },
+      { key: "name", header: t("Name"), sortable: true },
+      { key: "shortName", header: t("Short Name") },
       {
         key: "currency",
-        header: "Currency",
+        header: t("Currency"),
         accessorFn: (row) => row.currency?.displaySymbol ?? row.currency?.code ?? "—",
       },
       {
         key: "totalShares",
-        header: "Total Shares",
+        header: t("Total Shares"),
         accessorFn: (row) => (row.totalShares ?? 0).toLocaleString(),
       },
       {
         key: "unitPrice",
-        header: "Unit Price",
+        header: t("Unit Price"),
         accessorFn: (row) => (row.unitPrice ?? 0).toLocaleString(),
       },
       {
         key: "nominalShares",
-        header: "Nominal Shares",
+        header: t("Nominal Shares"),
         accessorFn: (row) => (row.nominalShares ?? 0).toLocaleString(),
       },
       {
         key: "accountingRule",
-        header: "Accounting Rule",
+        header: t("Accounting Rule"),
         accessorFn: (row) => row.accountingRule?.value ?? "—",
       },
       {
@@ -62,7 +64,7 @@ const ShareProductListPage = () => {
         ),
       },
     ],
-    [navigate],
+    [navigate, t],
   );
 
   const handleRowClick = useCallback(
@@ -76,15 +78,15 @@ const ShareProductListPage = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Share Products"
-          description="Manage share product definitions"
+          title={t("Share Products")}
+          description={t("Manage share product definitions")}
           actions={
             <Button onClick={() => navigate("/shares/products/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Product
+              <Plus className="mr-2 h-4 w-4" /> {t("New Product")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load share products." onRetry={refetch} />
+        <ErrorState message={t("Failed to load share products.")} onRetry={refetch} />
       </div>
     );
   }
@@ -92,18 +94,18 @@ const ShareProductListPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Share Products"
-        description="Manage share product definitions"
+        title={t("Share Products")}
+        description={t("Manage share product definitions")}
         actions={
           <Button onClick={() => navigate("/shares/products/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Product
+            <Plus className="mr-2 h-4 w-4" /> {t("New Product")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Share Products</CardTitle>
+          <CardTitle>{t("All Share Products")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -111,7 +113,7 @@ const ShareProductListPage = () => {
             data={products}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No share products found." }}
+            emptyState={{ message: t("No share products found.") }}
           />
           {totalFilteredRecords > 0 && (
             <Pagination

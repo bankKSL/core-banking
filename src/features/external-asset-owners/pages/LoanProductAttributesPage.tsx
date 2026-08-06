@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, Plus, Pencil, Sliders } from "lucide-react";
@@ -34,6 +35,7 @@ const INTEREST_STRATEGY_OPTIONS = [
 ];
 
 const LoanProductAttributesPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { loanProductId } = useParams<{ loanProductId: string }>();
   const parsedId = loanProductId ? Number(loanProductId) : undefined;
@@ -88,12 +90,12 @@ const LoanProductAttributesPage: FC = () => {
   const columns: ColumnDef<LoanProductAttribute>[] = [
     {
       key: "attributeKey",
-      header: "Key",
+      header: t("Key"),
       cell: (r) => <span className="font-medium">{r.attributeKey}</span>,
     },
     {
       key: "attributeValue",
-      header: "Value",
+      header: t("Value"),
       cell: (r) => <span className="font-mono text-sm">{r.attributeValue}</span>,
     },
     {
@@ -112,10 +114,10 @@ const LoanProductAttributesPage: FC = () => {
   if (!parsedId) {
     return (
       <div className="p-6 max-w-6xl m-auto">
-        <PageHeader title="Loan Product Attributes" description="Configure investor attributes for a loan product" />
+        <PageHeader title={t("Loan Product Attributes")} description={t("Configure investor attributes for a loan product")} />
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
-            Please provide a loan product ID in the URL.
+            {t("Please provide a loan product ID in the URL.")}
           </CardContent>
         </Card>
       </div>
@@ -125,52 +127,52 @@ const LoanProductAttributesPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Loan Product Attributes"
-        description={`Configure investor settings for loan product #${parsedId}`}
+        title={t("Loan Product Attributes")}
+        description={t("Configure investor settings for loan product #{{id}}", { id: parsedId })}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/lending/products")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Products
+              {t("Back to Products")}
             </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={openCreate} className="bg-[#D32F2F] hover:bg-red-700">
-                  <Plus className="mr-2 h-4 w-4" /> Add Attribute
+                  <Plus className="mr-2 h-4 w-4" /> {t("Add Attribute")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editingAttribute ? "Edit Attribute" : "Create Attribute"}</DialogTitle>
+                  <DialogTitle>{editingAttribute ? t("Edit Attribute") : t("Create Attribute")}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                   <div>
                     <label className="block text-sm font-medium" htmlFor="attributeKey">
-                      Attribute Key *
+                      {t("Attribute Key")} *
                     </label>
                     <Select
                       value={watch("attributeKey")}
                       onValueChange={(v) => setValue("attributeKey", v, { shouldValidate: true })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select key" />
+                        <SelectValue placeholder={t("Select key")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="settlementModel">Settlement Model</SelectItem>
-                        <SelectItem value="outstandingInterestStrategy">Outstanding Interest Strategy</SelectItem>
+                        <SelectItem value="settlementModel">{t("Settlement Model")}</SelectItem>
+                        <SelectItem value="outstandingInterestStrategy">{t("Outstanding Interest Strategy")}</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.attributeKey && <p className="text-xs text-red-500 mt-1">{errors.attributeKey.message}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Attribute Value *</label>
+                    <label className="block text-sm font-medium">{t("Attribute Value")} *</label>
                     {watch("attributeKey") === "settlementModel" ? (
                       <Select
                         value={watch("attributeValue")}
                         onValueChange={(v) => setValue("attributeValue", v, { shouldValidate: true })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select value" />
+                          <SelectValue placeholder={t("Select value")} />
                         </SelectTrigger>
                         <SelectContent>
                           {SETTLEMENT_OPTIONS.map((o) => (
@@ -186,7 +188,7 @@ const LoanProductAttributesPage: FC = () => {
                         onValueChange={(v) => setValue("attributeValue", v, { shouldValidate: true })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select value" />
+                          <SelectValue placeholder={t("Select value")} />
                         </SelectTrigger>
                         <SelectContent>
                           {INTEREST_STRATEGY_OPTIONS.map((o) => (
@@ -199,19 +201,19 @@ const LoanProductAttributesPage: FC = () => {
                     ) : (
                       <Input
                         {...register("attributeValue")}
-                        placeholder="Enter value"
+                        placeholder={t("Enter value")}
                         error={errors.attributeValue?.message}
                       />
                     )}
                   </div>
                   <div className="flex justify-end gap-3 pt-2">
                     <Button variant="outline" type="button" onClick={() => setDialogOpen(false)}>
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                     <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
                       {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       <Save className="mr-2 h-4 w-4" />
-                      {editingAttribute ? "Save Changes" : "Create"}
+                      {editingAttribute ? t("Save Changes") : t("Create")}
                     </Button>
                   </div>
                 </form>
@@ -224,7 +226,7 @@ const LoanProductAttributesPage: FC = () => {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Sliders className="h-5 w-5" />
-            Attributes
+            {t("Attributes")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -240,7 +242,7 @@ const LoanProductAttributesPage: FC = () => {
               data={attributes}
               emptyState={{
                 icon: <Sliders className="h-8 w-8 text-gray-300" />,
-                message: "No attributes configured for this loan product.",
+                message: t("No attributes configured for this loan product."),
               }}
               minWidth={500}
             />

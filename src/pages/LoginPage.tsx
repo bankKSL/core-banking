@@ -2,7 +2,8 @@ import { type FC, useState, useEffect, useRef, type Ref } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LayoutDashboard, Eye, EyeOff, Loader2, AlertCircle, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Eye, EyeOff, Loader2, AlertCircle, Moon, Sun, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,15 @@ function mergeRefs<T>(...refs: Array<Ref<T> | undefined>) {
 
 const LoginPage: FC = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { isAuthenticated, loginError, clearLoginError } = useAuthStore();
   const { theme, toggleTheme } = useUIStore();
   const loginMutation = useLogin();
+
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+    localStorage.setItem("language", langCode);
+  };
 
   const [showPassword, setShowPassword] = useState(false);
   const passwordInputRef = useRef<HTMLInputElement>(null);
@@ -69,14 +76,23 @@ const LoginPage: FC = () => {
         <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-[#D32F2F]/5 blur-3xl dark:bg-[#D32F2F]/10" />
       </div>
 
-      {/* Theme toggle */}
-      <button
-        onClick={toggleTheme}
-        className="fixed right-4 top-4 z-50 rounded-lg border border-gray-200 bg-white p-2.5 text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      >
-        {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-      </button>
+      {/* Theme and Language toggles */}
+      <div className="fixed right-4 top-4 z-50 flex gap-2">
+        <button
+          onClick={() => handleLanguageChange(i18n.language === "en" ? "lo" : "en")}
+          className="rounded-lg border border-gray-200 bg-white p-2.5 text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          aria-label={i18n.language === "en" ? "Switch to Lao" : "Switch to English"}
+        >
+          <Globe className="h-4 w-4" />
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="rounded-lg border border-gray-200 bg-white p-2.5 text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
+      </div>
 
       {/* Login card */}
       <div className="relative z-10 w-full max-w-md">
@@ -86,8 +102,8 @@ const LoginPage: FC = () => {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/25">
               <LayoutDashboard className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">CoreBank</h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Sign in to your account</p>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{t("CoreBank")}</h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("Sign in")}</p>
           </div>
 
           {/* Error alert */}
@@ -100,10 +116,10 @@ const LoginPage: FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Username</label>
+              <label className="block text-sm font-medium">{t("Username")}</label>
               <Input
                 type="text"
-                placeholder="Enter your username"
+                placeholder={t("Enter your username")}
                 autoComplete="username"
                 disabled={isSubmitting}
                 className={cn("h-11", displayError && "border-red-300 focus-visible:ring-red-500 dark:border-red-700")}
@@ -114,13 +130,13 @@ const LoginPage: FC = () => {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t("Password")}</label>
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
                   className="text-xs font-medium text-[#D32F2F] hover:text-primary-700 transition-colors"
                 >
-                  Forgot password?
+                  {t("Forgot password?")}
                 </button>
               </div>
               <div className="relative">
@@ -131,7 +147,7 @@ const LoginPage: FC = () => {
                       {...passwordRegister}
                       ref={mergeRefs(passwordInputRef, passwordRegister.ref)}
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder={t("Enter your password")}
                       autoComplete="current-password"
                       disabled={isSubmitting}
                       error={form.formState.errors.password?.message}
@@ -162,24 +178,24 @@ const LoginPage: FC = () => {
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t("Signing in...")}
                 </span>
               ) : (
-                "Sign in"
+                t("Sign in")
               )}
             </Button>
           </form>
 
           {/* Footer */}
           <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
-            Demo credentials pre-filled. Use <span className="font-medium text-gray-500 dark:text-gray-400">mifos</span>
+            {t("Demo credentials pre-filled. Use")} <span className="font-medium text-gray-500 dark:text-gray-400">mifos</span>
             {" / "}
             <span className="font-medium text-gray-500 dark:text-gray-400">password</span>
           </p>
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">
-          &copy; {new Date().getFullYear()} CoreBank. All rights reserved.
+          &copy; {new Date().getFullYear()} {t("CoreBank")}. {t("All rights reserved.")}
         </p>
       </div>
     </div>

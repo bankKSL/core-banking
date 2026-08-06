@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Receipt, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
@@ -29,6 +30,7 @@ interface LoanChargesCardProps {
 }
 
 const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD", charges: initialCharges }) => {
+  const { t } = useTranslation();
   const chargesQuery = useLoanCharges(initialCharges ? undefined : loanId);
   const charges = initialCharges ?? chargesQuery.data ?? [];
 
@@ -89,29 +91,29 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Receipt className="h-4 w-4 text-gray-400" />
-            Charges ({charges.length})
+            {t("Charges")} ({charges.length})
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openAdd}>
             <Plus className="mr-1 h-4 w-4" />
-            Add Charge
+            {t("Add Charge")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {charges.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No charges applied to this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No charges applied to this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Paid</TableHead>
-                  <TableHead className="text-right">Waived</TableHead>
-                  <TableHead className="text-right">Outstanding</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Name")}</TableHead>
+                  <TableHead>{t("Type")}</TableHead>
+                  <TableHead>{t("Due Date")}</TableHead>
+                  <TableHead className="text-right">{t("Amount")}</TableHead>
+                  <TableHead className="text-right">{t("Paid")}</TableHead>
+                  <TableHead className="text-right">{t("Waived")}</TableHead>
+                  <TableHead className="text-right">{t("Outstanding")}</TableHead>
+                  <TableHead>{t("Status")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -123,7 +125,7 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                       <TableCell className="text-sm font-medium">{charge.name}</TableCell>
                       <TableCell>
                         <Badge variant={charge.penalty ? "error" : "info"} size="sm">
-                          {charge.penalty ? "Penalty" : "Fee"}
+                          {charge.penalty ? t("Penalty") : t("Fee")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">{formatFineractDate(charge.dueDate)}</TableCell>
@@ -141,7 +143,7 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                       </TableCell>
                       <TableCell>
                         <Badge variant={isPaid ? "success" : isWaived ? "warning" : "default"} size="sm">
-                          {isPaid ? "Paid" : isWaived ? "Waived" : "Pending"}
+                          {isPaid ? t("Paid") : isWaived ? t("Waived") : t("Pending")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -156,10 +158,10 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                           {!isPaid && !isWaived && (
                             <>
                               <Button variant="ghost" size="sm" onClick={() => setPayTarget(charge)}>
-                                Pay
+                                {t("Pay")}
                               </Button>
                               <Button variant="ghost" size="sm" onClick={() => setWaiveTarget(charge)}>
-                                Waive
+                                {t("Waive")}
                               </Button>
                             </>
                           )}
@@ -181,18 +183,18 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Charge</DialogTitle>
-            <DialogDescription>Apply a new fee or penalty to this loan.</DialogDescription>
+            <DialogTitle>{t("Add Charge")}</DialogTitle>
+            <DialogDescription>{t("Apply a new fee or penalty to this loan.")}</DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            This charge will be added to the loan balance.
-          </div>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+              {t("This charge will be added to the loan balance.")}
+            </div>
           <form onSubmit={onAddSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Charge *</label>
+              <label className="block text-sm font-medium">{t("Charge")} *</label>
               <Select value={selectedChargeId ? String(selectedChargeId) : ""} onValueChange={(v) => handleChargeSelect(Number(v))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select charge" />
+                  <SelectValue placeholder={t("Select charge")} />
                 </SelectTrigger>
                 <SelectContent>
                   {chargeOptions.map((opt) => (
@@ -205,7 +207,7 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
               {errors.chargeId && <p className="text-xs text-red-500">{errors.chargeId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Amount *</label>
+              <label className="block text-sm font-medium">{t("Amount")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -215,16 +217,16 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Due Date</label>
+              <label className="block text-sm font-medium">{t("Due Date")}</label>
               <Input type="date" {...register("dueDate")} disabled={isMutating} />
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={isMutating}>
                 {addMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Charge
+                {t("Add Charge")}
               </Button>
             </div>
           </form>
@@ -235,21 +237,21 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Charge</DialogTitle>
-            <DialogDescription>Update amount for {editTarget?.name}.</DialogDescription>
+            <DialogTitle>{t("Edit Charge")}</DialogTitle>
+            <DialogDescription>{t("Update amount for")} {editTarget?.name}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Amount</label>
+              <label className="block text-sm font-medium">{t("Amount")}</label>
               <Input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Due Date</label>
+              <label className="block text-sm font-medium">{t("Due Date")}</label>
               <Input type="date" value={editDueDate} onChange={(e) => setEditDueDate(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditTarget(null)} disabled={updateMutation.isPending}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 disabled={updateMutation.isPending}
@@ -264,7 +266,7 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                 }}
               >
                 {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
+                {t("Save")}
               </Button>
             </div>
           </div>
@@ -275,19 +277,19 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
       <Dialog open={!!payTarget} onOpenChange={(open) => !open && setPayTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Pay Charge</DialogTitle>
+            <DialogTitle>{t("Pay Charge")}</DialogTitle>
             <DialogDescription>
               Pay {payTarget?.name} — outstanding {formatMoney(payTarget?.amountOutstanding ?? 0, currencyCode)}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Transaction Date</label>
+              <label className="block text-sm font-medium">{t("Transaction Date")}</label>
               <Input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setPayTarget(null)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 disabled={isMutating}
@@ -303,7 +305,7 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                 }}
               >
                 {commandMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Confirm Payment
+                {t("Confirm Payment")}
               </Button>
             </div>
           </div>
@@ -314,9 +316,9 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
       <ConfirmDialog
         open={!!waiveTarget}
         onOpenChange={(open) => !open && setWaiveTarget(null)}
-        title="Waive Charge"
-        description={`Waive ${waiveTarget?.name} (${formatMoney(waiveTarget?.amountOutstanding ?? 0, currencyCode)} outstanding)?`}
-        confirmLabel="Waive"
+        title={t("Waive Charge")}
+        description={`${t("Waive")} ${waiveTarget?.name} (${formatMoney(waiveTarget?.amountOutstanding ?? 0, currencyCode)} ${t("outstanding")})?`}
+        confirmLabel={t("Waive")}
         loading={commandMutation.isPending}
         onConfirm={async () => {
           if (!waiveTarget) return;
@@ -329,9 +331,9 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Charge"
-        description={`Remove charge ${deleteTarget?.name} from this loan? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Charge")}
+        description={`${t("Remove charge")} ${deleteTarget?.name} ${t("from this loan? This cannot be undone.")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={async () => {

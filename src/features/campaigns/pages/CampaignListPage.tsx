@@ -1,5 +1,6 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, Megaphone, Mail, Eye, Trash2, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -26,6 +27,7 @@ import {
 } from "../types/campaign";
 
 const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
+  const { t } = useTranslation();
   const { data: campaigns = [], isLoading } = useSmsCampaigns();
   const deleteMutation = useDeleteSmsCampaign();
   const [search, setSearch] = useState("");
@@ -40,27 +42,27 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
   const columns: ColumnDef<SmsCampaign>[] = [
     {
       key: "campaignName",
-      header: "Name",
+      header: t("Name"),
       cell: (r) => <span className="font-medium">{r.campaignName}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => <StatusBadge status={STATUS_LABELS[r.status]?.toLowerCase() ?? "unknown"} />,
     },
     {
       key: "triggerType",
-      header: "Trigger",
+      header: t("Trigger"),
       cell: (r) => <Badge>{TRIGGER_TYPE_LABELS[r.triggerType] ?? r.triggerType}</Badge>,
     },
     {
       key: "campaignType",
-      header: "Type",
+      header: t("Type"),
       cell: (r) => CAMPAIGN_TYPE_LABELS[r.campaignType] ?? r.campaignType,
     },
     {
       key: "message",
-      header: "Message",
+      header: t("Message"),
       cell: (r) => <span className="text-xs max-w-50 truncate block">{r.message}</span>,
     },
     {
@@ -87,7 +89,7 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search SMS campaigns..."
+            placeholder={t("Search SMS campaigns...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -104,7 +106,7 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
         <DataTable
           columns={columns}
           data={filtered}
-          emptyState={{ icon: <Megaphone className="h-8 w-8 text-gray-300" />, message: "No SMS campaigns found." }}
+          emptyState={{ icon: <Megaphone className="h-8 w-8 text-gray-300" />, message: t("No SMS campaigns found.") }}
           minWidth={700}
         />
       )}
@@ -117,10 +119,10 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete Campaign"
-        description={`Delete "${deleteTarget?.campaignName}"? Campaign must be closed.`}
+        title={t("Delete Campaign")}
+        description={t('Delete "{{name}}"? Campaign must be closed.', { name: deleteTarget?.campaignName })}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
         loading={deleteMutation.isPending}
       />
     </div>
@@ -128,6 +130,7 @@ const SmsCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
 };
 
 const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) => {
+  const { t } = useTranslation();
   const { data: campaigns = [], isLoading } = useEmailCampaigns();
   const deleteMutation = useDeleteEmailCampaign();
   const [search, setSearch] = useState("");
@@ -142,17 +145,17 @@ const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) =>
   const columns: ColumnDef<EmailCampaign>[] = [
     {
       key: "campaignName",
-      header: "Name",
+      header: t("Name"),
       cell: (r) => <span className="font-medium">{r.campaignName}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => <StatusBadge status={STATUS_LABELS[r.status]?.toLowerCase() ?? "unknown"} />,
     },
     {
       key: "emailSubject",
-      header: "Subject",
+      header: t("Subject"),
       cell: (r) => <span className="text-xs max-w-50 truncate block">{r.emailSubject}</span>,
     },
     {
@@ -179,7 +182,7 @@ const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) =>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search email campaigns..."
+            placeholder={t("Search email campaigns...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -196,7 +199,7 @@ const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) =>
         <DataTable
           columns={columns}
           data={filtered}
-          emptyState={{ icon: <Mail className="h-8 w-8 text-gray-300" />, message: "No email campaigns found." }}
+          emptyState={{ icon: <Mail className="h-8 w-8 text-gray-300" />, message: t("No email campaigns found.") }}
           minWidth={700}
         />
       )}
@@ -209,10 +212,10 @@ const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) =>
             setDeleteTarget(null);
           }
         }}
-        title="Delete Campaign"
-        description={`Delete "${deleteTarget?.campaignName}"? Campaign must be closed.`}
+        title={t("Delete Campaign")}
+        description={t('Delete "{{name}}"? Campaign must be closed.', { name: deleteTarget?.campaignName })}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
         loading={deleteMutation.isPending}
       />
     </div>
@@ -220,20 +223,21 @@ const EmailCampaignTable: FC<{ onView: (id: number) => void }> = ({ onView }) =>
 };
 
 const CampaignListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [tab, setTab] = useState("sms");
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Campaigns"
-        description="Manage SMS and email marketing campaigns"
+        title={t("Campaigns")}
+        description={t("Manage SMS and email marketing campaigns")}
         actions={
           <Button
             onClick={() => navigate(tab === "sms" ? "/campaigns/sms/new" : "/campaigns/email/new")}
             className="bg-[#D32F2F] hover:bg-red-700"
           >
-            <Plus className="mr-2 h-4 w-4" /> Create Campaign
+            <Plus className="mr-2 h-4 w-4" /> {t("Create Campaign")}
           </Button>
         }
       />
@@ -244,11 +248,11 @@ const CampaignListPage: FC = () => {
               <TabsList className="flex-wrap h-auto gap-1">
                 <TabsTrigger value="sms" className="flex items-center gap-2">
                   <Megaphone className="h-4 w-4" />
-                  SMS Campaigns
+                  {t("SMS Campaigns")}
                 </TabsTrigger>
                 <TabsTrigger value="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Email Campaigns
+                  {t("Email Campaigns")}
                 </TabsTrigger>
               </TabsList>
             </div>

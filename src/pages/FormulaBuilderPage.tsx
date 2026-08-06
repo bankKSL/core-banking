@@ -1,4 +1,5 @@
 import React, { useRef, useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { CheckCircle, XCircle, Code2, Wand2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { formulaVariables, operatorList, functionList } from "@/mock/data";
 import { useFormulaStore } from "@/store";
 
 const FormulaBuilderPage: React.FC = () => {
+  const { t } = useTranslation();
   const { formula, setFormula } = useFormulaStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPos, setCursorPos] = useState(0);
@@ -26,7 +28,6 @@ const FormulaBuilderPage: React.FC = () => {
       const after = formula.slice(el.selectionEnd);
       const newFormula = before + text + after;
       setFormula(newFormula);
-      // Restore cursor after React re-render
       setTimeout(() => {
         el.focus();
         const newPos = pos + text.length;
@@ -52,10 +53,9 @@ const FormulaBuilderPage: React.FC = () => {
     setCursorPos((e.target as HTMLTextAreaElement).selectionStart);
   }, []);
 
-  // Syntax-colored preview
   const previewHtml = useMemo(() => {
     if (!formula.trim()) {
-      return <span className="text-gray-400 text-sm italic">Enter a formula to preview...</span>;
+      return <span className="text-gray-400 text-sm italic">{t("Enter a formula to preview...")}</span>;
     }
     const tokens = formula.split(/([+\-*/%()])/g);
     return (
@@ -89,7 +89,6 @@ const FormulaBuilderPage: React.FC = () => {
     );
   }, [formula]);
 
-  // Basic validation
   const validation = useMemo(() => {
     if (!formula.trim()) {
       return { valid: false, message: "Formula is empty", issues: [] as string[] };
@@ -100,7 +99,6 @@ const FormulaBuilderPage: React.FC = () => {
     if (openParens !== closeParens) {
       issues.push(`Unmatched parentheses: ${openParens} open vs ${closeParens} close`);
     }
-    // Check for division by zero pattern
     if (/\/\s*0(?!\d)/.test(formula)) {
       issues.push("Potential division by zero");
     }
@@ -123,7 +121,7 @@ const FormulaBuilderPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Formula Builder" description="Visual Formula Editor" />
+      <PageHeader title={t("Formula Builder")} description={t("Visual Formula Editor")} />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Panel: Available Variables */}
@@ -131,9 +129,9 @@ const FormulaBuilderPage: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Code2 className="h-4 w-4" />
-              Available Variables
+              {t("Available Variables")}
             </CardTitle>
-            <CardDescription>Click to insert at cursor position</CardDescription>
+            <CardDescription>{t("Click to insert at cursor position")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {formulaVariables.map((v) => (
@@ -161,9 +159,9 @@ const FormulaBuilderPage: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Wand2 className="h-4 w-4" />
-              Formula Expression
+              {t("Formula Expression")}
             </CardTitle>
-            <CardDescription>Write your formula or use the buttons below</CardDescription>
+            <CardDescription>{t("Write your formula or use the buttons below")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
@@ -177,7 +175,7 @@ const FormulaBuilderPage: React.FC = () => {
             />
             <Separator />
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Operators</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{t("Operators")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {operatorList.map((op) => (
                   <Button
@@ -193,7 +191,7 @@ const FormulaBuilderPage: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Functions</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{t("Functions")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {functionList.map((fn) => (
                   <Button
@@ -214,7 +212,7 @@ const FormulaBuilderPage: React.FC = () => {
         {/* Right Panel: Preview & Validation */}
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Formula Preview</CardTitle>
+            <CardTitle className="text-base">{t("Formula Preview")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="min-h-[80px] p-3 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
@@ -222,7 +220,7 @@ const FormulaBuilderPage: React.FC = () => {
             </div>
           </CardContent>
           <CardHeader className="pb-3 pt-0">
-            <CardTitle className="text-base">Validation</CardTitle>
+            <CardTitle className="text-base">{t("Validation")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div

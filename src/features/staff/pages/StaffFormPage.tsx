@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Save, Loader2, UserRound } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const staffFormSchema = z.object({
 type StaffFormValues = z.infer<typeof staffFormSchema>;
 
 const StaffFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -128,14 +130,14 @@ const StaffFormPage: FC = () => {
     return (
       <div className="p-6 max-w-2xl m-auto">
         <PageHeader
-          title="Staff"
+          title={t("Staff")}
           actions={
             <Button variant="outline" onClick={() => navigate("/staff")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load staff member." />
+        <ErrorState message={t("Failed to load staff member.")} />
       </div>
     );
   }
@@ -143,11 +145,11 @@ const StaffFormPage: FC = () => {
   return (
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Staff" : "New Staff"}
-        description={isEdit ? `Editing "${staffMember?.displayName ?? ""}"` : "Create a new staff member"}
+        title={isEdit ? t("Edit Staff") : t("New Staff")}
+        description={isEdit ? t(`Editing "${staffMember?.displayName ?? ""}"`) : t("Create a new staff member")}
         actions={
           <Button variant="outline" onClick={() => navigate("/staff")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -157,7 +159,7 @@ const StaffFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <UserRound className="h-5 w-5" />
-              Staff Details
+              {t("Staff Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -170,12 +172,12 @@ const StaffFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">First Name *</label>
-                <Input {...register("firstname")} placeholder="Enter first name" error={errors.firstname?.message} />
+                <label className="block text-sm font-medium">{t("First Name *")}</label>
+                <Input {...register("firstname")} placeholder={t("Enter first name")} error={errors.firstname?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Last Name *</label>
-                <Input {...register("lastname")} placeholder="Enter last name" error={errors.lastname?.message} />
+                <label className="block text-sm font-medium">{t("Last Name *")}</label>
+                <Input {...register("lastname")} placeholder={t("Enter last name")} error={errors.lastname?.message} />
               </div>
             </div>
 
@@ -187,7 +189,7 @@ const StaffFormPage: FC = () => {
                   onCheckedChange={(checked) => setValue("isLoanOfficer", checked === true)}
                 />
                 <label className="block text-sm font-medium cursor-pointer" htmlFor="isLoanOfficer">
-                  Loan Officer
+                  {t("Loan Officer")}
                 </label>
               </div>
 
@@ -198,29 +200,29 @@ const StaffFormPage: FC = () => {
                   onCheckedChange={(checked) => setValue("isActive", checked === true)}
                 />
                 <label className="block text-sm font-medium cursor-pointer" htmlFor="isActive">
-                  Active
+                  {t("Active")}
                 </label>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Joining Date</label>
+              <label className="block text-sm font-medium">{t("Joining Date")}</label>
               <Input type="date" {...register("joiningDate")} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Mobile No</label>
-              <Input {...register("mobileNo")} placeholder="Enter mobile number" />
+              <label className="block text-sm font-medium">{t("Mobile No")}</label>
+              <Input {...register("mobileNo")} placeholder={t("Enter mobile number")} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Email Address</label>
-              <Input type="email" {...register("emailAddress")} placeholder="Enter email address" />
+              <label className="block text-sm font-medium">{t("Email Address")}</label>
+              <Input type="email" {...register("emailAddress")} placeholder={t("Enter email address")} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} placeholder="Optional external identifier" />
+              <label className="block text-sm font-medium">{t("External ID")}</label>
+              <Input {...register("externalId")} placeholder={t("Optional external identifier")} />
             </div>
           </CardContent>
         </Card>
@@ -228,25 +230,25 @@ const StaffFormPage: FC = () => {
         {createMutation.isError && (
           <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
             {(createMutation.error as any)?.response?.data?.errors?.[0]?.defaultUserMessage ??
-              "Failed to save staff member."}
+              t("Failed to save staff member.")}
           </div>
         )}
         {updateMutation.isError && (
           <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
             {(updateMutation.error as any)?.response?.data?.errors?.[0]?.defaultUserMessage ??
-              "Failed to save staff member."}
+              t("Failed to save staff member.")}
           </div>
         )}
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/staff")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Staff"}
+            {isEdit ? t("Save Changes") : t("Create Staff")}
           </Button>
         </div>
       </form>

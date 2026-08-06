@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Search, X, Calendar, Eye, RotateCw, Filter } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -77,6 +78,7 @@ const formatDate = (iso?: string): string => {
 };
 
 const AuditLogsPage: FC = () => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState<AuditFilters>(defaultFilters);
   const [appliedFilters, setAppliedFilters] = useState<AuditFilters>(defaultFilters);
   const [page, setPage] = useState(1);
@@ -108,13 +110,11 @@ const AuditLogsPage: FC = () => {
       if (appliedFilters.makerDateTimeTo) params.makerDateTimeTo = appliedFilters.makerDateTimeTo;
       if (appliedFilters.processingResult) params.processingResult = appliedFilters.processingResult;
 
-      // API returns Observable<string> — must JSON.parse
       const { data: raw } = await client.get<string>("/audits", { params });
       const result = typeof raw === "string" ? JSON.parse(raw) : raw;
       const items: AuditEntry[] = result?.pageItems ?? (Array.isArray(result) ? result : []);
       const totalFiltered = result?.totalFilteredRecords ?? result?.totalRecords;
 
-      // Heuristic: if page is full, estimate more records exist
       const total =
         items.length === PAGE_SIZE
           ? (page - 1) * PAGE_SIZE + PAGE_SIZE + 1
@@ -148,19 +148,19 @@ const AuditLogsPage: FC = () => {
     { key: "id", header: "ID", accessorFn: (r) => <code className="text-xs font-mono">{r.id}</code>, sortable: true },
     {
       key: "resourceId",
-      header: "Resource ID",
+      header: t("Resource ID"),
       accessorFn: (r) => <code className="text-xs">{r.resourceId ?? "—"}</code>,
       sortable: true,
     },
     {
       key: "entityName",
-      header: "Entity",
+      header: t("Entity"),
       accessorFn: (r) => <span className="text-sm font-medium">{r.entityName ?? "—"}</span>,
       sortable: true,
     },
     {
       key: "actionName",
-      header: "Action",
+      header: t("Action"),
       accessorFn: (r) => (
         <Badge variant={actionVariant[r.actionName ?? ""] ?? "default"} size="sm">
           {r.actionName ?? "—"}
@@ -170,33 +170,33 @@ const AuditLogsPage: FC = () => {
     },
     {
       key: "maker",
-      header: "Maker",
+      header: t("Maker"),
       accessorFn: (r) => <span className="text-sm">{r.maker ?? "—"}</span>,
       sortable: true,
     },
     {
       key: "madeOnDate",
-      header: "Made On",
+      header: t("Made On"),
       accessorFn: (r) => <span className="text-sm text-gray-500">{formatDate(r.madeOnDate)}</span>,
       sortable: true,
     },
-    { key: "checker", header: "Checker", accessorFn: (r) => <span className="text-sm">{r.checker ?? "—"}</span> },
+    { key: "checker", header: t("Checker"), accessorFn: (r) => <span className="text-sm">{r.checker ?? "—"}</span> },
     {
       key: "checkedOnDate",
-      header: "Checked On",
+      header: t("Checked On"),
       accessorFn: (r) => <span className="text-sm text-gray-500">{formatDate(r.checkedOnDate)}</span>,
     },
     {
       key: "processingResult",
-      header: "Result",
+      header: t("Result"),
       accessorFn: (r) =>
         r.processingResult === "success" ? (
           <Badge variant="success" size="sm">
-            Success
+            {t("Success")}
           </Badge>
         ) : r.processingResult === "failure" ? (
           <Badge variant="error" size="sm">
-            Failure
+            {t("Failure")}
           </Badge>
         ) : (
           <span className="text-sm text-gray-400">{r.processingResult ?? "—"}</span>
@@ -210,7 +210,7 @@ const AuditLogsPage: FC = () => {
           variant="ghost"
           size="sm"
           className="h-8 w-8"
-          title="View Details"
+          title={t("View Details")}
           onClick={(e) => {
             e.stopPropagation();
             setViewPayload(r.commandAsJson ?? JSON.stringify(r, null, 2));
@@ -225,12 +225,12 @@ const AuditLogsPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Audit Logs"
-        description="Security audit trail of system activities"
+        title={t("Audit Logs")}
+        description={t("Security audit trail of system activities")}
         actions={
           <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="gap-1">
             <Filter className="h-4 w-4" />
-            Filters
+            {t("Filters")}
           </Button>
         }
       />
@@ -238,31 +238,31 @@ const AuditLogsPage: FC = () => {
       {showFilters && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Filter Audit Logs</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Filter Audit Logs")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Input
-                placeholder="Action Name"
+                placeholder={t("Action Name")}
                 value={filters.actionName}
                 onChange={(e) => setField("actionName", e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleApply()}
               />
               <Input
-                placeholder="Entity Name"
+                placeholder={t("Entity Name")}
                 value={filters.entityName}
                 onChange={(e) => setField("entityName", e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleApply()}
               />
               <Input
-                placeholder="Resource ID"
+                placeholder={t("Resource ID")}
                 type="number"
                 value={filters.resourceId}
                 onChange={(e) => setField("resourceId", e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleApply()}
               />
               <Input
-                placeholder="Maker ID"
+                placeholder={t("Maker ID")}
                 type="number"
                 value={filters.makerId}
                 onChange={(e) => setField("makerId", e.target.value)}
@@ -285,10 +285,10 @@ const AuditLogsPage: FC = () => {
               </div>
               <Select value={filters.processingResult} onValueChange={(v) => setField("processingResult", v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Processing Result" />
+                  <SelectValue placeholder={t("Processing Result")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Results</SelectItem>
+                  <SelectItem value="all">{t("All Results")}</SelectItem>
                   {PROCESSING_RESULTS.map((r) => (
                     <SelectItem key={r} value={r}>
                       {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -298,10 +298,10 @@ const AuditLogsPage: FC = () => {
               </Select>
               <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-2">
                 <Button size="sm" onClick={handleApply}>
-                  Apply
+                  {t("Apply")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleReset}>
-                  Reset
+                  {t("Reset")}
                 </Button>
               </div>
             </div>
@@ -311,11 +311,11 @@ const AuditLogsPage: FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Audit Trail</CardTitle>
+          <CardTitle>{t("Audit Trail")}</CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
               <RotateCw className={`h-4 w-4 mr-1 ${isFetching ? "animate-spin" : ""}`} />
-              Refresh
+              {t("Refresh")}
             </Button>
           </div>
         </CardHeader>
@@ -328,9 +328,9 @@ const AuditLogsPage: FC = () => {
             </div>
           ) : isError ? (
             <div className="text-center py-8">
-              <p className="text-red-500">Failed to load audit logs.</p>
+              <p className="text-red-500">{t("Failed to load audit logs.")}</p>
               <Button variant="outline" size="sm" className="mt-2" onClick={() => refetch()}>
-                Retry
+                {t("Retry")}
               </Button>
             </div>
           ) : (
@@ -338,7 +338,7 @@ const AuditLogsPage: FC = () => {
               <DataTable
                 columns={columns}
                 data={items}
-                emptyState={{ title: "No audit logs", message: "No audit records match your filters." }}
+                emptyState={{ title: t("No audit logs"), message: t("No audit records match your filters.") }}
                 minWidth={1000}
               />
               {totalPages > 1 && (
@@ -358,7 +358,7 @@ const AuditLogsPage: FC = () => {
       <Dialog open={!!viewPayload} onOpenChange={() => setViewPayload(null)}>
         <DialogContent className="sm:max-w-6xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle>Audit Payload Details</DialogTitle>
+            <DialogTitle>{t("Audit Payload Details")}</DialogTitle>
           </DialogHeader>
           <pre className="overflow-auto rounded-lg bg-gray-50 dark:bg-gray-900 p-4 text-xs font-mono leading-relaxed max-h-[60vh]">
             {viewPayload ?? ""}

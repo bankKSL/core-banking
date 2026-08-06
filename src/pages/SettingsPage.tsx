@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Save, Check } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ const TIMEZONES = [
 const PRIORITIES = ["1", "2", "3", "4", "5"] as const;
 
 const SettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [systemName, setSystemName] = useState("Core Banking Formula Engine");
   const [defaultCurrency, setDefaultCurrency] = useState("USD");
   const [timeZone, setTimeZone] = useState("America/New_York (EST)");
@@ -43,28 +45,28 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Configure system-wide settings for the formula engine." />
+      <PageHeader title={t("Settings")} description={t("Configure system-wide settings for the formula engine.")} />
 
       {/* General Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>General Settings</CardTitle>
-          <CardDescription>Basic system configuration and defaults.</CardDescription>
+          <CardTitle>{t("General Settings")}</CardTitle>
+          <CardDescription>{t("Basic system configuration and defaults.")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">System Name</label>
-            <Input value={systemName} onChange={(e) => setSystemName(e.target.value)} placeholder="System name" />
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("System Name")}</label>
+            <Input value={systemName} onChange={(e) => setSystemName(e.target.value)} placeholder={t("System name")} />
           </div>
 
           <CurrencySelect
             value={defaultCurrency}
             onChange={setDefaultCurrency}
-            label="Default Currency"
+            label={t("Default Currency")}
           />
 
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Time Zone</label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Time Zone")}</label>
             <Select value={timeZone} onValueChange={setTimeZone}>
               <SelectTrigger>
                 <SelectValue />
@@ -83,15 +85,15 @@ const SettingsPage: React.FC = () => {
       {/* Notification Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Notification Settings</CardTitle>
-          <CardDescription>Manage how the system sends alerts and notifications.</CardDescription>
+          <CardTitle>{t("Notification Settings")}</CardTitle>
+          <CardDescription>{t("Manage how the system sends alerts and notifications.")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Email Notifications</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Email Notifications")}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Receive email alerts for campaign status changes.
+                {t("Receive email alerts for campaign status changes.")}
               </p>
             </div>
             <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
@@ -100,15 +102,15 @@ const SettingsPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Slack Integration</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Send notifications to a Slack channel.</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Slack Integration")}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t("Send notifications to a Slack channel.")}</p>
               </div>
               <Switch checked={slackIntegration} onCheckedChange={setSlackIntegration} />
             </div>
 
             {slackIntegration && (
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Webhook URL</label>
+                <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Webhook URL")}</label>
                 <Input
                   value={slackWebhookUrl}
                   onChange={(e) => setSlackWebhookUrl(e.target.value)}
@@ -123,12 +125,12 @@ const SettingsPage: React.FC = () => {
       {/* Formula Engine Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Formula Engine Settings</CardTitle>
-          <CardDescription>Tune the behavior of the formula evaluation engine.</CardDescription>
+          <CardTitle>{t("Formula Engine Settings")}</CardTitle>
+          <CardDescription>{t("Tune the behavior of the formula evaluation engine.")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Max Rules Per Campaign</label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Max Rules Per Campaign")}</label>
             <Input
               type="number"
               value={maxRules}
@@ -139,7 +141,7 @@ const SettingsPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Default Priority</label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Default Priority")}</label>
             <Select value={defaultPriority} onValueChange={setDefaultPriority}>
               <SelectTrigger>
                 <SelectValue />
@@ -147,7 +149,7 @@ const SettingsPage: React.FC = () => {
               <SelectContent>
                 {PRIORITIES.map((p) => (
                   <SelectItem key={p} value={p}>
-                    Priority {p}
+                    {t("Priority")} {p}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -155,7 +157,7 @@ const SettingsPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Auto-Approve Threshold (%)</label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Auto-Approve Threshold (%)")}</label>
             <Input
               type="number"
               value={autoApproveThreshold}
@@ -179,12 +181,12 @@ const SettingsPage: React.FC = () => {
           {saved ? (
             <>
               <Check className="mr-2 h-4 w-4" />
-              Saved
+              {t("Saved")}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              Save Settings
+              {t("Save Settings")}
             </>
           )}
         </Button>

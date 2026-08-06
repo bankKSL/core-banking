@@ -9,8 +9,10 @@ import { useClientTemplate } from "../hooks/useClientTemplate";
 import { useCreateClient } from "../hooks/useCreateClient";
 import ClientForm from "../components/ClientForm";
 import type { CreateClientFormValues } from "../schemas/client.schema";
+import { useTranslation } from "react-i18next";
 
 const CreateClientPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: template, isLoading: templateLoading } = useClientTemplate();
   const createMutation = useCreateClient();
@@ -47,8 +49,8 @@ const CreateClientPage: FC = () => {
     return (
       <div className="p-6">
         <ErrorState
-          title="Failed to create client"
-          message={createMutation.error?.message ?? "An unexpected error occurred."}
+          title={t("Failed to create client")}
+          message={createMutation.error?.message ?? t("An unexpected error occurred.")}
           onRetry={() => createMutation.reset()}
         />
       </div>
@@ -58,12 +60,12 @@ const CreateClientPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto">
       <PageHeader
-        title="Create Client"
-        description="Register a new client in Finfact"
+        title={t("Create Client")}
+        description={t("Register a new client in Finfact")}
         actions={
           <Button variant="outline" onClick={() => navigate("/clients")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Clients
+            {t("Back to Clients")}
           </Button>
         }
       />

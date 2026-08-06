@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, BookOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ const TAG_OPTIONS_BY_TYPE: Record<number, keyof GLAccountData> = {
 };
 
 const GLAccountFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -93,11 +95,11 @@ const GLAccountFormPage: React.FC = () => {
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (form.name.length > 200) e.name = "Name must be 200 characters or less";
-    if (!form.glCode.trim()) e.glCode = "GL Code is required";
-    if (form.glCode.length > 45) e.glCode = "GL Code must be 45 characters or less";
-    if (form.description.length > 500) e.description = "Description must be 500 characters or less";
+    if (!form.name.trim()) e.name = t("Name is required");
+    if (form.name.length > 200) e.name = t("Name must be 200 characters or less");
+    if (!form.glCode.trim()) e.glCode = t("GL Code is required");
+    if (form.glCode.length > 45) e.glCode = t("GL Code must be 45 characters or less");
+    if (form.description.length > 500) e.description = t("Description must be 500 characters or less");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -150,11 +152,11 @@ const GLAccountFormPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit GL Account" : "Create GL Account"}
-        description="Configure a general ledger account in the chart of accounts."
+        title={isEdit ? t("Edit GL Account") : t("Create GL Account")}
+        description={t("Configure a general ledger account in the chart of accounts.")}
         actions={
           <Button variant="outline" onClick={() => navigate("/accounting/gl-accounts")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -162,26 +164,26 @@ const GLAccountFormPage: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <BookOpen className="h-4 w-4" /> Basic Information
+            <BookOpen className="h-4 w-4" /> {t("Basic Information")}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Account Name *</label>
+            <label className="block text-sm font-medium">{t("Account Name")} *</label>
             <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">GL Code *</label>
+            <label className="block text-sm font-medium">{t("GL Code")} *</label>
             <Input
               value={form.glCode}
               onChange={(e) => updateForm("glCode", e.target.value)}
               error={errors.glCode}
               disabled={isEdit}
-              placeholder="e.g. 100001"
+              placeholder={t("e.g. 100001")}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Account Type *</label>
+            <label className="block text-sm font-medium">{t("Account Type")} *</label>
             <Select value={String(form.type)} onValueChange={(v) => updateForm("type", Number(v))} disabled={isEdit}>
               <SelectTrigger>
                 <SelectValue />
@@ -196,7 +198,7 @@ const GLAccountFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Usage *</label>
+            <label className="block text-sm font-medium">{t("Usage")} *</label>
             <Select value={String(form.usage)} onValueChange={(v) => updateForm("usage", Number(v))} disabled={isEdit}>
               <SelectTrigger>
                 <SelectValue />
@@ -217,7 +219,7 @@ const GLAccountFormPage: React.FC = () => {
               onCheckedChange={(c) => updateForm("manualEntriesAllowed", c === true)}
             />
             <Label htmlFor="manualEntriesAllowed" className="cursor-pointer">
-              Manual journal entries allowed
+              {t("Manual journal entries allowed")}
             </Label>
           </div>
           {isEdit && (
@@ -228,7 +230,7 @@ const GLAccountFormPage: React.FC = () => {
                 onCheckedChange={(c) => updateForm("disabled", c === true)}
               />
               <Label htmlFor="disabled" className="cursor-pointer">
-                Disable account
+                {t("Disable account")}
               </Label>
             </div>
           )}
@@ -237,17 +239,17 @@ const GLAccountFormPage: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Hierarchy &amp; Details</CardTitle>
+          <CardTitle className="text-base">{t("Hierarchy & Details")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Parent Account</label>
+            <label className="block text-sm font-medium">{t("Parent Account")}</label>
             <Select value={String(form.parentId)} onValueChange={(v) => updateForm("parentId", Number(v))}>
               <SelectTrigger>
-                <SelectValue placeholder="None (top level)" />
+                <SelectValue placeholder={t("None (top level)")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">None (top level)</SelectItem>
+                <SelectItem value="0">{t("None (top level)")}</SelectItem>
                 {parentOptions.map((p) => (
                   <SelectItem key={p.id} value={String(p.id)}>
                     {p.name} ({p.glCode})
@@ -257,13 +259,13 @@ const GLAccountFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Tag</label>
+            <label className="block text-sm font-medium">{t("Tag")}</label>
             <Select value={String(form.tagId)} onValueChange={(v) => updateForm("tagId", Number(v))}>
               <SelectTrigger>
-                <SelectValue placeholder="No tag" />
+                <SelectValue placeholder={t("No tag")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">No tag</SelectItem>
+                <SelectItem value="0">{t("No tag")}</SelectItem>
                 {tagOptions.map((t) => (
                   <SelectItem key={t.id} value={String(t.id)}>
                     {t.name}
@@ -273,12 +275,12 @@ const GLAccountFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="col-span-2 space-y-1.5">
-            <label className="block text-sm font-medium">Description</label>
+            <label className="block text-sm font-medium">{t("Description")}</label>
             <Textarea
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
               rows={3}
-              placeholder="Optional description"
+              placeholder={t("Optional description")}
               error={errors.description}
             />
           </div>
@@ -287,16 +289,16 @@ const GLAccountFormPage: React.FC = () => {
 
       <div className="flex justify-end gap-3">
         <Button variant="outline" type="button" onClick={() => navigate("/accounting/gl-accounts")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
         </Button>
         <Button onClick={handleSave} disabled={saving} className="bg-[#D32F2F] hover:bg-red-700">
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Account"}
+              <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Save Changes") : t("Create Account")}
             </>
           )}
         </Button>

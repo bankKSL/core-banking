@@ -1,5 +1,6 @@
 import { type FC, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -11,16 +12,17 @@ import { useFunds } from "../hooks/useFunds";
 import type { Fund } from "../api/funds";
 
 const FundListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useFunds();
 
   const funds = useMemo(() => data ?? [], [data]);
 
   const columns: ColumnDef<Fund>[] = [
-    { key: "name", header: "Name", cell: (r) => <span className="font-medium">{r.name}</span> },
+    { key: "name", header: t("Name"), cell: (r) => <span className="font-medium">{r.name}</span> },
     {
       key: "externalId",
-      header: "External ID",
+      header: t("External ID"),
       cell: (r) => (r.externalId ? <span className="font-mono text-sm">{r.externalId}</span> : "—"),
     },
   ];
@@ -29,15 +31,15 @@ const FundListPage: FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Funds"
-          description="Manage fund definitions"
+          title={t("Funds")}
+          description={t("Manage fund definitions")}
           actions={
             <Button onClick={() => navigate("/funds/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Fund
+              <Plus className="mr-2 h-4 w-4" /> {t("New Fund")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load funds." onRetry={refetch} />
+        <ErrorState message={t("Failed to load funds.")} onRetry={refetch} />
       </div>
     );
   }
@@ -45,17 +47,17 @@ const FundListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Funds"
-        description="Manage fund definitions"
+        title={t("Funds")}
+        description={t("Manage fund definitions")}
         actions={
           <Button onClick={() => navigate("/funds/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Fund
+            <Plus className="mr-2 h-4 w-4" /> {t("New Fund")}
           </Button>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>All Funds</CardTitle>
+          <CardTitle>{t("All Funds")}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -69,7 +71,7 @@ const FundListPage: FC = () => {
               columns={columns}
               data={funds}
               onRowClick={(row) => navigate(`/funds/edit/${row.id}`)}
-              emptyState={{ message: "No funds found." }}
+              emptyState={{ message: t("No funds found.") }}
               minWidth={600}
             />
           )}

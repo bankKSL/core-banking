@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Trash2, CalendarDays, X } from "lucide-react";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ const ATTENDANCE_LABELS: Record<number, string> = {
 };
 
 const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
+  const { t } = useTranslation();
   const { data: meetings, isLoading } = useMeetings(entityType, entityId);
   const deleteMutation = useDeleteMeeting();
 
@@ -68,17 +70,17 @@ const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
     () => [
       {
         key: "meetingDate",
-        header: "Date",
+        header: t("Date"),
         accessorFn: (row) => formatDate(row.meetingDate),
       },
       {
         key: "calendar",
-        header: "Calendar",
+        header: t("Calendar"),
         accessorFn: (row) => (row as any).calendarTitle ?? "—",
       },
       {
         key: "attendanceCount",
-        header: "Attendance",
+        header: t("Attendance"),
         accessorFn: (row) => {
           const total = row.clientsAttendance?.length ?? 0;
           const present = row.clientsAttendance?.filter(
@@ -89,7 +91,7 @@ const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
       },
       {
         key: "actions",
-        header: "Actions",
+        header: t("Actions"),
         sortable: false,
         cell: (row) => (
           <div className="flex items-center gap-2">
@@ -111,14 +113,14 @@ const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Create Meeting
+          <Plus className="mr-2 h-4 w-4" /> {t("Create Meeting")}
         </Button>
       </div>
 
@@ -126,7 +128,7 @@ const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
         columns={columns}
         data={list}
         loading={isLoading}
-        emptyState={{ message: "No meetings found." }}
+        emptyState={{ message: t("No meetings found.") }}
       />
 
       <MeetingFormDialog
@@ -141,9 +143,9 @@ const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
         onConfirm={handleDelete}
-        title="Delete Meeting"
-        description={`Are you sure you want to delete the meeting on ${deleteTarget?.meetingDate ? formatDate(deleteTarget.meetingDate) : "this date"}?`}
-        confirmLabel="Delete"
+        title={t("Delete Meeting")}
+        description={t("Are you sure you want to delete the meeting on {{date}}?", { date: deleteTarget?.meetingDate ? formatDate(deleteTarget.meetingDate) : t("this date") })}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
       />
@@ -152,18 +154,18 @@ const MeetingList: React.FC<MeetingListProps> = ({ entityType, entityId }) => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              Attendance — {detailTarget ? formatDate(detailTarget.meetingDate) : ""}
+              {t("Attendance")} — {detailTarget ? formatDate(detailTarget.meetingDate) : ""}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {detailTarget && (detailTarget.clientsAttendance ?? []).length === 0 ? (
-              <p className="text-sm text-gray-500">No attendance records.</p>
+              <p className="text-sm text-gray-500">{t("No attendance records.")}</p>
             ) : (
               (detailTarget?.clientsAttendance ?? []).map((att: MeetingAttendanceData) => (
                 <div key={att.id} className="flex justify-between items-center text-sm py-1">
                   <span>{att.clientName}</span>
                   <span className="font-medium">
-                    {ATTENDANCE_LABELS[att.attendanceType?.id] ?? att.attendanceType?.value ?? "—"}
+                    {t(ATTENDANCE_LABELS[att.attendanceType?.id] ?? att.attendanceType?.value ?? "—")}
                   </span>
                 </div>
               ))

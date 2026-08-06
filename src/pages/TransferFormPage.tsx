@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -50,6 +51,7 @@ const transferFormSchema = z.object({
 type TransferFormValues = z.infer<typeof transferFormSchema>;
 
 const TransferFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -179,13 +181,13 @@ const TransferFormPage: React.FC = () => {
     return (
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">Office *</label>
+          <label className="block text-sm font-medium">{t("Office")} *</label>
           <Select
             value={state.officeId ? String(state.officeId) : ""}
             onValueChange={(v) => updateSide(side, "officeId", Number(v))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select office" />
+              <SelectValue placeholder={t("Select office")} />
             </SelectTrigger>
             <SelectContent>
               {officesList.map((o) => (
@@ -197,14 +199,14 @@ const TransferFormPage: React.FC = () => {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">Client *</label>
+          <label className="block text-sm font-medium">{t("Client")} *</label>
           <Select
             value={state.clientId ? String(state.clientId) : ""}
             onValueChange={(v) => updateSide(side, "clientId", Number(v))}
             disabled={!state.officeId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.officeId ? "Select client" : "Select office first"} />
+              <SelectValue placeholder={state.officeId ? t("Select client") : t("Select office first")} />
             </SelectTrigger>
             <SelectContent>
               {currentClients.map((c) => (
@@ -216,14 +218,14 @@ const TransferFormPage: React.FC = () => {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">Account Type *</label>
+          <label className="block text-sm font-medium">{t("Account Type")} *</label>
           <Select
             value={state.accountType ? String(state.accountType) : ""}
             onValueChange={(v) => updateSide(side, "accountType", Number(v))}
             disabled={!state.clientId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.clientId ? "Select type" : "Select client first"} />
+              <SelectValue placeholder={state.clientId ? t("Select type") : t("Select client first")} />
             </SelectTrigger>
             <SelectContent>
               {ACCOUNT_TYPES.map((t) => (
@@ -235,14 +237,14 @@ const TransferFormPage: React.FC = () => {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">Account *</label>
+          <label className="block text-sm font-medium">{t("Account")} *</label>
           <Select
             value={state.accountId ? String(state.accountId) : ""}
             onValueChange={(v) => updateSide(side, "accountId", Number(v))}
             disabled={!state.accountType}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.accountType ? "Select account" : "Select type first"} />
+              <SelectValue placeholder={state.accountType ? t("Select account") : t("Select type first")} />
             </SelectTrigger>
             <SelectContent>
               {currentAccounts.map((a) => (
@@ -260,11 +262,11 @@ const TransferFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
       <PageHeader
-        title="New Account Transfer"
-        description="Transfer funds between accounts"
+        title={t("New Account Transfer")}
+        description={t("Transfer funds between accounts")}
         actions={
           <Button variant="outline" onClick={() => navigate("/transfers/history")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -274,7 +276,7 @@ const TransferFormPage: React.FC = () => {
           {/* FROM Section */}
           <Card>
             <CardHeader>
-              <CardTitle>From</CardTitle>
+              <CardTitle>{t("From")}</CardTitle>
             </CardHeader>
             <CardContent>{renderSide("from", from)}</CardContent>
           </Card>
@@ -282,7 +284,7 @@ const TransferFormPage: React.FC = () => {
           {/* TO Section */}
           <Card>
             <CardHeader>
-              <CardTitle>To</CardTitle>
+              <CardTitle>{t("To")}</CardTitle>
             </CardHeader>
             <CardContent>{renderSide("to", to)}</CardContent>
           </Card>
@@ -294,7 +296,7 @@ const TransferFormPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium" htmlFor="transferDate">
-                  Transfer Date <span className="text-red-500">*</span>
+                  {t("Transfer Date")} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="transferDate"
@@ -305,7 +307,7 @@ const TransferFormPage: React.FC = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium" htmlFor="transferAmount">
-                  Amount <span className="text-red-500">*</span>
+                  {t("Amount")} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="transferAmount"
@@ -320,27 +322,27 @@ const TransferFormPage: React.FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium" htmlFor="transferDescription">
-                Description
+                {t("Description")}
               </label>
               <Textarea
                 id="transferDescription"
-                placeholder="Optional description"
+                placeholder={t("Optional description")}
                 {...register("transferDescription")}
                 rows={3}
               />
             </div>
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => navigate("/transfers/history")}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={!isValid || transferMutation.isPending}>
                 {transferMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
                   </>
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" /> Submit Transfer
+                    <Save className="mr-2 h-4 w-4" /> {t("Submit Transfer")}
                   </>
                 )}
               </Button>

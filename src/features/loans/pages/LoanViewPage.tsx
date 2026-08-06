@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, RefreshCw, Calendar } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -25,6 +26,7 @@ import LoanAccountingCard from "../components/LoanAccountingCard";
 import { LoanOriginatorsCard } from "@/features/loan-originators";
 
 const LoanViewPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: loan, isLoading, isError, refetch, isRefetching } = useLoan(id);
@@ -51,8 +53,8 @@ const LoanViewPage: FC = () => {
     return (
       <div className="p-6">
         <ErrorState
-          title="Failed to load loan"
-          message="Could not load loan details. Please try again."
+          title={t("Failed to load loan")}
+          message={t("Could not load loan details. Please try again.")}
           onRetry={() => refetch()}
         />
       </div>
@@ -98,11 +100,11 @@ const LoanViewPage: FC = () => {
             </Button>
             <Button variant="outline" onClick={() => navigate(`/loans/${loan.id}/calendars`)}>
               <Calendar className="mr-2 h-4 w-4" />
-              Calendars
+              {t("Calendars")}
             </Button>
             <Button variant="outline" onClick={() => navigate("/loans")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -112,19 +114,19 @@ const LoanViewPage: FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="details">General</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions ({transactions.length})</TabsTrigger>
-          <TabsTrigger value="schedule">Schedule ({schedulePeriods.length})</TabsTrigger>
-          <TabsTrigger value="charges">Charges ({charges.length})</TabsTrigger>
-          <TabsTrigger value="collateral">Collateral ({collateral.length})</TabsTrigger>
-          <TabsTrigger value="guarantors">Guarantors ({guarantors.length})</TabsTrigger>
-          <TabsTrigger value="originators">Originators ({loan.originators?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="delinquency">Delinquency</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="pdcs">Post-Dated Checks</TabsTrigger>
-          <TabsTrigger value="interestPause">Interest Pause</TabsTrigger>
-          {hasAccountingData && <TabsTrigger value="accounting">Accounting</TabsTrigger>}
+          <TabsTrigger value="details">{t("General")}</TabsTrigger>
+          <TabsTrigger value="transactions">{t("Transactions")} ({transactions.length})</TabsTrigger>
+          <TabsTrigger value="schedule">{t("Schedule")} ({schedulePeriods.length})</TabsTrigger>
+          <TabsTrigger value="charges">{t("Charges")} ({charges.length})</TabsTrigger>
+          <TabsTrigger value="collateral">{t("Collateral")} ({collateral.length})</TabsTrigger>
+          <TabsTrigger value="guarantors">{t("Guarantors")} ({guarantors.length})</TabsTrigger>
+          <TabsTrigger value="originators">{t("Originators")} ({loan.originators?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="delinquency">{t("Delinquency")}</TabsTrigger>
+          <TabsTrigger value="notes">{t("Notes")}</TabsTrigger>
+          <TabsTrigger value="documents">{t("Documents")}</TabsTrigger>
+          <TabsTrigger value="pdcs">{t("Post-Dated Checks")}</TabsTrigger>
+          <TabsTrigger value="interestPause">{t("Interest Pause")}</TabsTrigger>
+          {hasAccountingData && <TabsTrigger value="accounting">{t("Accounting")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="details" className="mt-4">

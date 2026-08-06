@@ -1,4 +1,5 @@
 import { type FC, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,6 +37,7 @@ const reportFormSchema = z.object({
 type ReportFormValues = z.infer<typeof reportFormSchema>;
 
 const ReportFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -142,11 +144,11 @@ const ReportFormPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Report" : "New Report"}
-        description="Create or edit a report definition"
+        title={isEdit ? t("Edit Report") : t("New Report")}
+        description={t("Create or edit a report definition")}
         actions={
           <Button variant="outline" onClick={() => navigate("/reports")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -155,13 +157,13 @@ const ReportFormPage: FC = () => {
         {(createMutation.isError || updateMutation.isError) && (
           <div className="mb-6">
             <ErrorState
-              title="Failed to save report"
+              title={t("Failed to save report")}
               message={
                 createMutation.error instanceof Error
                   ? createMutation.error.message
                   : updateMutation.error instanceof Error
                     ? updateMutation.error.message
-                    : "An unexpected error occurred."
+                    : t("An unexpected error occurred.")
               }
               onRetry={() => {
                 createMutation.reset();
@@ -173,14 +175,14 @@ const ReportFormPage: FC = () => {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Report Details</CardTitle>
+            <CardTitle>{t("Report Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Report Name *</label>
+              <label className="block text-sm font-medium">{t("Report Name")} *</label>
               <Input
                 {...register("reportName")}
-                placeholder="e.g. Client Loan Summary"
+                placeholder={t("e.g. Client Loan Summary")}
                 disabled={isLoaded}
                 error={errors.reportName?.message}
               />
@@ -188,14 +190,14 @@ const ReportFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium">Report Type</label>
+                <label className="block text-sm font-medium">{t("Report Type")}</label>
                 <Controller
                   name="reportType"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange} disabled={isLoaded}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
+                        <SelectValue placeholder={t("Select type")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.paramTypes ?? []).map((opt) => (
@@ -210,14 +212,14 @@ const ReportFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Report Sub Type</label>
+                <label className="block text-sm font-medium">{t("Report Sub Type")}</label>
                 <Controller
                   name="reportSubType"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange} disabled={isLoaded}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select sub type" />
+                        <SelectValue placeholder={t("Select sub type")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.reportSubTypes ?? []).map((opt) => (
@@ -232,14 +234,14 @@ const ReportFormPage: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Report Category</label>
+                <label className="block text-sm font-medium">{t("Report Category")}</label>
                 <Controller
                   name="reportCategory"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange} disabled={isLoaded}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t("Select category")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.reportCategories ?? []).map((opt) => (
@@ -255,12 +257,12 @@ const ReportFormPage: FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
-              <Input {...register("description")} placeholder="Brief description of the report" disabled={isLoaded} />
+              <label className="block text-sm font-medium">{t("Description")}</label>
+              <Input {...register("description")} placeholder={t("Brief description of the report")} disabled={isLoaded} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Report SQL</label>
+              <label className="block text-sm font-medium">{t("Report SQL")}</label>
               <Textarea {...register("reportSql")} placeholder="SELECT ..." rows={6} disabled={isLoaded} />
             </div>
 
@@ -272,14 +274,14 @@ const ReportFormPage: FC = () => {
                   <Checkbox id="useReport" checked={field.value} onCheckedChange={field.onChange} disabled={isLoaded} />
                 )}
               />
-              <label className="block text-sm font-medium">Active</label>
+              <label className="block text-sm font-medium">{t("Active")}</label>
             </div>
           </CardContent>
         </Card>
 
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Parameters</CardTitle>
+            <CardTitle>{t("Parameters")}</CardTitle>
             {!isLoaded && (
               <Button
                 type="button"
@@ -289,21 +291,21 @@ const ReportFormPage: FC = () => {
                   append({ parameterName: "", parameterType: "", selectOne: false, reportParameterName: "" })
                 }
               >
-                <Plus className="mr-1 h-4 w-4" /> Add Parameter
+                <Plus className="mr-1 h-4 w-4" /> {t("Add Parameter")}
               </Button>
             )}
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">No parameters defined.</p>}
+            {fields.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">{t("No parameters defined.")}</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-start gap-3 p-3 border rounded-md">
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Parameter Name</label>
-                    <Input {...register(`parameters.${index}.parameterName`)} disabled={isLoaded} placeholder="Name" />
+                    <label className="block text-sm font-medium">{t("Parameter Name")}</label>
+                    <Input {...register(`parameters.${index}.parameterName`)} disabled={isLoaded} placeholder={t("Name")} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium">Parameter Type</label>
+                    <label className="block text-sm font-medium">{t("Parameter Type")}</label>
                     <Controller
                       name={`parameters.${index}.parameterType`}
                       control={control}
@@ -314,7 +316,7 @@ const ReportFormPage: FC = () => {
                           disabled={isLoaded}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Type" />
+                            <SelectValue placeholder={t("Type")} />
                           </SelectTrigger>
                           <SelectContent>
                             {(template?.paramTypes ?? []).map((opt) => (
@@ -328,11 +330,11 @@ const ReportFormPage: FC = () => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Report Param Name</label>
+                    <label className="block text-sm font-medium">{t("Report Param Name")}</label>
                     <Input
                       {...register(`parameters.${index}.reportParameterName`)}
                       disabled={isLoaded}
-                      placeholder="Report param"
+                      placeholder={t("Report param")}
                     />
                   </div>
                   <div className="flex items-end gap-2">
@@ -349,7 +351,7 @@ const ReportFormPage: FC = () => {
                           />
                         )}
                       />
-                      <label className="block text-sm font-medium">Select One</label>
+                      <label className="block text-sm font-medium">{t("Select One")}</label>
                     </div>
                     {!isLoaded && (
                       <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>
@@ -365,16 +367,16 @@ const ReportFormPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/reports")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={!canSave}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Report" : "Create Report"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Report") : t("Create Report")}
               </>
             )}
           </Button>

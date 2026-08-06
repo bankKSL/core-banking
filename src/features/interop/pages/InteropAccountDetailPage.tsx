@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Eye, Search, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -15,38 +16,39 @@ import { IDENTIFIER_TYPE_OPTIONS } from "../types/interop";
 import type { InteropIdentifier, AccountTransaction, KYCData, AccountDetailResponse } from "../types/interop";
 
 function AccountOverview({ account }: { account: AccountDetailResponse }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div>
-        <p className="text-xs text-gray-500">External ID</p>
+        <p className="text-xs text-gray-500">{t("External ID")}</p>
         <p className="font-mono text-sm">{account.externalId}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Account No</p>
+        <p className="text-xs text-gray-500">{t("Account No")}</p>
         <p className="text-sm">{account.accountNo ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Product</p>
+        <p className="text-xs text-gray-500">{t("Product")}</p>
         <p className="text-sm">{account.productName ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Status</p>
+        <p className="text-xs text-gray-500">{t("Status")}</p>
         <Badge variant={account.status === "ACTIVE" ? "success" : "default"}>{account.status ?? "—"}</Badge>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Currency</p>
+        <p className="text-xs text-gray-500">{t("Currency")}</p>
         <p className="text-sm">{account.currency?.code ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Balance</p>
+        <p className="text-xs text-gray-500">{t("Balance")}</p>
         <p className="text-sm font-mono font-medium">{account.accountBalance?.toFixed(2) ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Available Balance</p>
+        <p className="text-xs text-gray-500">{t("Available Balance")}</p>
         <p className="text-sm font-mono">{account.availableBalance?.toFixed(2) ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Client</p>
+        <p className="text-xs text-gray-500">{t("Client")}</p>
         <p className="text-sm">{account.clientName ?? `#${account.clientId ?? "—"}`}</p>
       </div>
     </div>
@@ -54,20 +56,21 @@ function AccountOverview({ account }: { account: AccountDetailResponse }) {
 }
 
 function IdentifiersTab({ identifiers, loading }: { identifiers: InteropIdentifier[]; loading: boolean }) {
+  const { t } = useTranslation();
   const columns: ColumnDef<InteropIdentifier>[] = [
     {
       key: "type",
-      header: "Type",
+      header: t("Type"),
       cell: (r) => {
         const opt = IDENTIFIER_TYPE_OPTIONS.find((o) => o.id === r.type);
         return <Badge variant="info">{opt?.label ?? r.type}</Badge>;
       },
     },
-    { key: "value", header: "Value", cell: (r) => <span className="font-mono text-sm">{r.value}</span> },
-    { key: "subType", header: "Sub Type", cell: (r) => r.subType ?? "—" },
+    { key: "value", header: t("Value"), cell: (r) => <span className="font-mono text-sm">{r.value}</span> },
+    { key: "subType", header: t("Sub Type"), cell: (r) => r.subType ?? "—" },
     {
       key: "createdOn",
-      header: "Created",
+      header: t("Created"),
       cell: (r) => (r.createdOn ? new Date(r.createdOn).toLocaleDateString() : "—"),
     },
   ];
@@ -77,33 +80,34 @@ function IdentifiersTab({ identifiers, loading }: { identifiers: InteropIdentifi
     <DataTable
       columns={columns}
       data={identifiers}
-      emptyState={{ message: "No identifiers registered for this account." }}
+      emptyState={{ message: t("No identifiers registered for this account.") }}
     />
   );
 }
 
 function TransactionsTab({ transactions, loading }: { transactions: AccountTransaction[]; loading: boolean }) {
+  const { t } = useTranslation();
   const columns: ColumnDef<AccountTransaction>[] = [
-    { key: "id", header: "ID", cell: (r) => <span className="font-medium">{r.id}</span> },
+    { key: "id", header: t("ID"), cell: (r) => <span className="font-medium">{r.id}</span> },
     {
       key: "transactionDate",
-      header: "Date",
+      header: t("Date"),
       cell: (r) => (r.transactionDate ? new Date(r.transactionDate).toLocaleDateString() : "—"),
     },
-    { key: "transactionType", header: "Type", cell: (r) => r.transactionType ?? "—" },
+    { key: "transactionType", header: t("Type"), cell: (r) => r.transactionType ?? "—" },
     {
       key: "debit",
-      header: "Debit",
+      header: t("Debit"),
       cell: (r) => (r.debit ? <span className="font-mono text-red-600">{r.debit.toFixed(2)}</span> : "—"),
     },
     {
       key: "credit",
-      header: "Credit",
+      header: t("Credit"),
       cell: (r) => (r.credit ? <span className="font-mono text-emerald-600">{r.credit.toFixed(2)}</span> : "—"),
     },
     {
       key: "runningBalance",
-      header: "Balance",
+      header: t("Balance"),
       cell: (r) =>
         r.runningBalance !== undefined ? <span className="font-mono">{r.runningBalance.toFixed(2)}</span> : "—",
     },
@@ -114,40 +118,41 @@ function TransactionsTab({ transactions, loading }: { transactions: AccountTrans
     <DataTable
       columns={columns}
       data={transactions}
-      emptyState={{ message: "No transactions found." }}
+      emptyState={{ message: t("No transactions found.") }}
       minWidth={600}
     />
   );
 }
 
 function KYCTab({ kyc, loading }: { kyc: KYCData | null; loading: boolean }) {
+  const { t } = useTranslation();
   if (loading) return <Skeleton className="h-32 w-full" />;
-  if (!kyc) return <p className="text-gray-500 text-sm">No KYC data available.</p>;
+  if (!kyc) return <p className="text-gray-500 text-sm">{t("No KYC data available.")}</p>;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       <div>
-        <p className="text-xs text-gray-500">Name</p>
+        <p className="text-xs text-gray-500">{t("Name")}</p>
         <p className="text-sm font-medium">{kyc.displayName ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Mobile</p>
+        <p className="text-xs text-gray-500">{t("Mobile")}</p>
         <p className="text-sm">{kyc.mobileNo ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Email</p>
+        <p className="text-xs text-gray-500">{t("Email")}</p>
         <p className="text-sm">{kyc.emailAddress ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Date of Birth</p>
+        <p className="text-xs text-gray-500">{t("Date of Birth")}</p>
         <p className="text-sm">{kyc.dateOfBirth ? new Date(kyc.dateOfBirth).toLocaleDateString() : "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">Gender</p>
+        <p className="text-xs text-gray-500">{t("Gender")}</p>
         <p className="text-sm">{kyc.gender ?? "—"}</p>
       </div>
       <div>
-        <p className="text-xs text-gray-500">ID Document</p>
+        <p className="text-xs text-gray-500">{t("ID Document")}</p>
         <p className="text-sm">{kyc.idDocument ?? "—"}</p>
       </div>
     </div>
@@ -155,6 +160,7 @@ function KYCTab({ kyc, loading }: { kyc: KYCData | null; loading: boolean }) {
 }
 
 const InteropAccountDetailPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [accountId, setAccountId] = useState(searchParams.get("id") ?? "");
@@ -167,25 +173,25 @@ const InteropAccountDetailPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Account Details"
-        description="View savings account information, identifiers, transactions, and KYC"
+        title={t("Account Details")}
+        description={t("View savings account information, identifiers, transactions, and KYC")}
         actions={
           <Button variant="outline" onClick={() => navigate("/interop/dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Account Search</CardTitle>
+          <CardTitle className="text-base">{t("Account Search")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-3">
             <div className="flex-1">
               <label cursor-pointer htmlFor="searchAccountId">
-                Account External ID
+                {t("Account External ID")}
               </label>
               <Input
                 id="searchAccountId"
@@ -196,7 +202,7 @@ const InteropAccountDetailPage: FC = () => {
             </div>
             <Button onClick={() => setAccountId(accountId)} className="bg-[#D32F2F] hover:bg-red-700">
               <Search className="mr-2 h-4 w-4" />
-              Search
+              {t("Search")}
             </Button>
           </div>
         </CardContent>
@@ -213,16 +219,16 @@ const InteropAccountDetailPage: FC = () => {
       {accountId && !accountLoading && account && (
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="identifiers">Identifiers</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="kyc">KYC</TabsTrigger>
+            <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+            <TabsTrigger value="identifiers">{t("Identifiers")}</TabsTrigger>
+            <TabsTrigger value="transactions">{t("Transactions")}</TabsTrigger>
+            <TabsTrigger value="kyc">{t("KYC")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Account Overview</CardTitle>
+                <CardTitle className="text-base">{t("Account Overview")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <AccountOverview account={account} />
@@ -233,7 +239,7 @@ const InteropAccountDetailPage: FC = () => {
           <TabsContent value="identifiers">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Registered Identifiers</CardTitle>
+                <CardTitle className="text-base">{t("Registered Identifiers")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <IdentifiersTab identifiers={identifiers} loading={idLoading} />
@@ -244,7 +250,7 @@ const InteropAccountDetailPage: FC = () => {
           <TabsContent value="transactions">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Transaction History</CardTitle>
+                <CardTitle className="text-base">{t("Transaction History")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <TransactionsTab transactions={transactions} loading={txLoading} />
@@ -255,7 +261,7 @@ const InteropAccountDetailPage: FC = () => {
           <TabsContent value="kyc">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">KYC Information</CardTitle>
+                <CardTitle className="text-base">{t("KYC Information")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <KYCTab kyc={kyc ?? null} loading={kycLoading} />
@@ -268,7 +274,7 @@ const InteropAccountDetailPage: FC = () => {
       {accountId && !accountLoading && !account && (
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
-            No account found with external ID &quot;{accountId}&quot;.
+            {t('No account found with external ID "{{accountId}}".', { accountId })}
           </CardContent>
         </Card>
       )}

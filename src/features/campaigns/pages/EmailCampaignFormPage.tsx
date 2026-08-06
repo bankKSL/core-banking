@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, Mail } from "lucide-react";
@@ -26,6 +27,7 @@ const ATTACHMENT_FORMATS = [
 ];
 
 const EmailCampaignFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -119,12 +121,12 @@ const EmailCampaignFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Email Campaign" : "Create Email Campaign"}
-        description={isEdit ? `Editing "${campaign?.campaignName}"` : "Create a new email marketing campaign"}
+        title={isEdit ? t("Edit Email Campaign") : t("Create Email Campaign")}
+        description={isEdit ? t('Editing "{{name}}"', { name: campaign?.campaignName }) : t("Create a new email marketing campaign")}
         actions={
           <Button variant="outline" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -133,12 +135,12 @@ const EmailCampaignFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Campaign Details
+              {t("Campaign Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Campaign Name *</label>
+              <label className="block text-sm font-medium">{t("Campaign Name")} *</label>
               <Input
                 {...register("campaignName")}
                 placeholder="e.g. Monthly Statement"
@@ -148,7 +150,7 @@ const EmailCampaignFormPage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Campaign Type *</label>
+                <label className="block text-sm font-medium">{t("Campaign Type")} *</label>
                 <Select
                   value={watch("campaignType")}
                   onValueChange={(v) => setValue("campaignType", v, { shouldValidate: true })}
@@ -167,13 +169,13 @@ const EmailCampaignFormPage: FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Business Rule *</label>
+                <label className="block text-sm font-medium">{t("Business Rule")} *</label>
                 <Select
                   value={watch("businessRuleId")}
                   onValueChange={(v) => setValue("businessRuleId", v, { shouldValidate: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select business rule" />
+                    <SelectValue placeholder={t("Select business rule")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(template?.businessRulesOptions ?? []).map((o) => (
@@ -188,12 +190,12 @@ const EmailCampaignFormPage: FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Param Value (JSON) *</label>
+              <label className="block text-sm font-medium">{t("Param Value (JSON)")} *</label>
               <Input {...register("paramValue")} placeholder='e.g. {"officeId":1}' error={errors.paramValue?.message} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Subject *</label>
+              <label className="block text-sm font-medium">{t("Subject")} *</label>
               <Input
                 {...register("emailSubject")}
                 placeholder="e.g. Your Monthly Statement"
@@ -203,7 +205,7 @@ const EmailCampaignFormPage: FC = () => {
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium" htmlFor="emailMessage">
-                Message *
+                {t("Message")} *
               </label>
               <Textarea
                 id="emailMessage"
@@ -215,13 +217,13 @@ const EmailCampaignFormPage: FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Attachment Format</label>
+              <label className="block text-sm font-medium">{t("Attachment Format")}</label>
               <Select
                 value={watch("emailAttachmentFileFormatId")}
                 onValueChange={(v) => setValue("emailAttachmentFileFormatId", v)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="No attachment" />
+                  <SelectValue placeholder={t("No attachment")} />
                 </SelectTrigger>
                 <SelectContent>
                   {ATTACHMENT_FORMATS.map((o) => (
@@ -238,16 +240,16 @@ const EmailCampaignFormPage: FC = () => {
         {isSchedule && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Schedule</CardTitle>
+              <CardTitle className="text-base">{t("Schedule")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Recurrence Rule *</label>
+                <label className="block text-sm font-medium">{t("Recurrence Rule")} *</label>
                 <Input {...register("recurrence")} placeholder="e.g. FREQ=MONTHLY;INTERVAL=1" />
-                <p className="text-xs text-gray-500 mt-1">RFC 5545 recurrence rule format.</p>
+                <p className="text-xs text-gray-500 mt-1">{t("RFC 5545 recurrence rule format.")}</p>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Recurrence Start Date *</label>
+                <label className="block text-sm font-medium">{t("Recurrence Start Date")} *</label>
                 <Input type="date" {...register("recurrenceStartDate")} />
               </div>
             </CardContent>
@@ -257,12 +259,12 @@ const EmailCampaignFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Campaign"}
+            {isEdit ? t("Save Changes") : t("Create Campaign")}
           </Button>
         </div>
       </form>

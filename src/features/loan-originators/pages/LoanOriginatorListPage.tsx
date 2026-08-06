@@ -1,5 +1,6 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, Pencil, Trash2, Handshake } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -13,6 +14,7 @@ import { useLoanOriginators, useDeleteLoanOriginator } from "../hooks/useLoanOri
 import type { LoanOriginator } from "../types/loanOriginator";
 
 const LoanOriginatorListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: originators = [], isLoading } = useLoanOriginators();
   const deleteMutation = useDeleteLoanOriginator();
@@ -34,23 +36,23 @@ const LoanOriginatorListPage: FC = () => {
   const columns: ColumnDef<LoanOriginator>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t("Name"),
       cell: (r) => <span className="font-medium">{r.name || "—"}</span>,
     },
-    { key: "externalId", header: "External ID (Revenue Share ID)", cell: (r) => <span className="font-mono text-xs">{r.externalId}</span> },
+    { key: "externalId", header: t("External ID (Revenue Share ID)"), cell: (r) => <span className="font-mono text-xs">{r.externalId}</span> },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => <StatusBadge status={r.status.toLowerCase()} size="sm" />,
     },
     {
       key: "originatorType",
-      header: "Originator Type",
+      header: t("Originator Type"),
       cell: (r) => r.originatorType?.name ?? "—",
     },
     {
       key: "channelType",
-      header: "Channel Type",
+      header: t("Channel Type"),
       cell: (r) => r.channelType?.name ?? "—",
     },
     {
@@ -72,21 +74,21 @@ const LoanOriginatorListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Loan Originators"
-        description="Manage the external parties (merchant, broker, affiliate, platform) that source loan applications"
+        title={t("Loan Originators")}
+        description={t("Manage the external parties (merchant, broker, affiliate, platform) that source loan applications")}
         actions={
           <Button onClick={() => navigate("/loan-originators/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> Create Originator
+            <Plus className="mr-2 h-4 w-4" /> {t("Create Originator")}
           </Button>
         }
       />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Originators</CardTitle>
+          <CardTitle>{t("All Originators")}</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search originators..."
+              placeholder={t("Search originators...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -106,7 +108,7 @@ const LoanOriginatorListPage: FC = () => {
               data={filtered}
               emptyState={{
                 icon: <Handshake className="h-8 w-8 text-gray-300" />,
-                message: "No loan originators defined.",
+                message: t("No loan originators defined."),
               }}
               minWidth={700}
             />
@@ -122,10 +124,10 @@ const LoanOriginatorListPage: FC = () => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete Originator"
-        description={`Delete originator "${deleteTarget?.name ?? deleteTarget?.externalId}"? Deletion fails if the originator is mapped to any loan.`}
+        title={t("Delete Originator")}
+        description={t('Delete originator "{{name}}"? Deletion fails if the originator is mapped to any loan.', { name: deleteTarget?.name ?? deleteTarget?.externalId })}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
         loading={deleteMutation.isPending}
       />
     </div>

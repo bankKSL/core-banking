@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, Plus, Trash2, Scale } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(n);
 
 const JournalEntryFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: glAccounts = [] } = useGLAccounts({ usage: 1, manualEntriesAllowed: true });
   const { data: rules = [] } = useAccountingRules();
@@ -73,18 +75,18 @@ const JournalEntryFormPage: React.FC = () => {
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
-    if (!header.officeId) e.officeId = "Office is required";
-    if (!header.transactionDate) e.transactionDate = "Date is required";
-    if (!header.currencyCode) e.currencyCode = "Currency is required";
+    if (!header.officeId) e.officeId = t("Office is required");
+    if (!header.transactionDate) e.transactionDate = t("Date is required");
+    if (!header.currencyCode) e.currencyCode = t("Currency is required");
     debits.forEach((r, i) => {
-      if (!r.glAccountId) e[`debit_${i}_account`] = "Account required";
-      if (!(parseFloat(r.amount) > 0)) e[`debit_${i}_amount`] = "Amount must be > 0";
+      if (!r.glAccountId) e[`debit_${i}_account`] = t("Account required");
+      if (!(parseFloat(r.amount) > 0)) e[`debit_${i}_amount`] = t("Amount must be > 0");
     });
     credits.forEach((r, i) => {
-      if (!r.glAccountId) e[`credit_${i}_account`] = "Account required";
-      if (!(parseFloat(r.amount) > 0)) e[`credit_${i}_amount`] = "Amount must be > 0";
+      if (!r.glAccountId) e[`credit_${i}_account`] = t("Account required");
+      if (!(parseFloat(r.amount) > 0)) e[`credit_${i}_amount`] = t("Amount must be > 0");
     });
-    if (!balanced) e.balance = "Total debits must equal total credits";
+    if (!balanced) e.balance = t("Total debits must equal total credits");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -118,13 +120,13 @@ const JournalEntryFormPage: React.FC = () => {
       {rows.map((row, i) => (
         <div key={i} className="grid grid-cols-[1fr_160px_40px] items-end gap-3">
           <div className="space-y-1">
-            <label className="block text-sm font-medium">GL Account</label>
+            <label className="block text-sm font-medium">{t("GL Account")}</label>
             <Select
               value={row.glAccountId ? String(row.glAccountId) : ""}
               onValueChange={(v) => updateRow(side, i, "glAccountId", Number(v))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select account" />
+                <SelectValue placeholder={t("Select account")} />
               </SelectTrigger>
               <SelectContent>
                 {glAccounts.map((a) => (
@@ -137,7 +139,7 @@ const JournalEntryFormPage: React.FC = () => {
             {errors[`${side}_${i}_account`] && <p className="text-xs text-red-500">{errors[`${side}_${i}_account`]}</p>}
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-medium">Amount</label>
+            <label className="block text-sm font-medium">{t("Amount")}</label>
             <Input
               type="number"
               step="0.01"
@@ -161,7 +163,7 @@ const JournalEntryFormPage: React.FC = () => {
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => addRow(side)}>
-        <Plus className="mr-1 h-4 w-4" /> Add {side === "debit" ? "Debit" : "Credit"}
+        <Plus className="mr-1 h-4 w-4" /> {t("Add")} {side === "debit" ? t("Debit") : t("Credit")}
       </Button>
     </div>
   );
@@ -169,18 +171,18 @@ const JournalEntryFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
       <PageHeader
-        title="New Journal Entry"
-        description="Create a balanced manual journal entry (total debits must equal total credits)."
+        title={t("New Journal Entry")}
+        description={t("Create a balanced manual journal entry (total debits must equal total credits).")}
         actions={
           <Button variant="outline" onClick={() => navigate("/accounting/journal-entries")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Entry Details</CardTitle>
+          <CardTitle className="text-base">{t("Entry Details")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <OfficeSelect
@@ -189,7 +191,7 @@ const JournalEntryFormPage: React.FC = () => {
             error={errors.officeId}
           />
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Transaction Date *</label>
+            <label className="block text-sm font-medium">{t("Transaction Date")} *</label>
             <Input
               type="date"
               value={header.transactionDate}
@@ -199,21 +201,21 @@ const JournalEntryFormPage: React.FC = () => {
           </div>
           <CurrencySelect value={header.currencyCode} onChange={(v) => setHeader((h) => ({ ...h, currencyCode: v }))} />
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Reference Number</label>
+            <label className="block text-sm font-medium">{t("Reference Number")}</label>
             <Input
               value={header.referenceNumber}
               onChange={(e) => setHeader((h) => ({ ...h, referenceNumber: e.target.value }))}
-              placeholder="Optional"
+              placeholder={t("Optional")}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Accounting Rule (auto-fill)</label>
+            <label className="block text-sm font-medium">{t("Accounting Rule (auto-fill)")}</label>
             <Select
               value={header.accountingRuleId ? String(header.accountingRuleId) : ""}
               onValueChange={(v) => setHeader((h) => ({ ...h, accountingRuleId: Number(v) }))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="None" />
+                <SelectValue placeholder={t("None")} />
               </SelectTrigger>
               <SelectContent>
                 {rules.map((r) => (
@@ -225,12 +227,12 @@ const JournalEntryFormPage: React.FC = () => {
             </Select>
           </div>
           <div className="col-span-2 space-y-1.5">
-            <label className="block text-sm font-medium">Comments</label>
+            <label className="block text-sm font-medium">{t("Comments")}</label>
             <Textarea
               value={header.comments}
               onChange={(e) => setHeader((h) => ({ ...h, comments: e.target.value }))}
               rows={2}
-              placeholder="Optional comments"
+              placeholder={t("Optional comments")}
             />
           </div>
         </CardContent>
@@ -239,13 +241,13 @@ const JournalEntryFormPage: React.FC = () => {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Debits</CardTitle>
+            <CardTitle className="text-base">{t("Debits")}</CardTitle>
           </CardHeader>
           <CardContent>{renderRows("debit", debits)}</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Credits</CardTitle>
+            <CardTitle className="text-base">{t("Credits")}</CardTitle>
           </CardHeader>
           <CardContent>{renderRows("credit", credits)}</CardContent>
         </Card>
@@ -255,16 +257,16 @@ const JournalEntryFormPage: React.FC = () => {
         <CardContent className="flex items-center justify-between py-4">
           <div className="flex items-center gap-6 text-sm">
             <span>
-              Total Debits:{" "}
+              {t("Total Debits:")}{" "}
               <span className="font-mono font-semibold">{formatCurrency(totalDebits, header.currencyCode)}</span>
             </span>
             <span>
-              Total Credits:{" "}
+              {t("Total Credits:")}{" "}
               <span className="font-mono font-semibold">{formatCurrency(totalCredits, header.currencyCode)}</span>
             </span>
             <span className={`flex items-center gap-1 font-medium ${balanced ? "text-emerald-600" : "text-red-500"}`}>
               <Scale className="h-4 w-4" />
-              {balanced ? "Balanced" : "Out of balance"}
+              {balanced ? t("Balanced") : t("Out of balance")}
             </span>
           </div>
           {errors.balance && <p className="text-sm text-red-500">{errors.balance}</p>}
@@ -273,16 +275,16 @@ const JournalEntryFormPage: React.FC = () => {
 
       <div className="flex justify-end gap-3">
         <Button variant="outline" type="button" onClick={() => navigate("/accounting/journal-entries")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
         </Button>
         <Button onClick={handleSave} disabled={saving || !balanced} className="bg-[#D32F2F] hover:bg-red-700">
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Posting…
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Posting…")}
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" /> Post Entry
+              <Save className="mr-2 h-4 w-4" /> {t("Post Entry")}
             </>
           )}
         </Button>

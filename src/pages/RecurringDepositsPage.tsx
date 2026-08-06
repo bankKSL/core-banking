@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus, Eye } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ const formatCurrency = (n: number, code = "USD") =>
 
 const RecurringDepositsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
@@ -42,31 +44,31 @@ const RecurringDepositsPage: React.FC = () => {
   }, [rds, search, statusFilter]);
 
   const columns: ColumnDef<RecurringDepositAccount>[] = [
-    { key: "accountNo", header: "RD #", cell: (r) => <code className="text-xs font-mono">{r.accountNo}</code> },
+    { key: "accountNo", header: t("RD #"), cell: (r) => <code className="text-xs font-mono">{r.accountNo}</code> },
     {
       key: "clientName",
-      header: "Customer",
+      header: t("Customer"),
       cell: (r) => <span className="font-medium">{r.clientName ?? `#${r.clientId}`}</span>,
     },
-    { key: "depositProductName", header: "Product" },
+    { key: "depositProductName", header: t("Product") },
     {
       key: "depositAmount",
-      header: "Deposit Amount",
+      header: t("Deposit Amount"),
       cell: (r) => <span className="font-mono text-sm">{formatCurrency(r.depositAmount ?? 0, r.currency.code)}</span>,
     },
     {
       key: "depositPeriod",
-      header: "Period",
+      header: t("Period"),
       cell: (r) => `${r.depositPeriod} ${r.depositPeriodFrequencyType?.value?.toLowerCase() ?? "mo"}`,
     },
     {
       key: "expectedMaturityDate",
-      header: "Matures",
+      header: t("Matures"),
       cell: (r) => (r.expectedMaturityDate ? new Date(r.expectedMaturityDate).toLocaleDateString() : "—"),
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => {
         const c = RECURRING_DEPOSIT_STATUS_CONFIG[r.status?.code ?? ""] ?? {
           label: r.status?.value ?? "Unknown",
@@ -88,24 +90,24 @@ const RecurringDepositsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Recurring Deposits"
-        description="Manage recurring deposit accounts"
+        title={t("Recurring Deposits")}
+        description={t("Manage recurring deposit accounts")}
         actions={
           <Button onClick={() => navigate("/deposits/recurring/new")}>
             <Plus className="mr-2 h-4 w-4" />
-            New Recurring Deposit
+            {t("New Recurring Deposit")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recurring Deposits</CardTitle>
+          <CardTitle>{t("Recurring Deposits")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search..."
+                placeholder={t("Search...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -113,10 +115,10 @@ const RecurringDepositsPage: React.FC = () => {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-36">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("Status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">{t("All")}</SelectItem>
                 {Object.entries(RECURRING_DEPOSIT_STATUS_CONFIG).map(([code, cfg]) => (
                   <SelectItem key={code} value={code}>
                     {cfg.label}
@@ -134,10 +136,10 @@ const RecurringDepositsPage: React.FC = () => {
               ))}
             </div>
           ) : rdError ? (
-            <p className="text-red-500">Failed to load recurring deposits.</p>
+            <p className="text-red-500">{t("Failed to load recurring deposits.")}</p>
           ) : (
             <>
-              <DataTable columns={columns} data={filtered} emptyState={{ message: "No recurring deposits found" }} />
+              <DataTable columns={columns} data={filtered} emptyState={{ message: t("No recurring deposits found") }} />
               {totalRecords > PAGE_SIZE && (
                 <Pagination
                   currentPage={page}

@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, Gem } from "lucide-react";
@@ -27,6 +28,7 @@ import type { CollateralProductCreateRequest } from "../types/collateralProduct"
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
 const CollateralProductFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -97,12 +99,12 @@ const CollateralProductFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Collateral Product" : "Create Collateral Product"}
-        description={isEdit ? `Editing "${product?.name}"` : "Define a new collateral product type"}
+        title={isEdit ? t("Edit Collateral Product") : t("Create Collateral Product")}
+        description={isEdit ? t('Editing "{{name}}"', { name: product?.name }) : t("Define a new collateral product type")}
         actions={
           <Button variant="outline" onClick={() => navigate("/collateral-products")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -111,23 +113,23 @@ const CollateralProductFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Gem className="h-5 w-5" />
-              Product Details
+              {t("Product Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Name *</label>
+                <label className="block text-sm font-medium">{t("Name")} *</label>
                 <Input {...register("name")} placeholder="e.g. Gold Jewelry" error={errors.name?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Quality *</label>
+                <label className="block text-sm font-medium">{t("Quality")} *</label>
                 <Input {...register("quality")} placeholder="e.g. 24K" error={errors.quality?.message} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Base Price *</label>
+                <label className="block text-sm font-medium">{t("Base Price")} *</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -137,7 +139,7 @@ const CollateralProductFormPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Pct to Base (%) *</label>
+                <label className="block text-sm font-medium">{t("Pct to Base (%)")} *</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -149,7 +151,7 @@ const CollateralProductFormPage: FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Unit Type *</label>
+                <label className="block text-sm font-medium">{t("Unit Type")} *</label>
                 <Input {...register("unitType")} placeholder="e.g. gram" error={errors.unitType?.message} />
               </div>
 
@@ -164,12 +166,12 @@ const CollateralProductFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/collateral-products")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Product"}
+            {isEdit ? t("Save Changes") : t("Create Product")}
           </Button>
         </div>
       </form>

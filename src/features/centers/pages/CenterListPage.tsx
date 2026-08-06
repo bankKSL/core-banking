@@ -1,5 +1,6 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,7 @@ const statusLabel: Record<string, string> = {
 const PAGE_SIZE = 10;
 
 const CenterListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
 
@@ -46,45 +48,45 @@ const CenterListPage: FC = () => {
   const columns: ColumnDef<CenterData>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t("Name"),
       cell: (row) => <span className="font-medium text-gray-900 dark:text-gray-100">{row.name ?? "—"}</span>,
     },
-    { key: "accountNo", header: "Account No", cell: (row) => row.accountNo ?? "—" },
-    { key: "officeName", header: "Office", cell: (row) => row.officeName ?? "—" },
-    { key: "staffName", header: "Staff", cell: (row) => row.staffName ?? "—" },
+    { key: "accountNo", header: t("Account No"), cell: (row) => row.accountNo ?? "—" },
+    { key: "officeName", header: t("Office"), cell: (row) => row.officeName ?? "—" },
+    { key: "staffName", header: t("Staff"), cell: (row) => row.staffName ?? "—" },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       sortable: false,
       cell: (row) => {
         const code = row.status?.code ?? "";
         return (
           <Badge variant={statusVariant[code] ?? "default"} size="sm">
-            {statusLabel[code] ?? row.status?.value ?? "Unknown"}
+            {statusLabel[code] ?? row.status?.value ?? t("Unknown")}
           </Badge>
         );
       },
     },
-    { key: "activationDate", header: "Activation Date", cell: (row) => row.activationDate ?? "—" },
+    { key: "activationDate", header: t("Activation Date"), cell: (row) => row.activationDate ?? "—" },
   ];
 
   if (isError) {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Centers"
-          description="Manage centers"
+          title={t("Centers")}
+          description={t("Manage centers")}
           actions={
             <Button onClick={() => navigate("/centers/new")} className="bg-[#D32F2F] hover:bg-red-700">
-              <Plus className="mr-2 h-4 w-4" /> New Center
+              <Plus className="mr-2 h-4 w-4" /> {t("New Center")}
             </Button>
           }
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span className="text-sm">Failed to load centers. {error?.message ?? "Please try again."}</span>
+          <span className="text-sm">{t("Failed to load centers.")} {error?.message ?? t("Please try again.")}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -94,11 +96,11 @@ const CenterListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Centers"
-        description="Manage centers"
+        title={t("Centers")}
+        description={t("Manage centers")}
         actions={
           <Button onClick={() => navigate("/centers/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Center
+            <Plus className="mr-2 h-4 w-4" /> {t("New Center")}
           </Button>
         }
       />
@@ -116,7 +118,7 @@ const CenterListPage: FC = () => {
               columns={columns}
               data={centers}
               idAccessor={(row) => String(row.id)}
-              emptyState={{ title: "No centers found", message: "Create a new center to get started." }}
+              emptyState={{ title: t("No centers found"), message: t("Create a new center to get started.") }}
               onRowClick={(row) => navigate(`/centers/${row.id}`)}
             />
           )}

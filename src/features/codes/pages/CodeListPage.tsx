@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Shield } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { useCodes } from "../hooks/useCodes";
 import type { Code } from "../api/codes";
 
 const CodeListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: codes = [], isLoading, isError, refetch } = useCodes();
 
@@ -18,25 +20,25 @@ const CodeListPage: React.FC = () => {
     () => [
       {
         key: "name",
-        header: "Code Name",
+        header: t("Code Name"),
         accessorFn: (row) => (
           <span className="font-medium">{row.name}</span>
         ),
       },
       {
         key: "systemDefined",
-        header: "Type",
+        header: t("Type"),
         accessorFn: (row) =>
           row.systemDefined ? (
             <Badge variant="info" size="sm">
-              <Shield className="h-3 w-3 mr-1" /> System
+              <Shield className="h-3 w-3 mr-1" /> {t("System")}
             </Badge>
           ) : (
-            <Badge variant="default" size="sm">User</Badge>
+            <Badge variant="default" size="sm">{t("User")}</Badge>
           ),
       },
     ],
-    [],
+    [t],
   );
 
   const handleRowClick = useCallback(
@@ -50,15 +52,15 @@ const CodeListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Codes"
-          description="Manage system lookup tables and their values"
+          title={t("Codes")}
+          description={t("Manage system lookup tables and their values")}
           actions={
             <Button onClick={() => navigate("/codes/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Code
+              <Plus className="mr-2 h-4 w-4" /> {t("New Code")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load codes." onRetry={refetch} />
+        <ErrorState message={t("Failed to load codes.")} onRetry={refetch} />
       </div>
     );
   }
@@ -66,18 +68,18 @@ const CodeListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Codes"
-        description="Manage system lookup tables and their values"
+        title={t("Codes")}
+        description={t("Manage system lookup tables and their values")}
         actions={
           <Button onClick={() => navigate("/codes/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Code
+            <Plus className="mr-2 h-4 w-4" /> {t("New Code")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Codes</CardTitle>
+          <CardTitle>{t("All Codes")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -85,7 +87,7 @@ const CodeListPage: React.FC = () => {
             data={codes}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No codes found." }}
+            emptyState={{ message: t("No codes found.") }}
           />
         </CardContent>
       </Card>

@@ -1,4 +1,5 @@
 import { type FC, useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -46,6 +47,7 @@ const shareAccountFormSchema = z.object({
 type ShareAccountFormValues = z.infer<typeof shareAccountFormSchema>;
 
 const ShareAccountFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -180,7 +182,7 @@ const ShareAccountFormPage: FC = () => {
       navigate("/shares/accounts");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save share account.";
+      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to save share account.");
       setMutationError(msg);
     }
   };
@@ -197,11 +199,11 @@ const ShareAccountFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Share Account" : "New Share Account"}
-        description={isEdit ? `Editing account #${id}` : "Create a new share account"}
+        title={isEdit ? t("Edit Share Account") : t("New Share Account")}
+        description={isEdit ? `${t("Editing account")} #${id}` : t("Create a new share account")}
         actions={
           <Button variant="outline" onClick={() => navigate("/shares/accounts")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -211,7 +213,7 @@ const ShareAccountFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Client & Product</CardTitle>
+            <CardTitle className="text-base">{t("Client & Product")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ClientSearch
@@ -236,16 +238,16 @@ const ShareAccountFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Application Details</CardTitle>
+            <CardTitle className="text-base">{t("Application Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Requested Shares *</label>
+                <label className="block text-sm font-medium">{t("Requested Shares")} *</label>
                 <Input type="number" {...register("requestedShares")} error={errors.requestedShares?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Application Date</label>
+                <label className="block text-sm font-medium">{t("Application Date")}</label>
                 <Input type="date" {...register("applicationDate")} error={errors.applicationDate?.message} />
               </div>
             </div>
@@ -259,7 +261,7 @@ const ShareAccountFormPage: FC = () => {
                 error={errors.savingsAccountId?.message}
               />
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Submitted Date</label>
+                <label className="block text-sm font-medium">{t("Submitted Date")}</label>
                 <Input type="date" {...register("submittedDate")} error={errors.submittedDate?.message} />
               </div>
             </div>
@@ -268,22 +270,22 @@ const ShareAccountFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Restrictions</CardTitle>
+            <CardTitle className="text-base">{t("Restrictions")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Minimum Active Period</label>
+                <label className="block text-sm font-medium">{t("Minimum Active Period")}</label>
                 <Input type="number" {...register("minimumActivePeriod")} error={errors.minimumActivePeriod?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Minimum Active Period Type</label>
+                <label className="block text-sm font-medium">{t("Minimum Active Period Type")}</label>
                 <Select
                   value={watch("minimumActivePeriodFrequencyType")}
                   onValueChange={(v) => setValue("minimumActivePeriodFrequencyType", v, { shouldValidate: true })}
                 >
                   <SelectTrigger className={errors.minimumActivePeriodFrequencyType?.message ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(template?.minimumActivePeriodFrequencyTypeOptions ?? []).map((o) => (
@@ -300,7 +302,7 @@ const ShareAccountFormPage: FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Lock-in Period Frequency</label>
+                <label className="block text-sm font-medium">{t("Lock-in Period Frequency")}</label>
                 <Input
                   type="number"
                   {...register("lockinPeriodFrequency")}
@@ -308,13 +310,13 @@ const ShareAccountFormPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Lock-in Period Type</label>
+                <label className="block text-sm font-medium">{t("Lock-in Period Type")}</label>
                 <Select
                   value={watch("lockinPeriodFrequencyType")}
                   onValueChange={(v) => setValue("lockinPeriodFrequencyType", v, { shouldValidate: true })}
                 >
                   <SelectTrigger className={errors.lockinPeriodFrequencyType?.message ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(template?.lockinPeriodFrequencyTypeOptions ?? []).map((o) => (
@@ -332,34 +334,34 @@ const ShareAccountFormPage: FC = () => {
             <div>
               <Checkbox
                 id="allowDividendCalculationForInactiveClients"
-                label="Allow dividend calculation for inactive clients"
+                label={t("Allow dividend calculation for inactive clients")}
                 checked={watch("allowDividendCalculationForInactiveClients")}
                 onCheckedChange={(v) => setValue("allowDividendCalculationForInactiveClients", v === true)}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} placeholder="Optional external identifier" />
+              <label className="block text-sm font-medium">{t("External ID")}</label>
+              <Input {...register("externalId")} placeholder={t("Optional external identifier")} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Charges</CardTitle>
+            <CardTitle className="text-base">{t("Charges")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.length === 0 && <p className="text-sm text-gray-500">No charges applied.</p>}
+            {fields.length === 0 && <p className="text-sm text-gray-500">{t("No charges applied.")}</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-end justify-center gap-4">
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-sm font-medium">Charge</label>
+                  <label className="block text-sm font-medium">{t("Charge")}</label>
                   <Select
                     value={watch(`charges.${index}.chargeId`)}
                     onValueChange={(v) => setValue(`charges.${index}.chargeId`, v)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select charge" />
+                      <SelectValue placeholder={t("Select charge")} />
                     </SelectTrigger>
                     <SelectContent>
                       {chargeOptions.map((c) => (
@@ -371,7 +373,7 @@ const ShareAccountFormPage: FC = () => {
                   </Select>
                 </div>
                 <div className="flex-1 space-y-1.5">
-                  <label className="block text-sm font-medium">Amount</label>
+                  <label className="block text-sm font-medium">{t("Amount")}</label>
                   <Input className="mb-1.5" type="number" step="0.01" {...register(`charges.${index}.amount`)} />
                 </div>
                 <Button className="mb-1.5" type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
@@ -380,21 +382,21 @@ const ShareAccountFormPage: FC = () => {
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={() => append({ chargeId: "", amount: "" })}>
-              <Plus className="mr-2 h-4 w-4" /> Add Charge
+              <Plus className="mr-2 h-4 w-4" /> {t("Add Charge")}
             </Button>
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/shares/accounts")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {(createMutation.isPending || updateMutation.isPending) && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Account"}
+            {isEdit ? t("Save Changes") : t("Create Account")}
           </Button>
         </div>
       </form>

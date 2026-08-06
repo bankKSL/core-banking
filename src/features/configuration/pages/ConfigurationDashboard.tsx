@@ -1,4 +1,5 @@
 import { type FC } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Settings, Globe, ShieldCheck, Calendar, Database, Mail, Zap } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,70 +13,71 @@ interface ConfigSection {
   color: string;
 }
 
-const sections: ConfigSection[] = [
-  {
-    label: "Global Configuration",
-    description: "Manage system-wide settings and feature flags",
-    path: "/configuration/global",
-    icon: Settings,
-    color: "text-blue-600",
-  },
-  {
-    label: "External Services",
-    description: "Configure S3, SMTP, SMS, and Notification services",
-    path: "/configuration/external-services",
-    icon: Globe,
-    color: "text-emerald-600",
-  },
-  {
-    label: "Password Policy",
-    description: "View and change the active password validation policy",
-    path: "/configuration/password-policy",
-    icon: ShieldCheck,
-    color: "text-purple-600",
-  },
-  {
-    label: "Business Date",
-    description: "View and update business dates",
-    path: "/configuration/business-date",
-    icon: Calendar,
-    color: "text-orange-600",
-  },
-  {
-    label: "Cache Management",
-    description: "View and switch cache implementation",
-    path: "/configuration/cache",
-    icon: Database,
-    color: "text-cyan-600",
-  },
-  {
-    label: "Email Configuration",
-    description: "Configure SMTP email settings",
-    path: "/configuration/email",
-    icon: Mail,
-    color: "text-rose-600",
-  },
-  {
-    label: "External Events",
-    description: "Toggle external event type configurations",
-    path: "/configuration/external-events",
-    icon: Zap,
-    color: "text-amber-600",
-  },
-];
-
 const ConfigurationDashboard: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const sections: ConfigSection[] = [
+    {
+      label: t("Global Configuration"),
+      description: t("Manage system-wide settings and feature flags"),
+      path: "/configuration/global",
+      icon: Settings,
+      color: "text-blue-600",
+    },
+    {
+      label: t("External Services"),
+      description: t("Configure S3, SMTP, SMS, and Notification services"),
+      path: "/configuration/external-services",
+      icon: Globe,
+      color: "text-emerald-600",
+    },
+    {
+      label: t("Password Policy"),
+      description: t("View and change the active password validation policy"),
+      path: "/configuration/password-policy",
+      icon: ShieldCheck,
+      color: "text-purple-600",
+    },
+    {
+      label: t("Business Date"),
+      description: t("View and update business dates"),
+      path: "/configuration/business-date",
+      icon: Calendar,
+      color: "text-orange-600",
+    },
+    {
+      label: t("Cache Management"),
+      description: t("View and switch cache implementation"),
+      path: "/configuration/cache",
+      icon: Database,
+      color: "text-cyan-600",
+    },
+    {
+      label: t("Email Configuration"),
+      description: t("Configure SMTP email settings"),
+      path: "/configuration/email",
+      icon: Mail,
+      color: "text-rose-600",
+    },
+    {
+      label: t("External Events"),
+      description: t("Toggle external event type configurations"),
+      path: "/configuration/external-events",
+      icon: Zap,
+      color: "text-amber-600",
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Configuration & Admin"
-        description="Manage global settings, external services, password policies, and system configuration"
+        title={t("Configuration & Admin")}
+        description={t("Manage global settings, external services, password policies, and system configuration")}
       />
       <Card>
         <CardHeader>
-          <CardTitle>Configuration Sections</CardTitle>
+          <CardTitle>{t("Configuration Sections")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

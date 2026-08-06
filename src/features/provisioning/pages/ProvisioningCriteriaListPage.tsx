@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -11,6 +12,7 @@ import { useProvisioningCriterias, useDeleteProvisioningCriteria } from "../hook
 import type { ProvisioningCriteria } from "../api/provisioning";
 
 const ProvisioningCriteriaListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: criterias = [], isLoading, isError, refetch } = useProvisioningCriterias();
   const deleteMutation = useDeleteProvisioningCriteria();
@@ -30,17 +32,17 @@ const ProvisioningCriteriaListPage: React.FC = () => {
     () => [
       {
         key: "criteriaName",
-        header: "Name",
+        header: t("Name"),
         accessorFn: (row) => <span className="font-medium">{row.criteriaName}</span>,
       },
       {
         key: "createdBy",
-        header: "Created By",
+        header: t("Created By"),
         accessorFn: (row) => row.createdBy ?? "—",
       },
       {
         key: "loanProducts",
-        header: "Loan Products",
+        header: t("Loan Products"),
         accessorFn: (row) => String(row.loanProducts?.length ?? 0),
       },
       {
@@ -63,7 +65,7 @@ const ProvisioningCriteriaListPage: React.FC = () => {
         ),
       },
     ],
-    [navigate],
+    [navigate, t],
   );
 
   const handleRowClick = useCallback(
@@ -77,15 +79,15 @@ const ProvisioningCriteriaListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Provisioning Criteria"
-          description="Manage provisioning criteria"
+          title={t("Provisioning Criteria")}
+          description={t("Manage provisioning criteria")}
           actions={
             <Button onClick={() => navigate("/provisioning/criterias/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Criteria
+              <Plus className="mr-2 h-4 w-4" /> {t("New Criteria")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load provisioning criteria." onRetry={refetch} />
+        <ErrorState message={t("Failed to load provisioning criteria.")} onRetry={refetch} />
       </div>
     );
   }
@@ -93,18 +95,18 @@ const ProvisioningCriteriaListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Provisioning Criteria"
-        description="Manage provisioning criteria"
+        title={t("Provisioning Criteria")}
+        description={t("Manage provisioning criteria")}
         actions={
           <Button onClick={() => navigate("/provisioning/criterias/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Criteria
+            <Plus className="mr-2 h-4 w-4" /> {t("New Criteria")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Criteria</CardTitle>
+          <CardTitle>{t("All Criteria")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -112,7 +114,7 @@ const ProvisioningCriteriaListPage: React.FC = () => {
             data={criterias}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No provisioning criteria found." }}
+            emptyState={{ message: t("No provisioning criteria found.") }}
           />
         </CardContent>
       </Card>
@@ -120,9 +122,9 @@ const ProvisioningCriteriaListPage: React.FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
-        title="Delete Criteria"
-        description={`Are you sure you want to delete "${deleteTarget?.criteriaName}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Criteria")}
+        description={t("Are you sure you want to delete \"{{name}}\"?", { name: deleteTarget?.criteriaName })}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

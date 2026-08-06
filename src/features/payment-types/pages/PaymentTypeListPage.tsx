@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Trash2, Check, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { usePaymentTypes, useDeletePaymentType } from "../hooks/usePaymentTypes"
 import type { PaymentType } from "../api/payment-types";
 
 const PaymentTypeListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<PaymentType | null>(null);
 
@@ -40,10 +42,10 @@ const PaymentTypeListPage: React.FC = () => {
 
   const columns: ColumnDef<PaymentType>[] = useMemo(
     () => [
-      { key: "name", header: "Name" },
+      { key: "name", header: t("Name") },
       {
         key: "description",
-        header: "Description",
+        header: t("Description"),
         accessorFn: (row) =>
           row.description && row.description.length > 60
             ? `${row.description.slice(0, 60)}...`
@@ -51,7 +53,7 @@ const PaymentTypeListPage: React.FC = () => {
       },
       {
         key: "isCashPayment",
-        header: "Cash Payment",
+        header: t("Cash Payment"),
         cell: (row) =>
           row.isCashPayment ? (
             <Check className="h-5 w-5 text-emerald-600" />
@@ -59,18 +61,18 @@ const PaymentTypeListPage: React.FC = () => {
             <X className="h-5 w-5 text-red-500" />
           ),
       },
-      { key: "position", header: "Position" },
+      { key: "position", header: t("Position") },
       {
         key: "isSystemDefined",
-        header: "System Defined",
+        header: t("System Defined"),
         cell: (row) =>
           row.isSystemDefined ? (
             <Badge variant="info" size="sm">
-              System
+              {t("System")}
             </Badge>
           ) : (
             <Badge variant="default" size="sm">
-              Custom
+              {t("Custom")}
             </Badge>
           ),
       },
@@ -94,21 +96,21 @@ const PaymentTypeListPage: React.FC = () => {
         sortable: false,
       },
     ],
-    [],
+    [t],
   );
 
   if (isError) {
     return (
       <div className="p-6">
         <PageHeader
-          title="Payment Types"
+          title={t("Payment Types")}
           actions={
             <Button onClick={() => navigate("/payment-types/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Payment Type
+              <Plus className="mr-2 h-4 w-4" /> {t("New Payment Type")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load payment types." onRetry={refetch} />
+        <ErrorState message={t("Failed to load payment types.")} onRetry={refetch} />
       </div>
     );
   }
@@ -116,17 +118,17 @@ const PaymentTypeListPage: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title="Payment Types"
+        title={t("Payment Types")}
         actions={
           <Button onClick={() => navigate("/payment-types/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Payment Type
+            <Plus className="mr-2 h-4 w-4" /> {t("New Payment Type")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Payment Types</CardTitle>
+          <CardTitle>{t("Payment Types")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -134,7 +136,7 @@ const PaymentTypeListPage: React.FC = () => {
             data={paymentTypes}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No payment types found." }}
+            emptyState={{ message: t("No payment types found.") }}
           />
         </CardContent>
       </Card>
@@ -144,9 +146,9 @@ const PaymentTypeListPage: React.FC = () => {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title="Delete Payment Type"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Payment Type")}
+        description={`${t("Are you sure you want to delete")} "${deleteTarget?.name}"? ${t("This action cannot be undone.")}`}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, RefreshCw, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,12 +23,13 @@ const LoanFilters: FC<LoanFiltersProps> = ({
   onRefresh,
   isRefreshing,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Search by account no, client name, product..."
+          placeholder={t("Search by account no, client name, product...")}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-10"
@@ -36,10 +38,10 @@ const LoanFilters: FC<LoanFiltersProps> = ({
       <Select value={status} onValueChange={onStatusChange}>
         <SelectTrigger className="w-full sm:w-44">
           <Filter className="mr-2 h-4 w-4" />
-          <SelectValue placeholder="All Statuses" />
+          <SelectValue placeholder={t("All Statuses")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Statuses</SelectItem>
+          <SelectItem value="all">{t("All Statuses")}</SelectItem>
           {Object.entries(LOAN_STATUS_CONFIG).map(([code, cfg]) => (
             <SelectItem key={code} value={code}>
               {cfg.label}

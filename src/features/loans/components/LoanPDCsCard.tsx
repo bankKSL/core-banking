@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Banknote, Trash2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,6 +29,7 @@ const statusVariant: Record<string, "default" | "success" | "warning" | "info" |
 };
 
 const LoanPDCsCard: FC<LoanPDCsCardProps> = ({ loanId, currencyCode = "USD" }) => {
+  const { t } = useTranslation();
   const pdcsQuery = useLoanPDCs(loanId);
   const pdcs = pdcsQuery.data ?? [];
 
@@ -55,22 +57,22 @@ const LoanPDCsCard: FC<LoanPDCsCardProps> = ({ loanId, currencyCode = "USD" }) =
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Banknote className="h-4 w-4 text-gray-400" />
-            Post-Dated Checks ({pdcs.length})
+            {t("Post-Dated Checks")} ({pdcs.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {pdcs.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No post-dated checks for this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No post-dated checks for this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Check No</TableHead>
-                  <TableHead>Bank</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Check No")}</TableHead>
+                  <TableHead>{t("Bank")}</TableHead>
+                  <TableHead>{t("Date")}</TableHead>
+                  <TableHead className="text-right">{t("Amount")}</TableHead>
+                  <TableHead>{t("Status")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -114,9 +116,9 @@ const LoanPDCsCard: FC<LoanPDCsCardProps> = ({ loanId, currencyCode = "USD" }) =
       <ConfirmDialog
         open={!!bounceTarget}
         onOpenChange={(open) => !open && setBounceTarget(null)}
-        title="Mark Check as Bounced"
-        description={`Mark check #${bounceTarget?.checkNo} (${formatMoney(bounceTarget?.amount ?? 0, currencyCode)}) as bounced?`}
-        confirmLabel="Mark Bounced"
+        title={t("Mark Check as Bounced")}
+        description={`${t("Mark check")} #${bounceTarget?.checkNo} (${formatMoney(bounceTarget?.amount ?? 0, currencyCode)}) ${t("as bounced?")}`}
+        confirmLabel={t("Mark Bounced")}
         loading={bounceMutation.isPending}
         onConfirm={handleBounce}
       />
@@ -125,9 +127,9 @@ const LoanPDCsCard: FC<LoanPDCsCardProps> = ({ loanId, currencyCode = "USD" }) =
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Check"
-        description={`Remove check #${deleteTarget?.checkNo} from this loan? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Check")}
+        description={`${t("Remove check")} #${deleteTarget?.checkNo} ${t("from this loan? This cannot be undone.")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}

@@ -1,5 +1,6 @@
 import { type FC, useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Search, Plus, Pencil, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -27,6 +28,7 @@ const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(n);
 
 const LoansListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -40,13 +42,13 @@ const LoansListPage: FC = () => {
 
   // Debounce the search input (doc §27 #7) so we don't fire a request per keystroke.
   useEffect(() => {
-    const t = setTimeout(() => setSearch(searchInput), LOAN_SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setSearch(searchInput), LOAN_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
   }, [searchInput]);
 
   useEffect(() => {
-    const t = setTimeout(() => setExternalId(externalIdInput), LOAN_SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setExternalId(externalIdInput), LOAN_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
   }, [externalIdInput]);
 
   const queryParams = useMemo(() => {
@@ -91,27 +93,27 @@ const LoansListPage: FC = () => {
   const columns: ColumnDef<Loan>[] = [
     {
       key: "accountNo",
-      header: "Account No",
+      header: t("Account No"),
       cell: (r) => <code className="text-xs font-mono">{r.accountNo ?? `#${r.id}`}</code>,
     },
     {
       key: "clientName",
-      header: "Customer",
+      header: t("Customer"),
       cell: (r) => <span className="font-medium">{r.clientName ?? `Client #${r.clientId}`}</span>,
     },
     {
       key: "loanProductName",
-      header: "Product",
+      header: t("Product"),
       cell: (r) => <span className="text-sm">{r.loanProductName}</span>,
     },
     {
       key: "principal",
-      header: "Principal",
+      header: t("Principal"),
       cell: (r) => <span className="font-mono text-sm font-semibold">{formatCurrency(r.principal ?? 0)}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => {
         const cfg = LOAN_STATUS_CONFIG[resolveStatusCode(r)];
         return <StatusBadge status={cfg?.variant ?? "default"} label={cfg?.label ?? resolveStatusCode(r)} size="sm" />;
@@ -139,19 +141,19 @@ const LoansListPage: FC = () => {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Loans"
-          description="Manage loan accounts in Finfact"
+          title={t("Loans")}
+          description={t("Manage loan accounts in Finfact")}
           actions={
             <Button onClick={() => navigate("/loans/create")} className="bg-[#D32F2F] hover:bg-red-700">
-              <Plus className="mr-2 h-4 w-4" /> Create Loan
+              <Plus className="mr-2 h-4 w-4" /> {t("Create Loan")}
             </Button>
           }
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span className="text-sm">Failed to load loans. {error?.message ?? "Please try again."}</span>
+          <span className="text-sm">{t("Failed to load loans.")} {error?.message ?? t("Please try again.")}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -161,23 +163,23 @@ const LoansListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Loans"
-        description="Manage loan accounts in Finfact"
+        title={t("Loans")}
+        description={t("Manage loan accounts in Finfact")}
         actions={
           <Button onClick={() => navigate("/loans/create")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> Create Loan
+            <Plus className="mr-2 h-4 w-4" /> {t("Create Loan")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Loans</CardTitle>
+          <CardTitle>{t("Loans")}</CardTitle>
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by customer, account or product..."
+                placeholder={t("Search by customer, account or product...")}
                 value={searchInput}
                 onChange={(e) => {
                   setSearchInput(e.target.value);
@@ -189,7 +191,7 @@ const LoansListPage: FC = () => {
             <div className="relative w-56">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="External ID..."
+                placeholder={t("External ID...")}
                 value={externalIdInput}
                 onChange={(e) => {
                   setExternalIdInput(e.target.value);
@@ -206,10 +208,10 @@ const LoansListPage: FC = () => {
               }}
             >
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("Status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">{t("All")}</SelectItem>
                 {Object.entries(LOAN_STATUS_CONFIG).map(([code, cfg]) => (
                   <SelectItem key={code} value={code}>
                     {cfg.label}
@@ -227,7 +229,7 @@ const LoansListPage: FC = () => {
               }}
             >
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t("Sort by")} />
               </SelectTrigger>
               <SelectContent>
                 {LOAN_SORT_OPTIONS.map((opt) => (
@@ -249,13 +251,13 @@ const LoansListPage: FC = () => {
             columns={columns}
             data={filtered}
             loading={isLoading}
-            emptyState={{ message: "No loans found." }}
+            emptyState={{ message: t("No loans found.") }}
             onRowClick={(r) => navigate(`/loans/view/${r.id}`)}
           />
           {totalFilteredRecords > 0 && (
             <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Rows per page</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t("Rows per page")}</span>
                 <Select
                   value={String(pageSize)}
                   onValueChange={(v) => {

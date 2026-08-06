@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ const ATTENDANCE_TYPE_LABELS: Record<number, string> = {
 };
 
 const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entityId, open, onOpenChange, meeting }) => {
+  const { t } = useTranslation();
   const isEdit = !!meeting;
   const { data: calendars, isLoading: calendarsLoading } = useCalendars(entityType, entityId);
   const createMutation = useCreateMeeting();
@@ -98,12 +100,12 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Meeting" : "Create Meeting"}</DialogTitle>
+          <DialogTitle>{isEdit ? t("Edit Meeting") : t("Create Meeting")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Calendar *</label>
+            <label className="block text-sm font-medium">{t("Calendar")} *</label>
             <Select
               value={selectedCalendarId ? String(selectedCalendarId) : ""}
               onValueChange={(v) => {
@@ -113,7 +115,7 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
               disabled={calendarsLoading || calList.length === 1}
             >
               <SelectTrigger>
-                <SelectValue placeholder={calendarsLoading ? "Loading..." : "Select calendar"} />
+                <SelectValue placeholder={calendarsLoading ? t("Loading...") : t("Select calendar")} />
               </SelectTrigger>
               <SelectContent>
                 {calList.map((cal) => (
@@ -127,10 +129,10 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
 
           {selectedCalendarId && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Meeting Date *</label>
+              <label className="block text-sm font-medium">{t("Meeting Date")} *</label>
               <Select value={selectedDate ?? ""} onValueChange={setSelectedDate} disabled={templateLoading}>
                 <SelectTrigger>
-                  <SelectValue placeholder={templateLoading ? "Loading dates..." : "Select date"} />
+                  <SelectValue placeholder={templateLoading ? t("Loading dates...") : t("Select date")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.recurringDates ?? selectedCal?.nextTenRecurringDates ?? []).map((d) => (
@@ -149,7 +151,7 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
 
           {selectedDate && template?.clients && (
             <div className="space-y-1.5">
-              <label className="text-base font-semibold">Client Attendance</label>
+              <label className="text-base font-semibold">{t("Client Attendance")}</label>
               {template.clients.map((client) => (
                 <div key={client.id} className="flex items-center justify-between gap-4">
                   <span className="text-sm flex-1">{client.displayName}</span>
@@ -163,7 +165,7 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
                     <SelectContent>
                       {(template.attendanceTypeOptions ?? []).map((opt) => (
                         <SelectItem key={opt.id} value={String(opt.id)}>
-                          {ATTENDANCE_TYPE_LABELS[opt.id] ?? opt.value}
+                          {t(ATTENDANCE_TYPE_LABELS[opt.id] ?? opt.value)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -174,7 +176,7 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
           )}
 
           {selectedDate && !template?.clients && !templateLoading && (
-            <p className="text-sm text-gray-500">No clients found for this entity.</p>
+            <p className="text-sm text-gray-500">{t("No clients found for this entity.")}</p>
           )}
 
           {templateLoading && selectedCalendarId && (
@@ -186,15 +188,15 @@ const MeetingFormDialog: React.FC<MeetingFormDialogProps> = ({ entityType, entit
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={!canSubmit || isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
-              "Create Meeting"
+              t("Create Meeting")
             )}
           </Button>
         </DialogFooter>

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const OfficeTransactionFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: template, isLoading: isTemplateLoading } = useOfficeTransactionTemplate();
   const createMutation = useCreateOfficeTransaction();
@@ -75,7 +77,7 @@ const OfficeTransactionFormPage: React.FC = () => {
       } catch (err: unknown) {
         const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
         const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to create transaction.";
+          error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to create transaction.");
         setMutationError(msg);
       }
     },
@@ -101,11 +103,11 @@ const OfficeTransactionFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
-        title="New Office Transaction"
-        description="Create a money transfer between offices"
+        title={t("New Office Transaction")}
+        description={t("Create a money transfer between offices")}
         actions={
           <Button variant="outline" onClick={() => navigate("/office-transactions")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -119,13 +121,13 @@ const OfficeTransactionFormPage: React.FC = () => {
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">From Office</label>
+                <label className="block text-sm font-medium">{t("From Office")}</label>
                 <Select
                   value={fromOfficeId}
                   onValueChange={(v) => setValue("fromOfficeId", v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select source office" />
+                    <SelectValue placeholder={t("Select source office")} />
                   </SelectTrigger>
                   <SelectContent>
                     {officeOptions.map((o) => (
@@ -138,13 +140,13 @@ const OfficeTransactionFormPage: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">To Office</label>
+                <label className="block text-sm font-medium">{t("To Office")}</label>
                 <Select
                   value={toOfficeId}
                   onValueChange={(v) => setValue("toOfficeId", v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select destination office" />
+                    <SelectValue placeholder={t("Select destination office")} />
                   </SelectTrigger>
                   <SelectContent>
                     {officeOptions.map((o) => (
@@ -158,19 +160,19 @@ const OfficeTransactionFormPage: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Transaction Date *</label>
+              <label className="block text-sm font-medium">{t("Transaction Date *")}</label>
               <Input type="date" {...register("transactionDate")} error={errors.transactionDate?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Currency *</label>
+                <label className="block text-sm font-medium">{t("Currency *")}</label>
                 <Select
                   value={watch("currencyCode")}
                   onValueChange={(v) => setValue("currencyCode", v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
+                    <SelectValue placeholder={t("Select currency")} />
                   </SelectTrigger>
                   <SelectContent>
                     {currencyOptions.map((c) => (
@@ -186,7 +188,7 @@ const OfficeTransactionFormPage: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Amount *</label>
+                <label className="block text-sm font-medium">{t("Amount *")}</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -199,22 +201,22 @@ const OfficeTransactionFormPage: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
-              <Input placeholder="Optional description" {...register("description")} />
+              <label className="block text-sm font-medium">{t("Description")}</label>
+              <Input placeholder={t("Optional description")} {...register("description")} />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => navigate("/office-transactions")}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Creating…")}
                   </>
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" /> Create Transaction
+                    <Save className="mr-2 h-4 w-4" /> {t("Create Transaction")}
                   </>
                 )}
               </Button>

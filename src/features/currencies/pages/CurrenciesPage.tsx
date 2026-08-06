@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { useCurrencies, useUpdateCurrencies } from "../hooks/useCurrencies";
 import type { CurrencyData } from "../api/currencies";
 
 const CurrenciesPage: React.FC = () => {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useCurrencies();
   const updateCurrencies = useUpdateCurrencies();
 
@@ -76,8 +78,8 @@ const CurrenciesPage: React.FC = () => {
   if (isError) {
     return (
       <div className="p-6">
-        <PageHeader title="Currencies" description="Configure supported currencies" />
-        <ErrorState message="Failed to load currencies." onRetry={refetch} />
+        <PageHeader title={t("Currencies")} description={t("Configure supported currencies")} />
+        <ErrorState message={t("Failed to load currencies.")} onRetry={refetch} />
       </div>
     );
   }
@@ -85,8 +87,8 @@ const CurrenciesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Currencies"
-        description="Configure supported currencies"
+        title={t("Currencies")}
+        description={t("Configure supported currencies")}
         actions={
           <Button onClick={handleSave} disabled={!dirty || updateCurrencies.isPending}>
             {updateCurrencies.isPending ? (
@@ -94,7 +96,7 @@ const CurrenciesPage: React.FC = () => {
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Save
+            {t("Save")}
           </Button>
         }
       />
@@ -102,7 +104,7 @@ const CurrenciesPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">Available Currencies</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">{t("Available Currencies")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-1">
@@ -132,7 +134,7 @@ const CurrenciesPage: React.FC = () => {
                 </li>
               ))}
               {available.length === 0 && (
-                <li className="py-8 text-center text-sm text-gray-400">All currencies selected</li>
+                <li className="py-8 text-center text-sm text-gray-400">{t("All currencies selected")}</li>
               )}
             </ul>
 
@@ -143,14 +145,14 @@ const CurrenciesPage: React.FC = () => {
               disabled={selected.size === 0}
             >
               <ChevronRight className="mr-2 h-4 w-4" />
-              Add Selected ({selected.size})
+              {t("Add Selected ({{count}})", { count: selected.size })}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">Selected Currencies</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">{t("Selected Currencies")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-1">
@@ -167,13 +169,13 @@ const CurrenciesPage: React.FC = () => {
                       onClick={() => handleRemove(currency.code)}
                     >
                       <ChevronLeft className="h-4 w-4" />
-                      Remove
+                      {t("Remove")}
                     </Button>
                   </div>
                 </li>
               ))}
               {selectedCurrencies.length === 0 && (
-                <li className="py-8 text-center text-sm text-gray-400">No currencies selected</li>
+                <li className="py-8 text-center text-sm text-gray-400">{t("No currencies selected")}</li>
               )}
             </ul>
           </CardContent>

@@ -1,4 +1,5 @@
 import { type FC, useMemo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,6 +31,7 @@ const createCheckSchema = z.object({
 type CreateCheckFormValues = z.infer<typeof createCheckSchema>;
 
 const EntityDatatableCheckListPage: FC = () => {
+  const { t } = useTranslation();
   const { data: checks = [], isLoading, isError, refetch } = useEntityDatatableChecks();
   const { data: template } = useEntityDatatableCheckTemplate();
   const createMutation = useCreateEntityDatatableCheck();
@@ -93,22 +95,22 @@ const EntityDatatableCheckListPage: FC = () => {
     () => [
       {
         key: "entity",
-        header: "Entity",
+        header: t("Entity"),
         accessorFn: (row) => <span className="font-medium">{row.entity}</span>,
       },
       {
         key: "datatableName",
-        header: "Datatable",
+        header: t("Datatable"),
         accessorFn: (row) => row.datatableName,
       },
       {
         key: "status",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => row.status,
       },
       {
         key: "productId",
-        header: "Product ID",
+        header: t("Product ID"),
         accessorFn: (row) => row.productId ?? "—",
       },
       {
@@ -131,15 +133,15 @@ const EntityDatatableCheckListPage: FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Entity Datatable Checks"
-          description="Configure datatable validation rules per entity"
+          title={t("Entity Datatable Checks")}
+          description={t("Configure datatable validation rules per entity")}
           actions={
             <Button onClick={openDialog}>
-              <Plus className="mr-2 h-4 w-4" /> New Check
+              <Plus className="mr-2 h-4 w-4" /> {t("New Check")}
             </Button>
           }
         />
-        <ErrorState title="Failed to load checks" message="Failed to load entity datatable checks." onRetry={refetch} />
+        <ErrorState title={t("Failed to load checks")} message={t("Failed to load entity datatable checks.")} onRetry={refetch} />
       </div>
     );
   }
@@ -147,25 +149,25 @@ const EntityDatatableCheckListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Entity Datatable Checks"
-        description="Configure datatable validation rules per entity"
+        title={t("Entity Datatable Checks")}
+        description={t("Configure datatable validation rules per entity")}
         actions={
           <Button onClick={openDialog}>
-            <Plus className="mr-2 h-4 w-4" /> New Check
+            <Plus className="mr-2 h-4 w-4" /> {t("New Check")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Checks</CardTitle>
+          <CardTitle>{t("All Checks")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={columns}
             data={checks}
             loading={isLoading}
-            emptyState={{ message: "No entity datatable checks found." }}
+            emptyState={{ message: t("No entity datatable checks found.") }}
           />
         </CardContent>
       </Card>
@@ -173,9 +175,9 @@ const EntityDatatableCheckListPage: FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
-        title="Delete Check"
-        description="Are you sure you want to delete this entity datatable check?"
-        confirmLabel="Delete"
+        title={t("Delete Check")}
+        description={t("Are you sure you want to delete this entity datatable check?")}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}
@@ -184,18 +186,18 @@ const EntityDatatableCheckListPage: FC = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New Entity Datatable Check</DialogTitle>
+            <DialogTitle>{t("New Entity Datatable Check")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium">Entity</label>
+              <label className="block text-sm font-medium">{t("Entity")}</label>
               <Controller
                 control={control}
                 name="entity"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger id="checkEntity">
-                      <SelectValue placeholder="Select entity" />
+                      <SelectValue placeholder={t("Select entity")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.entities ?? []).map((e) => (
@@ -210,14 +212,14 @@ const EntityDatatableCheckListPage: FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Datatable</label>
+              <label className="block text-sm font-medium">{t("Datatable")}</label>
               <Controller
                 control={control}
                 name="datatableName"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger id="checkDatatable">
-                      <SelectValue placeholder="Select datatable" />
+                      <SelectValue placeholder={t("Select datatable")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.datatables ?? []).map((d) => (
@@ -232,14 +234,14 @@ const EntityDatatableCheckListPage: FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Status</label>
+              <label className="block text-sm font-medium">{t("Status")}</label>
               <Controller
                 control={control}
                 name="status"
                 render={({ field }) => (
                   <Select value={field.value ? String(field.value) : ""} onValueChange={(v) => field.onChange(Number(v))}>
                     <SelectTrigger id="checkStatus">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t("Select status")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.statuses ?? []).map((s) => (
@@ -254,18 +256,18 @@ const EntityDatatableCheckListPage: FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Product ID (optional)</label>
+              <label className="block text-sm font-medium">{t("Product ID (optional)")}</label>
               <Input
                 type="number"
                 min="0"
                 {...register("productId")}
-                placeholder="Leave empty for all products"
+                placeholder={t("Leave empty for all products")}
               />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" type="button" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -273,7 +275,7 @@ const EntityDatatableCheckListPage: FC = () => {
               >
                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
-                Create
+                {t("Create")}
               </Button>
             </div>
           </form>

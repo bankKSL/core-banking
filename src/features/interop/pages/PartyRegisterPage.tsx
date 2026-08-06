@@ -1,5 +1,6 @@
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, UserPlus } from "lucide-react";
@@ -14,6 +15,7 @@ import { useRegisterIdentifier } from "../hooks/useInterop";
 import { IDENTIFIER_TYPE_OPTIONS } from "../types/interop";
 
 const PartyRegisterPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const registerMutation = useRegisterIdentifier();
 
@@ -45,12 +47,12 @@ const PartyRegisterPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Register Identifier"
-        description="Link a secondary identifier (MSISDN, email, IBAN, etc.) to a savings account"
+        title={t("Register Identifier")}
+        description={t("Link a secondary identifier (MSISDN, email, IBAN, etc.) to a savings account")}
         actions={
           <Button variant="outline" onClick={() => navigate("/interop/dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -59,16 +61,16 @@ const PartyRegisterPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Identifier Details
+              {t("Identifier Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium">Identifier Type *</label>
+                <label className="block text-sm font-medium">{t("Identifier Type")} *</label>
                 <Select onValueChange={(v) => setValue("idType", v, { shouldValidate: true })} defaultValue="MSISDN">
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {IDENTIFIER_TYPE_OPTIONS.map((o) => (
@@ -81,36 +83,36 @@ const PartyRegisterPage: FC = () => {
                 {errors.idType && <p className="text-xs text-red-500 mt-1">{errors.idType.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Identifier Value *</label>
+                <label className="block text-sm font-medium">{t("Identifier Value")} *</label>
                 <Input {...register("idValue")} placeholder="e.g. 254700111222" error={errors.idValue?.message} />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Account External ID *</label>
+              <label className="block text-sm font-medium">{t("Account External ID")} *</label>
               <Input
                 {...register("accountId")}
                 placeholder="e.g. ext-uuid-account-id"
                 error={errors.accountId?.message}
               />
               <p className="text-xs text-gray-500">
-                The external ID of the savings account to link this identifier to.
+                {t("The external ID of the savings account to link this identifier to.")}
               </p>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Sub Type (Optional)</label>
-              <Input {...register("subIdOrType")} placeholder="Optional sub-type" />
+              <label className="block text-sm font-medium">{t("Sub Type (Optional)")}</label>
+              <Input {...register("subIdOrType")} placeholder={t("Optional sub-type")} />
             </div>
           </CardContent>
         </Card>
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/interop/dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            Register Identifier
+            {t("Register Identifier")}
           </Button>
         </div>
       </form>

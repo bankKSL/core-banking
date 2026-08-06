@@ -4,11 +4,8 @@ import {
   LayoutDashboard,
   Megaphone,
   DollarSign,
-  Tags,
-  Filter,
   Calculator,
   Play,
-  FlaskConical,
   FileText,
   ShieldCheck,
   Settings,
@@ -45,6 +42,7 @@ import {
   Percent,
   Handshake,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
 import { Separator } from "@/components/ui/separator";
@@ -55,212 +53,218 @@ interface NavItem {
   path: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   exact?: boolean;
+  translationKey?: string;
 }
 
 interface NavSectionConfig {
   id: string;
   title: string;
+  titleKey: string;
   items: NavItem[];
   defaultOpen?: boolean;
 }
 
-const sections: NavSectionConfig[] = [
+const getSections = (t: (key: string) => string): NavSectionConfig[] => [
   {
     id: "dashboard",
-    title: "Dashboard",
+    title: t("Dashboard"),
+    titleKey: "Dashboard",
     defaultOpen: true,
-    items: [{ label: "Dashboard", path: "/", icon: LayoutDashboard }],
+    items: [{ label: t("Dashboard"), path: "/", icon: LayoutDashboard, translationKey: "Dashboard" }],
   },
   {
     id: "lending",
-    title: "Lending",
+    title: t("Loans"),
+    titleKey: "Loans",
     defaultOpen: true,
     items: [
-      { label: "Loans", path: "/loans", icon: Banknote, exact: true },
-      { label: "Loan Products", path: "/lending/products", icon: Briefcase },
-      { label: "Loan Originators", path: "/loan-originators", icon: Handshake },
-      { label: "Collateral Products", path: "/collateral-products", icon: Gem },
-      { label: "External Asset Owners", path: "/external-asset-owners/owners", icon: UsersRound },
-      { label: "Transfers (Investor)", path: "/external-asset-owners/transfers", icon: ArrowRightLeft },
-      { label: "Reschedule Requests", path: "/rescheduling", icon: CalendarClock },
-      { label: "Bulk Reassignment", path: "/loans/reassign", icon: ArrowRightLeft },
+      { label: t("Loans"), path: "/loans", icon: Banknote, exact: true, translationKey: "Loans" },
+      { label: t("Loan Products"), path: "/lending/products", icon: Briefcase, translationKey: "Loan Products" },
+      { label: t("Loan Originators"), path: "/loan-originators", icon: Handshake, translationKey: "Loan Originators" },
+      { label: t("Collateral Products"), path: "/collateral-products", icon: Gem, translationKey: "Collateral Products" },
+      { label: t("External Asset Owners"), path: "/external-asset-owners/owners", icon: UsersRound, translationKey: "External Asset Owners" },
+      { label: t("Transfers (Investor)"), path: "/external-asset-owners/transfers", icon: ArrowRightLeft, translationKey: "Transfers (Investor)" },
+      { label: t("Reschedule Requests"), path: "/rescheduling", icon: CalendarClock, translationKey: "Reschedule Requests" },
+      { label: t("Bulk Reassignment"), path: "/loans/reassign", icon: ArrowRightLeft, translationKey: "Bulk Reassignment" },
     ],
   },
   {
     id: "deposits",
-    title: "Deposits",
+    title: t("Deposits"),
+    titleKey: "Deposits",
     defaultOpen: true,
     items: [
-      { label: "Savings Accounts", path: "/deposits/saving-accounts", icon: PiggyBank },
-      { label: "Fixed Deposits", path: "/deposits/fixed", icon: Wallet },
-      { label: "Recurring Deposits", path: "/deposits/recurring", icon: Calendar },
-      { label: "Savings Accounts Products", path: "/deposits/products", icon: LayoutGrid },
-      { label: "Fixed Deposits Products", path: "/deposits/fixed-products", icon: Calendar },
-      { label: "Recurring Deposit Products", path: "/deposits/recurring-products", icon: LayoutGrid },
-      { label: "Interest Rate Charts", path: "/interest-rate-charts", icon: Percent },
+      { label: t("Savings Accounts"), path: "/deposits/saving-accounts", icon: PiggyBank, translationKey: "Savings Accounts" },
+      { label: t("Fixed Deposits"), path: "/deposits/fixed", icon: Wallet, translationKey: "Fixed Deposits" },
+      { label: t("Recurring Deposits"), path: "/deposits/recurring", icon: Calendar, translationKey: "Recurring Deposits" },
+      { label: t("Savings Accounts Products"), path: "/deposits/products", icon: LayoutGrid, translationKey: "Savings Accounts Products" },
+      { label: t("Fixed Deposits Products"), path: "/deposits/fixed-products", icon: Calendar, translationKey: "Fixed Deposits Products" },
+      { label: t("Recurring Deposit Products"), path: "/deposits/recurring-products", icon: LayoutGrid, translationKey: "Recurring Deposit Products" },
+      { label: t("Interest Rate Charts"), path: "/interest-rate-charts", icon: Percent, translationKey: "Interest Rate Charts" },
     ],
   },
   {
     id: "shares",
-    title: "Shares",
+    title: t("Shares"),
+    titleKey: "Shares",
     defaultOpen: true,
     items: [
-      { label: "Share Products", path: "/shares/products", icon: LayoutGrid },
-      { label: "Share Accounts", path: "/shares/accounts", icon: Users },
-      { label: "Dividends", path: "/shares/dividends", icon: DollarSign },
+      { label: t("Share Products"), path: "/shares/products", icon: LayoutGrid, translationKey: "Share Products" },
+      { label: t("Share Accounts"), path: "/shares/accounts", icon: Users, translationKey: "Share Accounts" },
+      { label: t("Dividends"), path: "/shares/dividends", icon: DollarSign, translationKey: "Dividends" },
     ],
   },
   {
     id: "accounting",
-    title: "Accounting",
+    title: t("Accounting"),
+    titleKey: "Accounting",
     defaultOpen: true,
     items: [
-      { label: "Chart of Accounts", path: "/accounting/gl-accounts", icon: BookOpen },
-      { label: "Journal Entries", path: "/accounting/journal-entries", icon: FileText },
-      { label: "Accounting Rules", path: "/accounting/rules", icon: Scale },
-      { label: "Activity Mappings", path: "/accounting/financial-activity-mappings", icon: Link2 },
-      { label: "Closures", path: "/accounting/closures", icon: Lock },
-      { label: "Periodic Accrual", path: "/accounting/periodic-accrual", icon: CalendarClock },
-      { label: "Provisioning", path: "/accounting/provisioning-entries", icon: ShieldCheck },
-      { label: "Provisioning Categories", path: "/provisioning-categories", icon: LayoutGrid },
-      { label: "Provisioning Criteria", path: "/provisioning-criteria", icon: ListOrdered },
-      { label: "Tax Components", path: "/taxes/components", icon: Percent },
-      { label: "Tax Groups", path: "/taxes/groups", icon: LayoutGrid },
+      { label: t("Chart of Accounts"), path: "/accounting/gl-accounts", icon: BookOpen, translationKey: "Chart of Accounts" },
+      { label: t("Journal Entries"), path: "/accounting/journal-entries", icon: FileText, translationKey: "Journal Entries" },
+      { label: t("Accounting Rules"), path: "/accounting/rules", icon: Scale, translationKey: "Accounting Rules" },
+      { label: t("Activity Mappings"), path: "/accounting/financial-activity-mappings", icon: Link2, translationKey: "Activity Mappings" },
+      { label: t("Closures"), path: "/accounting/closures", icon: Lock, translationKey: "Closures" },
+      { label: t("Periodic Accrual"), path: "/accounting/periodic-accrual", icon: CalendarClock, translationKey: "Periodic Accrual" },
+      { label: t("Provisioning"), path: "/accounting/provisioning-entries", icon: ShieldCheck, translationKey: "Provisioning" },
+      { label: t("Provisioning Categories"), path: "/provisioning-categories", icon: LayoutGrid, translationKey: "Provisioning Categories" },
+      { label: t("Provisioning Criteria"), path: "/provisioning-criteria", icon: ListOrdered, translationKey: "Provisioning Criteria" },
+      { label: t("Tax Components"), path: "/taxes/components", icon: Percent, translationKey: "Tax Components" },
+      { label: t("Tax Groups"), path: "/taxes/groups", icon: LayoutGrid, translationKey: "Tax Groups" },
     ],
   },
   {
     id: "treasury",
-    title: "Treasury",
+    title: t("Treasury"),
+    titleKey: "Treasury",
     defaultOpen: true,
-    items: [{ label: "Exchange Rates", path: "/exchange-rates", icon: Globe }],
+    items: [
+      { label: t("Exchange Rates"), path: "/exchange-rates", icon: Globe, translationKey: "Exchange Rates" },
+    ],
   },
   {
     id: "transfers",
-    title: "Transfers",
+    title: t("Transfers"),
+    titleKey: "Transfers",
     defaultOpen: true,
     items: [
-      { label: "Transfer History", path: "/transfers/history", icon: ArrowRightLeft },
-      { label: "New Transfer", path: "/transfers/new", icon: ArrowRightLeft },
-      { label: "Standing Instructions", path: "/transfers/standing-instructions", icon: FileText },
-      { label: "SI History", path: "/standing-instruction-history", icon: Repeat },
+      { label: t("Transfer History"), path: "/transfers/history", icon: ArrowRightLeft, translationKey: "Transfer History" },
+      { label: t("New Transfer"), path: "/transfers/new", icon: ArrowRightLeft, translationKey: "New Transfer" },
+      { label: t("Standing Instructions"), path: "/transfers/standing-instructions", icon: FileText, translationKey: "Standing Instructions" },
+      { label: t("SI History"), path: "/standing-instruction-history", icon: Repeat, translationKey: "SI History" },
     ],
   },
   {
     id: "crm",
-    title: "CRM",
+    title: t("CRM"),
+    titleKey: "CRM",
     defaultOpen: true,
     items: [
-      { label: "Global Search", path: "/search", icon: Search },
-      { label: "Clients", path: "/clients", icon: Users },
-      { label: "Groups", path: "/groups", icon: UsersRound },
-      { label: "Centers", path: "/centers", icon: Building2 },
-      { label: "Score Grade", path: "/score-grades", icon: Shield },
+      { label: t("Global Search"), path: "/search", icon: Search, translationKey: "Global Search" },
+      { label: t("Clients"), path: "/clients", icon: Users, translationKey: "Clients" },
+      { label: t("Groups"), path: "/groups", icon: UsersRound, translationKey: "Groups" },
+      { label: t("Centers"), path: "/centers", icon: Building2, translationKey: "Centers" },
+      { label: t("Score Grade"), path: "/score-grades", icon: Shield, translationKey: "Score Grade" },
     ],
   },
   {
     id: "organization",
-    title: "Organization",
+    title: t("Organization"),
+    titleKey: "Organization",
     defaultOpen: true,
     items: [
-      { label: "Branches (Offices)", path: "/offices", icon: Building2 },
-      { label: "Office Transactions", path: "/office-transactions", icon: ArrowRightLeft },
-      { label: "Staff", path: "/staff", icon: Users },
-      { label: "Holidays", path: "/holidays", icon: Calendar },
-      { label: "Currencies", path: "/currencies", icon: Wallet },
-      { label: "Funds", path: "/funds", icon: Banknote },
-      { label: "Payment Types", path: "/payment-types", icon: CreditCard },
-      { label: "Charges", path: "/charges", icon: Calculator },
-      { label: "Working Days", path: "/working-days", icon: CalendarClock },
-      { label: "Codes", path: "/codes", icon: ListOrdered },
+      { label: t("Branches (Offices)"), path: "/offices", icon: Building2, translationKey: "Branches (Offices)" },
+      { label: t("Office Transactions"), path: "/office-transactions", icon: ArrowRightLeft, translationKey: "Office Transactions" },
+      { label: t("Staff"), path: "/staff", icon: Users, translationKey: "Staff" },
+      { label: t("Holidays"), path: "/holidays", icon: Calendar, translationKey: "Holidays" },
+      { label: t("Currencies"), path: "/currencies", icon: Wallet, translationKey: "Currencies" },
+      { label: t("Funds"), path: "/funds", icon: Banknote, translationKey: "Funds" },
+      { label: t("Payment Types"), path: "/payment-types", icon: CreditCard, translationKey: "Payment Types" },
+      { label: t("Charges"), path: "/charges", icon: Calculator, translationKey: "Charges" },
+      { label: t("Working Days"), path: "/working-days", icon: CalendarClock, translationKey: "Working Days" },
+      { label: t("Codes"), path: "/codes", icon: ListOrdered, translationKey: "Codes" },
     ],
   },
   {
     id: "marketing",
-    title: "Marketing",
+    title: t("Marketing"),
+    titleKey: "Marketing",
     defaultOpen: true,
-    items: [{ label: "Campaigns", path: "/campaigns", icon: Megaphone }],
+    items: [
+      { label: t("Campaigns"), path: "/campaigns", icon: Megaphone, translationKey: "Campaigns" },
+    ],
   },
   {
     id: "configuration",
-    title: "Configuration",
+    title: t("Configuration"),
+    titleKey: "Configuration",
     defaultOpen: true,
     items: [
-      { label: "Dashboard", path: "/configuration", icon: Settings },
-      { label: "Global Config", path: "/configuration/global", icon: ToggleLeft },
-      { label: "External Services", path: "/configuration/external-services", icon: Globe },
-      { label: "Password Policy", path: "/configuration/password-policy", icon: ShieldCheck },
-      { label: "Business Date", path: "/configuration/business-date", icon: Calendar },
+      { label: t("Dashboard"), path: "/configuration", icon: Settings, translationKey: "Dashboard" },
+      { label: t("Global Config"), path: "/configuration/global", icon: ToggleLeft, translationKey: "Global Config" },
+      { label: t("External Services"), path: "/configuration/external-services", icon: Globe, translationKey: "External Services" },
+      { label: t("Password Policy"), path: "/configuration/password-policy", icon: ShieldCheck, translationKey: "Password Policy" },
+      { label: t("Business Date"), path: "/configuration/business-date", icon: Calendar, translationKey: "Business Date" },
     ],
   },
   {
     id: "reports",
-    title: "Reports & Data",
+    title: t("Reports & Data"),
+    titleKey: "Reports & Data",
     defaultOpen: true,
     items: [
-      { label: "Reports", path: "/reports", icon: FileText },
-      { label: "Adhoc Queries", path: "/adhoc-queries", icon: Calculator },
-      { label: "Datatables", path: "/datatables", icon: LayoutGrid },
-      { label: "Entity Checks", path: "/entity-datatable-checks", icon: ShieldCheck },
+      { label: t("Reports"), path: "/reports", icon: FileText, translationKey: "Reports" },
+      { label: t("Adhoc Queries"), path: "/adhoc-queries", icon: Calculator, translationKey: "Adhoc Queries" },
+      { label: t("Datatables"), path: "/datatables", icon: LayoutGrid, translationKey: "Datatables" },
+      { label: t("Entity Checks"), path: "/entity-datatable-checks", icon: ShieldCheck, translationKey: "Entity Checks" },
     ],
   },
   {
     id: "cob",
-    title: "Close of Business",
+    title: t("Close of Business"),
+    titleKey: "Close of Business",
     defaultOpen: true,
     items: [
-      { label: "Dashboard", path: "/cob/dashboard", icon: Activity },
-      { label: "Business Steps", path: "/cob/steps", icon: ListOrdered },
-      { label: "Catch-Up", path: "/cob/catch-up", icon: Play },
-      { label: "Locked Loans", path: "/cob/locked-loans", icon: Lock },
+      { label: t("Dashboard"), path: "/cob/dashboard", icon: Activity, translationKey: "Dashboard" },
+      { label: t("Business Steps"), path: "/cob/steps", icon: ListOrdered, translationKey: "Business Steps" },
+      { label: t("Catch-Up"), path: "/cob/catch-up", icon: Play, translationKey: "Catch-Up" },
+      { label: t("Locked Loans"), path: "/cob/locked-loans", icon: Lock, translationKey: "Locked Loans" },
     ],
   },
   {
     id: "interop",
-    title: "Interoperation",
+    title: t("Interoperation"),
+    titleKey: "Interoperation",
     defaultOpen: true,
     items: [
-      { label: "Dashboard", path: "/interop/dashboard", icon: Activity },
-      { label: "Lookup Party", path: "/interop/party/search", icon: Search },
-      { label: "Register Identifier", path: "/interop/party/register", icon: UserPlus },
-      { label: "Transfers", path: "/interop/transfers", icon: ArrowRightLeft },
-      { label: "Account Details", path: "/interop/account", icon: Eye },
+      { label: t("Dashboard"), path: "/interop/dashboard", icon: Activity, translationKey: "Dashboard" },
+      { label: t("Lookup Party"), path: "/interop/party/search", icon: Search, translationKey: "Lookup Party" },
+      { label: t("Register Identifier"), path: "/interop/party/register", icon: UserPlus, translationKey: "Register Identifier" },
+      { label: t("Transfers"), path: "/interop/transfers", icon: ArrowRightLeft, translationKey: "Transfers" },
+      { label: t("Account Details"), path: "/interop/account", icon: Eye, translationKey: "Account Details" },
     ],
   },
-  // // TODO: remove all the items below if not needed
-  // // TODO: remove all the components related
-  // // because they are not yet implemented with api
-  // {
-  //   id: "formula-engine",
-  //   title: "Formula Engine",
-  //   defaultOpen: true,
-  //   items: [
-  //     { label: "Campaign", path: "/campaign", icon: Megaphone },
-  //     { label: "Category", path: "/category", icon: Tags },
-  //     { label: "Conditions", path: "/conditions", icon: Filter },
-  //     { label: "Formula Builder", path: "/formula-builder", icon: Calculator },
-  //     { label: "Actions", path: "/actions", icon: Play },
-  //     { label: "Simulation", path: "/simulation", icon: FlaskConical },
-  //     { label: "Execution Logs", path: "/execution-logs", icon: FileText },
-  //     { label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
-  //   ],
-  // },
   {
     id: "administration",
-    title: "Administration",
+    title: t("Administration"),
+    titleKey: "Administration",
     defaultOpen: true,
     items: [
-      { label: "Users", path: "/admin/users", icon: UserCog },
-      { label: "Roles", path: "/admin/roles", icon: ShieldCheck },
-      { label: "Permissions", path: "/admin/permissions", icon: KeyRound },
-      { label: "Tellers", path: "/tellers", icon: Banknote },
-      { label: "Batch Operations", path: "/admin/batch-operations", icon: Terminal },
+      { label: t("Users"), path: "/admin/users", icon: UserCog, translationKey: "Users" },
+      { label: t("Roles"), path: "/admin/roles", icon: ShieldCheck, translationKey: "Roles" },
+      { label: t("Permissions"), path: "/admin/permissions", icon: KeyRound, translationKey: "Permissions" },
+      { label: t("Tellers"), path: "/tellers", icon: Banknote, translationKey: "Tellers" },
+      { label: t("Batch Operations"), path: "/admin/batch-operations", icon: Terminal, translationKey: "Batch Operations" },
     ],
   },
   {
     id: "logs",
-    title: "Logs",
+    title: t("Logs"),
+    titleKey: "Logs",
     defaultOpen: true,
-    items: [{ label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck }],
+    items: [
+      { label: t("Audit Logs"), path: "/audit-logs", icon: ShieldCheck, translationKey: "Audit Logs" },
+    ],
   },
 ];
 
@@ -380,6 +384,8 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = ({ drawerMode = false, drawerOpen = false }) => {
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
   const location = useLocation();
+  const { t } = useTranslation();
+  const sections = getSections(t);
 
   const isActive = useCallback(
     (path: string, exact?: boolean) => {

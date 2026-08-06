@@ -1,4 +1,5 @@
 import { type FC, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   CheckCircle2,
@@ -52,6 +53,7 @@ type DateCommand = "approve" | "disburse" | "disburseToSavings";
 type ConfirmCommand = "reject" | "withdraw" | "undoApproval" | "undoDisbursal" | "undoWriteOff" | "delete";
 
 const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { success: toastSuccess } = useToast();
   const approveMut = useApproveLoan();
@@ -119,7 +121,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           locale: "en",
         },
       });
-      toastSuccess("Loan approved successfully");
+      toastSuccess(t("Loan approved successfully"));
     } else if (dateCommand === "disburse") {
       await disburseMut.mutateAsync({
         loanId: loan.id,
@@ -131,13 +133,13 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           locale: "en",
         },
       });
-      toastSuccess("Loan disbursed successfully");
+      toastSuccess(t("Loan disbursed successfully"));
     } else {
       await disburseToSavingsMut.mutateAsync({
         loanId: loan.id,
         payload: { actualDisbursementDate: dateInput, note, dateFormat: "yyyy-MM-dd", locale: "en" },
       });
-      toastSuccess("Loan disbursed successfully");
+      toastSuccess(t("Loan disbursed successfully"));
     }
     setDateCommand(null);
     onSuccess?.();
@@ -194,11 +196,11 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
   ]);
 
   const dateDialogTitles: Record<DateCommand, { title: string; description: string }> = {
-    approve: { title: "Approve Loan", description: "Confirm the approval date and approved amount." },
-    disburse: { title: "Disburse Loan", description: "Confirm the actual disbursement date and amount." },
+    approve: { title: t("Approve Loan"), description: t("Confirm the approval date and approved amount.") },
+    disburse: { title: t("Disburse Loan"), description: t("Confirm the actual disbursement date and amount.") },
     disburseToSavings: {
-      title: "Disburse to Savings",
-      description: "Disburse the loan amount directly to the linked savings account.",
+      title: t("Disburse to Savings"),
+      description: t("Disburse the loan amount directly to the linked savings account."),
     },
   };
 
@@ -210,7 +212,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           <>
             <Button variant="outline" size="sm" onClick={() => navigate(`/loans/edit/${loan.id}`)}>
               <Pencil className="mr-1 h-4 w-4" />
-              Edit
+              {t("Edit")}
             </Button>
             <Button
               variant="outline"
@@ -219,7 +221,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <Trash2 className="mr-1 h-4 w-4" />
-              Delete
+              {t("Delete")}
             </Button>
             <Button
               variant="outline"
@@ -228,7 +230,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
             >
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              Approve
+              {t("Approve")}
             </Button>
             <Button
               variant="outline"
@@ -237,7 +239,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <XCircle className="mr-1 h-4 w-4" />
-              Reject
+              {t("Reject")}
             </Button>
             <Button
               variant="outline"
@@ -246,7 +248,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-amber-600 border-amber-200 hover:bg-amber-50"
             >
               <Ban className="mr-1 h-4 w-4" />
-              Withdraw
+              {t("Withdraw")}
             </Button>
           </>
         )}
@@ -260,7 +262,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-blue-600 border-blue-200 hover:bg-blue-50"
             >
               <DollarSign className="mr-1 h-4 w-4" />
-              Disburse
+              {t("Disburse")}
             </Button>
             <Button
               variant="outline"
@@ -269,7 +271,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-blue-600 border-blue-200 hover:bg-blue-50"
             >
               <PiggyBank className="mr-1 h-4 w-4" />
-              Disburse to Savings
+              {t("Disburse to Savings")}
             </Button>
             <Button
               variant="outline"
@@ -278,7 +280,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-amber-600 border-amber-200 hover:bg-amber-50"
             >
               <Undo2 className="mr-1 h-4 w-4" />
-              Undo Approval
+              {t("Undo Approval")}
             </Button>
           </>
         )}
@@ -287,11 +289,11 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           <>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("undo-charge-off")}>
               <Undo2 className="mr-1 h-4 w-4" />
-              Undo Charge Off
+              {t("Undo Charge Off")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("recoverypayment")}>
               <DollarSign className="mr-1 h-4 w-4" />
-              Recovery Repayment
+              {t("Recovery Repayment")}
             </Button>
           </>
         )}
@@ -300,15 +302,15 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           <>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("repayment")}>
               <DollarSign className="mr-1 h-4 w-4" />
-              Repayment
+              {t("Repayment")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("prepayLoan")}>
               <DollarSign className="mr-1 h-4 w-4" />
-              Prepay
+              {t("Prepay")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("waiveinterest")}>
               <Ban className="mr-1 h-4 w-4" />
-              Waive Interest
+              {t("Waive Interest")}
             </Button>
             <Button
               variant="outline"
@@ -317,7 +319,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <FileText className="mr-1 h-4 w-4" />
-              Write Off
+              {t("Write Off")}
             </Button>
             <Button
               variant="outline"
@@ -326,7 +328,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <Ban className="mr-1 h-4 w-4" />
-              Charge Off
+              {t("Charge Off")}
             </Button>
             <Button
               variant="outline"
@@ -335,11 +337,11 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <Ban className="mr-1 h-4 w-4" />
-              Foreclose
+              {t("Foreclose")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("close")} className="text-gray-600">
               <Ban className="mr-1 h-4 w-4" />
-              Close
+              {t("Close")}
             </Button>
             <Button
               variant="outline"
@@ -348,45 +350,45 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-amber-600 border-amber-200 hover:bg-amber-50"
             >
               <RotateCcw className="mr-1 h-4 w-4" />
-              Undo Disbursal
+              {t("Undo Disbursal")}
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  More Actions
+                  {t("More Actions")}
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => goToTransaction("recoverypayment")}>
-                  Recovery Repayment
+                  {t("Recovery Repayment")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => goToTransaction("downPayment")}>Down Payment</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("downPayment")}>{t("Down Payment")}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => goToTransaction("interestPaymentWaiver")}>
-                  Interest Payment Waiver
+                  {t("Interest Payment Waiver")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => goToTransaction("interest-refund")}>Interest Refund</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("interest-refund")}>{t("Interest Refund")}</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => goToTransaction("goodwillCredit")}>Goodwill Credit</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => goToTransaction("refundbycash")}>Refund by Cash</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("goodwillCredit")}>{t("Goodwill Credit")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("refundbycash")}>{t("Refund by Cash")}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => goToTransaction("refundbytransfer")}>
-                  Refund by Transfer
+                  {t("Refund by Transfer")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => goToTransaction("merchantIssuedRefund")}>
-                  Merchant Issued Refund
+                  {t("Merchant Issued Refund")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => goToTransaction("payoutRefund")}>Payout Refund</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("payoutRefund")}>{t("Payout Refund")}</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => goToTransaction("reAmortize")}>Re-Amortize</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => goToTransaction("reAge")}>Re-Age Loan</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("reAmortize")}>{t("Re-Amortize")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => goToTransaction("reAge")}>{t("Re-Age Loan")}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => goToTransaction("close-rescheduled")}>
-                  Close (Rescheduled)
+                  {t("Close (Rescheduled)")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate(`/rescheduling/new?loanId=${loan.id}`)}>
                   <CalendarClock className="mr-2 h-4 w-4" />
-                  Reschedule Loan
+                  {t("Reschedule Loan")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -402,7 +404,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
             >
               <Undo2 className="mr-1 h-4 w-4" />
-              Undo Write Off
+              {t("Undo Write Off")}
             </Button>
           </>
         )}
@@ -411,21 +413,21 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           <>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("refundbycash")}>
               <DollarSign className="mr-1 h-4 w-4" />
-              Refund by Cash
+              {t("Refund by Cash")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("creditBalanceRefund")}>
               <DollarSign className="mr-1 h-4 w-4" />
-              Credit Balance Refund
+              {t("Credit Balance Refund")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("goodwillCredit")}>
               <DollarSign className="mr-1 h-4 w-4" />
-              Goodwill Credit
+              {t("Goodwill Credit")}
             </Button>
           </>
         )}
 
         {(isClosed || (!isPending && !isApproved && !isActive && !isOverpaid && !isChargedOff)) && (
-          <span className="text-sm text-gray-400 italic">No actions available</span>
+          <span className="text-sm text-gray-400 italic">{t("No actions available")}</span>
         )}
       </div>
 
@@ -439,7 +441,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="commandDate">
-                {dateCommand === "approve" ? "Approval Date" : "Disbursement Date"}
+                {dateCommand === "approve" ? t("Approval Date") : t("Disbursement Date")}
               </label>
               <Input id="commandDate" type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
             </div>
@@ -447,7 +449,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="block text-sm font-medium" htmlFor="approvedAmount">
-                    Approved Amount
+                    {t("Approved Amount")}
                   </label>
                   <Input
                     id="approvedAmount"
@@ -459,7 +461,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="block text-sm font-medium" htmlFor="expectedDisbDate">
-                    Expected Disbursement Date
+                    {t("Expected Disbursement Date")}
                   </label>
                   <Input
                     id="expectedDisbDate"
@@ -473,7 +475,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
             {dateCommand === "disburse" && (
               <div className="flex flex-col gap-1.5">
                 <label className="block text-sm font-medium" htmlFor="disbAmount">
-                  Transaction Amount
+                  {t("Transaction Amount")}
                 </label>
                 <Input
                   id="disbAmount"
@@ -486,23 +488,23 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
             )}
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="commandNote">
-                Note
+                {t("Note")}
               </label>
               <Textarea
                 id="commandNote"
                 rows={2}
                 value={noteInput}
                 onChange={(e) => setNoteInput(e.target.value)}
-                placeholder="Optional note..."
+                placeholder={t("Optional note...")}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDateCommand(null)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleDateCommand} disabled={isMutating}>
                 {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Confirm
+                {t("Confirm")}
               </Button>
             </div>
           </div>
@@ -513,9 +515,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       <ConfirmDialog
         open={confirmCommand === "reject"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title="Reject Loan"
-        description={`Reject loan ${loan.accountNo ?? `#${loan.id}`}?`}
-        confirmLabel="Reject"
+        title={t("Reject Loan")}
+        description={`${t("Reject loan")} ${loan.accountNo ?? `#${loan.id}`}?`}
+        confirmLabel={t("Reject")}
         variant="destructive"
         loading={rejectMut.isPending}
         onConfirm={handleConfirmCommand}
@@ -523,9 +525,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       <ConfirmDialog
         open={confirmCommand === "withdraw"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title="Withdraw Loan"
-        description={`Withdraw loan application ${loan.accountNo ?? `#${loan.id}`}?`}
-        confirmLabel="Withdraw"
+        title={t("Withdraw Loan")}
+        description={`${t("Withdraw loan application")} ${loan.accountNo ?? `#${loan.id}`}?`}
+        confirmLabel={t("Withdraw")}
         variant="destructive"
         loading={withdrawMut.isPending}
         onConfirm={handleConfirmCommand}
@@ -533,9 +535,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       <ConfirmDialog
         open={confirmCommand === "undoApproval"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title="Undo Approval"
-        description={`Undo approval for loan ${loan.accountNo ?? `#${loan.id}`}?`}
-        confirmLabel="Undo"
+        title={t("Undo Approval")}
+        description={`${t("Undo approval for loan")} ${loan.accountNo ?? `#${loan.id}`}?`}
+        confirmLabel={t("Undo")}
         variant="destructive"
         loading={undoApprovalMut.isPending}
         onConfirm={handleConfirmCommand}
@@ -543,9 +545,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       <ConfirmDialog
         open={confirmCommand === "undoDisbursal"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title="Undo Disbursal"
-        description={`Undo disbursal for loan ${loan.accountNo ?? `#${loan.id}`}? All transactions will be reversed.`}
-        confirmLabel="Undo"
+        title={t("Undo Disbursal")}
+        description={`${t("Undo disbursal for loan")} ${loan.accountNo ?? `#${loan.id}`}? ${t("All transactions will be reversed.")}`}
+        confirmLabel={t("Undo")}
         variant="destructive"
         loading={undoDisbursalMut.isPending}
         onConfirm={handleConfirmCommand}
@@ -553,9 +555,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       <ConfirmDialog
         open={confirmCommand === "undoWriteOff"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title="Undo Write Off"
-        description={`Undo write off for loan ${loan.accountNo ?? `#${loan.id}`}? The loan will become active again.`}
-        confirmLabel="Undo"
+        title={t("Undo Write Off")}
+        description={`${t("Undo write off for loan")} ${loan.accountNo ?? `#${loan.id}`}? ${t("The loan will become active again.")}`}
+        confirmLabel={t("Undo")}
         variant="destructive"
         loading={undoWriteOffMut.isPending}
         onConfirm={handleConfirmCommand}
@@ -563,9 +565,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       <ConfirmDialog
         open={confirmCommand === "delete"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title="Delete Loan Application"
-        description={`Permanently delete loan application ${loan.accountNo ?? `#${loan.id}`}? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("Delete Loan Application")}
+        description={`${t("Permanently delete loan application")} ${loan.accountNo ?? `#${loan.id}`}? ${t("This cannot be undone.")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMut.isPending}
         onConfirm={handleConfirmCommand}

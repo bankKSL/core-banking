@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Repeat } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { StandingInstructionFilters } from "../components/StandingInstructionFil
 import type { StandingInstruction } from "../types/standing-instruction.types";
 
 const StandingInstructionListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [transferType, setTransferType] = useState<number | null>(null);
@@ -40,15 +42,15 @@ const StandingInstructionListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Standing Instructions"
-          description="Manage recurring transfer instructions"
+          title={t("Standing Instructions")}
+          description={t("Manage recurring transfer instructions")}
           actions={
             <Button onClick={() => navigate("/transfers/standing-instructions/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Instruction
+              <Plus className="mr-2 h-4 w-4" /> {t("New Instruction")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load standing instructions." onRetry={refetch} />
+        <ErrorState message={t("Failed to load standing instructions.")} onRetry={refetch} />
       </div>
     );
   }
@@ -56,15 +58,15 @@ const StandingInstructionListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Standing Instructions"
-        description="Manage recurring transfer instructions"
+        title={t("Standing Instructions")}
+        description={t("Manage recurring transfer instructions")}
         actions={
           <>
             <Button variant="outline" onClick={() => navigate("/standing-instruction-history")}>
-              View History
+              {t("View History")}
             </Button>
             <Button onClick={() => navigate("/transfers/standing-instructions/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Instruction
+              <Plus className="mr-2 h-4 w-4" /> {t("New Instruction")}
             </Button>
           </>
         }
@@ -74,7 +76,7 @@ const StandingInstructionListPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Repeat className="h-5 w-5" />
-            Instructions
+            {t("Instructions")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

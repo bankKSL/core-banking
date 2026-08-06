@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus, Play, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -13,6 +14,7 @@ import { ReportRunDialog } from "./ReportRunDialog";
 import type { Report } from "../api/reports";
 
 const ReportListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Report | null>(null);
   const [runTarget, setRunTarget] = useState<Report | null>(null);
@@ -32,24 +34,24 @@ const ReportListPage: React.FC = () => {
 
   const columns: ColumnDef<Report>[] = useMemo(
     () => [
-      { key: "reportName", header: "Report Name", accessorFn: (row) => row.reportName ?? "—" },
-      { key: "reportType", header: "Type", accessorFn: (row) => row.reportType ?? "—" },
-      { key: "reportCategory", header: "Category", accessorFn: (row) => row.reportCategory ?? "—" },
+      { key: "reportName", header: t("Report Name"), accessorFn: (row) => row.reportName ?? "—" },
+      { key: "reportType", header: t("Type"), accessorFn: (row) => row.reportType ?? "—" },
+      { key: "reportCategory", header: t("Category"), accessorFn: (row) => row.reportCategory ?? "—" },
       {
         key: "coreReport",
-        header: "Core",
+        header: t("Core"),
         accessorFn: (row) =>
-          row.coreReport ? <Badge variant="default">Yes</Badge> : <Badge variant="default">No</Badge>,
+          row.coreReport ? <Badge variant="default">{t("Yes")}</Badge> : <Badge variant="default">{t("No")}</Badge>,
       },
       {
         key: "useReport",
-        header: "Active",
+        header: t("Active"),
         accessorFn: (row) =>
-          row.useReport ? <Badge variant="default">Yes</Badge> : <Badge variant="default">No</Badge>,
+          row.useReport ? <Badge variant="default">{t("Yes")}</Badge> : <Badge variant="default">{t("No")}</Badge>,
       },
       {
         key: "actions",
-        header: "Actions",
+        header: t("Actions"),
         cell: (row) => (
           <div className="flex items-center gap-2">
             <Button
@@ -78,22 +80,22 @@ const ReportListPage: React.FC = () => {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   if (isError) {
     return (
       <div className="p-6">
         <PageHeader
-          title="Reports"
-          description="Manage report definitions"
+          title={t("Reports")}
+          description={t("Manage report definitions")}
           actions={
             <Button onClick={() => navigate("/reports/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Report
+              <Plus className="mr-2 h-4 w-4" /> {t("New Report")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load reports." onRetry={refetch} />
+        <ErrorState message={t("Failed to load reports.")} onRetry={refetch} />
       </div>
     );
   }
@@ -101,18 +103,18 @@ const ReportListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Reports"
-        description="Manage report definitions"
+        title={t("Reports")}
+        description={t("Manage report definitions")}
         actions={
           <Button onClick={() => navigate("/reports/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Report
+            <Plus className="mr-2 h-4 w-4" /> {t("New Report")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Reports</CardTitle>
+          <CardTitle>{t("All Reports")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -120,7 +122,7 @@ const ReportListPage: React.FC = () => {
             data={reports ?? []}
             onRowClick={(row) => navigate(`/reports/${row.id}`)}
             loading={isLoading}
-            emptyState={{ message: "No reports found." }}
+            emptyState={{ message: t("No reports found.") }}
           />
         </CardContent>
       </Card>
@@ -128,9 +130,9 @@ const ReportListPage: React.FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="Delete Report"
-        description={`Are you sure you want to delete "${deleteTarget?.reportName}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Report")}
+        description={`${t("Are you sure you want to delete")} "${deleteTarget?.reportName}"?`}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

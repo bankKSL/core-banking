@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Plus,
@@ -27,6 +28,7 @@ import type { SavingsAccount } from "@/features/deposits";
 const PAGE_SIZE = 15;
 
 const DepositAccountsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -68,26 +70,26 @@ const DepositAccountsPage: React.FC = () => {
     new Intl.NumberFormat("en-US", { style: "currency", currency: currency, maximumFractionDigits: 0 }).format(n);
 
   const columns: ColumnDef<SavingsAccount>[] = [
-    { key: "accountNo", header: "Account No", cell: (r) => <code className="text-xs font-mono">{r.accountNo}</code> },
+    { key: "accountNo", header: t("Account No"), cell: (r) => <code className="text-xs font-mono">{r.accountNo}</code> },
     {
       key: "clientName",
-      header: "Customer",
-      cell: (r) => <span className="font-medium">{r.clientName ?? `Client #${r.clientId}`}</span>,
+      header: t("Customer"),
+      cell: (r) => <span className="font-medium">{r.clientName ?? `${t("Client")} #${r.clientId}`}</span>,
     },
-    { key: "savingsProductName", header: "Product" },
+    { key: "savingsProductName", header: t("Product") },
     {
       key: "accountBalance",
-      header: "Balance",
+      header: t("Balance"),
       cell: (r) => (
         <span className="font-mono text-sm font-semibold">
           {formatCurrency(r.accountBalance ?? 0, r.currency?.code)}
         </span>
       ),
     },
-    { key: "nominalAnnualInterestRate", header: "Rate", cell: (r) => `${r.nominalAnnualInterestRate ?? 0}%` },
+    { key: "nominalAnnualInterestRate", header: t("Rate"), cell: (r) => `${r.nominalAnnualInterestRate ?? 0}%` },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => {
         const c = SAVINGS_STATUS_CONFIG[r.status?.code ?? ""];
         return (
@@ -95,7 +97,7 @@ const DepositAccountsPage: React.FC = () => {
         );
       },
     },
-    { key: "savingsOfficerName", header: "Officer", cell: (r) => r.savingsOfficerName ?? "—" },
+    { key: "savingsOfficerName", header: t("Officer"), cell: (r) => r.savingsOfficerName ?? "—" },
     {
       key: "actions",
       header: "",
@@ -158,9 +160,9 @@ const DepositAccountsPage: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <AlertTriangle className="mx-auto h-8 w-8 text-red-500 mb-2" />
-          <p className="text-red-600">Failed to load deposit accounts: {String(error)}</p>
+          <p className="text-red-600">{t("Failed to load deposit accounts:")} {String(error)}</p>
           <Button variant="outline" className="mt-2" onClick={() => window.location.reload()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -169,12 +171,12 @@ const DepositAccountsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Deposit Accounts"
-        description="Manage savings, current, fixed deposit and recurring deposit accounts"
+        title={t("Deposit Accounts")}
+        description={t("Manage savings, current, fixed deposit and recurring deposit accounts")}
         actions={
           <Button onClick={() => navigate("/deposits/saving-accounts/new")}>
             <Plus className="mr-2 h-4 w-4" />
-            New Account
+            {t("New Account")}
           </Button>
         }
       />
@@ -187,11 +189,11 @@ const DepositAccountsPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard title="Total Accounts" value={stats.total} icon={Building2} />
-          <StatCard title="Active" value={stats.active} variant="success" />
-          <StatCard title="Total Balance" value={formatCurrency(stats.totalBalance)} variant="success" />
+          <StatCard title={t("Total Accounts")} value={stats.total} icon={Building2} />
+          <StatCard title={t("Active")} value={stats.active} variant="success" />
+          <StatCard title={t("Total Balance")} value={formatCurrency(stats.totalBalance)} variant="success" />
           <StatCard
-            title="Dormant/Frozen"
+            title={t("Dormant/Frozen")}
             value={data.filter((a) => a.subStatus?.code === "dormant" || a.subStatus?.code === "frozen").length}
             variant="warning"
           />
@@ -200,12 +202,12 @@ const DepositAccountsPage: React.FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Deposit Accounts</CardTitle>
+          <CardTitle>{t("Deposit Accounts")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by customer or account..."
+                placeholder={t("Search by customer or account...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -213,10 +215,10 @@ const DepositAccountsPage: React.FC = () => {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-36">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("Status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">{t("All")}</SelectItem>
                 {Object.entries(SAVINGS_STATUS_CONFIG).map(([code, cfg]) => (
                   <SelectItem key={code} value={code}>
                     {cfg.label}
@@ -238,7 +240,7 @@ const DepositAccountsPage: React.FC = () => {
               <DataTable
                 columns={columns}
                 data={filtered}
-                emptyState={{ message: "No deposit accounts found" }}
+                emptyState={{ message: t("No deposit accounts found") }}
                 onRowClick={(r) => navigate(`/deposits/saving-accounts/${r.id}`)}
               />
               {totalPages > 1 && (

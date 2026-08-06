@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ function enumVal(v: any, fallback = ""): string {
 }
 
 const LoanProductsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: products = [], isLoading, refetch } = useLoanProducts();
   const [search, setSearch] = useState("");
@@ -42,22 +44,22 @@ const LoanProductsPage: React.FC = () => {
   };
 
   const columns: ColumnDef<any>[] = [
-    { key: "name", header: "Name", accessorFn: (r) => <span className="font-medium">{r.name}</span> },
+    { key: "name", header: t("Name"), accessorFn: (r) => <span className="font-medium">{r.name}</span> },
     {
       key: "shortName",
-      header: "Short Name",
+      header: t("Short Name"),
       accessorFn: (r) => <span className="text-sm text-gray-500">{r.shortName ?? "—"}</span>,
     },
-    { key: "currency", header: "Currency", accessorFn: (r) => <span>{r.currency?.code ?? "—"}</span> },
+    { key: "currency", header: t("Currency"), accessorFn: (r) => <span>{r.currency?.code ?? "—"}</span> },
     {
       key: "principal",
-      header: "Principal",
+      header: t("Principal"),
       accessorFn: (r) => <span className="font-mono">{r.principal?.toLocaleString()}</span>,
     },
-    { key: "rate", header: "Rate", accessorFn: (r) => <span>{r.interestRatePerPeriod}%</span> },
+    { key: "rate", header: t("Rate"), accessorFn: (r) => <span>{r.interestRatePerPeriod}%</span> },
     {
       key: "repayments",
-      header: "Repayments",
+      header: t("Repayments"),
       accessorFn: (r) => (
         <span>
           {r.numberOfRepayments} × {r.repaymentEvery}
@@ -66,7 +68,7 @@ const LoanProductsPage: React.FC = () => {
     },
     {
       key: "scheduleType",
-      header: "Schedule",
+      header: t("Schedule"),
       accessorFn: (r) => {
         const st = enumVal(r.loanScheduleType, "CUMULATIVE");
         return <Badge>{st}</Badge>;
@@ -94,24 +96,24 @@ const LoanProductsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Loan Products"
-        description="Manage loan product definitions"
+        title={t("Loan Products")}
+        description={t("Manage loan product definitions")}
         actions={
           <Button onClick={() => navigate("/lending/products/new")} className="bg-[#D32F2F] hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" />
-            Create Product
+            {t("Create Product")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Products</CardTitle>
+          <CardTitle>{t("All Products")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search products..."
+                placeholder={t("Search products...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -131,7 +133,7 @@ const LoanProductsPage: React.FC = () => {
             <DataTable
               columns={columns}
               data={filtered}
-              emptyState={{ message: "No products found." }}
+              emptyState={{ message: t("No products found.") }}
               minWidth={900}
             />
           )}
@@ -142,9 +144,9 @@ const LoanProductsPage: React.FC = () => {
         open={!!deleteTarget}
         onOpenChange={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Delete Loan Product"
-        description={`Delete "${deleteTarget?.name}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Loan Product")}
+        description={t('Delete "{{name}}"?', { name: deleteTarget?.name })}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
       />

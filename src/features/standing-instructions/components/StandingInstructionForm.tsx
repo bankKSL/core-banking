@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,6 +93,7 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
   onBack,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -146,13 +148,13 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
     return (
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Office *</label>
+          <label className="block text-sm font-medium">{side === "from" ? t("From") : t("To")} {t("Office")} *</label>
           <Select
             value={state.officeId ? String(state.officeId) : ""}
             onValueChange={(v) => update("officeId", Number(v))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select office" />
+              <SelectValue placeholder={t("Select office")} />
             </SelectTrigger>
             <SelectContent>
               {offices.map((o) => (
@@ -164,14 +166,14 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Client *</label>
+          <label className="block text-sm font-medium">{side === "from" ? t("From") : t("To")} {t("Client")} *</label>
           <Select
             value={state.clientId ? String(state.clientId) : ""}
             onValueChange={(v) => update("clientId", Number(v))}
             disabled={!state.officeId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.officeId ? "Select client" : "Select office first"} />
+              <SelectValue placeholder={state.officeId ? t("Select client") : t("Select office first")} />
             </SelectTrigger>
             <SelectContent>
               {clients.map((c) => (
@@ -183,14 +185,14 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Account Type *</label>
+          <label className="block text-sm font-medium">{side === "from" ? t("From") : t("To")} {t("Account Type")} *</label>
           <Select
             value={state.accountType ? String(state.accountType) : ""}
             onValueChange={(v) => update("accountType", Number(v))}
             disabled={!state.clientId}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.clientId ? "Select type" : "Select client first"} />
+              <SelectValue placeholder={state.clientId ? t("Select type") : t("Select client first")} />
             </SelectTrigger>
             <SelectContent>
               {Object.entries(ACCOUNT_TYPE_LABELS).map(([id, label]) => (
@@ -202,14 +204,14 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-medium">{side === "from" ? "From" : "To"} Account *</label>
+          <label className="block text-sm font-medium">{side === "from" ? t("From") : t("To")} {t("Account")} *</label>
           <Select
             value={state.accountId ? String(state.accountId) : ""}
             onValueChange={(v) => update("accountId", Number(v))}
             disabled={!state.accountType}
           >
             <SelectTrigger>
-              <SelectValue placeholder={state.accountType ? "Select account" : "Select type first"} />
+              <SelectValue placeholder={state.accountType ? t("Select account") : t("Select type first")} />
             </SelectTrigger>
             <SelectContent>
               {accounts.map((a) => (
@@ -228,11 +230,11 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
     return (
       <div className="p-6 max-w-5xl m-auto space-y-6">
         <PageHeader
-          title={isEdit ? "Edit Standing Instruction" : "New Standing Instruction"}
-          description="Loading form data..."
+          title={isEdit ? t("Edit Standing Instruction") : t("New Standing Instruction")}
+          description={t("Loading form data...")}
           actions={
             <Button variant="outline" onClick={onBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
@@ -252,11 +254,11 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Standing Instruction" : "New Standing Instruction"}
-        description="Create or edit a recurring transfer instruction"
+        title={isEdit ? t("Edit Standing Instruction") : t("New Standing Instruction")}
+        description={t("Create or edit a recurring transfer instruction")}
         actions={
           <Button variant="outline" onClick={onBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -270,37 +272,37 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Instruction Details</CardTitle>
+            <CardTitle>{t("Instruction Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
-              <Input {...register("name")} placeholder="e.g. Monthly savings transfer" error={errors.name?.message} />
+              <label className="block text-sm font-medium">{t("Name")} *</label>
+              <Input {...register("name")} placeholder={t("e.g. Monthly savings transfer")} error={errors.name?.message} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {renderSelect(
-                "Transfer Type",
+                t("Transfer Type"),
                 transferType,
                 onTransferTypeChange,
                 template?.transferTypeOptions ?? [],
-                "Select type",
+                t("Select type"),
                 isTemplateLoading,
               )}
               {renderSelect(
-                "Instruction Type",
+                t("Instruction Type"),
                 instructionType,
                 onInstructionTypeChange,
                 template?.instructionTypeOptions ?? [],
-                "Select type",
+                t("Select type"),
                 isTemplateLoading,
               )}
               {renderSelect(
-                "Priority",
+                t("Priority"),
                 priority,
                 onPriorityChange,
                 template?.priorityOptions ?? [],
-                "Select priority",
+                t("Select priority"),
                 isTemplateLoading,
               )}
             </div>
@@ -308,34 +310,34 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">
-                  Amount {instructionType === 1 && <span className="text-red-500">*</span>}
+                  {t("Amount")} {instructionType === 1 && <span className="text-red-500">*</span>}
                 </label>
                 <Input
                   type="number"
                   step="0.01"
-                  placeholder={instructionType === 2 ? "Auto-calculated from dues" : "0.00"}
+                  placeholder={instructionType === 2 ? t("Auto-calculated from dues") : "0.00"}
                   {...register("amount")}
                   error={errors.amount?.message}
                   disabled={instructionType === 2}
                 />
                 {instructionType === 2 && (
-                  <p className="text-xs text-gray-500 mt-1">Amount will be calculated from outstanding dues</p>
+                  <p className="text-xs text-gray-500 mt-1">{t("Amount will be calculated from outstanding dues")}</p>
                 )}
               </div>
               {renderSelect(
-                "Recurrence Type",
+                t("Recurrence Type"),
                 recurrenceType,
                 onRecurrenceTypeChange,
                 template?.recurrenceTypeOptions ?? [],
-                "Select type",
+                t("Select type"),
                 isTemplateLoading,
               )}
               {renderSelect(
-                "Status",
+                t("Status"),
                 status,
                 onStatusChange,
                 template?.statusOptions ?? [],
-                "Select status",
+                t("Select status"),
                 isTemplateLoading,
               )}
             </div>
@@ -343,13 +345,13 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             {recurrenceType === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Recurrence Frequency *</label>
+                  <label className="block text-sm font-medium">{t("Recurrence Frequency")} *</label>
                   <Select
                     value={recurrenceFrequency != null ? String(recurrenceFrequency) : ""}
                     onValueChange={(v) => onRecurrenceFrequencyChange(Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder={t("Select frequency")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.recurrenceFrequencyOptions ?? []).map((opt) => (
@@ -361,23 +363,23 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Recurrence Interval *</label>
+                  <label className="block text-sm font-medium">{t("Recurrence Interval")} *</label>
                   <Input
                     type="number"
                     min="1"
-                    placeholder="e.g. 1"
+                    placeholder={t("e.g. 1")}
                     {...register("recurrenceInterval")}
                     error={errors.recurrenceInterval?.message}
                   />
                 </div>
                 {(recurrenceFrequency === 2 || recurrenceFrequency === 3) && (
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Recurrence On Day</label>
+                    <label className="block text-sm font-medium">{t("Recurrence On Day")}</label>
                     <Input
                       type="number"
                       min="1"
                       max="31"
-                      placeholder="Day of month (1-31)"
+                      placeholder={t("Day of month (1-31)")}
                       {...register("recurrenceOnMonthDay")}
                     />
                   </div>
@@ -388,12 +390,12 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">
-                  Valid From <span className="text-red-500">*</span>
+                  {t("Valid From")} <span className="text-red-500">*</span>
                 </label>
                 <Input type="date" {...register("validFrom")} error={errors.validFrom?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Valid Till</label>
+                <label className="block text-sm font-medium">{t("Valid Till")}</label>
                 <Input type="date" {...register("validTill")} error={errors.validTill?.message} />
               </div>
             </div>
@@ -403,13 +405,13 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
             <CardHeader>
-              <CardTitle>From</CardTitle>
+              <CardTitle>{t("From")}</CardTitle>
             </CardHeader>
             <CardContent>{renderSidePanel("from", fromState, fromClients, fromAccounts, onFromChange)}</CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>To</CardTitle>
+              <CardTitle>{t("To")}</CardTitle>
             </CardHeader>
             <CardContent>{renderSidePanel("to", toState, toClients, toAccounts, onToChange)}</CardContent>
           </Card>
@@ -417,16 +419,16 @@ const StandingInstructionForm: React.FC<StandingInstructionFormProps> = ({
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={onBack}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting || !fromState.accountId || !toState.accountId}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Instruction" : "Create Instruction"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Instruction") : t("Create Instruction")}
               </>
             )}
           </Button>

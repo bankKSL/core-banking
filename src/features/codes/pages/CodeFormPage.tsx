@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +20,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const CodeFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -50,11 +52,11 @@ const CodeFormPage: React.FC = () => {
         navigate("/codes");
       } catch (err: unknown) {
         const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-        const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save code.";
+        const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to save code.");
         setMutationError(msg);
       }
     },
-    [isEdit, id, createMutation, updateMutation, navigate],
+    [isEdit, id, createMutation, updateMutation, navigate, t],
   );
 
   const isSystemDefined = existingCode?.systemDefined;
@@ -76,11 +78,11 @@ const CodeFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-lg m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Code" : "New Code"}
-        description={isEdit ? "Update code name" : "Create a new lookup code"}
+        title={isEdit ? t("Edit Code") : t("New Code")}
+        description={isEdit ? t("Update code name") : t("Create a new lookup code")}
         actions={
           <Button variant="outline" onClick={() => navigate("/codes")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -90,7 +92,7 @@ const CodeFormPage: React.FC = () => {
       {isSystemDefined && (
         <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
           <Shield className="h-4 w-4" />
-          System-defined codes cannot be renamed.
+          {t("System-defined codes cannot be renamed.")}
         </div>
       )}
 
@@ -98,10 +100,10 @@ const CodeFormPage: React.FC = () => {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Code Name *</label>
+              <label className="block text-sm font-medium">{t("Code Name")} *</label>
               <Input
                 {...register("name")}
-                placeholder="e.g. Marital Status"
+                placeholder={t("e.g. Marital Status")}
                 disabled={isSystemDefined}
                 error={errors.name?.message}
               />
@@ -109,16 +111,16 @@ const CodeFormPage: React.FC = () => {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => navigate("/codes")}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={isSystemDefined || createMutation.isPending || updateMutation.isPending}>
                 {createMutation.isPending || updateMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
                   </>
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Code" : "Create Code"}
+                    <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Code") : t("Create Code")}
                   </>
                 )}
               </Button>

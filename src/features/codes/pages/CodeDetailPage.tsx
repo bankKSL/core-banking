@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -36,6 +37,7 @@ const codeValueSchema = z.object({
 type CodeValueFormValues = z.infer<typeof codeValueSchema>;
 
 const CodeDetailPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const codeId = id ? Number(id) : undefined;
@@ -127,34 +129,34 @@ const CodeDetailPage: FC = () => {
   const columns: ColumnDef<CodeValue>[] = [
     {
       key: "name",
-      header: "Value Name",
+      header: t("Value Name"),
       accessorFn: (row) => <span className="font-medium">{row.name}</span>,
     },
-    { key: "position", header: "Position" },
+    { key: "position", header: t("Position") },
     {
       key: "description",
-      header: "Description",
+      header: t("Description"),
       accessorFn: (row) => row.description ?? "—",
       className: "max-w-[200px] truncate",
     },
     {
       key: "isActive",
-      header: "Active",
+      header: t("Active"),
       accessorFn: (row) =>
         row.isActive ? (
           <Badge variant="success" size="sm">
-            Active
+            {t("Active")}
           </Badge>
         ) : (
           <Badge variant="default" size="sm">
-            Inactive
+            {t("Inactive")}
           </Badge>
         ),
     },
     {
       key: "isMandatory",
-      header: "Mandatory",
-      accessorFn: (row) => (row.isMandatory ? "Yes" : "No"),
+      header: t("Mandatory"),
+      accessorFn: (row) => (row.isMandatory ? t("Yes") : t("No")),
     },
     {
       key: "actions",
@@ -193,17 +195,17 @@ const CodeDetailPage: FC = () => {
     return (
       <div className="p-6 max-w-6xl m-auto">
         <PageHeader
-          title="Code Details"
-          description="View and manage code values"
+          title={t("Code Details")}
+          description={t("View and manage code values")}
           actions={
             <Button variant="outline" onClick={() => navigate("/codes")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
         <ErrorState
-          title="Failed to load code"
-          message="An unexpected error occurred while loading the code."
+          title={t("Failed to load code")}
+          message={t("An unexpected error occurred while loading the code.")}
           onRetry={() => refetchCode()}
         />
       </div>
@@ -214,19 +216,19 @@ const CodeDetailPage: FC = () => {
     <div className="space-y-6">
       <PageHeader
         title={code.name}
-        description="Manage code values for this lookup table"
+        description={t("Manage code values for this lookup table")}
         actions={
           <>
             <Button variant="outline" onClick={() => navigate("/codes")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
             {!code.systemDefined && (
               <Button variant="outline" onClick={() => setShowDeleteCodeDialog(true)}>
-                <Trash2 className="mr-2 h-4 w-4 text-red-500" /> Delete Code
+                <Trash2 className="mr-2 h-4 w-4 text-red-500" /> {t("Delete Code")}
               </Button>
             )}
             <Button onClick={openCreateDialog}>
-              <Plus className="mr-2 h-4 w-4" /> New Value
+              <Plus className="mr-2 h-4 w-4" /> {t("New Value")}
             </Button>
           </>
         }
@@ -235,20 +237,20 @@ const CodeDetailPage: FC = () => {
       {code.systemDefined && (
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <Shield className="h-4 w-4" />
-          System-defined code. Values can be managed but the code itself cannot be deleted.
+          {t("System-defined code. Values can be managed but the code itself cannot be deleted.")}
         </div>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Code Values</CardTitle>
+          <CardTitle>{t("Code Values")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={columns}
             data={values}
             loading={valuesLoading}
-            emptyState={{ message: "No values defined for this code." }}
+            emptyState={{ message: t("No values defined for this code.") }}
           />
         </CardContent>
       </Card>
@@ -256,14 +258,14 @@ const CodeDetailPage: FC = () => {
       <Dialog open={valueDialog.open} onOpenChange={(o) => setValueDialog({ open: o })}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{valueDialog.editValue ? "Edit Code Value" : "New Code Value"}</DialogTitle>
+            <DialogTitle>{valueDialog.editValue ? t("Edit Code Value") : t("New Code Value")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             {(createValueMutation.isError || updateValueMutation.isError) && (
               <ErrorState
-                title="Failed to save code value"
+                title={t("Failed to save code value")}
                 message={
-                  (createValueMutation.error ?? updateValueMutation.error)?.message ?? "An unexpected error occurred."
+                  (createValueMutation.error ?? updateValueMutation.error)?.message ?? t("An unexpected error occurred.")
                 }
                 onRetry={() => {
                   createValueMutation.reset();
@@ -273,17 +275,17 @@ const CodeDetailPage: FC = () => {
             )}
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Value Name *</label>
-                <Input {...register("name")} placeholder="e.g. Male" error={errors.name?.message} />
+                <label className="block text-sm font-medium">{t("Value Name")} *</label>
+                <Input {...register("name")} placeholder={t("e.g. Male")} error={errors.name?.message} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Position</label>
+                  <label className="block text-sm font-medium">{t("Position")}</label>
                   <Input type="number" min="0" {...register("position")} placeholder="0" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Description</label>
-                  <Input {...register("description")} placeholder="Optional" />
+                  <label className="block text-sm font-medium">{t("Description")}</label>
+                  <Input {...register("description")} placeholder={t("Optional")} />
                 </div>
               </div>
               <div className="flex items-center gap-6">
@@ -295,7 +297,7 @@ const CodeDetailPage: FC = () => {
                       <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} />
                     )}
                   />
-                  Active
+                  {t("Active")}
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <Controller
@@ -305,16 +307,16 @@ const CodeDetailPage: FC = () => {
                       <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} />
                     )}
                   />
-                  Mandatory
+                  {t("Mandatory")}
                 </label>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setValueDialog({ open: false })}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={createValueMutation.isPending || updateValueMutation.isPending}>
-                {createValueMutation.isPending || updateValueMutation.isPending ? "Saving..." : "Save"}
+                {createValueMutation.isPending || updateValueMutation.isPending ? t("Saving...") : t("Save")}
               </Button>
             </DialogFooter>
           </form>
@@ -326,9 +328,9 @@ const CodeDetailPage: FC = () => {
         onOpenChange={(o) => {
           if (!o) setDeleteTarget(null);
         }}
-        title="Delete Code Value"
-        description="Are you sure you want to delete this code value?"
-        confirmLabel="Delete"
+        title={t("Delete Code Value")}
+        description={t("Are you sure you want to delete this code value?")}
+        confirmLabel={t("Delete")}
         onConfirm={handleDeleteValue}
         variant="destructive"
         loading={deleteValueMutation.isPending}
@@ -337,9 +339,9 @@ const CodeDetailPage: FC = () => {
       <ConfirmDialog
         open={showDeleteCodeDialog}
         onOpenChange={setShowDeleteCodeDialog}
-        title="Delete Code"
-        description={`Are you sure you want to delete "${code.name}"? This will also remove all its values.`}
-        confirmLabel="Delete"
+        title={t("Delete Code")}
+        description={`${t("Are you sure you want to delete")} "${code.name}"? ${t("This will also remove all its values.")}`}
+        confirmLabel={t("Delete")}
         onConfirm={handleDeleteCode}
         variant="destructive"
         loading={deleteCodeMutation.isPending}

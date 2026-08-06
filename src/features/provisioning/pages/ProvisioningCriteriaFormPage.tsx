@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface CategoryConfig {
 }
 
 const ProvisioningCriteriaFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -96,7 +98,7 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
       navigate("/provisioning/criterias");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save provisioning criteria.";
+      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to save provisioning criteria.");
       setMutationError(msg);
     }
   };
@@ -122,11 +124,11 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Provisioning Criteria" : "New Provisioning Criteria"}
-        description={isEdit ? "Update criteria details" : "Create new provisioning criteria"}
+        title={isEdit ? t("Edit Provisioning Criteria") : t("New Provisioning Criteria")}
+        description={isEdit ? t("Update criteria details") : t("Create new provisioning criteria")}
         actions={
           <Button variant="outline" onClick={() => navigate("/provisioning/criterias")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -136,12 +138,12 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t("Basic Information")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Input
-              label="Criteria Name *"
-              placeholder="Enter criteria name"
+              label={t("Criteria Name *")}
+              placeholder={t("Enter criteria name")}
               value={criteriaName}
               onChange={(e) => setCriteriaName(e.target.value)}
             />
@@ -150,11 +152,11 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Loan Products</CardTitle>
+            <CardTitle>{t("Loan Products")}</CardTitle>
           </CardHeader>
           <CardContent>
             {loanProducts.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">No loan products available.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("No loan products available.")}</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {loanProducts.map((product) => (
@@ -179,12 +181,12 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Categories Configuration</CardTitle>
+            <CardTitle>{t("Categories Configuration")}</CardTitle>
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                No categories available. Create provisioning categories first.
+                {t("No categories available. Create provisioning categories first.")}
               </p>
             ) : (
               <div className="space-y-3">
@@ -204,7 +206,7 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
                           step="0.01"
                           min="0"
                           max="100"
-                          placeholder="Percentage"
+                          placeholder={t("Percentage")}
                           value={config?.percentage ?? ""}
                           onChange={(e) => handleCategoryPercentageChange(cat.id, e.target.value)}
                         />
@@ -219,16 +221,16 @@ const ProvisioningCriteriaFormPage: React.FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/provisioning/criterias")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Criteria" : "Create Criteria"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Criteria") : t("Create Criteria")}
               </>
             )}
           </Button>

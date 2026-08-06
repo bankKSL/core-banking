@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Pencil, Landmark, DollarSign, Repeat, Percent, CalendarClock, FileText } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -50,6 +51,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
 );
 
 const LoanProductViewPage: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: product, isLoading } = useLoanProduct(id ? Number(id) : undefined);
@@ -80,11 +82,11 @@ const LoanProductViewPage: React.FC = () => {
     return (
       <div className="p-6 max-w-6xl m-auto">
         <PageHeader
-          title="Product Not Found"
-          description="The requested loan product does not exist."
+          title={t("Product Not Found")}
+          description={t("The requested loan product does not exist.")}
           actions={
             <Button variant="outline" onClick={() => navigate("/lending/products")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
@@ -103,10 +105,10 @@ const LoanProductViewPage: React.FC = () => {
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate("/lending/products")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
             <Button onClick={() => navigate(`/lending/products/edit/${id}`)} className="bg-[#D32F2F] hover:bg-red-700">
-              <Pencil className="mr-2 h-4 w-4" /> Edit
+              <Pencil className="mr-2 h-4 w-4" /> {t("Edit")}
             </Button>
           </div>
         }
@@ -117,36 +119,36 @@ const LoanProductViewPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Landmark className="h-5 w-5 text-[#D32F2F]" />
-              Product Details
+              {t("Product Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Short Name" value={p.shortName ?? "—"} />
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="Description" value={p.description ?? "—"} />
+            <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Short Name")} value={p.shortName ?? "—"} />
+            <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Description")} value={p.description ?? "—"} />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Currency"
+              label={t("Currency")}
               value={p.currency?.displaySymbol ?? p.currency?.code ?? "—"}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Digits After Decimal"
+              label={t("Digits After Decimal")}
               value={p.currency?.decimalPlaces ?? 2}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="In Multiples Of"
+              label={t("In Multiples Of")}
               value={p.currency?.inMultiplesOf ?? 0}
             />
-            <InfoRow icon={<Landmark className="h-4 w-4" />} label="Fund" value={p.fundName ?? "—"} />
+            <InfoRow icon={<Landmark className="h-4 w-4" />} label={t("Fund")} value={p.fundName ?? "—"} />
             <InfoRow
               icon={
                 <Badge variant={isProgressive ? "info" : "default"} size="sm" rounded>
-                  {isProgressive ? "Progressive" : "Cumulative"}
+                  {isProgressive ? t("Progressive") : t("Cumulative")}
                 </Badge>
               }
-              label="Schedule Type"
-              value={enumVal(p.loanScheduleType, "Cumulative")}
+              label={t("Schedule Type")}
+              value={enumVal(p.loanScheduleType, t("Cumulative"))}
             />
           </CardContent>
         </Card>
@@ -155,38 +157,38 @@ const LoanProductViewPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Percent className="h-5 w-5 text-[#D32F2F]" />
-              Terms
+              {t("Terms")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Principal"
+              label={t("Principal")}
               value={p.principal?.toLocaleString()}
             />
             <InfoRow
               icon={<Percent className="h-4 w-4 text-emerald-500" />}
-              label="Interest Rate"
+              label={t("Interest Rate")}
               value={`${p.interestRatePerPeriod}%`}
             />
             <InfoRow
               icon={<Percent className="h-4 w-4" />}
-              label="Interest Rate Frequency"
+              label={t("Interest Rate Frequency")}
               value={getLabel("interestRateFrequencyType", enumId(p.interestRateFrequencyType))}
             />
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
-              label="Amortization"
+              label={t("Amortization")}
               value={getLabel("amortizationType", enumId(p.amortizationType))}
             />
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
-              label="Interest Type"
+              label={t("Interest Type")}
               value={getLabel("interestType", enumId(p.interestType))}
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
-              label="Interest Calculation"
+              label={t("Interest Calculation")}
               value={getLabel("interestCalculationPeriodType", enumId(p.interestCalculationPeriodType))}
             />
           </CardContent>
@@ -196,34 +198,34 @@ const LoanProductViewPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Repeat className="h-5 w-5 text-[#D32F2F]" />
-              Repayment
+              {t("Repayment")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<Repeat className="h-4 w-4" />} label="Number of Repayments" value={p.numberOfRepayments} />
+            <InfoRow icon={<Repeat className="h-4 w-4" />} label={t("Number of Repayments")} value={p.numberOfRepayments} />
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
-              label="Repayment Every"
+              label={t("Repayment Every")}
               value={`${p.repaymentEvery} ${getLabel("repaymentFrequencyType", enumId(p.repaymentFrequencyType))}`}
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
-              label="Days In Year"
+              label={t("Days In Year")}
               value={getLabel("daysInYearType", enumId(p.daysInYearType))}
             />
             <InfoRow
               icon={<CalendarClock className="h-4 w-4" />}
-              label="Days In Month"
+              label={t("Days In Month")}
               value={getLabel("daysInMonthType", enumId(p.daysInMonthType))}
             />
             <InfoRow
               icon={
                 <Badge variant="info" size="sm">
-                  {p.isInterestRecalculationEnabled ? "Enabled" : "Disabled"}
+                  {p.isInterestRecalculationEnabled ? t("Enabled") : t("Disabled")}
                 </Badge>
               }
-              label="Interest Recalculation"
-              value={p.isInterestRecalculationEnabled ? "Enabled" : "Disabled"}
+              label={t("Interest Recalculation")}
+              value={p.isInterestRecalculationEnabled ? t("Enabled") : t("Disabled")}
             />
           </CardContent>
         </Card>
@@ -232,49 +234,49 @@ const LoanProductViewPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileText className="h-5 w-5 text-[#D32F2F]" />
-              Configuration
+              {t("Configuration")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<FileText className="h-4 w-4" />}
-              label="Transaction Strategy"
+              label={t("Transaction Strategy")}
               value={p.transactionProcessingStrategyName ?? p.transactionProcessingStrategyCode ?? "—"}
             />
             <InfoRow
               icon={<FileText className="h-4 w-4" />}
-              label="Accounting Rule"
+              label={t("Accounting Rule")}
               value={enumVal(p.accountingRule, "1")}
             />
-            <InfoRow icon={<FileText className="h-4 w-4" />} label="External ID" value={p.externalId ?? "—"} />
+            <InfoRow icon={<FileText className="h-4 w-4" />} label={t("External ID")} value={p.externalId ?? "—"} />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Min Principal"
+              label={t("Min Principal")}
               value={p.minPrincipal?.toLocaleString() ?? "—"}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4" />}
-              label="Max Principal"
+              label={t("Max Principal")}
               value={p.maxPrincipal?.toLocaleString() ?? "—"}
             />
             <InfoRow
               icon={<Percent className="h-4 w-4" />}
-              label="Min Interest Rate"
+              label={t("Min Interest Rate")}
               value={p.minInterestRatePerPeriod != null ? `${p.minInterestRatePerPeriod}%` : "—"}
             />
             <InfoRow
               icon={<Percent className="h-4 w-4" />}
-              label="Max Interest Rate"
+              label={t("Max Interest Rate")}
               value={p.maxInterestRatePerPeriod != null ? `${p.maxInterestRatePerPeriod}%` : "—"}
             />
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
-              label="Min Repayments"
+              label={t("Min Repayments")}
               value={p.minNumberOfRepayments ?? "—"}
             />
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
-              label="Max Repayments"
+              label={t("Max Repayments")}
               value={p.maxNumberOfRepayments ?? "—"}
             />
           </CardContent>
@@ -285,18 +287,18 @@ const LoanProductViewPage: React.FC = () => {
       {(product as any).activeChart?.chartSlabs?.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Interest Rate Chart</CardTitle>
+            <CardTitle className="text-base">{t("Interest Rate Chart")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Description</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Period Type</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">From</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">To</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">Annual Rate</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">{t("Description")}</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">{t("Period Type")}</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">{t("From")}</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">{t("To")}</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">{t("Annual Rate")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y dark:divide-gray-700">

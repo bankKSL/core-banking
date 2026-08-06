@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, Handshake } from "lucide-react";
@@ -32,6 +33,7 @@ type FormValues = {
 const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
 
 const LoanOriginatorFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -58,7 +60,6 @@ const LoanOriginatorFormPage: FC = () => {
     },
   });
 
-  // Prefill from the create template (generated externalId, defaults) or the loaded detail (edit).
   useEffect(() => {
     if (isEdit) {
       if (!originator) return;
@@ -119,14 +120,14 @@ const LoanOriginatorFormPage: FC = () => {
   return (
     <div className="max-w-4xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Loan Originator" : "Create Loan Originator"}
+        title={isEdit ? t("Edit Loan Originator") : t("Create Loan Originator")}
         description={
-          isEdit ? `Editing "${originator?.name ?? originator?.externalId}"` : "Register an external party that sources loan applications"
+          isEdit ? t('Editing "{{name}}"', { name: originator?.name ?? originator?.externalId }) : t("Register an external party that sources loan applications")
         }
         actions={
           <Button variant="outline" onClick={() => navigate("/loan-originators")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -135,26 +136,26 @@ const LoanOriginatorFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Handshake className="h-5 w-5" />
-              Basic Information
+              {t("Basic Information")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">External ID (Revenue Share ID) *</label>
+              <label className="block text-sm font-medium">{t("External ID (Revenue Share ID)")} *</label>
               <Input
                 {...register("externalId")}
                 placeholder="e.g. REV-SHARE-001"
                 disabled={isEdit || isSubmitting}
                 error={errors.externalId?.message}
               />
-              {isEdit && <p className="text-xs text-gray-500">The External ID cannot be changed.</p>}
+              {isEdit && <p className="text-xs text-gray-500">{t("The External ID cannot be changed.")}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name</label>
+              <label className="block text-sm font-medium">{t("Name")}</label>
               <Input {...register("name")} placeholder="e.g. Acme Merchant" disabled={isSubmitting} error={errors.name?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Status *</label>
+              <label className="block text-sm font-medium">{t("Status")} *</label>
               <Select
                 value={watch("status") ?? "ACTIVE"}
                 onValueChange={(v) => setValue("status", v as LoanOriginatorStatus, { shouldValidate: true })}
@@ -178,11 +179,11 @@ const LoanOriginatorFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Classification</CardTitle>
+            <CardTitle className="text-base">{t("Classification")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Originator Type</label>
+              <label className="block text-sm font-medium">{t("Originator Type")}</label>
               <Select
                 value={watch("originatorTypeId") ? String(watch("originatorTypeId")) : ""}
                 onValueChange={(v) =>
@@ -191,10 +192,10 @@ const LoanOriginatorFormPage: FC = () => {
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("Select type")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">{t("None")}</SelectItem>
                   {typeOptions.map((opt) => (
                     <SelectItem key={opt.id} value={String(opt.id)}>
                       {titleCase(opt.name)}
@@ -205,7 +206,7 @@ const LoanOriginatorFormPage: FC = () => {
               {errors.originatorTypeId && <p className="text-xs text-red-500">{errors.originatorTypeId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Channel Type</label>
+              <label className="block text-sm font-medium">{t("Channel Type")}</label>
               <Select
                 value={watch("channelTypeId") ? String(watch("channelTypeId")) : ""}
                 onValueChange={(v) =>
@@ -214,10 +215,10 @@ const LoanOriginatorFormPage: FC = () => {
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select channel" />
+                  <SelectValue placeholder={t("Select channel")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">{t("None")}</SelectItem>
                   {channelOptions.map((opt) => (
                     <SelectItem key={opt.id} value={String(opt.id)}>
                       {titleCase(opt.name)}
@@ -233,12 +234,12 @@ const LoanOriginatorFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/loan-originators")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Originator"}
+            {isEdit ? t("Save Changes") : t("Create Originator")}
           </Button>
         </div>
       </form>

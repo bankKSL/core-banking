@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Handshake, Plus, Loader2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,6 +25,7 @@ interface LoanOriginatorsCardProps {
 const titleCase = (s?: string) => (s ? s.charAt(0) + s.slice(1).toLowerCase() : "—");
 
 const LoanOriginatorsCard: FC<LoanOriginatorsCardProps> = ({ loanId, originators: initial, canEdit = false }) => {
+  const { t } = useTranslation();
   const originatorsQuery = useLoanOriginatorsByLoan(initial ? undefined : loanId);
   const items = initial ?? originatorsQuery.data ?? [];
 
@@ -49,7 +51,7 @@ const LoanOriginatorsCard: FC<LoanOriginatorsCardProps> = ({ loanId, originators
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Handshake className="h-4 w-4 text-gray-400" />
-            Originators ({items.length})
+            {t("Originators ({{count}})", { count: items.length })}
           </CardTitle>
           {canEdit && (
             <Button
@@ -61,23 +63,23 @@ const LoanOriginatorsCard: FC<LoanOriginatorsCardProps> = ({ loanId, originators
               }}
             >
               <Plus className="mr-1 h-4 w-4" />
-              Add Originator
+              {t("Add Originator")}
             </Button>
           )}
         </CardHeader>
         <CardContent className="p-0">
           {items.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No originators linked to this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No originators linked to this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>External ID</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Channel</TableHead>
-                  {canEdit && <TableHead className="text-right">Actions</TableHead>}
+                  <TableHead>{t("Name")}</TableHead>
+                  <TableHead>{t("External ID")}</TableHead>
+                  <TableHead>{t("Status")}</TableHead>
+                  <TableHead>{t("Type")}</TableHead>
+                  <TableHead>{t("Channel")}</TableHead>
+                  {canEdit && <TableHead className="text-right">{t("Actions")}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -114,8 +116,8 @@ const LoanOriginatorsCard: FC<LoanOriginatorsCardProps> = ({ loanId, originators
       <Dialog open={attachOpen} onOpenChange={setAttachOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Originator</DialogTitle>
-            <DialogDescription>Attach an ACTIVE originator to this loan. Attach/detach is only possible while the loan is submitted and pending approval.</DialogDescription>
+            <DialogTitle>{t("Add Originator")}</DialogTitle>
+            <DialogDescription>{t("Attach an ACTIVE originator to this loan. Attach/detach is only possible while the loan is submitted and pending approval.")}</DialogDescription>
           </DialogHeader>
           <LoanOriginatorPicker
             value={selected}
@@ -125,11 +127,11 @@ const LoanOriginatorsCard: FC<LoanOriginatorsCardProps> = ({ loanId, originators
           />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setAttachOpen(false)} disabled={isMutating}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="button" onClick={handleAttach} disabled={isMutating || selected.length === 0}>
               {attachMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Attach
+              {t("Attach")}
             </Button>
           </div>
         </DialogContent>
@@ -139,9 +141,9 @@ const LoanOriginatorsCard: FC<LoanOriginatorsCardProps> = ({ loanId, originators
       <ConfirmDialog
         open={!!detachTarget}
         onOpenChange={(open) => !open && setDetachTarget(null)}
-        title="Detach Originator"
-        description={`Remove originator "${detachTarget?.name ?? detachTarget?.externalId}" from this loan?`}
-        confirmLabel="Detach"
+        title={t("Detach Originator")}
+        description={t('Remove originator "{{name}}" from this loan?', { name: detachTarget?.name ?? detachTarget?.externalId })}
+        confirmLabel={t("Detach")}
         variant="destructive"
         loading={detachMutation.isPending}
         onConfirm={async () => {

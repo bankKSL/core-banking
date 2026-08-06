@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,6 +13,7 @@ import { useAdhocQueries, useDeleteAdhocQuery } from "../hooks/useReports";
 import type { AdhocQuery } from "../api/reports";
 
 const AdhocQueryListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<AdhocQuery | null>(null);
 
@@ -30,18 +32,18 @@ const AdhocQueryListPage: React.FC = () => {
 
   const columns: ColumnDef<AdhocQuery>[] = useMemo(
     () => [
-      { key: "name", header: "Name", accessorFn: (row) => row.name ?? "—" },
-      { key: "tableName", header: "Table", accessorFn: (row) => row.tableName ?? "—" },
+      { key: "name", header: t("Name"), accessorFn: (row) => row.name ?? "—" },
+      { key: "tableName", header: t("Table"), accessorFn: (row) => row.tableName ?? "—" },
       {
         key: "isActive",
-        header: "Active",
+        header: t("Active"),
         accessorFn: (row) =>
-          row.isActive ? <Badge variant="default">Yes</Badge> : <Badge variant="default">No</Badge>,
+          row.isActive ? <Badge variant="default">{t("Yes")}</Badge> : <Badge variant="default">{t("No")}</Badge>,
       },
-      { key: "email", header: "Email", accessorFn: (row) => row.email ?? "—" },
+      { key: "email", header: t("Email"), accessorFn: (row) => row.email ?? "—" },
       {
         key: "actions",
-        header: "Actions",
+        header: t("Actions"),
         cell: (row) => (
           <div className="flex items-center gap-2">
             <Button
@@ -68,22 +70,22 @@ const AdhocQueryListPage: React.FC = () => {
         ),
       },
     ],
-    [navigate],
+    [navigate, t],
   );
 
   if (isError) {
     return (
       <div className="p-6">
         <PageHeader
-          title="Adhoc Queries"
-          description="Manage adhoc query definitions"
+          title={t("Adhoc Queries")}
+          description={t("Manage adhoc query definitions")}
           actions={
             <Button onClick={() => navigate("/adhoc-queries/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Query
+              <Plus className="mr-2 h-4 w-4" /> {t("New Query")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load adhoc queries." onRetry={refetch} />
+        <ErrorState message={t("Failed to load adhoc queries.")} onRetry={refetch} />
       </div>
     );
   }
@@ -91,25 +93,25 @@ const AdhocQueryListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Adhoc Queries"
-        description="Manage adhoc query definitions"
+        title={t("Adhoc Queries")}
+        description={t("Manage adhoc query definitions")}
         actions={
           <Button onClick={() => navigate("/adhoc-queries/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Query
+            <Plus className="mr-2 h-4 w-4" /> {t("New Query")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Queries</CardTitle>
+          <CardTitle>{t("All Queries")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={columns}
             data={queries ?? []}
             loading={isLoading}
-            emptyState={{ message: "No adhoc queries found." }}
+            emptyState={{ message: t("No adhoc queries found.") }}
           />
         </CardContent>
       </Card>
@@ -117,9 +119,9 @@ const AdhocQueryListPage: React.FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="Delete Adhoc Query"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Adhoc Query")}
+        description={`${t("Are you sure you want to delete")} "${deleteTarget?.name}"?`}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

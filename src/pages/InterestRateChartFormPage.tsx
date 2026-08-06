@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, Plus, Trash2, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -41,6 +42,7 @@ const emptySlab = (template?: InterestRateChartTemplate): SlabForm => ({
 });
 
 const InterestRateChartFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -178,11 +180,11 @@ const InterestRateChartFormPage: React.FC = () => {
       header: "Period Type",
       cell: (r) => r.periodType?.value ?? String(r.periodType?.id ?? ""),
     },
-    { key: "fromPeriod", header: "From Period" },
-    { key: "toPeriod", header: "To Period" },
+    { key: "fromPeriod", header: t("From Period") },
+    { key: "toPeriod", header: t("To Period") },
     {
       key: "annualInterestRate",
-      header: "Rate (%)",
+      header: t("Rate (%)"),
       cell: (r) => <span className="font-mono font-semibold">{r.annualInterestRate}%</span>,
     },
     {
@@ -213,22 +215,22 @@ const InterestRateChartFormPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Interest Rate Chart" : "Create Interest Rate Chart"}
-        description="Define interest rate charts and their slabs."
+        title={isEdit ? t("Edit Interest Rate Chart") : t("Create Interest Rate Chart")}
+        description={t("Define interest rate charts and their slabs.")}
         actions={
           <Button variant="outline" onClick={() => navigate("/interest-rate-charts")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Chart Details</CardTitle>
+          <CardTitle className="text-base">{t("Chart Details")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="col-span-2 space-y-1.5">
-            <label className="block text-sm font-medium">Name *</label>
+            <label className="block text-sm font-medium">{t("Name")} *</label>
             <Input value={form.name} onChange={(e) => updateForm("name", e.target.value)} error={errors.name} />
           </div>
           <div className="col-span-2 space-y-1.5">
@@ -237,11 +239,11 @@ const InterestRateChartFormPage: React.FC = () => {
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
               rows={3}
-              placeholder="Chart description"
+              placeholder={t("Chart description")}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">From Date *</label>
+            <label className="block text-sm font-medium">{t("From Date")} *</label>
             <Input
               type="date"
               value={form.fromDate}
@@ -250,7 +252,7 @@ const InterestRateChartFormPage: React.FC = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">End Date</label>
+            <label className="block text-sm font-medium">{t("End Date")}</label>
             <Input type="date" value={form.endDate} onChange={(e) => updateForm("endDate", e.target.value)} />
           </div>
         </CardContent>
@@ -259,9 +261,9 @@ const InterestRateChartFormPage: React.FC = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Chart Slabs</CardTitle>
+            <CardTitle className="text-base">{t("Chart Slabs")}</CardTitle>
             <Button type="button" variant="outline" size="sm" onClick={openAddSlab} disabled={!chartId && !isEdit}>
-              <Plus className="mr-1 h-4 w-4" /> Add Slab
+              <Plus className="mr-1 h-4 w-4" /> {t("Add Slab")}
             </Button>
           </div>
         </CardHeader>
@@ -276,7 +278,7 @@ const InterestRateChartFormPage: React.FC = () => {
             <DataTable
               columns={slabColumns}
               data={slabs}
-              emptyState={{ message: "No slabs defined. Click 'Add Slab' to create one." }}
+              emptyState={{ message: t("No slabs defined. Click 'Add Slab' to create one.") }}
             />
           )}
         </CardContent>
@@ -284,7 +286,7 @@ const InterestRateChartFormPage: React.FC = () => {
 
       <div className="flex justify-end gap-3">
         <Button variant="outline" type="button" onClick={() => navigate("/interest-rate-charts")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
         </Button>
         <Button onClick={handleSave} disabled={saving} className="bg-[#D32F2F] hover:bg-red-700">
           {saving ? (
@@ -293,7 +295,7 @@ const InterestRateChartFormPage: React.FC = () => {
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Chart"}
+              <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Save Changes") : t("Create Chart")}
             </>
           )}
         </Button>
@@ -302,19 +304,19 @@ const InterestRateChartFormPage: React.FC = () => {
       <Dialog open={slabDialogOpen} onOpenChange={setSlabDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingSlab ? "Edit Slab" : "Add Slab"}</DialogTitle>
+            <DialogTitle>{editingSlab ? t("Edit Slab") : t("Add Slab")}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
+            <label className="block text-sm font-medium">{t("Description")}</label>
               <Input
                 value={slabForm.description}
                 onChange={(e) => setSlabForm((f) => ({ ...f, description: e.target.value }))}
-                placeholder="Slab description"
+                placeholder={t("Slab description")}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Period Type</label>
+              <label className="block text-sm font-medium">{t("Period Type")}</label>
               <Select value={slabForm.periodType} onValueChange={(v) => setSlabForm((f) => ({ ...f, periodType: v }))}>
                 <SelectTrigger>
                   <SelectValue />
@@ -329,7 +331,7 @@ const InterestRateChartFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Annual Rate (%)</label>
+              <label className="block text-sm font-medium">{t("Annual Rate (%)")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -338,7 +340,7 @@ const InterestRateChartFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">From Period</label>
+              <label className="block text-sm font-medium">{t("From Period")}</label>
               <Input
                 type="number"
                 value={slabForm.fromPeriod ?? ""}
@@ -348,7 +350,7 @@ const InterestRateChartFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">To Period</label>
+              <label className="block text-sm font-medium">{t("To Period")}</label>
               <Input
                 type="number"
                 value={slabForm.toPeriod ?? ""}
@@ -360,16 +362,16 @@ const InterestRateChartFormPage: React.FC = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSlabDialogOpen(false)}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button onClick={handleSaveSlab} disabled={savingSlab} className="bg-[#D32F2F] hover:bg-red-700">
               {savingSlab ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" /> {editingSlab ? "Update" : "Add"}
+                  <Save className="mr-2 h-4 w-4" /> {editingSlab ? t("Update") : t("Add")}
                 </>
               )}
             </Button>
@@ -382,9 +384,9 @@ const InterestRateChartFormPage: React.FC = () => {
         onOpenChange={() => setDeleteSlabTarget(null)}
         onConfirm={handleDeleteSlab}
         loading={deleteSlabMutation.isPending}
-        title="Delete Slab"
-        description={`Delete this slab?`}
-        confirmLabel="Delete"
+        title={t("Delete Slab")}
+        description={`${t("Delete this slab?")}`}
+        confirmLabel={t("Delete")}
         variant="destructive"
       />
     </div>

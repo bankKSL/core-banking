@@ -1,4 +1,5 @@
 import { type FC, useState, useMemo, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { Save, Loader2, Search } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { usePermissions, useUpdateMakerChecker } from "../hooks/useRoles";
 
 const PermissionsPage: FC = () => {
+  const { t } = useTranslation();
   const { data: permissions, isLoading } = usePermissions(true);
   const updateMutation = useUpdateMakerChecker();
   const [search, setSearch] = useState("");
@@ -68,8 +70,8 @@ const PermissionsPage: FC = () => {
   return (
     <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
       <PageHeader
-        title="Maker-Checker Permissions"
-        description="Enable or disable maker-checker workflow for each permission"
+        title={t("Maker-Checker Permissions")}
+        description={t("Enable or disable maker-checker workflow for each permission")}
         actions={
           <Button
             type="submit"
@@ -78,18 +80,18 @@ const PermissionsPage: FC = () => {
           >
             {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            Save Configuration
+            {t("Save Configuration")}
           </Button>
         }
       />
 
       {updateMutation.isError && (
         <ErrorState
-          title="Failed to save configuration"
+          title={t("Failed to save configuration")}
           message={
             updateMutation.error instanceof Error
               ? updateMutation.error.message
-              : "An unexpected error occurred."
+              : t("An unexpected error occurred.")
           }
           onRetry={() => updateMutation.reset()}
         />
@@ -97,11 +99,11 @@ const PermissionsPage: FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Maker-Checker Permissions</CardTitle>
+          <CardTitle>{t("Maker-Checker Permissions")}</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search..."
+              placeholder={t("Search...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -137,7 +139,7 @@ const PermissionsPage: FC = () => {
             </div>
           ))}
           {Object.keys(filteredGroups).length === 0 && (
-            <p className="text-sm text-gray-500">No maker-checker permissions available.</p>
+            <p className="text-sm text-gray-500">{t("No maker-checker permissions available.")}</p>
           )}
         </CardContent>
       </Card>

@@ -11,6 +11,7 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { createGroupSchema, type CreateGroupFormValues } from "../schemas/group.schema";
 import type { GroupDetail } from "../types/group";
 import { currentDate } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface GroupFormProps {
   group?: GroupDetail;
@@ -40,6 +41,7 @@ const GroupForm: FC<GroupFormProps> = ({
   isActivating = false,
   error,
 }) => {
+  const { t } = useTranslation();
   const isEditMode = mode === "edit";
 
   const {
@@ -93,16 +95,16 @@ const GroupForm: FC<GroupFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card>
         <CardHeader>
-          <CardTitle>{isEditMode ? "Group Details" : "New Group"}</CardTitle>
+          <CardTitle>{isEditMode ? t("Group Details") : t("New Group")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Group Name — the only field editable in edit mode */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">Group Name *</label>
+            <label className="block text-sm font-medium">{t("Group Name")} *</label>
             <Input
-              {...register("name", { required: "Group name is required" })}
+              {...register("name", { required: t("Group name is required") })}
               disabled={isSubmitting}
-              placeholder="e.g. Sunrise Self-Help Group"
+              placeholder={t("e.g. Sunrise Self-Help Group")}
               error={errors.name?.message}
             />
           </div>
@@ -117,11 +119,11 @@ const GroupForm: FC<GroupFormProps> = ({
           {/* External ID — create mode only */}
           {!isEditMode && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">External ID</label>
+              <label className="block text-sm font-medium">{t("External ID")}</label>
               <Input
                 {...register("externalId")}
                 disabled={isSubmitting}
-                placeholder="Optional"
+                placeholder={t("Optional")}
                 error={errors.externalId?.message}
               />
             </div>
@@ -136,14 +138,14 @@ const GroupForm: FC<GroupFormProps> = ({
               disabled={isEditMode || isSubmitting}
             />
             <label className="block text-sm font-medium cursor-pointer" htmlFor="active">
-              Active
+              {t("Active")}
             </label>
           </div>
 
           {/* Activation Date — create: shown, required when active; edit: only for the Activate action on pending groups */}
           {((!isEditMode && active) || showActivate) && (
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Activation Date *</label>
+              <label className="block text-sm font-medium">{t("Activation Date")} *</label>
               <Input
                 type="date"
                 {...register("activationDate")}
@@ -167,12 +169,12 @@ const GroupForm: FC<GroupFormProps> = ({
           {isSubmitting ? (
             <span className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              {isEditMode ? "Saving..." : "Creating..."}
+              {isEditMode ? t("Saving...") : t("Creating...")}
             </span>
           ) : isEditMode ? (
-            "Save Changes"
+            t("Save Changes")
           ) : (
-            "Create Group"
+            t("Create Group")
           )}
         </Button>
 
@@ -187,10 +189,10 @@ const GroupForm: FC<GroupFormProps> = ({
             {isActivating ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Activating...
+                {t("Activating...")}
               </span>
             ) : (
-              "Activate Group"
+              t("Activate Group")
             )}
           </Button>
         )}
@@ -201,7 +203,7 @@ const GroupForm: FC<GroupFormProps> = ({
           disabled={isSubmitting || isActivating}
           onClick={() => window.history.back()}
         >
-          Cancel
+          {t("Cancel")}
         </Button>
       </div>
     </form>

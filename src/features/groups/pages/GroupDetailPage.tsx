@@ -50,6 +50,7 @@ import {
 import GroupStatusBadge from "../components/GroupStatusBadge";
 import { resolveGroupStatusLabel } from "../constants/status";
 import type { GroupRoleData, GroupClosureReason } from "../types/group";
+import { useTranslation } from "react-i18next";
 
 const formatDate = (d?: string) => (d ? new Date(d).toLocaleDateString() : "—");
 
@@ -72,6 +73,7 @@ const assignRoleSchema = z.object({
 });
 
 const GroupDetailPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: group, isLoading, isError, refetch } = useGroup(id);
@@ -244,17 +246,17 @@ const GroupDetailPage: FC = () => {
   if (isError || !group) {
     return (
       <div className="p-6">
-        <ErrorState title="Failed to load group" message="Could not fetch group details." onRetry={() => refetch()} />
+        <ErrorState title={t("Failed to load group")} message={t("Could not fetch group details.")} onRetry={() => refetch()} />
       </div>
     );
   }
 
   const clientColumns: ColumnDef<(typeof clientMembers)[number]>[] = [
-    { key: "displayName", header: "Client Name", cell: (r) => r.displayName ?? `#${r.id}` },
-    { key: "accountNo", header: "Account No", cell: (r) => r.accountNo ?? "—" },
+    { key: "displayName", header: t("Client Name"), cell: (r) => r.displayName ?? `#${r.id}` },
+    { key: "accountNo", header: t("Account No"), cell: (r) => r.accountNo ?? "—" },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       sortable: false,
       className: "text-right",
       headerClassName: "text-right",
@@ -270,18 +272,18 @@ const GroupDetailPage: FC = () => {
           disabled={disassociateMutation.isPending}
         >
           <UserX className="mr-1 h-3.5 w-3.5" />
-          Remove
+          {t("Remove")}
         </Button>
       ),
     },
   ];
 
   const roleColumns: ColumnDef<GroupRoleData>[] = [
-    { key: "clientName", header: "Client Name", cell: (r) => r.clientName ?? `#${r.clientId}` },
-    { key: "role", header: "Role", cell: (r) => r.role?.name ?? "—" },
+    { key: "clientName", header: t("Client Name"), cell: (r) => r.clientName ?? `#${r.clientId}` },
+    { key: "role", header: t("Role"), cell: (r) => r.role?.name ?? "—" },
     {
       key: "actions",
-      header: "Actions",
+      header: t("Actions"),
       sortable: false,
       className: "text-right",
       headerClassName: "text-right",
@@ -297,7 +299,7 @@ const GroupDetailPage: FC = () => {
           disabled={unassignRoleMutation.isPending}
         >
           <ShieldX className="mr-1 h-3.5 w-3.5" />
-          Unassign
+          {t("Unassign")}
         </Button>
       ),
     },
@@ -306,8 +308,8 @@ const GroupDetailPage: FC = () => {
   return (
     <div className="p-6 space-y-6">
       <PageHeader
-        title={group.name ?? `Group #${group.id}`}
-        description={group.accountNo ? `Account #${group.accountNo}` : undefined}
+        title={group.name ?? t("Group #{{id}}", { id: group.id })}
+        description={group.accountNo ? t("Account #{{accountNo}}", { accountNo: group.accountNo }) : undefined}
         actions={
           <div className="flex items-center gap-2">
             <GroupStatusBadge status={group.status} size="lg" />
@@ -319,20 +321,20 @@ const GroupDetailPage: FC = () => {
                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
               >
                 <CheckCircle2 className="mr-1 h-4 w-4" />
-                Activate
+                {t("Activate")}
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate(`/groups/edit/${group.id}`)}>
               <Pencil className="mr-1 h-4 w-4" />
-              Edit
+              {t("Edit")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/groups/${group.id}/calendars`)}>
               <Calendar className="mr-1 h-4 w-4" />
-              Calendars
+              {t("Calendars")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/groups/${group.id}/meetings`)}>
               <CalendarClock className="mr-1 h-4 w-4" />
-              Meetings
+              {t("Meetings")}
             </Button>
             {isPending && (
               <Button
@@ -342,7 +344,7 @@ const GroupDetailPage: FC = () => {
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >
                 <Trash2 className="mr-1 h-4 w-4" />
-                Delete
+                {t("Delete")}
               </Button>
             )}
             {isActive && (
@@ -353,12 +355,12 @@ const GroupDetailPage: FC = () => {
                 className="text-gray-600 border-gray-200 hover:bg-gray-50"
               >
                 <XCircle className="mr-1 h-4 w-4" />
-                Close
+                {t("Close")}
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate("/groups")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -369,36 +371,36 @@ const GroupDetailPage: FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Info className="h-4 w-4" />
-              Group Information
+              {t("Group Information")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Name</span>
+              <span className="text-sm text-gray-500">{t("Name")}</span>
               <span className="text-sm font-medium">{group.name ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Account No</span>
+              <span className="text-sm text-gray-500">{t("Account No")}</span>
               <span className="text-sm font-medium">{group.accountNo ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Office</span>
+              <span className="text-sm text-gray-500">{t("Office")}</span>
               <span className="text-sm font-medium">{group.officeName ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Staff</span>
+              <span className="text-sm text-gray-500">{t("Staff")}</span>
               <span className="text-sm font-medium">{group.staffName ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">External ID</span>
+              <span className="text-sm text-gray-500">{t("External ID")}</span>
               <span className="text-sm font-medium">{group.externalId ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Hierarchy</span>
+              <span className="text-sm text-gray-500">{t("Hierarchy")}</span>
               <span className="text-sm font-mono">{group.hierarchy ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Activation Date</span>
+              <span className="text-sm text-gray-500">{t("Activation Date")}</span>
               <span className="text-sm font-medium">
                 {formatDate(group.activationDate ?? group.timeline?.activatedOnDate)}
               </span>
@@ -410,27 +412,27 @@ const GroupDetailPage: FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="h-4 w-4" />
-              Timeline
+              {t("Timeline")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Submitted On</span>
+              <span className="text-sm text-gray-500">{t("Submitted On")}</span>
               <span className="text-sm font-medium">
                 {formatDate(group.submittedDate ?? group.timeline?.submittedOnDate)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Activated On</span>
+              <span className="text-sm text-gray-500">{t("Activated On")}</span>
               <span className="text-sm font-medium">{formatDate(group.timeline?.activatedOnDate)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Closed On</span>
+              <span className="text-sm text-gray-500">{t("Closed On")}</span>
               <span className="text-sm font-medium">{formatDate(group.timeline?.closedOnDate)}</span>
             </div>
             {group.collectionMeetingCalendar && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Meeting Calendar</span>
+                <span className="text-sm text-gray-500">{t("Meeting Calendar")}</span>
                 <span className="text-sm font-medium">
                   {group.collectionMeetingCalendar.title ?? `#${group.collectionMeetingCalendar.id}`}
                 </span>
@@ -442,14 +444,14 @@ const GroupDetailPage: FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Users className="h-4 w-4" />
-            Client Members ({clientMembers.length})
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="h-4 w-4" />
+              {t("Client Members")} ({clientMembers.length})
           </CardTitle>
           {isActive && (
             <Button variant="outline" size="sm" onClick={() => setShowAddClientDialog(true)}>
               <Plus className="mr-1 h-4 w-4" />
-              Add Client
+              {t("Add Client")}
             </Button>
           )}
         </CardHeader>
@@ -457,7 +459,7 @@ const GroupDetailPage: FC = () => {
           <DataTable
             columns={clientColumns}
             data={clientMembers}
-            emptyState={{ title: "No client members", message: "This group has no client members yet." }}
+            emptyState={{ title: t("No client members"), message: t("This group has no client members yet.") }}
             idAccessor={(r) => String(r.id)}
           />
         </CardContent>
@@ -465,14 +467,14 @@ const GroupDetailPage: FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Shield className="h-4 w-4" />
-            Roles ({groupRoles.length})
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Shield className="h-4 w-4" />
+              {t("Roles")} ({groupRoles.length})
           </CardTitle>
           {isActive && (
             <Button variant="outline" size="sm" onClick={() => setShowAssignRoleDialog(true)}>
               <ShieldPlus className="mr-1 h-4 w-4" />
-              Assign Role
+              {t("Assign Role")}
             </Button>
           )}
         </CardHeader>
@@ -480,7 +482,7 @@ const GroupDetailPage: FC = () => {
           <DataTable
             columns={roleColumns}
             data={groupRoles}
-            emptyState={{ title: "No roles assigned", message: "No roles have been assigned to group members." }}
+            emptyState={{ title: t("No roles assigned"), message: t("No roles have been assigned to group members.") }}
             idAccessor={(r) => String(r.id)}
           />
         </CardContent>
@@ -488,9 +490,9 @@ const GroupDetailPage: FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <UserCircle className="h-4 w-4" />
-            Staff Assignment
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserCircle className="h-4 w-4" />
+              {t("Staff Assignment")}
           </CardTitle>
           <div className="flex items-center gap-2">
             {isActive && (
@@ -503,12 +505,12 @@ const GroupDetailPage: FC = () => {
                     disabled={unassignStaffMutation.isPending}
                   >
                     <UserX className="mr-1 h-4 w-4" />
-                    Unassign Staff
+                    {t("Unassign Staff")}
                   </Button>
                 ) : (
                   <Button variant="outline" size="sm" onClick={() => setShowAssignStaffDialog(true)}>
                     <UserPlus className="mr-1 h-4 w-4" />
-                    Assign Staff
+                    {t("Assign Staff")}
                   </Button>
                 )}
               </>
@@ -519,10 +521,10 @@ const GroupDetailPage: FC = () => {
           <p className="text-sm text-gray-700 dark:text-gray-300">
             {group.staffName ? (
               <>
-                Current staff: <span className="font-medium">{group.staffName}</span>
+                {t("Current staff:")}: <span className="font-medium">{group.staffName}</span>
               </>
             ) : (
-              "No staff assigned to this group."
+              t("No staff assigned to this group.")
             )}
           </p>
         </CardContent>
@@ -531,26 +533,26 @@ const GroupDetailPage: FC = () => {
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
-        title="Delete Group"
-        description={`Delete ${group.name}? Only pending groups with no members can be deleted. This cannot be undone.`}
+        title={t("Delete Group")}
+        description={t("Delete {{name}}? Only pending groups with no members can be deleted. This cannot be undone.", { name: group.name })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
       />
 
       <ConfirmDialog
         open={showActivateConfirm}
         onOpenChange={setShowActivateConfirm}
-        title="Activate Group"
-        description={`Activate ${group.name}? The group will become active.`}
+        title={t("Activate Group")}
+        description={t("Activate {{name}}? The group will become active.", { name: group.name })}
         onConfirm={handleActivate}
         variant="default"
       />
 
       {closeMutation.isError && (
         <ErrorState
-          title="Failed to close group"
-          message={closeMutation.error instanceof Error ? closeMutation.error.message : "An unexpected error occurred."}
+          title={t("Failed to close group")}
+          message={closeMutation.error instanceof Error ? closeMutation.error.message : t("An unexpected error occurred.")}
           onRetry={() => closeMutation.reset()}
         />
       )}
@@ -558,12 +560,12 @@ const GroupDetailPage: FC = () => {
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Close Group</DialogTitle>
+            <DialogTitle>{t("Close Group")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={closeForm.handleSubmit(onCloseSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Closure Date</label>
+                <label className="block text-sm font-medium">{t("Closure Date")}</label>
                 <Input
                   type="date"
                   {...closeForm.register("closureDate")}
@@ -571,14 +573,14 @@ const GroupDetailPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label cursor-pointer>Closure Reason</label>
+                <label cursor-pointer>{t("Closure Reason")}</label>
                 <Controller
                   name="closureReasonId"
                   control={closeForm.control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select reason" />
+                        <SelectValue placeholder={t("Select reason")} />
                       </SelectTrigger>
                       <SelectContent>
                         {closureReasons.map((r: GroupClosureReason) => (
@@ -603,10 +605,10 @@ const GroupDetailPage: FC = () => {
                   closeForm.reset();
                 }}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={closeMutation.isPending}>
-                {closeMutation.isPending ? "Closing..." : "Close Group"}
+                {closeMutation.isPending ? t("Closing...") : t("Close Group")}
               </Button>
             </DialogFooter>
           </form>
@@ -615,9 +617,9 @@ const GroupDetailPage: FC = () => {
 
       {associateMutation.isError && (
         <ErrorState
-          title="Failed to add client"
+          title={t("Failed to add client")}
           message={
-            associateMutation.error instanceof Error ? associateMutation.error.message : "An unexpected error occurred."
+            associateMutation.error instanceof Error ? associateMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => associateMutation.reset()}
         />
@@ -626,27 +628,27 @@ const GroupDetailPage: FC = () => {
       <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Client to Group</DialogTitle>
+            <DialogTitle>{t("Add Client to Group")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={addClientForm.handleSubmit(onAddClientSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <label cursor-pointer>Search Client</label>
+                <label cursor-pointer>{t("Search Client")}</label>
                 <Input
-                  placeholder="Type to search..."
+                  placeholder={t("Type to search...")}
                   value={clientSearch}
                   onChange={(e) => setClientSearch(e.target.value)}
                 />
               </div>
               <div className="space-y-1.5">
-                <label cursor-pointer>Select Client</label>
+                <label cursor-pointer>{t("Select Client")}</label>
                 <Controller
                   name="clientId"
                   control={addClientForm.control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a client" />
+                        <SelectValue placeholder={t("Select a client")} />
                       </SelectTrigger>
                       <SelectContent>
                         {filteredClients.length > 0 ? (
@@ -657,7 +659,7 @@ const GroupDetailPage: FC = () => {
                           ))
                         ) : (
                           <SelectItem value="" disabled>
-                            No clients found
+                            {t("No clients found")}
                           </SelectItem>
                         )}
                       </SelectContent>
@@ -678,10 +680,10 @@ const GroupDetailPage: FC = () => {
                   setClientSearch("");
                 }}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={addClientForm.watch("clientId") === "" || associateMutation.isPending}>
-                {associateMutation.isPending ? "Adding..." : "Add Client"}
+                {associateMutation.isPending ? t("Adding...") : t("Add Client")}
               </Button>
             </DialogFooter>
           </form>
@@ -690,11 +692,11 @@ const GroupDetailPage: FC = () => {
 
       {assignStaffMutation.isError && (
         <ErrorState
-          title="Failed to assign staff"
+          title={t("Failed to assign staff")}
           message={
             assignStaffMutation.error instanceof Error
               ? assignStaffMutation.error.message
-              : "An unexpected error occurred."
+              : t("An unexpected error occurred.")
           }
           onRetry={() => assignStaffMutation.reset()}
         />
@@ -703,15 +705,15 @@ const GroupDetailPage: FC = () => {
       <Dialog open={showAssignStaffDialog} onOpenChange={setShowAssignStaffDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Staff to Group</DialogTitle>
+            <DialogTitle>{t("Assign Staff to Group")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={assignStaffForm.handleSubmit(onAssignStaffSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Staff ID</label>
+                <label className="block text-sm font-medium">{t("Staff ID")}</label>
                 <Input
                   type="number"
-                  placeholder="Enter staff ID"
+                  placeholder={t("Enter staff ID")}
                   {...assignStaffForm.register("staffId")}
                   error={assignStaffForm.formState.errors.staffId?.message}
                 />
@@ -725,10 +727,10 @@ const GroupDetailPage: FC = () => {
                   assignStaffForm.reset();
                 }}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={assignStaffMutation.isPending}>
-                {assignStaffMutation.isPending ? "Assigning..." : "Assign Staff"}
+                {assignStaffMutation.isPending ? t("Assigning...") : t("Assign Staff")}
               </Button>
             </DialogFooter>
           </form>
@@ -737,11 +739,11 @@ const GroupDetailPage: FC = () => {
 
       {assignRoleMutation.isError && (
         <ErrorState
-          title="Failed to assign role"
+          title={t("Failed to assign role")}
           message={
             assignRoleMutation.error instanceof Error
               ? assignRoleMutation.error.message
-              : "An unexpected error occurred."
+              : t("An unexpected error occurred.")
           }
           onRetry={() => assignRoleMutation.reset()}
         />
@@ -750,19 +752,19 @@ const GroupDetailPage: FC = () => {
       <Dialog open={showAssignRoleDialog} onOpenChange={setShowAssignRoleDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Role</DialogTitle>
+            <DialogTitle>{t("Assign Role")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={assignRoleForm.handleSubmit(onAssignRoleSubmit)}>
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <label cursor-pointer>Client</label>
+                <label cursor-pointer>{t("Client")}</label>
                 <Controller
                   name="clientId"
                   control={assignRoleForm.control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select client" />
+                        <SelectValue placeholder={t("Select client")} />
                       </SelectTrigger>
                       <SelectContent>
                         {clientMembers.map((c) => (
@@ -779,10 +781,10 @@ const GroupDetailPage: FC = () => {
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Role ID</label>
+                <label className="block text-sm font-medium">{t("Role ID")}</label>
                 <Input
                   type="number"
-                  placeholder="Enter role ID"
+                  placeholder={t("Enter role ID")}
                   {...assignRoleForm.register("roleId")}
                   error={assignRoleForm.formState.errors.roleId?.message}
                 />
@@ -796,10 +798,10 @@ const GroupDetailPage: FC = () => {
                   assignRoleForm.reset();
                 }}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={assignRoleMutation.isPending}>
-                {assignRoleMutation.isPending ? "Assigning..." : "Assign Role"}
+                {assignRoleMutation.isPending ? t("Assigning...") : t("Assign Role")}
               </Button>
             </DialogFooter>
           </form>
@@ -808,9 +810,9 @@ const GroupDetailPage: FC = () => {
 
       {deleteMutation.isError && (
         <ErrorState
-          title="Failed to delete group"
+          title={t("Failed to delete group")}
           message={
-            deleteMutation.error instanceof Error ? deleteMutation.error.message : "An unexpected error occurred."
+            deleteMutation.error instanceof Error ? deleteMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => deleteMutation.reset()}
         />

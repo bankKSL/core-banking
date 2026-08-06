@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,7 @@ const fundSchema = z.object({
 type FundFormValues = z.infer<typeof fundSchema>;
 
 const FundFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -72,40 +74,40 @@ const FundFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Fund" : "Create Fund"}
-        description={isEdit ? `Editing fund #${id}` : "Create a new fund"}
+        title={isEdit ? t("Edit Fund") : t("Create Fund")}
+        description={isEdit ? t("Editing fund") + ` #${id}` : t("Create a new fund")}
         actions={
           <Button variant="outline" onClick={() => navigate("/funds")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Fund Details</CardTitle>
+            <CardTitle className="text-base">{t("Fund Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
-              <Input {...register("name")} placeholder="e.g. Mortgage Fund 2026" error={errors.name?.message} />
+              <label className="block text-sm font-medium">{t("Name")} *</label>
+              <Input {...register("name")} placeholder={t("e.g. Mortgage Fund 2026")} error={errors.name?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">External ID</label>
-              <Input {...register("externalId")} placeholder="Optional external identifier" />
+              <label className="block text-sm font-medium">{t("External ID")}</label>
+              <Input {...register("externalId")} placeholder={t("Optional external identifier")} />
             </div>
           </CardContent>
         </Card>
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/funds")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Fund"}
+            {isEdit ? t("Save Changes") : t("Create Fund")}
           </Button>
         </div>
       </form>

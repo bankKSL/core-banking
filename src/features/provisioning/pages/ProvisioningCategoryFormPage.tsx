@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 } from "../hooks/useProvisioning";
 
 const ProvisioningCategoryFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -54,7 +56,7 @@ const ProvisioningCategoryFormPage: React.FC = () => {
       navigate("/provisioning/categories");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save provisioning category.";
+      const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to save provisioning category.");
       setMutationError(msg);
     }
   };
@@ -78,11 +80,11 @@ const ProvisioningCategoryFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Provisioning Category" : "New Provisioning Category"}
-        description={isEdit ? "Update category details" : "Create a new provisioning category"}
+        title={isEdit ? t("Edit Provisioning Category") : t("New Provisioning Category")}
+        description={isEdit ? t("Update category details") : t("Create a new provisioning category")}
         actions={
           <Button variant="outline" onClick={() => navigate("/provisioning/categories")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -92,19 +94,19 @@ const ProvisioningCategoryFormPage: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Category Details</CardTitle>
+            <CardTitle>{t("Category Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
-              label="Category Name *"
-              placeholder="Enter category name"
+              label={t("Category Name *")}
+              placeholder={t("Enter category name")}
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
-              error={!categoryName.trim() && mutationError ? "Name is required" : undefined}
+              error={!categoryName.trim() && mutationError ? t("Name is required") : undefined}
             />
             <Textarea
-              label="Description"
-              placeholder="Enter category description (optional)"
+              label={t("Description")}
+              placeholder={t("Enter category description (optional)")}
               value={categoryDescription}
               onChange={(e) => setCategoryDescription(e.target.value)}
             />
@@ -113,16 +115,16 @@ const ProvisioningCategoryFormPage: React.FC = () => {
 
         <div className="flex justify-end gap-3 mt-6">
           <Button type="button" variant="outline" onClick={() => navigate("/provisioning/categories")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Update Category" : "Create Category"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Category") : t("Create Category")}
               </>
             )}
           </Button>

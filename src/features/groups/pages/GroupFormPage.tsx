@@ -11,8 +11,10 @@ import { useUpdateGroup } from "../hooks/useUpdateGroup";
 import { useActivateGroup } from "../hooks/useGroupCommands";
 import GroupForm from "../components/GroupForm";
 import type { CreateGroupFormValues } from "../schemas/group.schema";
+import { useTranslation } from "react-i18next";
 
 const GroupFormPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
@@ -82,22 +84,22 @@ const GroupFormPage: FC = () => {
   return (
     <div className="p-6 max-w-6xl m-auto">
       <PageHeader
-        title={isEditMode ? "Edit Group" : "Create Group"}
+        title={isEditMode ? t("Edit Group") : t("Create Group")}
         description={
-          isEditMode ? `Editing group ${group?.name ?? `#${id}`}` : "Register a new self-help group in Fineract"
+          isEditMode ? t("Editing group {{name}}", { name: group?.name ?? `#${id}` }) : t("Register a new self-help group in Fineract")
         }
         actions={
           <Button variant="outline" onClick={() => navigate("/groups")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Groups
+            {t("Back to Groups")}
           </Button>
         }
       />
       {(createMutation.isError || updateMutation.isError) && (
         <div className="mb-4">
           <ErrorState
-            title="Failed to save group"
-            message={error ?? "An unexpected error occurred."}
+            title={t("Failed to save group")}
+            message={error ?? t("An unexpected error occurred.")}
             onRetry={() => {
               createMutation.reset();
               updateMutation.reset();

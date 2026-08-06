@@ -1,4 +1,5 @@
 import { type FC, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,6 +47,7 @@ const workingDaysSchema = z.object({
 type WorkingDaysFormValues = z.infer<typeof workingDaysSchema>;
 
 const WorkingDaysPage: FC = () => {
+  const { t } = useTranslation();
   const {
     data: config,
     isLoading: isConfigLoading,
@@ -119,21 +121,21 @@ const WorkingDaysPage: FC = () => {
   if (isConfigError) {
     return (
       <div className="p-6 max-w-4xl m-auto space-y-6">
-        <PageHeader title="Working Days" description="Configure business working days and repayment rescheduling" />
-        <ErrorState message="Failed to load working days configuration" onRetry={() => refetchConfig()} />
+        <PageHeader title={t("Working Days")} description={t("Configure business working days and repayment rescheduling")} />
+        <ErrorState message={t("Failed to load working days configuration")} onRetry={() => refetchConfig()} />
       </div>
     );
   }
 
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
-      <PageHeader title="Working Days" description="Configure business working days and repayment rescheduling" />
+      <PageHeader title={t("Working Days")} description={t("Configure business working days and repayment rescheduling")} />
 
       {updateMutation.isError && (
         <ErrorState
-          title="Failed to update working days"
+          title={t("Failed to update working days")}
           message={
-            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+            updateMutation.error instanceof Error ? updateMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => updateMutation.reset()}
         />
@@ -142,7 +144,7 @@ const WorkingDaysPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Working Days</CardTitle>
+            <CardTitle>{t("Working Days")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {isLoading ? (
@@ -160,7 +162,7 @@ const WorkingDaysPage: FC = () => {
             ) : (
               <>
                 <div>
-                  <Label className="mb-3 block">Select Working Days</Label>
+                  <Label className="mb-3 block">{t("Select Working Days")}</Label>
                   <div className="flex flex-wrap gap-3">
                     {DAYS.map((day) => (
                       <Checkbox
@@ -178,7 +180,7 @@ const WorkingDaysPage: FC = () => {
                 <Separator />
 
                 <div>
-                  <Label htmlFor="reschedule-type">Repayment Reschedule Type</Label>
+                  <Label htmlFor="reschedule-type">{t("Repayment Reschedule Type")}</Label>
                   <Controller
                     name="rescheduleTypeId"
                     control={control}
@@ -188,7 +190,7 @@ const WorkingDaysPage: FC = () => {
                         onValueChange={(v) => field.onChange(Number(v))}
                       >
                         <SelectTrigger id="reschedule-type" className="mt-1">
-                          <SelectValue placeholder="Select reschedule type" />
+                          <SelectValue placeholder={t("Select reschedule type")} />
                         </SelectTrigger>
                         <SelectContent>
                           {(template?.repaymentRescheduleOptions ?? []).map((opt) => (
@@ -214,7 +216,7 @@ const WorkingDaysPage: FC = () => {
                     render={({ field }) => (
                       <Checkbox
                         id="extend-daily"
-                        label="Extend term for daily repayments"
+                        label={t("Extend term for daily repayments")}
                         checked={field.value}
                         onCheckedChange={(checked) => field.onChange(checked === true)}
                       />
@@ -226,7 +228,7 @@ const WorkingDaysPage: FC = () => {
                     render={({ field }) => (
                       <Checkbox
                         id="extend-holidays"
-                        label="Extend term for repayments on holidays"
+                        label={t("Extend term for repayments on holidays")}
                         checked={field.value}
                         onCheckedChange={(checked) => field.onChange(checked === true)}
                       />
@@ -241,16 +243,16 @@ const WorkingDaysPage: FC = () => {
         {!isLoading && (
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => refetchConfig()}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Reset
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Reset")}
             </Button>
             <Button type="submit" disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" /> Save Configuration
+                  <Save className="mr-2 h-4 w-4" /> {t("Save Configuration")}
                 </>
               )}
             </Button>

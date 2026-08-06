@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useTranslation } from "react-i18next";
 import { User, DollarSign, Calendar, Clock, Percent, Hash, Building2, Landmark } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Loan } from "../types/loan";
@@ -29,6 +30,7 @@ const resolveStatus = (loan: Loan): string => {
 };
 
 const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
+  const { t } = useTranslation();
   const status = resolveStatus(loan);
   const summary = loan.summary;
 
@@ -38,17 +40,17 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Hash className="h-4 w-4 text-gray-400" />
-            Loan Information
+            {t("Loan Information")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="Account No" value={loan.accountNo ?? `#${loan.id}`} />
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="External ID" value={loan.externalId ?? "—"} />
-          <InfoRow icon={<Building2 className="h-4 w-4" />} label="Status" value={<LoanStatusBadge code={status} />} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("Account No")} value={loan.accountNo ?? `#${loan.id}`} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("External ID")} value={loan.externalId ?? "—"} />
+          <InfoRow icon={<Building2 className="h-4 w-4" />} label={t("Status")} value={<LoanStatusBadge code={status} />} />
           {loan.subStatus && (
             <InfoRow
               icon={<Building2 className="h-4 w-4" />}
-              label="Sub-Status"
+              label={t("Sub-Status")}
               value={
                 <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
                   {loan.subStatus.value}
@@ -56,52 +58,52 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
               }
             />
           )}
-          <InfoRow icon={<Landmark className="h-4 w-4" />} label="Product" value={loan.loanProductName} />
+          <InfoRow icon={<Landmark className="h-4 w-4" />} label={t("Product")} value={loan.loanProductName} />
           <InfoRow
             icon={<User className="h-4 w-4" />}
-            label="Client"
+            label={t("Client")}
             value={loan.clientName ?? `Client #${loan.clientId}`}
           />
-          <InfoRow icon={<User className="h-4 w-4" />} label="Loan Officer" value={loan.loanOfficerName ?? "—"} />
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="Loan Purpose" value={loan.loanPurposeName ?? "—"} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("Loan Officer")} value={loan.loanOfficerName ?? "—"} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("Loan Purpose")} value={loan.loanPurposeName ?? "—"} />
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <DollarSign className="h-4 w-4 text-gray-400" />
-            Financial Details
+            {t("Financial Details")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
           <InfoRow
             icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
-            label="Principal"
+            label={t("Principal")}
             value={formatCurrency(loan.principal ?? 0)}
           />
           <InfoRow
             icon={<Percent className="h-4 w-4 text-blue-500" />}
-            label="Interest Rate"
+            label={t("Interest Rate")}
             value={`${loan.annualInterestRate ?? loan.interestRatePerPeriod ?? 0}%`}
           />
           <InfoRow
             icon={<Clock className="h-4 w-4" />}
-            label="Repayments"
+            label={t("Repayments")}
             value={`${loan.numberOfRepayments ?? "—"} × ${loan.repaymentEvery ?? "—"} ${loan.repaymentFrequencyType?.value ?? "months"}`}
           />
           <InfoRow
             icon={<Clock className="h-4 w-4" />}
-            label="Term"
+            label={t("Term")}
             value={`${loan.termFrequency ?? "—"} ${loan.termPeriodFrequencyType?.value ?? "Years"}`}
           />
           <InfoRow
             icon={<Percent className="h-4 w-4" />}
-            label="Amortization"
+            label={t("Amortization")}
             value={loan.amortizationType?.value ?? "—"}
           />
           <InfoRow
             icon={<Percent className="h-4 w-4" />}
-            label="Interest Type"
+            label={t("Interest Type")}
             value={loan.interestType?.value ?? "—"}
           />
         </CardContent>
@@ -111,33 +113,33 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <DollarSign className="h-4 w-4 text-emerald-500" />
-              Loan Summary
+              {t("Loan Summary")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
-              label="Disbursed"
+              label={t("Disbursed")}
               value={formatCurrency(summary.principalDisbursed ?? 0)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-blue-500" />}
-              label="Principal Paid"
+              label={t("Principal Paid")}
               value={formatCurrency(summary.principalPaid ?? 0)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-blue-500" />}
-              label="Interest Paid"
+              label={t("Interest Paid")}
               value={formatCurrency(summary.interestPaid ?? 0)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-red-500" />}
-              label="Outstanding"
+              label={t("Outstanding")}
               value={formatCurrency(summary.totalOutstanding ?? 0)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-amber-500" />}
-              label="Overdue"
+              label={t("Overdue")}
               value={formatCurrency(summary.totalOverdue ?? 0)}
             />
           </CardContent>
@@ -147,23 +149,23 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Calendar className="h-4 w-4 text-gray-400" />
-            Timeline
+            {t("Timeline")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Submitted On"
+            label={t("Submitted On")}
             value={loan.timeline?.submittedOnDate ? new Date(loan.timeline.submittedOnDate).toLocaleDateString() : "—"}
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Approved On"
+            label={t("Approved On")}
             value={loan.timeline?.approvedOnDate ? new Date(loan.timeline.approvedOnDate).toLocaleDateString() : "—"}
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Disbursed On"
+            label={t("Disbursed On")}
             value={
               loan.timeline?.actualDisbursementDate
                 ? new Date(loan.timeline.actualDisbursementDate).toLocaleDateString()
@@ -172,7 +174,7 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Expected Disbursement"
+            label={t("Expected Disbursement")}
             value={
               loan.timeline?.expectedDisbursementDate
                 ? new Date(loan.timeline.expectedDisbursementDate).toLocaleDateString()
@@ -181,7 +183,7 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Closed On"
+            label={t("Closed On")}
             value={loan.timeline?.closedOnDate ? new Date(loan.timeline.closedOnDate).toLocaleDateString() : "—"}
           />
         </CardContent>

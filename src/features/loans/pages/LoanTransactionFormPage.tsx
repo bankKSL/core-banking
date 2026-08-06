@@ -1,5 +1,6 @@
 import { type FC, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -23,6 +24,7 @@ const SUCCESS_MESSAGES: Record<string, string> = {
 };
 
 const LoanTransactionFormPage: FC = () => {
+  const { t } = useTranslation();
   const { loanId, transactionType } = useParams<{ loanId: string; transactionType: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -92,7 +94,7 @@ const LoanTransactionFormPage: FC = () => {
     },
     onSuccess: () => {
       const message = SUCCESS_MESSAGES[transactionType ?? ""];
-      if (message) toastSuccess(message);
+      if (message) toastSuccess(t(message));
       qc.invalidateQueries({ queryKey: loanKeys.detail(loanId!) });
       qc.invalidateQueries({ queryKey: loanKeys.schedule(Number(loanId)) });
       qc.invalidateQueries({ queryKey: loanKeys.all });
@@ -134,15 +136,15 @@ const LoanTransactionFormPage: FC = () => {
         actions={
           <Button variant="outline" onClick={() => navigate(`/loans/view/${loanId}`)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Loan
+            {t("Back to Loan")}
           </Button>
         }
       />
       {mutation.isError && (
         <div className="mb-4">
           <ErrorState
-            title="Transaction failed"
-            message={mutation.error instanceof Error ? mutation.error.message : "An unexpected error occurred."}
+            title={t("Transaction failed")}
+            message={mutation.error instanceof Error ? mutation.error.message : t("An unexpected error occurred.")}
             onRetry={() => mutation.reset()}
           />
         </div>
@@ -166,10 +168,10 @@ const LoanTransactionFormPage: FC = () => {
           if (!open) setPendingConfirm(null);
         }}
         title={confirmTitle}
-        description={`Are you sure you want to ${label.toLowerCase()} this loan?${
-          isDestructive ? " This action cannot be undone." : ""
+        description={`${t("Are you sure you want to")} ${label.toLowerCase()} ${t("this loan?")}${
+          isDestructive ? ` ${t("This action cannot be undone.")}` : ""
         }`}
-        confirmLabel="Confirm"
+        confirmLabel={t("Confirm")}
         variant="destructive"
         loading={mutation.isPending}
         onConfirm={() => {

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,14 +53,8 @@ const campaignBasicSchema = z.object({
 
 type CampaignFormValues = z.infer<typeof campaignBasicSchema>;
 
-const STEP_LABELS = [
-  { title: "Basic Information", icon: FileText },
-  { title: "Select Products", icon: Package },
-  { title: "Eligibility Rules", icon: Filter },
-  { title: "Formula Builder", icon: Calculator },
-];
-
 const CreateCampaign: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -155,6 +150,13 @@ const CreateCampaign: React.FC = () => {
     const formValues = getValues();
   }, [validateStep1, selectedProducts, getValues, rules, formula]);
 
+  const STEP_LABELS = [
+    { title: t("Basic Information"), icon: FileText },
+    { title: t("Select Products"), icon: Package },
+    { title: t("Eligibility Rules"), icon: Filter },
+    { title: t("Formula Builder"), icon: Calculator },
+  ];
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -162,17 +164,17 @@ const CreateCampaign: React.FC = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Campaign Name *</label>
-                <Input {...register("name")} error={errors.name?.message} placeholder="e.g. Summer Savings Promotion" />
+                <label className="block text-sm font-medium">{t("Campaign Name")} *</label>
+                <Input {...register("name")} error={errors.name?.message} placeholder={t("e.g. Summer Savings Promotion")} />
               </div>
               <div>
-                <label className="text-sm font-medium">Category *</label>
+                <label className="text-sm font-medium">{t("Category")} *</label>
                 <Select
                   value={watch("categoryId")}
                   onValueChange={(v) => setValue("categoryId", v, { shouldValidate: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t("Select category")} />
                   </SelectTrigger>
                   <SelectContent>
                     {mockCategories.map((cat) => (
@@ -186,24 +188,24 @@ const CreateCampaign: React.FC = () => {
               </div>
             </div>
             <Textarea
-              label="Description *"
+              label={`${t("Description")} *`}
               {...register("description")}
-              placeholder="Describe the campaign purpose..."
+              placeholder={t("Describe the campaign purpose...")}
               error={errors.description?.message}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Start Date *</label>
+                <label className="block text-sm font-medium">{t("Start Date")} *</label>
                 <Input type="date" {...register("startDate")} error={errors.startDate?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">End Date *</label>
+                <label className="block text-sm font-medium">{t("End Date")} *</label>
                 <Input type="date" {...register("endDate")} error={errors.endDate?.message} />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium">Priority</label>
+                <label className="text-sm font-medium">{t("Priority")}</label>
                 <select
                   className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   value={watch("priority")}
@@ -217,20 +219,20 @@ const CreateCampaign: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium">Status</label>
+                <label className="text-sm font-medium">{t("Status")}</label>
                 <select
                   className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   value={watch("status")}
                   onChange={(e) => setValue("status", e.target.value)}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="paused">Paused</option>
-                  <option value="completed">Completed</option>
+                  <option value="draft">{t("Draft")}</option>
+                  <option value="active">{t("Active")}</option>
+                  <option value="paused">{t("Paused")}</option>
+                  <option value="completed">{t("Completed")}</option>
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Version</label>
+                <label className="block text-sm font-medium">{t("Version")}</label>
                 <Input type="number" {...register("version")} error={errors.version?.message} />
               </div>
             </div>
@@ -271,7 +273,7 @@ const CreateCampaign: React.FC = () => {
           <div className="space-y-6">
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-35">
-                <label className="text-xs font-medium mb-1 block">Field</label>
+                <label className="text-xs font-medium mb-1 block">{t("Field")}</label>
                 <Select value={ruleField} onValueChange={setRuleField}>
                   <SelectTrigger>
                     <SelectValue />
@@ -286,7 +288,7 @@ const CreateCampaign: React.FC = () => {
                 </Select>
               </div>
               <div className="flex-1 min-w-25">
-                <label className="text-xs font-medium mb-1 block">Operator</label>
+                <label className="text-xs font-medium mb-1 block">{t("Operator")}</label>
                 <Select value={ruleOperator} onValueChange={(v) => setRuleOperator(v as ComparisonOperator)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -301,11 +303,11 @@ const CreateCampaign: React.FC = () => {
                 </Select>
               </div>
               <div className="flex-1 min-w-35">
-                <label className="text-xs font-medium mb-1 block">Value</label>
-                <Input value={ruleValue} onChange={(e) => setRuleValue(e.target.value)} placeholder="Enter value" />
+                <label className="text-xs font-medium mb-1 block">{t("Value")}</label>
+                <Input value={ruleValue} onChange={(e) => setRuleValue(e.target.value)} placeholder={t("Enter value")} />
               </div>
               <Button size="sm" onClick={addRuleLocal} disabled={!ruleField || !ruleValue}>
-                <Plus className="mr-1 h-4 w-4" /> Add Rule
+                <Plus className="mr-1 h-4 w-4" /> {t("Add Rule")}
               </Button>
             </div>
 
@@ -328,7 +330,7 @@ const CreateCampaign: React.FC = () => {
 
             {rules.length > 1 && (
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span className="font-medium">Logical connector:</span>
+                <span className="font-medium">{t("Logical connector:")}</span>
                 <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">AND</span>
               </div>
             )}
@@ -339,7 +341,7 @@ const CreateCampaign: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <label className="text-sm font-medium mb-1 block">Variables</label>
+              <label className="text-sm font-medium mb-1 block">{t("Variables")}</label>
               <div className="flex flex-wrap gap-2 mb-4">
                 {formulaVariables.map((v) => (
                   <Badge
@@ -355,7 +357,7 @@ const CreateCampaign: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Operators</label>
+              <label className="text-sm font-medium mb-1 block">{t("Operators")}</label>
               <div className="flex flex-wrap gap-2 mb-4">
                 {operatorList.map((op) => (
                   <Badge
@@ -371,7 +373,7 @@ const CreateCampaign: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Functions</label>
+              <label className="text-sm font-medium mb-1 block">{t("Functions")}</label>
               <div className="flex flex-wrap gap-2 mb-4">
                 {functionList.map((fn) => (
                   <Badge
@@ -387,18 +389,18 @@ const CreateCampaign: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Formula</label>
+              <label className="text-sm font-medium mb-1 block">{t("Formula")}</label>
               <Textarea
                 value={formula}
                 onChange={(e) => setFormula(e.target.value)}
                 rows={5}
-                placeholder="Build your formula using variables, operators, and functions..."
+                placeholder={t("Build your formula using variables, operators, and functions...")}
                 className="font-mono text-sm"
               />
             </div>
             {formula && (
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
-                <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                <p className="text-xs text-gray-500 mb-1">{t("Preview:")}</p>
                 <p className="font-mono">{formula}</p>
               </div>
             )}
@@ -414,13 +416,13 @@ const CreateCampaign: React.FC = () => {
     <div className="max-w-6xl m-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Create Campaign</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("Create Campaign")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Set up a new banking campaign with rules and formula
+            {t("Set up a new banking campaign with rules and formula")}
           </p>
         </div>
         <Button variant="outline" onClick={() => navigate("/campaigns")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Campaigns
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back to Campaigns")}
         </Button>
       </div>
 
@@ -471,7 +473,7 @@ const CreateCampaign: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            Step {currentStep + 1}: {STEP_LABELS[currentStep].title}
+            {t("Step")} {currentStep + 1}: {STEP_LABELS[currentStep].title}
           </CardTitle>
         </CardHeader>
         <CardContent>{renderStepContent()}</CardContent>
@@ -480,21 +482,21 @@ const CreateCampaign: React.FC = () => {
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
         </Button>
         <div className="flex items-center gap-3">
           {currentStep === 3 ? (
             <>
               <Button variant="outline" onClick={handleSaveDraft}>
-                <Save className="mr-2 h-4 w-4" /> Save Draft
+                <Save className="mr-2 h-4 w-4" /> {t("Save Draft")}
               </Button>
               <Button onClick={handlePublish}>
-                <Send className="mr-2 h-4 w-4" /> Publish Campaign
+                <Send className="mr-2 h-4 w-4" /> {t("Publish Campaign")}
               </Button>
             </>
           ) : (
             <Button onClick={handleNext}>
-              Next <ArrowRight className="ml-2 h-4 w-4" />
+              {t("Next")} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}
         </div>

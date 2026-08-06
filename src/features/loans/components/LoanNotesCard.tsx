@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MessageSquare, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ interface LoanNotesCardProps {
 }
 
 const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
+  const { t } = useTranslation();
   const notesQuery = useLoanNotes(loanId);
   const notes = notesQuery.data ?? [];
 
@@ -65,16 +67,16 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-gray-400" />
-            Notes ({notes.length})
+            {t("Notes")} ({notes.length})
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openAdd}>
             <Plus className="mr-1 h-4 w-4" />
-            Add Note
+            {t("Add Note")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {notes.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No notes added to this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No notes added to this loan.")}</p>
           ) : (
             <div className="divide-y">
               {notes.map((note) => (
@@ -107,29 +109,29 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Note</DialogTitle>
-            <DialogDescription>Add a note to this loan.</DialogDescription>
+            <DialogTitle>{t("Add Note")}</DialogTitle>
+            <DialogDescription>{t("Add a note to this loan.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="addNoteText">
-                Note
+                {t("Note")}
               </label>
               <Textarea
                 id="addNoteText"
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Enter note..."
+                placeholder={t("Enter note...")}
                 disabled={isMutating}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAddOpen(false)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleCreate} disabled={isMutating || !noteText.trim()}>
                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Note
+                {t("Add Note")}
               </Button>
             </div>
           </div>
@@ -140,29 +142,29 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Note</DialogTitle>
-            <DialogDescription>Update this note.</DialogDescription>
+            <DialogTitle>{t("Edit Note")}</DialogTitle>
+            <DialogDescription>{t("Update this note.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="editNoteText">
-                Note
+                {t("Note")}
               </label>
               <Textarea
                 id="editNoteText"
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Enter note..."
+                placeholder={t("Enter note...")}
                 disabled={isMutating}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleUpdate} disabled={isMutating || !noteText.trim()}>
                 {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update Note
+                {t("Update Note")}
               </Button>
             </div>
           </div>
@@ -173,9 +175,9 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Note"
-        description="Remove this note from the loan? This cannot be undone."
-        confirmLabel="Delete"
+        title={t("Delete Note")}
+        description={t("Remove this note from the loan? This cannot be undone.")}
+        confirmLabel={t("Delete")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}

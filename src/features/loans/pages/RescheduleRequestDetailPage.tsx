@@ -1,6 +1,7 @@
 import { type FC, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Loader2, CalendarClock, CheckCircle2, XCircle, Eye } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -35,6 +36,7 @@ interface ActionFormValues {
 }
 
 const RescheduleRequestDetailPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const scheduleId = id ? Number(id) : undefined;
@@ -82,10 +84,10 @@ const RescheduleRequestDetailPage: FC = () => {
   if (detailQuery.isError || !req) {
     return (
       <div className="p-6 max-w-4xl m-auto space-y-6">
-        <PageHeader title="Reschedule Request" description="Request detail" />
+        <PageHeader title={t("Reschedule Request")} description={t("Request detail")} />
         <ErrorState
-          title="Failed to load request"
-          message={detailQuery.error?.message ?? "Reschedule request not found."}
+          title={t("Failed to load request")}
+          message={detailQuery.error?.message ?? t("Reschedule request not found.")}
           onRetry={() => detailQuery.refetch()}
         />
       </div>
@@ -100,13 +102,13 @@ const RescheduleRequestDetailPage: FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
-        title={`Reschedule Request #${req.id}`}
-        description={`Loan ${req.loanAccountNo ?? `#${req.loanId}`} — ${req.clientName ?? "Unknown client"}`}
+        title={`${t("Reschedule Request")} #${req.id}`}
+        description={`Loan ${req.loanAccountNo ?? `#${req.loanId}`} — ${req.clientName ?? t("Unknown client")}`}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate("/rescheduling")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to List
+              {t("Back to List")}
             </Button>
             {isPending && (
               <>
@@ -116,7 +118,7 @@ const RescheduleRequestDetailPage: FC = () => {
                   className="text-blue-600 border-blue-200 hover:bg-blue-50"
                 >
                   <Eye className="mr-2 h-4 w-4" />
-                  Preview Schedule
+                  {t("Preview Schedule")}
                 </Button>
                 <Button
                   variant="outline"
@@ -124,7 +126,7 @@ const RescheduleRequestDetailPage: FC = () => {
                   className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                 >
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Approve
+                  {t("Approve")}
                 </Button>
                 <Button
                   variant="outline"
@@ -132,7 +134,7 @@ const RescheduleRequestDetailPage: FC = () => {
                   className="text-red-600 border-red-200 hover:bg-red-50"
                 >
                   <XCircle className="mr-2 h-4 w-4" />
-                  Reject
+                  {t("Reject")}
                 </Button>
               </>
             )}
@@ -145,43 +147,43 @@ const RescheduleRequestDetailPage: FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-gray-400" />
-            Request Details
+            {t("Request Details")}
             <StatusBadge status={cfg?.variant ?? "default"} label={cfg?.label ?? status} size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <span className="text-xs text-gray-500">Client</span>
+              <span className="text-xs text-gray-500">{t("Client")}</span>
               <p className="text-sm font-medium">{req.clientName ?? "—"}</p>
             </div>
             <div>
-              <span className="text-xs text-gray-500">Loan Account</span>
+              <span className="text-xs text-gray-500">{t("Loan Account")}</span>
               <p className="text-sm font-medium">{req.loanAccountNo ?? `#${req.loanId}`}</p>
             </div>
             <div>
-              <span className="text-xs text-gray-500">Reschedule From Date</span>
+              <span className="text-xs text-gray-500">{t("Reschedule From Date")}</span>
               <p className="text-sm font-medium">{formatFineractDate(req.rescheduleFromDate)}</p>
             </div>
             <div>
-              <span className="text-xs text-gray-500">Reschedule From Installment</span>
+              <span className="text-xs text-gray-500">{t("Reschedule From Installment")}</span>
               <p className="text-sm font-medium">{req.rescheduleFromInstallment ?? "—"}</p>
             </div>
             <div>
-              <span className="text-xs text-gray-500">Reason</span>
+              <span className="text-xs text-gray-500">{t("Reason")}</span>
               <p className="text-sm font-medium">
                 {req.rescheduleReasonName ?? req.rescheduleReasonCodeValue?.name ?? "—"}
               </p>
             </div>
             {req.rescheduleReasonComment && (
               <div className="sm:col-span-2">
-                <span className="text-xs text-gray-500">Comment</span>
+                <span className="text-xs text-gray-500">{t("Comment")}</span>
                 <p className="text-sm font-medium">{req.rescheduleReasonComment}</p>
               </div>
             )}
             <div>
-              <span className="text-xs text-gray-500">Recalculate Interest</span>
-              <p className="text-sm font-medium">{req.recalculateInterest ? "Yes" : "No"}</p>
+              <span className="text-xs text-gray-500">{t("Recalculate Interest")}</span>
+              <p className="text-sm font-medium">{req.recalculateInterest ? t("Yes") : t("No")}</p>
             </div>
           </div>
         </CardContent>
@@ -191,7 +193,7 @@ const RescheduleRequestDetailPage: FC = () => {
       {timeline && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Timeline</CardTitle>
+            <CardTitle className="text-base">{t("Timeline")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -200,10 +202,10 @@ const RescheduleRequestDetailPage: FC = () => {
                   <div className="h-2 w-2 rounded-full bg-blue-500" />
                   <div>
                     <p className="text-sm font-medium">
-                      Submitted on {formatFineractDate(timeline.submittedOnDate)}
+                      {t("Submitted on")} {formatFineractDate(timeline.submittedOnDate)}
                     </p>
                     <p className="text-xs text-gray-500">
-                      by {timeline.submittedByFirstname} {timeline.submittedByLastname} (
+                      {t("by")} {timeline.submittedByFirstname} {timeline.submittedByLastname} (
                       {timeline.submittedByUsername})
                     </p>
                   </div>
@@ -214,10 +216,10 @@ const RescheduleRequestDetailPage: FC = () => {
                   <div className="h-2 w-2 rounded-full bg-emerald-500" />
                   <div>
                     <p className="text-sm font-medium">
-                      Approved on {formatFineractDate(timeline.approvedOnDate)}
+                      {t("Approved on")} {formatFineractDate(timeline.approvedOnDate)}
                     </p>
                     <p className="text-xs text-gray-500">
-                      by {timeline.approvedByFirstname} {timeline.approvedByLastname} (
+                      {t("by")} {timeline.approvedByFirstname} {timeline.approvedByLastname} (
                       {timeline.approvedByUsername})
                     </p>
                   </div>
@@ -228,10 +230,10 @@ const RescheduleRequestDetailPage: FC = () => {
                   <div className="h-2 w-2 rounded-full bg-red-500" />
                   <div>
                     <p className="text-sm font-medium">
-                      Rejected on {formatFineractDate(timeline.rejectedOnDate)}
+                      {t("Rejected on")} {formatFineractDate(timeline.rejectedOnDate)}
                     </p>
                     <p className="text-xs text-gray-500">
-                      by {timeline.rejectedByFirstname} {timeline.rejectedByLastname} (
+                      {t("by")} {timeline.rejectedByFirstname} {timeline.rejectedByLastname} (
                       {timeline.rejectedByUsername})
                     </p>
                   </div>
@@ -246,16 +248,16 @@ const RescheduleRequestDetailPage: FC = () => {
       {req.loanTermVariationsData && req.loanTermVariationsData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Requested Changes (Term Variations)</CardTitle>
+            <CardTitle className="text-base">{t("Requested Changes (Term Variations)")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Applicable From</TableHead>
-                  <TableHead>Value</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t("Type")}</TableHead>
+                  <TableHead>{t("Applicable From")}</TableHead>
+                  <TableHead>{t("Value")}</TableHead>
+                  <TableHead>{t("Status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -271,7 +273,7 @@ const RescheduleRequestDetailPage: FC = () => {
                     <TableCell className="text-sm">
                       <StatusBadge
                         status={v.isProcessed ? "success" : "default"}
-                        label={v.isProcessed ? "Processed" : "Pending"}
+                        label={v.isProcessed ? t("Processed") : t("Pending")}
                         size="sm"
                       />
                     </TableCell>
@@ -287,24 +289,24 @@ const RescheduleRequestDetailPage: FC = () => {
       <Dialog open={!!action} onOpenChange={(open) => !open && setAction(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{action === "approve" ? "Approve Reschedule" : "Reject Reschedule"}</DialogTitle>
+            <DialogTitle>{action === "approve" ? t("Approve Reschedule") : t("Reject Reschedule")}</DialogTitle>
             <DialogDescription>
               {action === "approve"
-                ? `Approving will regenerate the repayment schedule for loan ${req.loanAccountNo ?? `#${req.loanId}`}.`
-                : `Reject the reschedule request for loan ${req.loanAccountNo ?? `#${req.loanId}`}? The schedule will remain unchanged.`}
+                ? `${t("Approving will regenerate the repayment schedule for loan")} ${req.loanAccountNo ?? `#${req.loanId}`}.`
+                : `${t("Reject the reschedule request for loan")} ${req.loanAccountNo ?? `#${req.loanId}`}? ${t("The schedule will remain unchanged.")}`}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAction} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{action === "approve" ? "Approved On" : "Rejected On"}</label>
+              <label className="block text-sm font-medium">{action === "approve" ? t("Approved On") : t("Rejected On")}</label>
               <Input type="date" {...register("actionDate")} />
             </div>
 
             {commandMutation.isError && (
               <ErrorState
-                title="Failed to process request"
+                title={t("Failed to process request")}
                 message={
-                  commandMutation.error instanceof Error ? commandMutation.error.message : "An unexpected error occurred."
+                  commandMutation.error instanceof Error ? commandMutation.error.message : t("An unexpected error occurred.")
                 }
                 onRetry={() => commandMutation.reset()}
               />
@@ -312,7 +314,7 @@ const RescheduleRequestDetailPage: FC = () => {
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" type="button" onClick={() => setAction(null)} disabled={commandMutation.isPending}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -322,12 +324,12 @@ const RescheduleRequestDetailPage: FC = () => {
                 {commandMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Processing...
+                    {t("Processing...")}
                   </span>
                 ) : action === "approve" ? (
-                  "Approve"
+                  t("Approve")
                 ) : (
-                  "Reject"
+                  t("Reject")
                 )}
               </Button>
             </div>
@@ -339,9 +341,9 @@ const RescheduleRequestDetailPage: FC = () => {
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Preview Rescheduled Schedule</DialogTitle>
+            <DialogTitle>{t("Preview Rescheduled Schedule")}</DialogTitle>
             <DialogDescription>
-              This is the prospective repayment schedule if this request is approved.
+              {t("This is the prospective repayment schedule if this request is approved.")}
             </DialogDescription>
           </DialogHeader>
           {previewQuery.isLoading ? (
@@ -352,8 +354,8 @@ const RescheduleRequestDetailPage: FC = () => {
             </div>
           ) : previewQuery.isError ? (
             <ErrorState
-              title="Failed to load preview"
-              message={previewQuery.error?.message ?? "Could not load schedule preview."}
+              title={t("Failed to load preview")}
+              message={previewQuery.error?.message ?? t("Could not load schedule preview.")}
               onRetry={() => previewQuery.refetch()}
             />
           ) : previewQuery.data ? (
@@ -362,7 +364,7 @@ const RescheduleRequestDetailPage: FC = () => {
               currencyCode={previewQuery.data.currency?.code}
             />
           ) : (
-            <p className="text-sm text-gray-500">No schedule data available.</p>
+            <p className="text-sm text-gray-500">{t("No schedule data available.")}</p>
           )}
         </DialogContent>
       </Dialog>

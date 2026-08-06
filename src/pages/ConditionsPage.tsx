@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -18,6 +19,7 @@ interface FlatRule extends EligibilityRule {
 }
 
 const ConditionsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
@@ -46,12 +48,12 @@ const ConditionsPage: React.FC = () => {
   const ruleColumns: ColumnDef<FlatRule>[] = [
     {
       key: "campaignName",
-      header: "Campaign Name",
+      header: t("Campaign Name"),
       cell: (row) => <span className="font-medium text-gray-900 dark:text-gray-100">{row.campaignName}</span>,
     },
     {
       key: "field",
-      header: "Rule Field",
+      header: t("Rule Field"),
       cell: (row) => (
         <Badge variant="info" size="sm">
           {row.field}
@@ -60,19 +62,19 @@ const ConditionsPage: React.FC = () => {
     },
     {
       key: "operator",
-      header: "Operator",
+      header: t("Operator"),
       cell: (row) => (
         <code className="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded font-mono">{row.operator}</code>
       ),
     },
     {
       key: "value",
-      header: "Value",
+      header: t("Value"),
       cell: (row) => <span className="font-mono text-sm">{row.value}</span>,
     },
     {
       key: "logicalOperator",
-      header: "Logical Operator",
+      header: t("Logical Operator"),
       cell: (row) =>
         row.logicalOperator ? (
           <Badge variant={row.logicalOperator === "AND" ? "info" : "warning"} size="sm">
@@ -84,25 +86,25 @@ const ConditionsPage: React.FC = () => {
     },
     {
       key: "campaignStatus",
-      header: "Campaign Status",
+      header: t("Campaign Status"),
       cell: (row) => <StatusBadge status={row.campaignStatus} size="sm" />,
     },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Conditions" description="Eligibility Rules & Condition Groups" />
+      <PageHeader title={t("Conditions")} description={t("Eligibility Rules & Condition Groups")} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4">
           <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="all">All Rules</TabsTrigger>
-            <TabsTrigger value="byCampaign">By Campaign</TabsTrigger>
+            <TabsTrigger value="all">{t("All Rules")}</TabsTrigger>
+            <TabsTrigger value="byCampaign">{t("By Campaign")}</TabsTrigger>
           </TabsList>
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search rules..."
+              placeholder={t("Search rules...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -113,15 +115,15 @@ const ConditionsPage: React.FC = () => {
         <TabsContent value="all">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">All Eligibility Rules ({filteredRules.length})</CardTitle>
+              <CardTitle className="text-lg">{t("All Eligibility Rules")} ({filteredRules.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <DataTable
                 columns={ruleColumns}
                 data={filteredRules}
                 emptyState={{
-                  title: "No rules found",
-                  message: search ? "Try adjusting your search query." : "No eligibility rules have been defined yet.",
+                  title: t("No rules found"),
+                  message: search ? t("Try adjusting your search query.") : t("No eligibility rules have been defined yet."),
                 }}
               />
             </CardContent>
@@ -131,7 +133,7 @@ const ConditionsPage: React.FC = () => {
         <TabsContent value="byCampaign">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Campaign Rules</CardTitle>
+              <CardTitle className="text-lg">{t("Campaign Rules")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
@@ -142,15 +144,15 @@ const ConditionsPage: React.FC = () => {
                         <span className="font-medium">{campaign.name}</span>
                         <StatusBadge status={campaign.status} size="sm" />
                         <span className="text-xs text-gray-500">
-                          ({campaign.eligibilityRules.length} rule
-                          {campaign.eligibilityRules.length !== 1 ? "s" : ""})
+                          ({campaign.eligibilityRules.length} {t("rule")}
+                          {campaign.eligibilityRules.length !== 1 ? t("s") : ""})
                         </span>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
                       {campaign.eligibilityRules.length === 0 ? (
                         <p className="text-sm text-gray-500 py-4 text-center">
-                          No eligibility rules defined for this campaign.
+                          {t("No eligibility rules defined for this campaign.")}
                         </p>
                       ) : (
                         <div className="overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
@@ -158,16 +160,16 @@ const ConditionsPage: React.FC = () => {
                             <thead className="bg-gray-50 dark:bg-gray-800">
                               <tr>
                                 <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
-                                  Field
+                                  {t("Field")}
                                 </th>
                                 <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
-                                  Operator
+                                  {t("Operator")}
                                 </th>
                                 <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
-                                  Value
+                                  {t("Value")}
                                 </th>
                                 <th className="px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-400">
-                                  Logical Op
+                                  {t("Logical Op")}
                                 </th>
                               </tr>
                             </thead>

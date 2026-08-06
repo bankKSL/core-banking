@@ -1,6 +1,7 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Plus, CalendarClock } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -38,6 +39,7 @@ const STATUS_FILTER_OPTIONS = [
 ] as const;
 
 const RescheduleLoansPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -77,7 +79,7 @@ const RescheduleLoansPage: FC = () => {
   const columns: ColumnDef<LoanRescheduleRequest>[] = [
     {
       key: "id",
-      header: "ID",
+      header: t("ID"),
       cell: (r) => (
         <button
           className="text-sm font-medium text-[#D32F2F] hover:underline"
@@ -89,7 +91,7 @@ const RescheduleLoansPage: FC = () => {
     },
     {
       key: "loan",
-      header: "Loan",
+      header: t("Loan"),
       cell: (r) => (
         <button
           className="text-sm font-medium text-[#D32F2F] hover:underline"
@@ -104,29 +106,29 @@ const RescheduleLoansPage: FC = () => {
     },
     {
       key: "client",
-      header: "Client",
+      header: t("Client"),
       cell: (r) => <span className="text-sm">{r.clientName ?? "—"}</span>,
     },
     {
       key: "reason",
-      header: "Reason",
+      header: t("Reason"),
       cell: (r) => (
         <span className="text-sm">{r.rescheduleReasonName ?? r.rescheduleReasonCodeValue?.name ?? "—"}</span>
       ),
     },
     {
       key: "fromDate",
-      header: "Reschedule From",
+      header: t("Reschedule From"),
       cell: (r) => <span className="text-sm">{formatFineractDate(r.rescheduleFromDate)}</span>,
     },
     {
       key: "submitted",
-      header: "Submitted On",
+      header: t("Submitted On"),
       cell: (r) => <span className="text-sm">{formatFineractDate(r.submittedOnDate)}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       cell: (r) => {
         const status = resolveStatus(r);
         const cfg = RESCHEDULE_STATUS_CONFIG[status];
@@ -150,7 +152,7 @@ const RescheduleLoansPage: FC = () => {
                 openAction(r, "approve");
               }}
             >
-              Approve
+              {t("Approve")}
             </Button>
             <Button
               variant="ghost"
@@ -161,7 +163,7 @@ const RescheduleLoansPage: FC = () => {
                 openAction(r, "reject");
               }}
             >
-              Reject
+              {t("Reject")}
             </Button>
           </div>
         );
@@ -172,10 +174,10 @@ const RescheduleLoansPage: FC = () => {
   if (isError) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Reschedule Requests" description="Loan rescheduling requests" />
+        <PageHeader title={t("Reschedule Requests")} description={t("Loan rescheduling requests")} />
         <ErrorState
-          title="Failed to load requests"
-          message={error?.message ?? "Failed to load reschedule requests. Please try again."}
+          title={t("Failed to load requests")}
+          message={error?.message ?? t("Failed to load reschedule requests. Please try again.")}
           onRetry={refetch}
         />
       </div>
@@ -185,11 +187,11 @@ const RescheduleLoansPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Reschedule Requests"
-        description="Review and manage loan rescheduling requests"
+        title={t("Reschedule Requests")}
+        description={t("Review and manage loan rescheduling requests")}
         actions={
           <Button onClick={() => navigate("/rescheduling/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Request
+            <Plus className="mr-2 h-4 w-4" /> {t("New Request")}
           </Button>
         }
       />
@@ -199,16 +201,16 @@ const RescheduleLoansPage: FC = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-gray-400" />
-              Requests ({filteredRequests.length})
+              {t("Requests")} ({filteredRequests.length})
             </CardTitle>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t("Filter by status")} />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_FILTER_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.label)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -223,7 +225,7 @@ const RescheduleLoansPage: FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={filteredRequests} emptyState={{ message: "No reschedule requests found." }} />
+            <DataTable columns={columns} data={filteredRequests} emptyState={{ message: t("No reschedule requests found.") }} />
           )}
         </CardContent>
       </Card>
@@ -231,24 +233,24 @@ const RescheduleLoansPage: FC = () => {
       <Dialog open={!!action} onOpenChange={(open) => !open && setAction(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{action?.command === "approve" ? "Approve Reschedule" : "Reject Reschedule"}</DialogTitle>
+            <DialogTitle>{action?.command === "approve" ? t("Approve Reschedule") : t("Reject Reschedule")}</DialogTitle>
             <DialogDescription>
               {action?.command === "approve"
-                ? `Approving will recalculate the repayment schedule of loan ${action?.req.loanAccountNo ?? `#${action?.req.loanId}`}.`
-                : `Reject the reschedule request for loan ${action?.req.loanAccountNo ?? `#${action?.req.loanId}`}?`}
+                ? `${t("Approving will recalculate the repayment schedule of loan")} ${action?.req.loanAccountNo ?? `#${action?.req.loanId}`}.`
+                : `${t("Reject the reschedule request for loan")} ${action?.req.loanAccountNo ?? `#${action?.req.loanId}`}?`}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAction} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{action?.command === "approve" ? "Approved On" : "Rejected On"}</label>
+              <label className="block text-sm font-medium">{action?.command === "approve" ? t("Approved On") : t("Rejected On")}</label>
               <Input type="date" {...register("actionDate")} />
             </div>
 
             {commandMutation.isError && (
               <ErrorState
-                title="Failed to process request"
+                title={t("Failed to process request")}
                 message={
-                  commandMutation.error instanceof Error ? commandMutation.error.message : "An unexpected error occurred."
+                  commandMutation.error instanceof Error ? commandMutation.error.message : t("An unexpected error occurred.")
                 }
                 onRetry={() => commandMutation.reset()}
               />
@@ -256,14 +258,14 @@ const RescheduleLoansPage: FC = () => {
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" type="button" onClick={() => setAction(null)} disabled={commandMutation.isPending}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
                 variant={action?.command === "reject" ? "destructive" : "default"}
                 disabled={commandMutation.isPending}
               >
-                {commandMutation.isPending ? "Processing..." : action?.command === "approve" ? "Approve" : "Reject"}
+                {commandMutation.isPending ? t("Processing...") : action?.command === "approve" ? t("Approve") : t("Reject")}
               </Button>
             </div>
           </form>

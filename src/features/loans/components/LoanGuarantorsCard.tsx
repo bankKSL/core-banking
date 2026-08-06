@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ShieldCheck, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
@@ -21,6 +22,7 @@ interface LoanGuarantorsCardProps {
 }
 
 const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode = "USD", guarantors: initial }) => {
+  const { t } = useTranslation();
   const guarantorsQuery = useLoanGuarantors(initial ? undefined : loanId);
   const items = initial ?? guarantorsQuery.data ?? [];
 
@@ -67,31 +69,31 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-gray-400" />
-            Guarantors ({items.length})
+            {t("Guarantors")} ({items.length})
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openCreate}>
             <Plus className="mr-1 h-4 w-4" />
-            Add Guarantor
+            {t("Add Guarantor")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           {items.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No guarantors linked to this loan.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No guarantors linked to this loan.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("Name")}</TableHead>
+                  <TableHead>{t("Type")}</TableHead>
+                  <TableHead className="text-right">{t("Amount")}</TableHead>
+                  <TableHead className="text-right">{t("Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {items.map((g) => (
                   <TableRow key={g.id}>
                     <TableCell className="text-sm font-medium">{displayName(g)}</TableCell>
-                    <TableCell className="text-sm text-gray-500">{g.guarantorType?.value ?? "Existing Client"}</TableCell>
+                    <TableCell className="text-sm text-gray-500">{g.guarantorType?.value ?? t("Existing Client")}</TableCell>
                     <TableCell className="text-right font-mono text-sm">{formatMoney(g.amount, currencyCode)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
@@ -118,8 +120,8 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Guarantor</DialogTitle>
-            <DialogDescription>Link an existing client as guarantor for this loan.</DialogDescription>
+            <DialogTitle>{t("Add Guarantor")}</DialogTitle>
+            <DialogDescription>{t("Link an existing client as guarantor for this loan.")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <ClientSearch
@@ -129,7 +131,7 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
               error={errors.clientId?.message}
             />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Guaranteed Amount *</label>
+              <label className="block text-sm font-medium">{t("Guaranteed Amount")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -140,11 +142,11 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={isMutating}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={isMutating}>
                 {addMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Guarantor
+                {t("Add Guarantor")}
               </Button>
             </div>
           </form>
@@ -155,17 +157,17 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Guarantor</DialogTitle>
-            <DialogDescription>Update guaranteed amount for {editTarget ? displayName(editTarget) : ""}.</DialogDescription>
+            <DialogTitle>{t("Edit Guarantor")}</DialogTitle>
+            <DialogDescription>{t("Update guaranteed amount for")} {editTarget ? displayName(editTarget) : ""}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Guaranteed Amount</label>
+              <label className="block text-sm font-medium">{t("Guaranteed Amount")}</label>
               <Input type="number" step="0.01" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditTarget(null)} disabled={updateMutation.isPending}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 disabled={updateMutation.isPending}
@@ -180,7 +182,7 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
                 }}
               >
                 {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
+                {t("Save")}
               </Button>
             </div>
           </div>
@@ -191,9 +193,9 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Remove Guarantor"
-        description={`Remove ${displayName(deleteTarget ?? { id: 0, amount: 0 })} as guarantor?`}
-        confirmLabel="Remove"
+        title={t("Remove Guarantor")}
+        description={`${t("Remove")} ${displayName(deleteTarget ?? { id: 0, amount: 0 })} ${t("as guarantor?")}`}
+        confirmLabel={t("Remove")}
         variant="destructive"
         loading={deleteMutation.isPending}
         onConfirm={async () => {

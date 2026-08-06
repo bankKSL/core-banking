@@ -1,5 +1,6 @@
 import { type FC, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, Pencil, Trash2, Eye, ToggleLeft, ToggleRight } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -13,6 +14,7 @@ import { useRoles, useDeleteRole, useEnableRole, useDisableRole } from "../hooks
 import type { Role } from "../types/role";
 
 const RoleListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: roles = [], isLoading, isError, refetch } = useRoles();
   const deleteMutation = useDeleteRole();
@@ -28,23 +30,23 @@ const RoleListPage: FC = () => {
   }, [roles, search]);
 
   const columns: ColumnDef<Role>[] = [
-    { key: "name", header: "Name", cell: (r) => <span className="font-medium">{r.name}</span> },
+    { key: "name", header: t("Name"), cell: (r) => <span className="font-medium">{r.name}</span> },
     {
       key: "description",
-      header: "Description",
+      header: t("Description"),
       cell: (r) => <span className="text-sm text-gray-500">{r.description}</span>,
     },
     {
       key: "disabled",
-      header: "Status",
+      header: t("Status"),
       cell: (r) =>
         r.disabled ? (
           <Badge variant="error" size="sm">
-            Disabled
+            {t("Disabled")}
           </Badge>
         ) : (
           <Badge variant="success" size="sm">
-            Active
+            {t("Active")}
           </Badge>
         ),
     },
@@ -79,21 +81,21 @@ const RoleListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Roles"
-        description="Manage application roles and permissions"
+        title={t("Roles")}
+        description={t("Manage application roles and permissions")}
         actions={
           <Button onClick={() => navigate("/admin/roles/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> Create Role
+            <Plus className="mr-2 h-4 w-4" /> {t("Create Role")}
           </Button>
         }
       />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Application Roles</CardTitle>
+          <CardTitle>{t("Application Roles")}</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search roles..."
+              placeholder={t("Search roles...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -109,13 +111,13 @@ const RoleListPage: FC = () => {
             </div>
           ) : isError ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-              Failed to load roles.{" "}
+              {t("Failed to load roles.")}{" "}
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Retry
+                {t("Retry")}
               </Button>
             </div>
           ) : (
-            <DataTable columns={columns} data={filtered} emptyState={{ message: "No roles found." }} minWidth={700} />
+            <DataTable columns={columns} data={filtered} emptyState={{ message: t("No roles found.") }} minWidth={700} />
           )}
         </CardContent>
       </Card>
@@ -128,10 +130,10 @@ const RoleListPage: FC = () => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete Role"
-        description={`Delete "${deleteTarget?.name}"? This will fail if users are assigned to this role.`}
+        title={t("Delete Role")}
+        description={t(`Delete "${deleteTarget?.name}"? This will fail if users are assigned to this role.`)}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
       />
     </div>
   );

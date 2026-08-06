@@ -24,6 +24,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 // ----- Breadcrumb path label mapping -----
 const pathLabels: Record<string, string> = {
@@ -106,6 +107,9 @@ const TopNav: FC = () => {
 
         {/* Right: actions */}
         <div className="flex shrink-0 items-center gap-1">
+          {/* Language switcher */}
+          <LanguageSwitcher />
+
           {/* Theme toggle */}
           <Button
             variant="ghost"

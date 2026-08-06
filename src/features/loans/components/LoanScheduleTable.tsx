@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarClock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,21 +27,21 @@ const getPeriodStatus = (p: LoanRepaymentPeriod): PeriodStatus => {
   return "upcoming";
 };
 
-const STATUS_BADGE: Record<PeriodStatus, { variant: "success" | "warning" | "error" | "default"; label: string }> = {
-  paid: { variant: "success", label: "Paid" },
-  partial: { variant: "warning", label: "Partial" },
-  overdue: { variant: "error", label: "Overdue" },
-  upcoming: { variant: "default", label: "Upcoming" },
-};
-
 const LoanScheduleTable: FC<LoanScheduleTableProps> = ({ periods, currencyCode = "USD", loading }) => {
+  const { t } = useTranslation();
+  const STATUS_BADGE: Record<PeriodStatus, { variant: "success" | "warning" | "error" | "default"; label: string }> = {
+    paid: { variant: "success", label: t("Paid") },
+    partial: { variant: "warning", label: t("Partial") },
+    overdue: { variant: "error", label: t("Overdue") },
+    upcoming: { variant: "default", label: t("Upcoming") },
+  };
   if (loading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-gray-400" />
-            Repayment Schedule
+            {t("Repayment Schedule")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -60,11 +61,11 @@ const LoanScheduleTable: FC<LoanScheduleTableProps> = ({ periods, currencyCode =
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-gray-400" />
-            Repayment Schedule
+            {t("Repayment Schedule")}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-400">No repayment schedule available.</p>
+          <p className="text-sm text-gray-400">{t("No repayment schedule available.")}</p>
         </CardContent>
       </Card>
     );
@@ -75,7 +76,7 @@ const LoanScheduleTable: FC<LoanScheduleTableProps> = ({ periods, currencyCode =
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <CalendarClock className="h-4 w-4 text-gray-400" />
-          Repayment Schedule ({periods.length} installments)
+          {t("Repayment Schedule")} ({periods.length} {t("installments")})
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -83,14 +84,14 @@ const LoanScheduleTable: FC<LoanScheduleTableProps> = ({ periods, currencyCode =
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead className="text-right">Principal</TableHead>
-              <TableHead className="text-right">Interest</TableHead>
-              <TableHead className="text-right">Fees</TableHead>
-              <TableHead className="text-right">Total Due</TableHead>
-              <TableHead className="text-right">Paid</TableHead>
-              <TableHead className="text-right">Outstanding</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>{t("Due Date")}</TableHead>
+              <TableHead className="text-right">{t("Principal")}</TableHead>
+              <TableHead className="text-right">{t("Interest")}</TableHead>
+              <TableHead className="text-right">{t("Fees")}</TableHead>
+              <TableHead className="text-right">{t("Total Due")}</TableHead>
+              <TableHead className="text-right">{t("Paid")}</TableHead>
+              <TableHead className="text-right">{t("Outstanding")}</TableHead>
+              <TableHead>{t("Status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

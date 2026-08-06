@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,6 +35,7 @@ const campaignActionSchema = z.object({
 type CampaignActionFormValues = z.infer<typeof campaignActionSchema>;
 
 const CampaignDetailPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
@@ -128,7 +130,7 @@ const CampaignDetailPage: FC = () => {
   if (!campaign) {
     return (
       <div className="p-6 max-w-6xl m-auto">
-        <PageHeader title="Campaign Not Found" description="The requested campaign does not exist." />
+        <PageHeader title={t("Campaign Not Found")} description={t("The requested campaign does not exist.")} />
       </div>
     );
   }
@@ -140,27 +142,27 @@ const CampaignDetailPage: FC = () => {
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={campaign.campaignName}
-        description={`${isSms ? "SMS" : "Email"} campaign details and management`}
+        description={t("{{type}} campaign details and management", { type: isSms ? "SMS" : "Email" })}
         actions={
           <Button variant="outline" onClick={() => navigate("/campaigns")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
 
       {actionDialog === "activate" && (isSms ? activateSms.isError : activateEmail.isError) && (
         <ErrorState
-          title="Failed to activate campaign"
-          message={activateError instanceof Error ? activateError.message : "An unexpected error occurred."}
+          title={t("Failed to activate campaign")}
+          message={activateError instanceof Error ? activateError.message : t("An unexpected error occurred.")}
           onRetry={() => (isSms ? activateSms : activateEmail).reset()}
         />
       )}
 
       {actionDialog === "close" && (isSms ? closeSms.isError : closeEmail.isError) && (
         <ErrorState
-          title="Failed to close campaign"
-          message={closeError instanceof Error ? closeError.message : "An unexpected error occurred."}
+          title={t("Failed to close campaign")}
+          message={closeError instanceof Error ? closeError.message : t("An unexpected error occurred.")}
           onRetry={() => (isSms ? closeSms : closeEmail).reset()}
         />
       )}
@@ -176,7 +178,7 @@ const CampaignDetailPage: FC = () => {
             }}
             className="bg-emerald-600 hover:bg-emerald-700"
           >
-            <Play className="mr-1 h-4 w-4" /> Activate
+            <Play className="mr-1 h-4 w-4" /> {t("Activate")}
           </Button>
         )}
         {status === 300 && (
@@ -188,16 +190,16 @@ const CampaignDetailPage: FC = () => {
               reset();
             }}
           >
-            <XCircle className="mr-1 h-4 w-4" /> Close
+            <XCircle className="mr-1 h-4 w-4" /> {t("Close")}
           </Button>
         )}
         {status === 600 && (
           <>
             <Button size="sm" onClick={handleReactivate} className="bg-[#D32F2F] hover:bg-red-700">
-              <RotateCcw className="mr-1 h-4 w-4" /> Reactivate
+              <RotateCcw className="mr-1 h-4 w-4" /> {t("Reactivate")}
             </Button>
             <Button size="sm" variant="destructive" onClick={() => setDeleteTarget(true)}>
-              <Trash2 className="mr-1 h-4 w-4" /> Delete
+              <Trash2 className="mr-1 h-4 w-4" /> {t("Delete")}
             </Button>
           </>
         )}
@@ -205,47 +207,47 @@ const CampaignDetailPage: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Campaign Information</CardTitle>
+          <CardTitle className="text-base">{t("Campaign Information")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <p className="text-xs text-gray-500">Campaign Type</p>
+              <p className="text-xs text-gray-500">{t("Campaign Type")}</p>
               <p className="text-sm font-medium">
                 {isSms
                   ? (CAMPAIGN_TYPE_LABELS[(campaign as any).campaignType] ?? (campaign as any).campaignType)
-                  : "Email"}
+                  : t("Email")}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Trigger Type</p>
+              <p className="text-xs text-gray-500">{t("Trigger Type")}</p>
               <p className="text-sm font-medium">
                 {TRIGGER_TYPE_LABELS[(campaign as any).triggerType] ?? (campaign as any).triggerType ?? "\u2014"}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Status</p>
+              <p className="text-xs text-gray-500">{t("Status")}</p>
               <StatusBadge status={STATUS_LABELS[status!]?.toLowerCase() ?? "unknown"} />
             </div>
             {isSms ? (
               <>
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500">Message</p>
+                  <p className="text-xs text-gray-500">{t("Message")}</p>
                   <p className="text-sm">{(campaign as any).message ?? "\u2014"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Business Rule</p>
+                  <p className="text-xs text-gray-500">{t("Business Rule")}</p>
                   <p className="text-sm">{(campaign as any).reportName ?? (campaign as any).runReportId ?? "\u2014"}</p>
                 </div>
               </>
             ) : (
               <>
                 <div>
-                  <p className="text-xs text-gray-500">Subject</p>
+                  <p className="text-xs text-gray-500">{t("Subject")}</p>
                   <p className="text-sm">{(campaign as any).emailSubject ?? "\u2014"}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500">Message</p>
+                  <p className="text-xs text-gray-500">{t("Message")}</p>
                   <p className="text-sm">{(campaign as any).emailMessage ?? "\u2014"}</p>
                 </div>
               </>
@@ -257,19 +259,19 @@ const CampaignDetailPage: FC = () => {
       <Dialog open={!!actionDialog} onOpenChange={(o) => !o && setActionDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{actionDialog === "activate" ? "Activate Campaign" : "Close Campaign"}</DialogTitle>
+            <DialogTitle>{actionDialog === "activate" ? t("Activate Campaign") : t("Close Campaign")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">
-                  {actionDialog === "activate" ? "Activation Date *" : "Closure Date *"}
+                  {actionDialog === "activate" ? t("Activation Date *") : t("Closure Date *")}
                 </label>
                 <Input type="date" {...register("actionDate")} error={errors.actionDate?.message} />
               </div>
               <div className="flex justify-end gap-3">
                 <Button variant="outline" type="button" onClick={() => setActionDialog(null)}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -291,7 +293,7 @@ const CampaignDetailPage: FC = () => {
                     : isSms
                       ? closeSms.isPending
                       : closeEmail.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {actionDialog === "activate" ? "Activate" : "Close"}
+                  {actionDialog === "activate" ? t("Activate") : t("Close")}
                 </Button>
               </div>
             </div>
@@ -303,10 +305,10 @@ const CampaignDetailPage: FC = () => {
         open={deleteTarget}
         onOpenChange={setDeleteTarget}
         onConfirm={handleDelete}
-        title="Delete Campaign"
-        description={`Delete "${campaign.campaignName}"? This action cannot be undone.`}
+        title={t("Delete Campaign")}
+        description={t('Delete "{{name}}"? This action cannot be undone.', { name: campaign.campaignName })}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
       />
     </div>
   );

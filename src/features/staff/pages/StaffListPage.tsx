@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,33 +12,34 @@ import { useStaffList } from "../hooks/useStaff";
 import type { Staff } from "../api/staff";
 import type { ColumnDef } from "@/components/shared/DataTable";
 
-const columns: ColumnDef<Staff>[] = [
-  { key: "displayName", header: "Name" },
-  { key: "officeName", header: "Office" },
-  {
-    key: "isLoanOfficer",
-    header: "Loan Officer",
-    cell: (row) => (
-      <StatusBadge status={row.isLoanOfficer ? "active" : "inactive"} label={row.isLoanOfficer ? "Yes" : "No"} />
-    ),
-  },
-  {
-    key: "isActive",
-    header: "Status",
-    cell: (row) => (
-      <StatusBadge status={row.isActive ? "active" : "inactive"} />
-    ),
-  },
-  {
-    key: "joiningDate",
-    header: "Joining Date",
-    className: "text-gray-500",
-  },
-];
-
 const StaffListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch, isRefetching } = useStaffList();
+
+  const columns: ColumnDef<Staff>[] = [
+    { key: "displayName", header: t("Name") },
+    { key: "officeName", header: t("Office") },
+    {
+      key: "isLoanOfficer",
+      header: t("Loan Officer"),
+      cell: (row) => (
+        <StatusBadge status={row.isLoanOfficer ? "active" : "inactive"} label={row.isLoanOfficer ? t("Yes") : t("No")} />
+      ),
+    },
+    {
+      key: "isActive",
+      header: t("Status"),
+      cell: (row) => (
+        <StatusBadge status={row.isActive ? "active" : "inactive"} />
+      ),
+    },
+    {
+      key: "joiningDate",
+      header: t("Joining Date"),
+      className: "text-gray-500",
+    },
+  ];
 
   const staff = useMemo(() => data ?? [], [data]);
 
@@ -52,15 +54,15 @@ const StaffListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Staff"
-          description="Manage organization staff members"
+          title={t("Staff")}
+          description={t("Manage organization staff members")}
           actions={
             <Button onClick={() => navigate("/staff/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Staff
+              <Plus className="mr-2 h-4 w-4" /> {t("New Staff")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load staff." onRetry={refetch} />
+        <ErrorState message={t("Failed to load staff.")} onRetry={refetch} />
       </div>
     );
   }
@@ -68,11 +70,11 @@ const StaffListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Staff"
-        description="Manage organization staff members"
+        title={t("Staff")}
+        description={t("Manage organization staff members")}
         actions={
           <Button onClick={() => navigate("/staff/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Staff
+            <Plus className="mr-2 h-4 w-4" /> {t("New Staff")}
           </Button>
         }
       />
@@ -81,7 +83,7 @@ const StaffListPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Staff Members
+            {t("Staff Members")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -91,8 +93,8 @@ const StaffListPage: React.FC = () => {
             onRowClick={handleRowClick}
             loading={isLoading || isRefetching}
             emptyState={{
-              title: "No staff found",
-              message: "Get started by creating a new staff member.",
+              title: t("No staff found"),
+              message: t("Get started by creating a new staff member."),
             }}
           />
         </CardContent>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Client } from "../types/client";
 import ClientStatusBadge from "./ClientStatusBadge";
 import { getClientDisplayName, getClientStatus, formatClientDate, calculateAge } from "../utils/client";
+import { useTranslation } from "react-i18next";
 
 interface ClientDetailsProps {
   client: Client;
@@ -20,6 +21,7 @@ const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode
 );
 
 const ClientDetails: FC<ClientDetailsProps> = ({ client }) => {
+  const { t } = useTranslation();
   const status = getClientStatus(client);
   const displayName = getClientDisplayName(client);
   const age = calculateAge(client?.dateOfBirth);
@@ -30,16 +32,16 @@ const ClientDetails: FC<ClientDetailsProps> = ({ client }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Hash className="h-4 w-4 text-gray-400" />
-            Basic Information
+            {t("Basic Information")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="Client ID" value={client.id} />
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="Account Number" value={client.accountNo ?? "—"} />
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="External ID" value={client.externalId ?? "—"} />
-          <InfoRow icon={<Hash className="h-4 w-4" />} label="Status" value={<ClientStatusBadge status={status} />} />
-          <InfoRow icon={<Building2 className="h-4 w-4" />} label="Office" value={client.officeName ?? "—"} />
-          <InfoRow icon={<User className="h-4 w-4" />} label="Staff" value={client.staffName ?? "—"} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("Client ID")} value={client.id} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("Account Number")} value={client.accountNo ?? "—"} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("External ID")} value={client.externalId ?? "—"} />
+          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("Status")} value={<ClientStatusBadge status={status} />} />
+          <InfoRow icon={<Building2 className="h-4 w-4" />} label={t("Office")} value={client.officeName ?? "—"} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("Staff")} value={client.staffName ?? "—"} />
         </CardContent>
       </Card>
 
@@ -47,18 +49,18 @@ const ClientDetails: FC<ClientDetailsProps> = ({ client }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <User className="h-4 w-4 text-gray-400" />
-            Personal Information
+            {t("Personal Information")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-          <InfoRow icon={<User className="h-4 w-4" />} label="Full Name" value={displayName} />
-          <InfoRow icon={<User className="h-4 w-4" />} label="First Name" value={client.firstname ?? "—"} />
-          <InfoRow icon={<User className="h-4 w-4" />} label="Middle Name" value={client.middlename ?? "—"} />
-          <InfoRow icon={<User className="h-4 w-4" />} label="Last Name" value={client.lastname ?? "—"} />
-          <InfoRow icon={<User className="h-4 w-4" />} label="Gender" value={client.gender?.name ?? "—"} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("Full Name")} value={displayName} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("First Name")} value={client.firstname ?? "—"} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("Middle Name")} value={client.middlename ?? "—"} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("Last Name")} value={client.lastname ?? "—"} />
+          <InfoRow icon={<User className="h-4 w-4" />} label={t("Gender")} value={client.gender?.name ?? "—"} />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Date of Birth"
+            label={t("Date of Birth")}
             value={
               client.dateOfBirth
                 ? `${formatClientDate(client.dateOfBirth)}${age !== null ? ` (${age} years)` : ""}`
@@ -72,12 +74,12 @@ const ClientDetails: FC<ClientDetailsProps> = ({ client }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Phone className="h-4 w-4 text-gray-400" />
-            Contact Information
+            {t("Contact Information")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-          <InfoRow icon={<Phone className="h-4 w-4" />} label="Mobile Number" value={client.mobileNo ?? "—"} />
-          <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={client.emailAddress ?? "—"} />
+          <InfoRow icon={<Phone className="h-4 w-4" />} label={t("Mobile Number")} value={client.mobileNo ?? "—"} />
+          <InfoRow icon={<Mail className="h-4 w-4" />} label={t("Email")} value={client.emailAddress ?? "—"} />
         </CardContent>
       </Card>
 
@@ -85,23 +87,23 @@ const ClientDetails: FC<ClientDetailsProps> = ({ client }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Clock className="h-4 w-4 text-gray-400" />
-            Timeline
+            {t("Timeline")}
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Submitted On"
+            label={t("Submitted On")}
             value={formatClientDate(client.timeline?.submittedOnDate)}
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Activated On"
+            label={t("Activated On")}
             value={formatClientDate(client.activationDate ?? client.timeline?.activatedOnDate)}
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
-            label="Closed On"
+            label={t("Closed On")}
             value={formatClientDate(client.timeline?.closedOnDate)}
           />
         </CardContent>

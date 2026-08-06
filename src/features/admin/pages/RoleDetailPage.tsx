@@ -1,5 +1,6 @@
 import { type FC, useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Pencil, Shield, Search, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { useRole, useRolePermissions, useUpdateRolePermissions } from "../hooks/useRoles";
 
 const RoleDetailPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: role, isLoading } = useRole(id);
@@ -79,7 +81,7 @@ const RoleDetailPage: FC = () => {
   if (!role)
     return (
       <div className="p-6">
-        <p className="text-red-600">Role not found.</p>
+        <p className="text-red-600">{t("Role not found.")}</p>
       </div>
     );
 
@@ -90,14 +92,14 @@ const RoleDetailPage: FC = () => {
         description={role.description}
         actions={
           <div className="flex items-center gap-2">
-            <Badge variant={role.disabled ? "error" : "success"}>{role.disabled ? "Disabled" : "Active"}</Badge>
+            <Badge variant={role.disabled ? "error" : "success"}>{role.disabled ? t("Disabled") : t("Active")}</Badge>
             <Button variant="outline" size="sm" onClick={() => navigate(`/admin/roles/edit/${role.id}`)}>
               <Pencil className="mr-1 h-4 w-4" />
-              Edit
+              {t("Edit")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/roles")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -107,13 +109,13 @@ const RoleDetailPage: FC = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            Permissions
+            {t("Permissions")}
           </CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search permissions..."
+                placeholder={t("Search permissions...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -122,7 +124,7 @@ const RoleDetailPage: FC = () => {
             <Button onClick={handleSavePermissions} disabled={updatePermsMutation.isPending} size="sm">
               {updatePermsMutation.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
               <Save className="mr-1 h-4 w-4" />
-              Save
+              {t("Save")}
             </Button>
           </div>
         </CardHeader>
@@ -147,17 +149,17 @@ const RoleDetailPage: FC = () => {
               <Separator className="mt-4" />
             </div>
           ))}
-          {Object.keys(filteredGroups).length === 0 && <p className="text-sm text-gray-500">No permissions found.</p>}
+          {Object.keys(filteredGroups).length === 0 && <p className="text-sm text-gray-500">{t("No permissions found.")}</p>}
         </CardContent>
       </Card>
 
       {updatePermsMutation.isError && (
         <ErrorState
-          title="Failed to update permissions"
+          title={t("Failed to update permissions")}
           message={
             updatePermsMutation.error instanceof Error
               ? updatePermsMutation.error.message
-              : "An unexpected error occurred."
+              : t("An unexpected error occurred.")
           }
           onRetry={() => updatePermsMutation.reset()}
         />

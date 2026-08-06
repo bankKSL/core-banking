@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +22,7 @@ const roleSchema = z.object({
 type RoleFormValues = z.infer<typeof roleSchema>;
 
 const RoleFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -64,27 +66,27 @@ const RoleFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Role" : "Create Role"}
-        description={isEdit ? `Editing role #${id}` : "Define a new application role"}
+        title={isEdit ? t("Edit Role") : t("Create Role")}
+        description={isEdit ? t(`Editing role #${id}`) : t("Define a new application role")}
         actions={
           <Button variant="outline" onClick={() => navigate("/admin/roles")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Role Details</CardTitle>
+            <CardTitle className="text-base">{t("Role Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Role Name *</label>
-              <Input {...register("name")} placeholder="e.g. Loan Officer" error={errors.name?.message} />
+              <label className="block text-sm font-medium">{t("Role Name")} *</label>
+              <Input {...register("name")} placeholder={t("e.g. Loan Officer")} error={errors.name?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description *</label>
-              <Textarea {...register("description")} placeholder="Describe this role's purpose" rows={3} />
+              <label className="block text-sm font-medium">{t("Description")} *</label>
+              <Textarea {...register("description")} placeholder={t("Describe this role's purpose")} rows={3} />
               {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
             </div>
           </CardContent>
@@ -92,12 +94,12 @@ const RoleFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/admin/roles")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create Role"}
+            {isEdit ? t("Save Changes") : t("Create Role")}
           </Button>
         </div>
       </form>

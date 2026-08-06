@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -12,6 +13,7 @@ import { useDatatables, useDeleteDatatable } from "../hooks/useDatatables";
 import type { Datatable } from "../api/datatables";
 
 const DatatableListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: datatables = [], isLoading, isError, refetch } = useDatatables();
   const deleteMutation = useDeleteDatatable();
@@ -31,23 +33,23 @@ const DatatableListPage: React.FC = () => {
     () => [
       {
         key: "datatableName",
-        header: "Datatable Name",
+        header: t("Datatable Name"),
         accessorFn: (row) => <span className="font-medium">{row.datatableName}</span>,
       },
       {
         key: "apptableName",
-        header: "App Table",
+        header: t("App Table"),
         accessorFn: (row) => row.apptableName ?? "—",
       },
       {
         key: "multiRow",
-        header: "Multi Row",
+        header: t("Multi Row"),
         accessorFn: (row) =>
-          row.multiRow ? <Badge variant="success" size="sm">Yes</Badge> : <Badge variant="default" size="sm">No</Badge>,
+          row.multiRow ? <Badge variant="success" size="sm">{t("Yes")}</Badge> : <Badge variant="default" size="sm">{t("No")}</Badge>,
       },
       {
         key: "columns",
-        header: "Columns",
+        header: t("Columns"),
         accessorFn: (row) => row.columns?.length ?? 0,
       },
       {
@@ -77,15 +79,15 @@ const DatatableListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Datatables"
-          description="Manage custom datatables"
+          title={t("Datatables")}
+          description={t("Manage custom datatables")}
           actions={
             <Button onClick={() => navigate("/datatables/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Datatable
+              <Plus className="mr-2 h-4 w-4" /> {t("New Datatable")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load datatables." onRetry={refetch} />
+        <ErrorState message={t("Failed to load datatables.")} onRetry={refetch} />
       </div>
     );
   }
@@ -93,18 +95,18 @@ const DatatableListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Datatables"
-        description="Manage custom datatables"
+        title={t("Datatables")}
+        description={t("Manage custom datatables")}
         actions={
           <Button onClick={() => navigate("/datatables/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Datatable
+            <Plus className="mr-2 h-4 w-4" /> {t("New Datatable")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Datatables</CardTitle>
+          <CardTitle>{t("All Datatables")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -112,7 +114,7 @@ const DatatableListPage: React.FC = () => {
             data={datatables}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No datatables found." }}
+            emptyState={{ message: t("No datatables found.") }}
           />
         </CardContent>
       </Card>
@@ -120,9 +122,9 @@ const DatatableListPage: React.FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
-        title="Delete Datatable"
-        description="Are you sure you want to delete this datatable? This action cannot be undone."
-        confirmLabel="Delete"
+        title={t("Delete Datatable")}
+        description={t("Are you sure you want to delete this datatable? This action cannot be undone.")}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

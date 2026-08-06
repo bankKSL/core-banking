@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -37,6 +38,7 @@ const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode
 );
 
 const UserDetailPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: user, isLoading, isError, refetch } = useUser(id);
@@ -75,9 +77,9 @@ const UserDetailPage: FC = () => {
   if (isError || !user)
     return (
       <div className="p-6">
-        <p className="text-red-600">User not found.</p>
+        <p className="text-red-600">{t("User not found.")}</p>
         <Button variant="outline" className="mt-2" onClick={() => navigate("/admin/users")}>
-          Back
+          {t("Back")}
         </Button>
       </div>
     );
@@ -90,7 +92,7 @@ const UserDetailPage: FC = () => {
         actions={
           <div className="flex items-center gap-2">
             <Badge variant={user.isActive !== false ? "success" : "error"} size="sm">
-              {user.isActive !== false ? "Active" : "Disabled"}
+              {user.isActive !== false ? t("Active") : t("Disabled")}
             </Badge>
             <Button
               variant="outline"
@@ -101,19 +103,19 @@ const UserDetailPage: FC = () => {
               }}
             >
               <Lock className="mr-1 h-4 w-4" />
-              Change Password
+              {t("Change Password")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/admin/users/edit/${user.id}`)}>
               <Pencil className="mr-1 h-4 w-4" />
-              Edit
+              {t("Edit")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(true)} className="text-red-600">
               <Trash2 className="mr-1 h-4 w-4" />
-              Delete
+              {t("Delete")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/users")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -123,49 +125,49 @@ const UserDetailPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <User className="h-4 w-4" />
-              User Info
+              {t("User Info")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<User className="h-4 w-4" />} label="Username" value={user.username} />
-            <InfoRow icon={<User className="h-4 w-4" />} label="First Name" value={user.firstname} />
-            <InfoRow icon={<User className="h-4 w-4" />} label="Last Name" value={user.lastname} />
-            <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={user.email ?? "\u2014"} />
+            <InfoRow icon={<User className="h-4 w-4" />} label={t("Username")} value={user.username} />
+            <InfoRow icon={<User className="h-4 w-4" />} label={t("First Name")} value={user.firstname} />
+            <InfoRow icon={<User className="h-4 w-4" />} label={t("Last Name")} value={user.lastname} />
+            <InfoRow icon={<Mail className="h-4 w-4" />} label={t("Email")} value={user.email ?? "\u2014"} />
             <InfoRow
               icon={<Building2 className="h-4 w-4" />}
-              label="Office"
+              label={t("Office")}
               value={user.officeName ?? `#${user.officeId}`}
             />
-            <InfoRow icon={<Shield className="h-4 w-4" />} label="Staff ID" value={user.staffId ?? "\u2014"} />
+            <InfoRow icon={<Shield className="h-4 w-4" />} label={t("Staff ID")} value={user.staffId ?? "\u2014"} />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              Roles & Settings
+              {t("Roles & Settings")}
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
             <InfoRow
               icon={<Shield className="h-4 w-4" />}
-              label="Roles"
+              label={t("Roles")}
               value={user?.roles?.map((r) => r.name).join(", ") || "\u2014"}
             />
             <InfoRow
               icon={<Lock className="h-4 w-4" />}
-              label="Password Never Expires"
-              value={user.passwordNeverExpires ? "Yes" : "No"}
+              label={t("Password Never Expires")}
+              value={user.passwordNeverExpires ? t("Yes") : t("No")}
             />
             <InfoRow
               icon={<Lock className="h-4 w-4" />}
-              label="Login Retry Lock"
-              value={user.isLoginRetriesEnabled ? "Enabled" : "Disabled"}
+              label={t("Login Retry Lock")}
+              value={user.isLoginRetriesEnabled ? t("Enabled") : t("Disabled")}
             />
             <InfoRow
               icon={<Lock className="h-4 w-4" />}
-              label="Password Reset Allowed"
-              value={user.isPasswordResetAllowed ? "Yes" : "No"}
+              label={t("Password Reset Allowed")}
+              value={user.isPasswordResetAllowed ? t("Yes") : t("No")}
             />
           </CardContent>
         </Card>
@@ -173,9 +175,9 @@ const UserDetailPage: FC = () => {
 
       {changePwdMutation.isError && (
         <ErrorState
-          title="Failed to change password"
+          title={t("Failed to change password")}
           message={
-            changePwdMutation.error instanceof Error ? changePwdMutation.error.message : "An unexpected error occurred."
+            changePwdMutation.error instanceof Error ? changePwdMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => changePwdMutation.reset()}
         />
@@ -192,21 +194,21 @@ const UserDetailPage: FC = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>Set a new password for {user.username}.</DialogDescription>
+            <DialogTitle>{t("Change Password")}</DialogTitle>
+            <DialogDescription>{t(`Set a new password for ${user.username}.`)}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">New Password</label>
+              <label className="block text-sm font-medium">{t("New Password")}</label>
               <Input type="password" {...register("newPassword")} error={errors.newPassword?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Repeat Password</label>
+              <label className="block text-sm font-medium">{t("Repeat Password")}</label>
               <Input type="password" {...register("repeatPassword")} error={errors.repeatPassword?.message} />
             </div>
             <Button type="submit" disabled={changePwdMutation.isPending}>
               {changePwdMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Change Password
+              {t("Change Password")}
             </Button>
           </form>
         </DialogContent>
@@ -219,10 +221,10 @@ const UserDetailPage: FC = () => {
           await deleteMutation.mutateAsync(user.id);
           navigate("/admin/users");
         }}
-        title="Delete User"
-        description={`Delete ${user.username}? The account will be disabled.`}
+        title={t("Delete User")}
+        description={t(`Delete ${user.username}? The account will be disabled.`)}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
       />
     </div>
   );

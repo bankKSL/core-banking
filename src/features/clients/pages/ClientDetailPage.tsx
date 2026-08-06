@@ -48,11 +48,13 @@ import ClientCollaterals from "../components/ClientCollaterals";
 import ClientTransactions from "../components/ClientTransactions";
 import { getClientStatus, getClientDisplayName } from "../utils/client";
 import type { ClientLoanAccount, ClientSavingsAccount } from "../api/client";
+import { useTranslation } from "react-i18next";
 
 const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(n);
 
 const ClientDetailPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: client, isLoading, isError, refetch } = useClient(id);
@@ -104,7 +106,7 @@ const ClientDetailPage: FC = () => {
   if (isError || !client) {
     return (
       <div className="p-6">
-        <ErrorState title="Failed to load client" message="Could not fetch client details." onRetry={() => refetch()} />
+        <ErrorState title={t("Failed to load client")} message={t("Could not fetch client details.")} onRetry={() => refetch()} />
       </div>
     );
   }
@@ -117,7 +119,7 @@ const ClientDetailPage: FC = () => {
     <div className="p-6">
       <PageHeader
         title={displayName}
-        description={`Client #${client.id}`}
+        description={t("Client #{{id}}", { id: client.id })}
         actions={
           <div className="flex items-center gap-2">
             <ClientStatusBadge status={status} size="lg" />
@@ -137,20 +139,20 @@ const ClientDetailPage: FC = () => {
                 className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
               >
                 <CheckCircle2 className="mr-1 h-4 w-4" />
-                Activate
+                {t("Activate")}
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/edit`)}>
               <Pencil className="mr-1 h-4 w-4" />
-              Edit
+              {t("Edit")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/calendars`)}>
               <Calendar className="mr-1 h-4 w-4" />
-              Calendars
+              {t("Calendars")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/meetings`)}>
               <CalendarClock className="mr-1 h-4 w-4" />
-              Meetings
+              {t("Meetings")}
             </Button>
             {isPending && (
               <Button
@@ -160,7 +162,7 @@ const ClientDetailPage: FC = () => {
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >
                 <Trash2 className="mr-1 h-4 w-4" />
-                Delete
+                {t("Delete")}
               </Button>
             )}
           </div>
@@ -171,43 +173,43 @@ const ClientDetailPage: FC = () => {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="general" className="gap-1.5">
             <Info className="h-4 w-4" />
-            General
+            {t("General")}
           </TabsTrigger>
           <TabsTrigger value="accounts" className="gap-1.5">
             <LayoutGrid className="h-4 w-4" />
-            Accounts
+            {t("Accounts")}
           </TabsTrigger>
           <TabsTrigger value="charges" className="gap-1.5">
             <Receipt className="h-4 w-4" />
-            Charges
+            {t("Charges")}
           </TabsTrigger>
           <TabsTrigger value="collaterals" className="gap-1.5">
             <Gem className="h-4 w-4" />
-            Collaterals
+            {t("Collaterals")}
           </TabsTrigger>
           <TabsTrigger value="identifiers" className="gap-1.5">
             <Fingerprint className="h-4 w-4" />
-            Identifiers
+            {t("Identifiers")}
           </TabsTrigger>
           <TabsTrigger value="addresses" className="gap-1.5">
             <MapPinIcon className="h-4 w-4" />
-            Addresses
+            {t("Addresses")}
           </TabsTrigger>
           <TabsTrigger value="family" className="gap-1.5">
             <Users className="h-4 w-4" />
-            Family
+            {t("Family")}
           </TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5">
             <FileText className="h-4 w-4" />
-            Documents
+            {t("Documents")}
           </TabsTrigger>
           <TabsTrigger value="notes" className="gap-1.5">
             <StickyNote className="h-4 w-4" />
-            Notes
+            {t("Notes")}
           </TabsTrigger>
           <TabsTrigger value="transactions" className="gap-1.5">
             <ArrowLeftRight className="h-4 w-4" />
-            Transactions
+            {t("Transactions")}
           </TabsTrigger>
         </TabsList>
         <Separator className="mb-6" />
@@ -224,7 +226,7 @@ const ClientDetailPage: FC = () => {
               onClick={() => navigate(`/lending/applications/new?clientId=${client.id}`)}
             >
               <Plus className="mr-1 h-4 w-4" />
-              New Loan
+              {t("New Loan")}
             </Button>
             <Button
               variant="outline"
@@ -232,11 +234,11 @@ const ClientDetailPage: FC = () => {
               onClick={() => navigate(`/deposits/saving-accounts/new?clientId=${client.id}`)}
             >
               <Plus className="mr-1 h-4 w-4" />
-              New Savings
+              {t("New Savings")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/fixed/new?clientId=${client.id}`)}>
               <Plus className="mr-1 h-4 w-4" />
-              New Fixed Deposit
+              {t("New Fixed Deposit")}
             </Button>
           </div>
           {accountsLoading ? (
@@ -245,7 +247,7 @@ const ClientDetailPage: FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Landmark className="h-4 w-4" />
-                    Loan Accounts
+                    {t("Loan Accounts")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -258,7 +260,7 @@ const ClientDetailPage: FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <PiggyBank className="h-4 w-4 text-emerald-500" />
-                    Savings Accounts
+                    {t("Savings Accounts")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -274,12 +276,12 @@ const ClientDetailPage: FC = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Landmark className="h-4 w-4" />
-                    Loan Accounts
+                    {t("Loan Accounts")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {accounts?.loanAccounts?.length === 0 ? (
-                    <p className="text-sm text-gray-400">No loan accounts</p>
+                    <p className="text-sm text-gray-400">{t("No loan accounts")}</p>
                   ) : (
                     <div className="space-y-3">
                       {accounts?.loanAccounts?.map((loan: ClientLoanAccount) => (
@@ -299,8 +301,8 @@ const ClientDetailPage: FC = () => {
                           </div>
                           <p className="text-sm font-medium">{loan.productName}</p>
                           <div className="flex justify-between mt-2 text-xs text-gray-500">
-                            <span>Balance: {formatCurrency(loan.accountBalance ?? 0, loan.currency.code)}</span>
-                            <span>Out: {formatCurrency(loan.amountOutstanding ?? 0, loan.currency.code)}</span>
+                            <span>{t("Balance")}: {formatCurrency(loan.accountBalance ?? 0, loan.currency.code)}</span>
+                            <span>{t("Out")}: {formatCurrency(loan.amountOutstanding ?? 0, loan.currency.code)}</span>
                           </div>
                         </div>
                       ))}
@@ -312,12 +314,12 @@ const ClientDetailPage: FC = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <PiggyBank className="h-4 w-4 text-emerald-500" />
-                    Savings Accounts
+                    {t("Savings Accounts")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {accounts?.savingsAccounts?.length === 0 ? (
-                    <p className="text-sm text-gray-400">No savings accounts</p>
+                    <p className="text-sm text-gray-400">{t("No savings accounts")}</p>
                   ) : (
                     <div className="space-y-3">
                       {accounts?.savingsAccounts?.map((sav: ClientSavingsAccount) => (
@@ -337,8 +339,8 @@ const ClientDetailPage: FC = () => {
                           </div>
                           <p className="text-sm font-medium">{sav.productName}</p>
                           <div className="flex justify-between mt-2 text-xs text-gray-500">
-                            <span>Balance: {formatCurrency(sav.accountBalance, sav.currency.code)}</span>
-                            <span>Deposits: {formatCurrency(sav.totalDeposits ?? 0, sav.currency.code)}</span>
+                            <span>{t("Balance")}: {formatCurrency(sav.accountBalance, sav.currency.code)}</span>
+                            <span>{t("Deposits")}: {formatCurrency(sav.totalDeposits ?? 0, sav.currency.code)}</span>
                           </div>
                         </div>
                       ))}
@@ -389,26 +391,26 @@ const ClientDetailPage: FC = () => {
         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {deleteMutation.error instanceof Error
             ? deleteMutation.error.message
-            : "Failed to delete client. Only pending clients can be deleted."}
+            : t("Failed to delete client. Only pending clients can be deleted.")}
         </div>
       )}
 
       <ConfirmDialog
         open={showActivateConfirm}
         onOpenChange={setShowActivateConfirm}
-        title="Activate Client"
-        description={`Activate ${displayName}? The client will become active and eligible for financial services.`}
+        title={t("Activate Client")}
+        description={t("Activate {{displayName}}? The client will become active and eligible for financial services.", { displayName })}
         onConfirm={handleActivate}
         variant="default"
       />
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
-        title="Delete Client"
-        description={`⚠️ Delete ${displayName}? Only pending clients with no active loans or savings can be deleted. This cannot be undone.`}
+        title={t("Delete Client")}
+        description={t("⚠️ Delete {{displayName}}? Only pending clients with no active loans or savings can be deleted. This cannot be undone.", { displayName })}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
       />
     </div>
   );

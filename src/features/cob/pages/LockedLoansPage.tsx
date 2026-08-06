@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Lock, RefreshCw, Search } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -18,6 +19,7 @@ const LOCK_OWNER_LABELS: Record<string, string> = {
 };
 
 const LockedLoansPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -34,12 +36,12 @@ const LockedLoansPage: FC = () => {
   const columns: ColumnDef<LoanAccountLock>[] = [
     {
       key: "loanId",
-      header: "Loan ID",
+      header: t("Loan ID"),
       cell: (r) => <span className="font-medium">{r.loanId}</span>,
     },
     {
       key: "lockOwner",
-      header: "Lock Owner",
+      header: t("Lock Owner"),
       cell: (r) => (
         <Badge variant={r.lockOwner === "LOAN_COB_CHUNK_PROCESSING" ? "info" : "warning"}>
           {LOCK_OWNER_LABELS[r.lockOwner] ?? r.lockOwner}
@@ -48,17 +50,17 @@ const LockedLoansPage: FC = () => {
     },
     {
       key: "lockPlacedOn",
-      header: "Locked At",
+      header: t("Locked At"),
       cell: (r) => new Date(r.lockPlacedOn).toLocaleString(),
     },
     {
       key: "lockPlacedOnCobBusinessDate",
-      header: "COB Date",
+      header: t("COB Date"),
       cell: (r) => r.lockPlacedOnCobBusinessDate,
     },
     {
       key: "error",
-      header: "Error",
+      header: t("Error"),
       cell: (r) =>
         r.error ? (
           <span className="text-red-600 text-xs max-w-50 truncate block" title={r.error}>
@@ -70,7 +72,7 @@ const LockedLoansPage: FC = () => {
     },
     {
       key: "version",
-      header: "Version",
+      header: t("Version"),
       cell: (r) => r.version,
     },
   ];
@@ -80,17 +82,17 @@ const LockedLoansPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Locked Loans"
-        description="Loan accounts currently locked during COB processing"
+        title={t("Locked Loans")}
+        description={t("Loan accounts currently locked during COB processing")}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => refetch()}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh
+              {t("Refresh")}
             </Button>
             <Button variant="outline" onClick={() => navigate("/cob/dashboard")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -98,11 +100,11 @@ const LockedLoansPage: FC = () => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Locked Accounts</CardTitle>
+          <CardTitle>{t("Locked Accounts")}</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by loan ID..."
+              placeholder={t("Search by loan ID...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -123,7 +125,7 @@ const LockedLoansPage: FC = () => {
                 data={filtered}
                 emptyState={{
                   icon: <Lock className="h-8 w-8 text-gray-300" />,
-                  message: "No locked loans found.",
+                  message: t("No locked loans found."),
                 }}
                 minWidth={700}
               />

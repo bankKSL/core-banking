@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DollarSign, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -35,6 +36,7 @@ const formatTxDate = (tx: LoanTransaction): string => {
 };
 
 const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, loading, loanId, onSuccess }) => {
+  const { t } = useTranslation();
   const [adjustTarget, setAdjustTarget] = useState<LoanTransaction | null>(null);
   if (loading) {
     return (
@@ -42,7 +44,7 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-gray-400" />
-            Transactions
+            {t("Transactions")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -62,11 +64,11 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-gray-400" />
-            Transactions
+            {t("Transactions")}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-400">No transactions found.</p>
+          <p className="text-sm text-gray-400">{t("No transactions found.")}</p>
         </CardContent>
       </Card>
     );
@@ -77,20 +79,20 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <DollarSign className="h-4 w-4 text-gray-400" />
-          Transactions ({transactions.length})
+          {t("Transactions")} ({transactions.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Principal</TableHead>
-              <TableHead className="text-right">Interest</TableHead>
-              <TableHead>Status</TableHead>
-              {loanId && <TableHead className="text-right">Actions</TableHead>}
+              <TableHead>{t("Date")}</TableHead>
+              <TableHead>{t("Type")}</TableHead>
+              <TableHead className="text-right">{t("Amount")}</TableHead>
+              <TableHead className="text-right">{t("Principal")}</TableHead>
+              <TableHead className="text-right">{t("Interest")}</TableHead>
+              <TableHead>{t("Status")}</TableHead>
+              {loanId && <TableHead className="text-right">{t("Actions")}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,7 +112,7 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
                 <TableCell>
                   <StatusBadge
                     status={getTransactionStatus(tx)}
-                    label={tx.manuallyReversed ? "Reversed" : "Completed"}
+                    label={tx.manuallyReversed ? t("Reversed") : t("Completed")}
                     size="sm"
                   />
                 </TableCell>

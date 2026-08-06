@@ -1,5 +1,6 @@
 import { type FC, useCallback, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -42,6 +43,7 @@ const holidayFormSchema = z.object({
 type HolidayFormValues = z.input<typeof holidayFormSchema>;
 
 const HolidayFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -156,19 +158,19 @@ const HolidayFormPage: FC = () => {
   return (
     <div className="p-6 max-w-5xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Holiday" : "New Holiday"}
-        description="Create or edit a bank holiday"
+        title={isEdit ? t("Edit Holiday") : t("New Holiday")}
+        description={t("Create or edit a bank holiday")}
         actions={
           <Button variant="outline" onClick={() => navigate("/holidays")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {(createMutation.isError || updateMutation.isError) && (
         <ErrorState
-          title="Failed to save holiday"
-          message={saveError instanceof Error ? saveError.message : "An unexpected error occurred."}
+          title={t("Failed to save holiday")}
+          message={saveError instanceof Error ? saveError.message : t("An unexpected error occurred.")}
           onRetry={() => {
             createMutation.reset();
             updateMutation.reset();
@@ -181,30 +183,30 @@ const HolidayFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Holiday Details
+              {t("Holiday Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input
                 {...register("name")}
-                placeholder="e.g. New Year's Day"
+                placeholder={t("e.g. New Year's Day")}
                 error={errors.name?.message}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Description</label>
+              <label className="block text-sm font-medium">{t("Description")}</label>
               <Textarea
                 {...register("description")}
-                placeholder="Optional description"
+                placeholder={t("Optional description")}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">From Date *</label>
+                <label className="block text-sm font-medium">{t("From Date")} *</label>
                 <Input
                   type="date"
                   {...register("fromDate")}
@@ -212,7 +214,7 @@ const HolidayFormPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">To Date *</label>
+                <label className="block text-sm font-medium">{t("To Date")} *</label>
                 <Input
                   type="date"
                   {...register("toDate")}
@@ -222,7 +224,7 @@ const HolidayFormPage: FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Rescheduling Type *</label>
+              <label className="block text-sm font-medium">{t("Rescheduling Type")} *</label>
               <Controller
                 name="reschedulingType"
                 control={control}
@@ -232,7 +234,7 @@ const HolidayFormPage: FC = () => {
                     onValueChange={(v) => field.onChange(v ? Number(v) : null)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select rescheduling type" />
+                      <SelectValue placeholder={t("Select rescheduling type")} />
                     </SelectTrigger>
                     <SelectContent>
                       {reschedulingTypeOptions.map((opt) => (
@@ -250,7 +252,7 @@ const HolidayFormPage: FC = () => {
             {isSpecificDate && (
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">
-                  Repayments Rescheduled To
+                  {t("Repayments Rescheduled To")}
                 </label>
                 <Input
                   type="date"
@@ -260,7 +262,7 @@ const HolidayFormPage: FC = () => {
             )}
 
             <div>
-              <label className="block text-sm font-medium">Offices *</label>
+              <label className="block text-sm font-medium">{t("Offices")} *</label>
               <Controller
                 name="selectedOfficeIds"
                 control={control}
@@ -293,7 +295,7 @@ const HolidayFormPage: FC = () => {
                       })}
                       {offices.length === 0 && (
                         <p className="text-sm text-gray-500 col-span-full">
-                          No offices available.
+                          {t("No offices available.")}
                         </p>
                       )}
                     </div>
@@ -309,17 +311,17 @@ const HolidayFormPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/holidays")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />{" "}
-                {isEdit ? "Update Holiday" : "Create Holiday"}
+                {isEdit ? t("Update Holiday") : t("Create Holiday")}
               </>
             )}
           </Button>

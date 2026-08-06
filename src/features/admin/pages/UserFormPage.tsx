@@ -1,5 +1,6 @@
 import { type FC, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +33,7 @@ const userSchema = z.object({
 type UserFormValues = z.infer<typeof userSchema>;
 
 const UserFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -137,34 +139,34 @@ const UserFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit User" : "Create User"}
-        description={isEdit ? `Editing user #${id}` : "Register a new application user"}
+        title={isEdit ? t("Edit User") : t("Create User")}
+        description={isEdit ? t(`Editing user #${id}`) : t("Register a new application user")}
         actions={
           <Button variant="outline" onClick={() => navigate("/admin/users")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Basic Information</CardTitle>
+            <CardTitle className="text-base">{t("Basic Information")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">Username *</label>
+              <label className="block text-sm font-medium">{t("Username")} *</label>
               <Input {...register("username")} error={errors.username?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">First Name *</label>
+              <label className="block text-sm font-medium">{t("First Name")} *</label>
               <Input {...register("firstname")} error={errors.firstname?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Last Name *</label>
+              <label className="block text-sm font-medium">{t("Last Name")} *</label>
               <Input {...register("lastname")} error={errors.lastname?.message} />
             </div>
             <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">Email</label>
+              <label className="block text-sm font-medium">{t("Email")}</label>
               <Input type="email" {...register("email")} placeholder="user@example.com" error={errors.email?.message} />
             </div>
           </CardContent>
@@ -172,17 +174,17 @@ const UserFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Organization</CardTitle>
+            <CardTitle className="text-base">{t("Organization")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Office *</label>
+              <label className="block text-sm font-medium">{t("Office")} *</label>
               <Select
                 value={watch("officeId")}
                 onValueChange={(v) => setValue("officeId", v, { shouldValidate: true })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
+                  <SelectValue placeholder={t("Select office")} />
                 </SelectTrigger>
                 <SelectContent>
                   {template?.allowedOffices?.map((o) => (
@@ -195,15 +197,15 @@ const UserFormPage: FC = () => {
               {errors.officeId && <p className="text-xs text-red-500 mt-1">{errors.officeId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Staff ID</label>
-              <Input type="number" {...register("staffId")} placeholder="Optional" />
+              <label className="block text-sm font-medium">{t("Staff ID")}</label>
+              <Input type="number" {...register("staffId")} placeholder={t("Optional")} />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Roles *</CardTitle>
+            <CardTitle className="text-base">{t("Roles")} *</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -227,23 +229,23 @@ const UserFormPage: FC = () => {
         {!isEdit && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Password</CardTitle>
+              <CardTitle className="text-base">{t("Password")}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex items-center gap-3">
                 <Switch id="sendPasswordToEmail" onCheckedChange={(v) => setValue("sendPasswordToEmail", v)} />
                 <label className="block text-sm font-medium" htmlFor="sendPasswordToEmail">
-                  Send password via email
+                  {t("Send password via email")}
                 </label>
               </div>
               {!sendPasswordToEmail && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Password *</label>
+                    <label className="block text-sm font-medium">{t("Password")} *</label>
                     <Input type="password" {...register("password")} />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Repeat Password *</label>
+                    <label className="block text-sm font-medium">{t("Repeat Password")} *</label>
                     <Input type="password" {...register("repeatPassword")} />
                   </div>
                 </>
@@ -254,7 +256,7 @@ const UserFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Settings</CardTitle>
+            <CardTitle className="text-base">{t("Settings")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
@@ -264,7 +266,7 @@ const UserFormPage: FC = () => {
                 defaultChecked={user?.passwordNeverExpires ?? false}
               />
               <label className="block text-sm font-medium" htmlFor="passwordNeverExpires">
-                Password never expires
+                {t("Password never expires")}
               </label>
             </div>
             <div className="flex items-center gap-3">
@@ -274,7 +276,7 @@ const UserFormPage: FC = () => {
                 defaultChecked={user?.isLoginRetriesEnabled ?? true}
               />
               <label className="block text-sm font-medium" htmlFor="isLoginRetriesEnabled">
-                Enable login retry locking
+                {t("Enable login retry locking")}
               </label>
             </div>
             <div className="flex items-center gap-3">
@@ -284,7 +286,7 @@ const UserFormPage: FC = () => {
                 defaultChecked={user?.isPasswordResetAllowed ?? true}
               />
               <label className="block text-sm font-medium" htmlFor="isPasswordResetAllowed">
-                Allow password reset
+                {t("Allow password reset")}
               </label>
             </div>
           </CardContent>
@@ -293,12 +295,12 @@ const UserFormPage: FC = () => {
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/admin/users")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEdit ? "Save Changes" : "Create User"}
+            {isEdit ? t("Save Changes") : t("Create User")}
           </Button>
         </div>
       </form>

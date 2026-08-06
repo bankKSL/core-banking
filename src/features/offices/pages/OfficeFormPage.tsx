@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import OfficeForm from "@/components/organization/OfficeForm";
 import type { OfficeCreateFormData } from "@/lib/validations/office";
 
 const OfficeFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -57,7 +59,7 @@ const OfficeFormPage: React.FC = () => {
       } catch (err: unknown) {
         const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
         const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save office.";
+          error?.response?.data?.errors?.[0]?.defaultUserMessage ?? t("Failed to save office.");
         setMutationError(msg);
       }
     },
@@ -83,11 +85,11 @@ const OfficeFormPage: React.FC = () => {
   return (
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Office" : "New Office"}
-        description={isEdit ? "Update office details" : "Create a new office in the hierarchy"}
+        title={isEdit ? t("Edit Office") : t("New Office")}
+        description={isEdit ? t("Update office details") : t("Create a new office in the hierarchy")}
         actions={
           <Button variant="outline" onClick={() => navigate("/offices")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />

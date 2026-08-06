@@ -1,4 +1,5 @@
 import { type FC, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, Save, Loader2, Eye, EyeOff, Globe } from "lucide-react";
@@ -16,6 +17,7 @@ const SERVICE_NAMES = ["S3", "SMTP", "SMS", "NOTIFICATION"];
 const SENSITIVE_FIELDS = ["password", "secretKey", "secret_key", "authToken", "auth_token"];
 
 const ExternalServicesPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState(SERVICE_NAMES[0]);
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set());
@@ -61,21 +63,21 @@ const ExternalServicesPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="External Services"
-        description="Configure S3, SMTP, SMS, and Notification service integrations"
+        title={t("External Services")}
+        description={t("Configure S3, SMTP, SMS, and Notification service integrations")}
         actions={
           <Button variant="outline" onClick={() => navigate("/configuration")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
 
       {updateMutation.isError && (
         <ErrorState
-          title="Failed to save configuration"
+          title={t("Failed to save configuration")}
           message={
-            updateMutation.error instanceof Error ? updateMutation.error.message : "An unexpected error occurred."
+            updateMutation.error instanceof Error ? updateMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => updateMutation.reset()}
         />
@@ -84,14 +86,14 @@ const ExternalServicesPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Service Configuration
-            </CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                {t("Service Configuration")}
+              </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Service</label>
+              <label className="block text-sm font-medium">{t("Service")}</label>
               <Select value={selectedService} onValueChange={setSelectedService}>
                 <SelectTrigger>
                   <SelectValue />
@@ -115,7 +117,7 @@ const ExternalServicesPage: FC = () => {
             ) : (
               <div className="space-y-4">
                 {properties.length === 0 && (
-                  <p className="text-sm text-gray-500">Select a service to view its configuration.</p>
+                  <p className="text-sm text-gray-500">{t("Select a service to view its configuration.")}</p>
                 )}
                 {properties.map((p) => {
                   const sensitive = isSensitive(p.name);
@@ -148,7 +150,7 @@ const ExternalServicesPage: FC = () => {
                 <Button type="submit" disabled={updateMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
                   {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Save className="mr-2 h-4 w-4" />
-                  Save Configuration
+                  {t("Save Configuration")}
                 </Button>
               </div>
             )}

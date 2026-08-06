@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Loader2, Users, CheckSquare, Square, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -45,6 +46,7 @@ function getLoanStatusColor(code: string): string {
 }
 
 const LoanReassignmentPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { success } = useToast();
   const { can } = useLoanPermissions();
@@ -140,7 +142,7 @@ const LoanReassignmentPage: FC = () => {
     });
 
     setConfirmOpen(false);
-    success("Loans reassigned", `${selectedLoanIds.size} loan(s) have been reassigned successfully.`);
+    success(t("Loans reassigned"), `${selectedLoanIds.size} ${t("loan(s) have been reassigned successfully.")}`);
     navigate("/loans");
   }, [executeMutation, navigate, selectedLoanIds, success, getValues]);
 
@@ -148,15 +150,15 @@ const LoanReassignmentPage: FC = () => {
     return (
       <div className="p-6 max-w-2xl m-auto space-y-6">
         <PageHeader
-          title="Bulk Loan Reassignment"
-          description="Reassign loans between loan officers"
+          title={t("Bulk Loan Reassignment")}
+          description={t("Reassign loans between loan officers")}
           actions={
             <Button variant="outline" onClick={() => navigate("/loans")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
-        <ErrorState title="Permission denied" message="You do not have permission to perform bulk loan reassignment." />
+        <ErrorState title={t("Permission denied")} message={t("You do not have permission to perform bulk loan reassignment.")} />
       </div>
     );
   }
@@ -180,20 +182,20 @@ const LoanReassignmentPage: FC = () => {
   return (
     <div className="p-6 max-w-3xl m-auto space-y-6">
       <PageHeader
-        title="Bulk Loan Reassignment"
-        description="Reassign loans between loan officers"
+        title={t("Bulk Loan Reassignment")}
+        description={t("Reassign loans between loan officers")}
         actions={
           <Button variant="outline" onClick={() => navigate("/loans")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
       {executeMutation.isError && (
         <ErrorState
-          title="Failed to reassign loans"
+          title={t("Failed to reassign loans")}
           message={
-            executeMutation.error instanceof Error ? executeMutation.error.message : "An unexpected error occurred."
+            executeMutation.error instanceof Error ? executeMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => executeMutation.reset()}
         />
@@ -202,7 +204,7 @@ const LoanReassignmentPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Reassignment Details</CardTitle>
+            <CardTitle>{t("Reassignment Details")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <OfficeSelect
@@ -213,7 +215,7 @@ const LoanReassignmentPage: FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">From Loan Officer *</label>
+                <label className="block text-sm font-medium">{t("From Loan Officer")} *</label>
                 <Controller
                   name="fromLoanOfficerId"
                   control={control}
@@ -223,7 +225,7 @@ const LoanReassignmentPage: FC = () => {
                       onValueChange={(v) => handleFromOfficerChange(v)}
                     >
                       <SelectTrigger id="fromLoanOfficer">
-                        <SelectValue placeholder="Select officer..." />
+                        <SelectValue placeholder={t("Select officer...")} />
                       </SelectTrigger>
                       <SelectContent>
                         {loanOfficerOptions.map((o) => (
@@ -241,7 +243,7 @@ const LoanReassignmentPage: FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">To Loan Officer *</label>
+                <label className="block text-sm font-medium">{t("To Loan Officer")} *</label>
                 <Controller
                   name="toLoanOfficerId"
                   control={control}
@@ -251,7 +253,7 @@ const LoanReassignmentPage: FC = () => {
                       onValueChange={(v) => field.onChange(Number(v))}
                     >
                       <SelectTrigger id="toLoanOfficer">
-                        <SelectValue placeholder="Select officer..." />
+                        <SelectValue placeholder={t("Select officer...")} />
                       </SelectTrigger>
                       <SelectContent>
                         {loanOfficerOptions.map((o) => (
@@ -274,7 +276,7 @@ const LoanReassignmentPage: FC = () => {
               control={control}
               render={({ field }) => (
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Assignment Date *</label>
+                  <label className="block text-sm font-medium">{t("Assignment Date")} *</label>
                   <input
                     type="date"
                     {...field}
@@ -288,7 +290,7 @@ const LoanReassignmentPage: FC = () => {
 
             {toLoanOfficerId && fromLoanOfficerId && toLoanOfficerId === fromLoanOfficerId && (
               <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" /> From and To officers must be different.
+                <AlertTriangle className="h-3 w-3" /> {t("From and To officers must be different.")}
               </p>
             )}
           </CardContent>
@@ -298,10 +300,10 @@ const LoanReassignmentPage: FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-base">
-                Loans to Reassign
+                {t("Loans to Reassign")}
                 {selectedLoanIds.size > 0 && (
                   <span className="ml-2 text-sm font-normal text-gray-500">
-                    ({selectedLoanIds.size} of {allLoans.length} selected)
+                    ({selectedLoanIds.size} {t("of")} {allLoans.length} {t("selected")})
                   </span>
                 )}
               </CardTitle>
@@ -309,11 +311,11 @@ const LoanReassignmentPage: FC = () => {
                 <Button type="button" variant="ghost" size="sm" onClick={toggleAll} className="h-8 text-xs">
                   {allSelected ? (
                     <>
-                      <Square className="mr-1 h-3 w-3" /> Deselect All
+                      <Square className="mr-1 h-3 w-3" /> {t("Deselect All")}
                     </>
                   ) : (
                     <>
-                      <CheckSquare className="mr-1 h-3 w-3" /> Select All
+                      <CheckSquare className="mr-1 h-3 w-3" /> {t("Select All")}
                     </>
                   )}
                 </Button>
@@ -329,14 +331,14 @@ const LoanReassignmentPage: FC = () => {
               ) : !hasLoans ? (
                 <EmptyState
                   icon={Users}
-                  title="No loans to reassign"
-                  description="The selected officer has no active loans assigned."
+                  title={t("No loans to reassign")}
+                  description={t("The selected officer has no active loans assigned.")}
                 />
               ) : (
                 <div className="space-y-4">
                   {clients.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Clients</h4>
+                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t("Clients")}</h4>
                       <div className="space-y-2">
                         {clients.map((client) => (
                           <ClientGroupCard
@@ -351,7 +353,7 @@ const LoanReassignmentPage: FC = () => {
                   )}
                   {groups.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Groups</h4>
+                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t("Groups")}</h4>
                       <div className="space-y-2">
                         {groups.map((group) => (
                           <ClientGroupCard
@@ -372,7 +374,7 @@ const LoanReassignmentPage: FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate("/loans")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             type="submit"
@@ -386,10 +388,10 @@ const LoanReassignmentPage: FC = () => {
           >
             {executeMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reassigning...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Reassigning...")}
               </>
             ) : (
-              `Reassign ${selectedLoanIds.size > 0 ? `${selectedLoanIds.size} ` : ""}Loan${selectedLoanIds.size !== 1 ? "s" : ""}`
+              `${t("Reassign")} ${selectedLoanIds.size > 0 ? `${selectedLoanIds.size} ` : ""}${t("Loan")}${selectedLoanIds.size !== 1 ? "s" : ""}`
             )}
           </Button>
         </div>
@@ -399,9 +401,9 @@ const LoanReassignmentPage: FC = () => {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         onConfirm={confirmSubmit}
-        title="Confirm Bulk Reassignment"
-        description={`You are about to reassign ${selectedLoanIds.size} loan(s). This action cannot be undone.`}
-        confirmLabel={executeMutation.isPending ? "Reassigning..." : "Confirm Reassignment"}
+        title={t("Confirm Bulk Reassignment")}
+        description={`${t("You are about to reassign")} ${selectedLoanIds.size} ${t("loan(s). This action cannot be undone.")}`}
+        confirmLabel={executeMutation.isPending ? t("Reassigning...") : t("Confirm Reassignment")}
         loading={executeMutation.isPending}
       />
     </div>

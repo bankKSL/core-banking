@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   PiggyBank,
@@ -104,6 +105,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.Rea
 );
 
 const DepositAccountDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: account, isLoading, isError, error, refetch } = useSavingsAccount(id);
@@ -220,9 +222,9 @@ const DepositAccountDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-600">Failed to load: {String(error)}</p>
+          <p className="text-red-600">{t("Failed to load:")} {String(error)}</p>
           <Button variant="outline" className="mt-2" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -364,28 +366,28 @@ const DepositAccountDetailPage: React.FC = () => {
                   className="text-emerald-600 border-emerald-200"
                 >
                   {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                  <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Approve
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("reject")}
-                  disabled={acting}
-                  className="text-red-600"
-                >
-                  <XCircle className="mr-1 h-4 w-4" />
-                  Reject
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("withdraw")}
-                  disabled={acting}
-                  className="text-amber-600"
-                >
-                  Withdraw
-                </Button>
+                   <CheckCircle2 className="mr-1 h-4 w-4" />
+                   {t("Approve")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCommand("reject")}
+                   disabled={acting}
+                   className="text-red-600"
+                 >
+                   <XCircle className="mr-1 h-4 w-4" />
+                   {t("Reject")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCommand("withdraw")}
+                   disabled={acting}
+                   className="text-amber-600"
+                 >
+                   {t("Withdraw")}
+                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -398,7 +400,7 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={acting}
                   className="text-red-600"
                 >
-                  <Trash2 className="mr-1 h-4 w-4" /> Delete
+                   <Trash2 className="mr-1 h-4 w-4" /> {t("Delete")}
                 </Button>
               </>
             )}
@@ -412,17 +414,17 @@ const DepositAccountDetailPage: React.FC = () => {
                   className="text-emerald-600"
                 >
                   {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                  <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Activate
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("undoapproval")}
-                  disabled={acting}
-                  className="text-amber-600"
-                >
-                  Undo Approval
+                   <CheckCircle2 className="mr-1 h-4 w-4" />
+                   {t("Activate")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCommand("undoapproval")}
+                   disabled={acting}
+                   className="text-amber-600"
+                 >
+                   {t("Undo Approval")}
                 </Button>
               </>
             )}
@@ -435,18 +437,18 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={isBlocked || isBlockedDebit}
                   className="text-emerald-600"
                 >
-                  <ArrowDownCircle className="mr-1 h-4 w-4" />
-                  Deposit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTxnDialog("withdrawal")}
-                  disabled={isBlocked || isBlockedCredit}
-                  className="text-amber-600"
-                >
-                  <ArrowUpCircle className="mr-1 h-4 w-4" />
-                  Withdraw
+                   <ArrowDownCircle className="mr-1 h-4 w-4" />
+                   {t("Deposit")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => setTxnDialog("withdrawal")}
+                   disabled={isBlocked || isBlockedCredit}
+                   className="text-amber-600"
+                 >
+                   <ArrowUpCircle className="mr-1 h-4 w-4" />
+                   {t("Withdraw")}
                 </Button>
                 <Button
                   variant="outline"
@@ -454,42 +456,42 @@ const DepositAccountDetailPage: React.FC = () => {
                   onClick={() => handleCommand("calculateInterest")}
                   disabled={acting}
                 >
-                  Calc Interest
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleCommand("postInterest")} disabled={acting}>
-                  Post Interest
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setHoldDialogOpen(true)}>
-                  Hold Amount
-                </Button>
-                <Button variant="outline" size="sm" onClick={loadOnHoldTransactions}>
-                  On-Hold Funds
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
-                  Force Withdrawal
-                </Button>
+                 {t("Calc Interest")}
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={() => handleCommand("postInterest")} disabled={acting}>
+                   {t("Post Interest")}
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={() => setHoldDialogOpen(true)}>
+                   {t("Hold Amount")}
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={loadOnHoldTransactions}>
+                   {t("On-Hold Funds")}
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
+                   {t("Force Withdrawal")}
+                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleApplyAnnualFees}
                   disabled={applyAnnualFeesMutation.isPending}
                 >
-                  Apply Annual Fees
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setAssignOfficerDialogOpen(true)}>
-                  Assign Officer
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUnassignOfficer}
-                  disabled={unassignOfficerMutation.isPending}
-                >
-                  Unassign Officer
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setSearchDialogOpen(true)}>
-                  <Search className="mr-1 h-4 w-4" />
-                  Search Transactions
+                 {t("Apply Annual Fees")}
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={() => setAssignOfficerDialogOpen(true)}>
+                   {t("Assign Officer")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={handleUnassignOfficer}
+                   disabled={unassignOfficerMutation.isPending}
+                 >
+                   {t("Unassign Officer")}
+                 </Button>
+                 <Button variant="outline" size="sm" onClick={() => setSearchDialogOpen(true)}>
+                   <Search className="mr-1 h-4 w-4" />
+                   {t("Search Transactions")}
                 </Button>
                 <Button
                   variant="outline"
@@ -498,53 +500,53 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={acting}
                   className="text-red-600"
                 >
-                  Block
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => { setBlockReason(""); setBlockReasonDialog("blockCredit"); }}
-                  disabled={acting}
-                  className="text-amber-600"
-                >
-                  Block Credit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => { setBlockReason(""); setBlockReasonDialog("blockDebit"); }}
-                  disabled={acting}
-                  className="text-amber-600"
-                >
-                  Block Debit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("unblock")}
-                  disabled={acting}
-                  className="text-emerald-600"
-                >
-                  Unblock
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("unblockCredit")}
-                  disabled={acting}
-                  className="text-emerald-600"
-                >
-                  Unblock Credit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("unblockDebit")}
-                  disabled={acting}
-                  className="text-emerald-600"
-                >
-                  Unblock Debit
-                </Button>
+                 {t("Block")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => { setBlockReason(""); setBlockReasonDialog("blockCredit"); }}
+                   disabled={acting}
+                   className="text-amber-600"
+                 >
+                   {t("Block Credit")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => { setBlockReason(""); setBlockReasonDialog("blockDebit"); }}
+                   disabled={acting}
+                   className="text-amber-600"
+                 >
+                   {t("Block Debit")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCommand("unblock")}
+                   disabled={acting}
+                   className="text-emerald-600"
+                 >
+                   {t("Unblock")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCommand("unblockCredit")}
+                   disabled={acting}
+                   className="text-emerald-600"
+                 >
+                   {t("Unblock Credit")}
+                 </Button>
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCommand("unblockDebit")}
+                   disabled={acting}
+                   className="text-emerald-600"
+                 >
+                   {t("Unblock Debit")}
+                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -552,19 +554,19 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={acting}
                   className="text-gray-600"
                 >
-                  <XCircle className="mr-1 h-4 w-4" />
-                  Close
+                   <XCircle className="mr-1 h-4 w-4" />
+                   {t("Close")}
                 </Button>
               </>
             )}
             {isRejected && (
               <Button variant="outline" size="sm" onClick={() => handleCommand("undoreject")} disabled={acting}>
-                Undo Reject
+                {t("Undo Reject")}
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/saving-accounts")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -574,15 +576,15 @@ const DepositAccountDetailPage: React.FC = () => {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="general">
             <Info className="h-4 w-4 mr-1" />
-            General
+            {t("General")}
           </TabsTrigger>
           <TabsTrigger value="charges">
             <Receipt className="h-4 w-4 mr-1" />
-            Charges
+            {t("Charges")}
           </TabsTrigger>
           <TabsTrigger value="transactions">
             <ArrowLeftRight className="h-4 w-4 mr-1" />
-            Transactions
+            {t("Transactions")}
           </TabsTrigger>
         </TabsList>
         <Separator className="my-4" />
@@ -593,41 +595,41 @@ const DepositAccountDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <PiggyBank className="h-4 w-4 text-emerald-500" />
-                  Account Info
+                  {t("Account Info")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<Hash className="h-4 w-4" />}
-                  label="Account No"
+                  label={t("Account No")}
                   value={<code className="text-xs">{a.accountNo}</code>}
                 />
                 <InfoRow
                   icon={<Building2 className="h-4 w-4" />}
-                  label="Product"
+                  label={t("Product")}
                   value={a.savingsProductName ?? a.savingsProductId}
                 />
-                <InfoRow icon={<User className="h-4 w-4" />} label="Client" value={a.clientName ?? `#${a.clientId}`} />
+                <InfoRow icon={<User className="h-4 w-4" />} label={t("Client")} value={a.clientName ?? `#${a.clientId}`} />
                 <InfoRow
                   icon={<User className="h-4 w-4" />}
-                  label="Field Officer ID"
+                  label={t("Field Officer ID")}
                   value={a.fieldOfficerId != null && a.fieldOfficerId !== 0 ? a.fieldOfficerId : "—"}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
-                  label="Balance"
+                  label={t("Balance")}
                   value={
                     <span className="font-semibold">{formatCurrency(summary.accountBalance, a.currency?.code)}</span>
                   }
                 />
                 <InfoRow
                   icon={<Percent className="h-4 w-4" />}
-                  label="Interest Rate"
+                  label={t("Interest Rate")}
                   value={`${a.nominalAnnualInterestRate ?? 0}%`}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
-                  label="Available"
+                  label={t("Available")}
                   value={formatCurrency(summary.availableBalance, a.currency?.code)}
                 />
               </CardContent>
@@ -637,28 +639,28 @@ const DepositAccountDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-gray-400" />
-                  Summary
+                  {t("Summary")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
-                  label="Total Deposits"
+                  label={t("Total Deposits")}
                   value={formatCurrency(summary.totalDeposits, a.currency?.code)}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4 text-amber-500" />}
-                  label="Interest Earned"
+                  label={t("Interest Earned")}
                   value={formatCurrency(summary.totalInterestEarned, a.currency?.code)}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4 text-amber-500" />}
-                  label="Interest Posted"
+                  label={t("Interest Posted")}
                   value={formatCurrency(summary.totalInterestPosted, a.currency?.code)}
                 />
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
-                  label="Last Transaction"
+                  label={t("Last Transaction")}
                   value={fmtDate(a.lastActiveTransactionDate)}
                 />
               </CardContent>
@@ -668,23 +670,23 @@ const DepositAccountDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-400" />
-                  Timeline
+                  {t("Timeline")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Submitted"
+                  label={t("Submitted")}
                   value={fmtDate(a.timeline?.submittedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Approved"
+                  label={t("Approved")}
                   value={fmtDate(a.timeline?.approvedOnDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Activated"
+                  label={t("Activated")}
                   value={fmtDate(a.timeline?.activatedOnDate)}
                 />
               </CardContent>
@@ -694,32 +696,32 @@ const DepositAccountDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base">
                   <Percent className="inline mr-2 h-4 w-4" />
-                  Interest Rate &amp; Configuration
+                   {t("Interest Rate & Configuration")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Interest Rate:</span>{" "}
+                                     <span className="text-gray-500">{t("Interest Rate:")}</span>{" "}
                   <span className="font-medium">{a.nominalAnnualInterestRate ?? 0}%</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Compounding:</span>{" "}
+                                     <span className="text-gray-500">{t("Compounding:")}</span>{" "}
                   <span className="font-medium">{a.interestCompoundingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Posting:</span>{" "}
+                                     <span className="text-gray-500">{t("Posting:")}</span>{" "}
                   <span className="font-medium">{a.interestPostingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Calculation:</span>{" "}
+                                     <span className="text-gray-500">{t("Calculation:")}</span>{" "}
                   <span className="font-medium">{a.interestCalculationType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Days/Year:</span>{" "}
+                                     <span className="text-gray-500">{t("Days/Year:")}</span>{" "}
                   <span className="font-medium">{a.interestCalculationDaysInYearType?.value ?? "—"}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Min Opening Balance:</span>{" "}
+                                     <span className="text-gray-500">{t("Min Opening Balance:")}</span>{" "}
                   <span className="font-medium">
                     {a.minRequiredOpeningBalance != null
                       ? formatCurrency(a.minRequiredOpeningBalance, a.currency?.code)
@@ -765,13 +767,13 @@ const DepositAccountDetailPage: React.FC = () => {
       <Dialog open={holdDialogOpen} onOpenChange={setHoldDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Hold Amount</DialogTitle>
-            <DialogDescription>Freeze an amount on this account.</DialogDescription>
+            <DialogTitle>{t("Hold Amount")}</DialogTitle>
+            <DialogDescription>{t("Freeze an amount on this account.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="holdAmount">
-                Amount *
+                {t("Amount")} *
               </label>
               <Input
                 id="holdAmount"
@@ -789,18 +791,18 @@ const DepositAccountDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="holdReason">
-                Reason *
+                {t("Reason")} *
               </label>
               <Input
                 id="holdReason"
                 value={holdReason}
                 onChange={(e) => setHoldReason(e.target.value)}
-                placeholder="e.g. Court order hold"
+                placeholder={t("e.g. Court order hold")}
               />
             </div>
             <Button onClick={handleHoldAmount} disabled={!holdAmount || !holdReason}>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Hold
+              {t("Hold")}
             </Button>
           </div>
         </DialogContent>
@@ -810,21 +812,21 @@ const DepositAccountDetailPage: React.FC = () => {
       <Dialog open={showOnHold} onOpenChange={setShowOnHold}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>On-Hold Funds</DialogTitle>
-            <DialogDescription>Currently held amounts on this account.</DialogDescription>
+            <DialogTitle>{t("On-Hold Funds")}</DialogTitle>
+            <DialogDescription>{t("Currently held amounts on this account.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             {onHoldTxns?.length === 0 ? (
-              <p className="text-sm text-gray-500">No funds on hold.</p>
+              <p className="text-sm text-gray-500">{t("No funds on hold.")}</p>
             ) : (
-              onHoldTxns?.map((t) => (
-                <div key={t.id} className="flex items-center justify-between rounded-lg border p-3">
+              onHoldTxns?.map((txn) => (
+                <div key={txn.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div>
-                    <p className="text-sm font-medium">{formatCurrency(t.amount, a.currency?.code)}</p>
-                    {t.reasonForBlock && <p className="text-xs text-gray-500">{t.reasonForBlock}</p>}
+                    <p className="text-sm font-medium">{formatCurrency(txn.amount, a.currency?.code)}</p>
+                    {txn.reasonForBlock && <p className="text-xs text-gray-500">{txn.reasonForBlock}</p>}
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleReleaseHold(t.id)}>
-                    Release
+                  <Button variant="outline" size="sm" onClick={() => handleReleaseHold(txn.id)}>
+                    {t("Release")}
                   </Button>
                 </div>
               ))
@@ -837,8 +839,8 @@ const DepositAccountDetailPage: React.FC = () => {
       <Dialog open={forceWithdrawalDialogOpen} onOpenChange={setForceWithdrawalDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Force Withdrawal</DialogTitle>
-            <DialogDescription>Force a withdrawal from this account.</DialogDescription>
+            <DialogTitle>{t("Force Withdrawal")}</DialogTitle>
+            <DialogDescription>{t("Force a withdrawal from this account.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -855,13 +857,13 @@ const DepositAccountDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="fwDate">
-                Date *
+                {t("Date")} *
               </label>
               <Input id="fwDate" type="date" value={fwDate} onChange={(e) => setFwDate(e.target.value)} />
             </div>
             <Button onClick={handleForceWithdrawal} disabled={!fwAmount || forceWithdrawalMutation.isPending}>
               {forceWithdrawalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Force Withdraw
+              {t("Force Withdraw")}
             </Button>
           </div>
         </DialogContent>
@@ -871,15 +873,15 @@ const DepositAccountDetailPage: React.FC = () => {
       <Dialog open={assignOfficerDialogOpen} onOpenChange={setAssignOfficerDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Savings Officer</DialogTitle>
-            <DialogDescription>Select an officer to assign to this account.</DialogDescription>
+            <DialogTitle>{t("Assign Savings Officer")}</DialogTitle>
+            <DialogDescription>{t("Select an officer to assign to this account.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium">Officer *</label>
+              <label className="block text-sm font-medium">{t("Officer")} *</label>
               <Select onValueChange={setSelectedOfficerId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select officer" />
+                  <SelectValue placeholder={t("Select officer")} />
                 </SelectTrigger>
                 <SelectContent>
                   {staffList?.map((o: any) => (
@@ -892,7 +894,7 @@ const DepositAccountDetailPage: React.FC = () => {
             </div>
             <Button onClick={handleAssignOfficer} disabled={!selectedOfficerId || assignOfficerMutation.isPending}>
               {assignOfficerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Assign
+              {t("Assign")}
             </Button>
           </div>
         </DialogContent>
@@ -902,20 +904,20 @@ const DepositAccountDetailPage: React.FC = () => {
       <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Search Transactions</DialogTitle>
-            <DialogDescription>Filter transactions by date range.</DialogDescription>
+            <DialogTitle>{t("Search Transactions")}</DialogTitle>
+            <DialogDescription>{t("Filter transactions by date range.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-4">
               <div className="flex flex-col gap-1.5 flex-1">
                 <label className="block text-sm font-medium" htmlFor="searchFrom">
-                  From Date
+                  {t("From Date")}
                 </label>
                 <Input id="searchFrom" type="date" value={searchFrom} onChange={(e) => setSearchFrom(e.target.value)} />
               </div>
               <div className="flex flex-col gap-1.5 flex-1">
                 <label className="block text-sm font-medium" htmlFor="searchTo">
-                  To Date
+                  {t("To Date")}
                 </label>
                 <Input id="searchTo" type="date" value={searchTo} onChange={(e) => setSearchTo(e.target.value)} />
               </div>
@@ -923,7 +925,7 @@ const DepositAccountDetailPage: React.FC = () => {
             <Button onClick={handleSearchTransactions} disabled={searching}>
               {searching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Search className="mr-2 h-4 w-4" />
-              Search
+              {t("Search")}
             </Button>
             {searchResults.length > 0 && (
               <div className="max-h-64 overflow-y-auto space-y-2">
@@ -939,7 +941,7 @@ const DepositAccountDetailPage: React.FC = () => {
               </div>
             )}
             {searchResults.length === 0 && !searching && searchFrom && (
-              <p className="text-sm text-gray-500">No transactions found.</p>
+              <p className="text-sm text-gray-500">{t("No transactions found.")}</p>
             )}
           </div>
         </DialogContent>
@@ -949,25 +951,25 @@ const DepositAccountDetailPage: React.FC = () => {
       <Dialog open={!!blockReasonDialog} onOpenChange={() => setBlockReasonDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Block Account</DialogTitle>
-            <DialogDescription>Provide a reason for blocking (required by backend).</DialogDescription>
+            <DialogTitle>{t("Block Account")}</DialogTitle>
+            <DialogDescription>{t("Provide a reason for blocking (required by backend).")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="blockReason">
-                Reason for Block *
+                {t("Reason for Block")} *
               </label>
               <Input
                 id="blockReason"
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
-                placeholder="Enter reason..."
+                placeholder={t("Enter reason...")}
                 maxLength={100}
               />
             </div>
             <Button onClick={handleBlockConfirm} disabled={acting || !blockReason.trim()}>
               {acting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirm
+              {t("Confirm")}
             </Button>
           </div>
         </DialogContent>

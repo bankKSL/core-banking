@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Send, Loader2, ArrowRightLeft, Quote, Check } from "lucide-react";
@@ -17,6 +18,7 @@ import type { QuoteResponse, TransferResponse } from "../types/interop";
 type Step = "form" | "quote" | "result";
 
 const InteropTransferPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const quoteMutation = useCreateQuote();
   const transferMutation = useExecuteTransfer();
@@ -101,12 +103,12 @@ const InteropTransferPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Interop Transfer"
-        description="Create quotes, prepare holds, and commit transfers"
+        title={t("Interop Transfer")}
+        description={t("Create quotes, prepare holds, and commit transfers")}
         actions={
           <Button variant="outline" onClick={() => navigate("/interop/dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -117,100 +119,100 @@ const InteropTransferPage: FC = () => {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <ArrowRightLeft className="h-5 w-5" />
-                Transfer Details
+                {t("Transfer Details")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Transaction Code *</label>
+                  <label className="block text-sm font-medium">{t("Transaction Code")} *</label>
                   <Input {...register("transactionCode")} placeholder="e.g. tx-001" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Transfer Code *</label>
+                  <label className="block text-sm font-medium">{t("Transfer Code")} *</label>
                   <Input {...register("transferCode")} placeholder="e.g. tr-001" />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Account External ID *</label>
+                <label className="block text-sm font-medium">{t("Account External ID")} *</label>
                 <Input {...register("accountId")} placeholder="e.g. ext-payer-account" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Amount *</label>
+                  <label className="block text-sm font-medium">{t("Amount")} *</label>
                   <Input {...register("amount")} placeholder="e.g. 100.00" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Currency *</label>
+                  <label className="block text-sm font-medium">{t("Currency")} *</label>
                   <Input {...register("currency")} placeholder="e.g. USD" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">Transaction Role *</label>
+                  <label className="block text-sm font-medium">{t("Transaction Role")} *</label>
                   <Select onValueChange={(v) => setValue("transactionRole", v)} defaultValue="PAYER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PAYER">Payer (Debit)</SelectItem>
-                      <SelectItem value="PAYEE">Payee (Credit)</SelectItem>
+                      <SelectItem value="PAYER">{t("Payer (Debit)")}</SelectItem>
+                      <SelectItem value="PAYEE">{t("Payee (Credit)")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">Scenario *</label>
+                  <label className="block text-sm font-medium">{t("Scenario")} *</label>
                   <Select onValueChange={(v) => setValue("scenario", v)} defaultValue="TRANSFER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TRANSFER">Transfer</SelectItem>
-                      <SelectItem value="PAYMENT">Payment</SelectItem>
-                      <SelectItem value="DEPOSIT">Deposit</SelectItem>
-                      <SelectItem value="WITHDRAWAL">Withdrawal</SelectItem>
-                      <SelectItem value="REFUND">Refund</SelectItem>
+                      <SelectItem value="TRANSFER">{t("Transfer")}</SelectItem>
+                      <SelectItem value="PAYMENT">{t("Payment")}</SelectItem>
+                      <SelectItem value="DEPOSIT">{t("Deposit")}</SelectItem>
+                      <SelectItem value="WITHDRAWAL">{t("Withdrawal")}</SelectItem>
+                      <SelectItem value="REFUND">{t("Refund")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">Initiator *</label>
+                  <label className="block text-sm font-medium">{t("Initiator")} *</label>
                   <Select onValueChange={(v) => setValue("initiator", v)} defaultValue="PAYER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="PAYER">Payer</SelectItem>
-                      <SelectItem value="PAYEE">Payee</SelectItem>
+                      <SelectItem value="PAYER">{t("Payer")}</SelectItem>
+                      <SelectItem value="PAYEE">{t("Payee")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">Initiator Type *</label>
+                  <label className="block text-sm font-medium">{t("Initiator Type")} *</label>
                   <Select onValueChange={(v) => setValue("initiatorType", v)} defaultValue="CONSUMER">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="CONSUMER">Consumer</SelectItem>
-                      <SelectItem value="AGENT">Agent</SelectItem>
-                      <SelectItem value="BUSINESS">Business</SelectItem>
-                      <SelectItem value="DEVICE">Device</SelectItem>
+                      <SelectItem value="CONSUMER">{t("Consumer")}</SelectItem>
+                      <SelectItem value="AGENT">{t("Agent")}</SelectItem>
+                      <SelectItem value="BUSINESS">{t("Business")}</SelectItem>
+                      <SelectItem value="DEVICE">{t("Device")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Note</label>
-                <Input {...register("note")} placeholder="Optional note" />
+                <label className="block text-sm font-medium">{t("Note")}</label>
+                <Input {...register("note")} placeholder={t("Optional note")} />
               </div>
             </CardContent>
           </Card>
           <div className="flex justify-end gap-3">
             <Button variant="outline" type="button" onClick={() => navigate("/interop/dashboard")}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               type="button"
@@ -220,7 +222,7 @@ const InteropTransferPage: FC = () => {
             >
               {quoteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Quote className="mr-2 h-4 w-4" />
-              Get Quote
+              {t("Get Quote")}
             </Button>
           </div>
         </form>
@@ -231,22 +233,22 @@ const InteropTransferPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Check className="h-5 w-5 text-emerald-500" />
-              Quote Received
+              {t("Quote Received")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500">State</p>
+                <p className="text-xs text-gray-500">{t("State")}</p>
                 <Badge variant={quote.state === "ACCEPTED" ? "success" : "error"}>{quote.state}</Badge>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Transaction Code</p>
+                <p className="text-xs text-gray-500">{t("Transaction Code")}</p>
                 <p className="font-mono text-sm">{quote.transactionCode}</p>
               </div>
               {quote.fspFee && (
                 <div>
-                  <p className="text-xs text-gray-500">FSP Fee</p>
+                  <p className="text-xs text-gray-500">{t("FSP Fee")}</p>
                   <p className="font-mono text-sm">
                     {quote.fspFee.amount} {quote.fspFee.currency}
                   </p>
@@ -255,7 +257,7 @@ const InteropTransferPage: FC = () => {
             </div>
             <div className="flex gap-2 pt-2">
               <Button variant="outline" onClick={() => setStep("form")}>
-                Back to Form
+                {t("Back to Form")}
               </Button>
               <Button
                 onClick={handleSubmit((v) => {
@@ -267,7 +269,7 @@ const InteropTransferPage: FC = () => {
               >
                 {transferMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Send className="mr-2 h-4 w-4" />
-                Prepare Transfer
+                {t("Prepare Transfer")}
               </Button>
             </div>
           </CardContent>
@@ -279,24 +281,24 @@ const InteropTransferPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Check className="h-5 w-5 text-emerald-500" />
-              Transfer {action === "PREPARE" ? "Prepared" : action === "CREATE" ? "Committed" : "Released"}
+              {t("Transfer")} {action === "PREPARE" ? t("Prepared") : action === "CREATE" ? t("Committed") : t("Released")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500">State</p>
+                <p className="text-xs text-gray-500">{t("State")}</p>
                 <Badge variant={transferResult.state === "ACCEPTED" ? "success" : "error"}>
                   {transferResult.state}
                 </Badge>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Transfer Code</p>
+                <p className="text-xs text-gray-500">{t("Transfer Code")}</p>
                 <p className="font-mono text-sm">{transferResult.transferCode}</p>
               </div>
               {transferResult.completedTimestamp && (
                 <div>
-                  <p className="text-xs text-gray-500">Completed</p>
+                  <p className="text-xs text-gray-500">{t("Completed")}</p>
                   <p className="text-sm">{new Date(transferResult.completedTimestamp).toLocaleString()}</p>
                 </div>
               )}
@@ -312,11 +314,11 @@ const InteropTransferPage: FC = () => {
                   className="bg-[#D32F2F] hover:bg-red-700"
                 >
                   <Send className="mr-2 h-4 w-4" />
-                  Commit Transfer
+                  {t("Commit Transfer")}
                 </Button>
               )}
               <Button variant="outline" onClick={() => navigate("/interop/dashboard")}>
-                Back to Dashboard
+                {t("Back to Dashboard")}
               </Button>
             </div>
           </CardContent>

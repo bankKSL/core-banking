@@ -2,6 +2,7 @@ import { type FC, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -18,6 +19,7 @@ import { createRescheduleRequestSchema, type CreateRescheduleRequestFormValues }
 const today = () => new Date().toISOString().split("T")[0];
 
 const RescheduleLoanFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const loanIdParam = searchParams.get("loanId") ? Number(searchParams.get("loanId")) : undefined;
@@ -78,21 +80,21 @@ const RescheduleLoanFormPage: FC = () => {
   return (
     <div className="p-6 max-w-4xl m-auto space-y-6">
       <PageHeader
-        title="New Reschedule Request"
-        description="Request a repayment schedule adjustment for a loan"
+        title={t("New Reschedule Request")}
+        description={t("Request a repayment schedule adjustment for a loan")}
         actions={
           <Button variant="outline" onClick={() => navigate("/rescheduling")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
 
       {createMutation.isError && (
         <ErrorState
-          title="Failed to create request"
+          title={t("Failed to create request")}
           message={
-            createMutation.error instanceof Error ? createMutation.error.message : "An unexpected error occurred."
+            createMutation.error instanceof Error ? createMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => createMutation.reset()}
         />
@@ -101,7 +103,7 @@ const RescheduleLoanFormPage: FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Reschedule Details</CardTitle>
+            <CardTitle className="text-base">{t("Reschedule Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <LoanSearch
@@ -111,14 +113,14 @@ const RescheduleLoanFormPage: FC = () => {
               error={errors.loanId?.message}
             />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Reason *</label>
+              <label className="block text-sm font-medium">{t("Reason")} *</label>
               <Select
                 value={watch("rescheduleReasonId") ? String(watch("rescheduleReasonId")) : ""}
                 onValueChange={(v) => setValue("rescheduleReasonId", Number(v), { shouldValidate: true })}
                 disabled={isSubmitting || templateQuery.isLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={templateQuery.isLoading ? "Loading reasons..." : "Select reason"} />
+                  <SelectValue placeholder={templateQuery.isLoading ? t("Loading reasons...") : t("Select reason")} />
                 </SelectTrigger>
                 <SelectContent>
                   {reasonOptions.map((reason) => (
@@ -131,7 +133,7 @@ const RescheduleLoanFormPage: FC = () => {
               {errors.rescheduleReasonId && <p className="text-xs text-red-500">{errors.rescheduleReasonId.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Reschedule From Date *</label>
+              <label className="block text-sm font-medium">{t("Reschedule From Date")} *</label>
               <Input
                 type="date"
                 {...register("rescheduleFromDate")}
@@ -140,7 +142,7 @@ const RescheduleLoanFormPage: FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Submitted On Date *</label>
+              <label className="block text-sm font-medium">{t("Submitted On Date")} *</label>
               <Input
                 type="date"
                 {...register("submittedOnDate")}
@@ -149,15 +151,15 @@ const RescheduleLoanFormPage: FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Adjusted Due Date</label>
+              <label className="block text-sm font-medium">{t("Adjusted Due Date")}</label>
               <Input type="date" {...register("adjustedDueDate")} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="block text-sm font-medium">Reschedule Reason Comment</label>
+              <label className="block text-sm font-medium">{t("Reschedule Reason Comment")}</label>
               <Textarea
                 {...register("rescheduleReasonComment")}
                 disabled={isSubmitting}
-                placeholder="Optional comment (max 500 characters)"
+                placeholder={t("Optional comment (max 500 characters)")}
                 rows={3}
               />
               {errors.rescheduleReasonComment && (
@@ -169,23 +171,23 @@ const RescheduleLoanFormPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Adjustments</CardTitle>
+            <CardTitle className="text-base">{t("Adjustments")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Grace on Principal</label>
+              <label className="block text-sm font-medium">{t("Grace on Principal")}</label>
               <Input type="number" {...register("graceOnPrincipal", { valueAsNumber: true })} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Grace on Interest</label>
+              <label className="block text-sm font-medium">{t("Grace on Interest")}</label>
               <Input type="number" {...register("graceOnInterest", { valueAsNumber: true })} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Extra Terms</label>
+              <label className="block text-sm font-medium">{t("Extra Terms")}</label>
               <Input type="number" {...register("extraTerms", { valueAsNumber: true })} disabled={isSubmitting} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">New Interest Rate (%)</label>
+              <label className="block text-sm font-medium">{t("New Interest Rate (%)")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -194,7 +196,7 @@ const RescheduleLoanFormPage: FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">New EMI Amount</label>
+              <label className="block text-sm font-medium">{t("New EMI Amount")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -204,7 +206,7 @@ const RescheduleLoanFormPage: FC = () => {
               {errors.emi && <p className="text-xs text-red-500">{errors.emi.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">End Date</label>
+              <label className="block text-sm font-medium">{t("End Date")}</label>
               <Input type="date" {...register("endDate")} disabled={isSubmitting} />
               {errors.endDate && <p className="text-xs text-red-500">{errors.endDate.message}</p>}
             </div>
@@ -216,7 +218,7 @@ const RescheduleLoanFormPage: FC = () => {
                 disabled={isSubmitting}
               />
               <label htmlFor="recalculateInterest" className="text-sm font-medium">
-                Recalculate Interest
+                {t("Recalculate Interest")}
               </label>
             </div>
             {errors.graceOnPrincipal?.message && errors.graceOnPrincipal.message.includes("At least one") && (
@@ -230,14 +232,14 @@ const RescheduleLoanFormPage: FC = () => {
             {isSubmitting ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Submitting...
+                {t("Submitting...")}
               </span>
             ) : (
-              "Submit Request"
+              t("Submit Request")
             )}
           </Button>
           <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => window.history.back()}>
-            Cancel
+            {t("Cancel")}
           </Button>
         </div>
       </form>

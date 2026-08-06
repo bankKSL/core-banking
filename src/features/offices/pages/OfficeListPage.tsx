@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Building2, ArrowRightLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import OfficeDrawer from "@/components/organization/OfficeDrawer";
 import type { Office } from "@/types";
 
 const OfficeListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: offices = [], isLoading, isError, refetch } = useOffices();
 
@@ -44,12 +46,12 @@ const OfficeListPage: React.FC = () => {
 
   const columns: ColumnDef<Office>[] = useMemo(
     () => [
-      { key: "nameDecorated", header: "Office Name", sortable: true },
-      { key: "externalId", header: "External ID" },
-      { key: "openingDate", header: "Opening Date" },
+      { key: "nameDecorated", header: t("Office Name"), sortable: true },
+      { key: "externalId", header: t("External ID") },
+      { key: "openingDate", header: t("Opening Date") },
       {
         key: "parentName",
-        header: "Parent Office",
+        header: t("Parent Office"),
         accessorFn: (row) => row.parentName ?? "—",
       },
     ],
@@ -80,15 +82,15 @@ const OfficeListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Branches (Offices)"
-          description="Manage organizational hierarchy"
+          title={t("Branches (Offices)")}
+          description={t("Manage organizational hierarchy")}
           actions={
             <Button onClick={() => navigate("/offices/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Office
+              <Plus className="mr-2 h-4 w-4" /> {t("New Office")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load offices." onRetry={refetch} />
+        <ErrorState message={t("Failed to load offices.")} onRetry={refetch} />
       </div>
     );
   }
@@ -96,15 +98,15 @@ const OfficeListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Branches (Offices)"
-        description="Manage organizational hierarchy"
+        title={t("Branches (Offices)")}
+        description={t("Manage organizational hierarchy")}
         actions={
           <>
             <Button variant="outline" onClick={() => navigate("/office-transactions")}>
-              <ArrowRightLeft className="mr-2 h-4 w-4" /> Transactions
+              <ArrowRightLeft className="mr-2 h-4 w-4" /> {t("Transactions")}
             </Button>
             <Button onClick={() => navigate("/offices/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Office
+              <Plus className="mr-2 h-4 w-4" /> {t("New Office")}
             </Button>
           </>
         }
@@ -115,7 +117,7 @@ const OfficeListPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Hierarchy
+              {t("Hierarchy")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -133,7 +135,7 @@ const OfficeListPage: React.FC = () => {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>All Offices</CardTitle>
+            <CardTitle>{t("All Offices")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <OfficeFilters
@@ -147,7 +149,7 @@ const OfficeListPage: React.FC = () => {
               data={filtered}
               onRowClick={handleRowClick}
               loading={isLoading}
-              emptyState={{ message: "No offices found." }}
+              emptyState={{ message: t("No offices found.") }}
             />
           </CardContent>
         </Card>

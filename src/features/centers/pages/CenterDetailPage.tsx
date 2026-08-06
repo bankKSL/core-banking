@@ -1,5 +1,6 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Calendar, Users, Link2, Unlink, Loader2 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,6 +49,7 @@ type CloseCenterFormValues = z.infer<typeof closeCenterSchema>;
 type AssociateGroupsFormValues = z.infer<typeof associateGroupsSchema>;
 
 const CenterDetailPage: FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const centerId = id ? Number(id) : undefined;
@@ -127,18 +129,18 @@ const CenterDetailPage: FC = () => {
   const groupMemberColumns: ColumnDef<CenterData>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t("Name"),
       cell: (row) => <span className="font-medium">{row.name ?? "—"}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("Status"),
       sortable: false,
       cell: (row) => {
         const code = row.status?.code ?? "";
         return (
           <Badge variant={statusVariant[code] ?? "default"} size="sm">
-            {statusLabel[code] ?? row.status?.value ?? "Unknown"}
+            {statusLabel[code] ?? row.status?.value ?? t("Unknown")}
           </Badge>
         );
       },
@@ -161,8 +163,8 @@ const CenterDetailPage: FC = () => {
     return (
       <div className="p-6">
         <ErrorState
-          title="Failed to load center"
-          message={error?.message ?? "An unexpected error occurred."}
+          title={t("Failed to load center")}
+          message={error?.message ?? t("An unexpected error occurred.")}
           onRetry={refetch}
         />
       </div>
@@ -198,7 +200,7 @@ const CenterDetailPage: FC = () => {
                 {activateMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Activate
+                {t("Activate")}
               </Button>
             )}
             {isActive && (
@@ -207,18 +209,18 @@ const CenterDetailPage: FC = () => {
                 className="border-red-600 text-red-700 hover:bg-red-50"
                 onClick={() => setCloseOpen(true)}
               >
-                Close
+                {t("Close")}
               </Button>
             )}
             {isActive && (
               <Button variant="outline" onClick={handleOpenAssociate}>
                 <Users className="mr-2 h-4 w-4" />
-                Associate Groups
+                {t("Associate Groups")}
               </Button>
             )}
             <Button variant="ghost" onClick={() => navigate("/centers")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("Back")}
             </Button>
           </div>
         }
@@ -227,45 +229,45 @@ const CenterDetailPage: FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t("Basic Information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Name</span>
+              <span className="text-gray-500">{t("Name")}</span>
               <span className="font-medium">{center.name ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Account No</span>
+              <span className="text-gray-500">{t("Account No")}</span>
               <span className="font-medium">{center.accountNo ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">External ID</span>
+              <span className="text-gray-500">{t("External ID")}</span>
               <span className="font-medium">{center.externalId ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Office</span>
+              <span className="text-gray-500">{t("Office")}</span>
               <span className="font-medium">{center.officeName ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Staff</span>
+              <span className="text-gray-500">{t("Staff")}</span>
               <span className="font-medium">{center.staffName ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Status</span>
+              <span className="text-gray-500">{t("Status")}</span>
               <Badge variant={statusVariant[statusCode] ?? "default"} size="sm">
-                {statusLabel[statusCode] ?? center.status?.value ?? "Unknown"}
+                {statusLabel[statusCode] ?? center.status?.value ?? t("Unknown")}
               </Badge>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Hierarchy</span>
+              <span className="text-gray-500">{t("Hierarchy")}</span>
               <span className="font-medium">{center.hierarchy ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Active</span>
-              <span className="font-medium">{center.active ? "Yes" : "No"}</span>
+              <span className="text-gray-500">{t("Active")}</span>
+              <span className="font-medium">{center.active ? t("Yes") : t("No")}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Activation Date</span>
+              <span className="text-gray-500">{t("Activation Date")}</span>
               <span className="font-medium">{center.activationDate ?? "—"}</span>
             </div>
           </CardContent>
@@ -273,19 +275,19 @@ const CenterDetailPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Timeline</CardTitle>
+            <CardTitle>{t("Timeline")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Submitted On</span>
+              <span className="text-gray-500">{t("Submitted On")}</span>
               <span className="font-medium">{center.timeline?.submittedOnDate ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Activated On</span>
+              <span className="text-gray-500">{t("Activated On")}</span>
               <span className="font-medium">{center.timeline?.activatedOnDate ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Closed On</span>
+              <span className="text-gray-500">{t("Closed On")}</span>
               <span className="font-medium">{center.timeline?.closedOnDate ?? "—"}</span>
             </div>
           </CardContent>
@@ -293,16 +295,16 @@ const CenterDetailPage: FC = () => {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Child Groups</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>{t("Child Groups")}</CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate(`/centers/${center.id}/calendars`)}>
               <Calendar className="mr-1.5 h-4 w-4" />
-              Calendars
+              {t("Calendars")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate(`/centers/${center.id}/meetings`)}>
               <Users className="mr-1.5 h-4 w-4" />
-              Meetings
+              {t("Meetings")}
             </Button>
           </div>
         </CardHeader>
@@ -313,7 +315,7 @@ const CenterDetailPage: FC = () => {
                 columns={groupMemberColumns}
                 data={groupMembers}
                 idAccessor={(row) => String(row.id)}
-                emptyState={{ message: "No groups associated." }}
+                emptyState={{ message: t("No groups associated.") }}
                 onRowClick={(row) => navigate(`/groups/edit/${row.id}`)}
               />
               {disassociateIds.length > 0 && (
@@ -329,21 +331,21 @@ const CenterDetailPage: FC = () => {
                     ) : (
                       <Unlink className="mr-2 h-4 w-4" />
                     )}
-                    Disassociate Selected ({disassociateIds.length})
+                    {t("Disassociate Selected")} ({disassociateIds.length})
                   </Button>
                 </div>
               )}
             </>
           ) : (
-            <p className="text-sm text-gray-500">No child groups associated with this center.</p>
+            <p className="text-sm text-gray-500">{t("No child groups associated with this center.")}</p>
           )}
         </CardContent>
       </Card>
 
       {closeMutation.isError && (
         <ErrorState
-          title="Failed to close center"
-          message={closeMutation.error instanceof Error ? closeMutation.error.message : "An unexpected error occurred."}
+          title={t("Failed to close center")}
+          message={closeMutation.error instanceof Error ? closeMutation.error.message : t("An unexpected error occurred.")}
           onRetry={() => closeMutation.reset()}
         />
       )}
@@ -351,15 +353,15 @@ const CenterDetailPage: FC = () => {
       <Dialog open={closeOpen} onOpenChange={setCloseOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Close Center</DialogTitle>
+            <DialogTitle>{t("Close Center")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={closeForm.handleSubmit(onCloseSubmit)}>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Closure Reason ID</label>
+                <label className="block text-sm font-medium">{t("Closure Reason ID")}</label>
                 <Input
                   type="number"
-                  placeholder="Enter closure reason ID"
+                  placeholder={t("Enter closure reason ID")}
                   {...closeForm.register("closureReasonId")}
                   error={closeForm.formState.errors.closureReasonId?.message}
                 />
@@ -367,7 +369,7 @@ const CenterDetailPage: FC = () => {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setCloseOpen(false); closeForm.reset(); }}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -377,7 +379,7 @@ const CenterDetailPage: FC = () => {
                 {closeMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Confirm Close
+                {t("Confirm Close")}
               </Button>
             </DialogFooter>
           </form>
@@ -386,8 +388,8 @@ const CenterDetailPage: FC = () => {
 
       {associateMutation.isError && (
         <ErrorState
-          title="Failed to associate groups"
-          message={associateMutation.error instanceof Error ? associateMutation.error.message : "An unexpected error occurred."}
+          title={t("Failed to associate groups")}
+          message={associateMutation.error instanceof Error ? associateMutation.error.message : t("An unexpected error occurred.")}
           onRetry={() => associateMutation.reset()}
         />
       )}
@@ -395,7 +397,7 @@ const CenterDetailPage: FC = () => {
       <Dialog open={associateOpen} onOpenChange={setAssociateOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Associate Groups</DialogTitle>
+            <DialogTitle>{t("Associate Groups")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={associateForm.handleSubmit(onAssociateSubmit)}>
             <Controller
@@ -404,7 +406,7 @@ const CenterDetailPage: FC = () => {
               render={({ field }) => (
                 <div className="space-y-3 max-h-80 overflow-y-auto">
                   {availableGroups.length === 0 ? (
-                    <p className="text-sm text-gray-500">No groups available to associate.</p>
+                    <p className="text-sm text-gray-500">{t("No groups available to associate.")}</p>
                   ) : (
                     availableGroups.map((group) => (
                       <label
@@ -437,7 +439,7 @@ const CenterDetailPage: FC = () => {
             />
             <DialogFooter>
               <Button variant="outline" onClick={() => { setAssociateOpen(false); associateForm.reset(); }}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -449,7 +451,7 @@ const CenterDetailPage: FC = () => {
                 ) : (
                   <Link2 className="mr-2 h-4 w-4" />
                 )}
-                Associate ({selectedGroupIds.length})
+                {t("Associate")} ({selectedGroupIds.length})
               </Button>
             </DialogFooter>
           </form>

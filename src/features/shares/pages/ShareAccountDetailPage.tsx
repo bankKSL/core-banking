@@ -1,4 +1,5 @@
 import { type FC, useMemo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +52,7 @@ const DetailRow: FC<{ label: string; value: React.ReactNode }> = ({ label, value
 type ActionDialog = "additionalShares" | "redeemShares" | "close" | null;
 
 const ShareAccountDetailPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const accountId = id ? Number(id) : undefined;
@@ -112,58 +114,58 @@ const ShareAccountDetailPage: FC = () => {
     () => [
       {
         key: "transactionDate",
-        header: "Date",
+        header: t("Date"),
         accessorFn: (row) => formatDate(row.transactionDate),
       },
       {
         key: "totalShares",
-        header: "Shares",
+        header: t("Shares"),
         accessorFn: (row) => row.totalShares?.toLocaleString() ?? "\u2014",
       },
       {
         key: "unitPrice",
-        header: "Unit Price",
+        header: t("Unit Price"),
         accessorFn: (row) => formatAmount(row.unitPrice),
       },
       {
         key: "amount",
-        header: "Amount",
+        header: t("Amount"),
         accessorFn: (row) => formatAmount(row.amount),
       },
       {
         key: "type",
-        header: "Type",
+        header: t("Type"),
         accessorFn: (row) => <StatusBadge status={row.type?.value?.toLowerCase() ?? "unknown"} />,
       },
       {
         key: "status",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => <StatusBadge status={row.status?.value?.toLowerCase() ?? "unknown"} />,
       },
     ],
-    [],
+    [t],
   );
 
   const chargesColumns: ColumnDef<NonNullable<ShareAccount["charges"]>[number]>[] = useMemo(
     () => [
-      { key: "name", header: "Name" },
+      { key: "name", header: t("Name") },
       {
         key: "amount",
-        header: "Amount",
+        header: t("Amount"),
         accessorFn: (row) => formatAmount(row.amount),
       },
       {
         key: "amountPaid",
-        header: "Paid",
+        header: t("Paid"),
         accessorFn: (row) => formatAmount(row.amountPaid),
       },
       {
         key: "amountOutstanding",
-        header: "Outstanding",
+        header: t("Outstanding"),
         accessorFn: (row) => formatAmount(row.amountOutstanding),
       },
     ],
-    [],
+    [t],
   );
 
   if (isLoading) {
@@ -190,15 +192,15 @@ const ShareAccountDetailPage: FC = () => {
     return (
       <div className="p-6 max-w-5xl m-auto">
         <PageHeader
-          title="Share Account"
-          description="View share account details"
+          title={t("Share Account")}
+          description={t("View share account details")}
           actions={
             <Button variant="outline" onClick={() => navigate("/shares/accounts")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load share account." onRetry={refetch} />
+        <ErrorState message={t("Failed to load share account.")} onRetry={refetch} />
       </div>
     );
   }
@@ -214,22 +216,22 @@ const ShareAccountDetailPage: FC = () => {
   return (
     <div className="max-w-5xl m-auto space-y-6">
       <PageHeader
-        title={`Share Account #${account.accountNo}`}
+        title={`${t("Share Account")} #${account.accountNo}`}
         description={`${account.clientName} \u2014 ${account.productName}`}
         actions={
           <>
             <StatusBadge status={statusCode} />
             <Button variant="outline" onClick={() => navigate("/shares/accounts")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
 
             {isPending && (
               <>
                 <Button onClick={() => setConfirmAction("approve")}>
-                  <ThumbsUp className="mr-2 h-4 w-4" /> Approve
+                  <ThumbsUp className="mr-2 h-4 w-4" /> {t("Approve")}
                 </Button>
                 <Button variant="destructive" onClick={() => setConfirmAction("reject")}>
-                  <ThumbsDown className="mr-2 h-4 w-4" /> Reject
+                  <ThumbsDown className="mr-2 h-4 w-4" /> {t("Reject")}
                 </Button>
               </>
             )}
@@ -237,10 +239,10 @@ const ShareAccountDetailPage: FC = () => {
             {isApproved && (
               <>
                 <Button onClick={() => setConfirmAction("activate")}>
-                  <Play className="mr-2 h-4 w-4" /> Activate
+                  <Play className="mr-2 h-4 w-4" /> {t("Activate")}
                 </Button>
                 <Button variant="outline" onClick={() => setConfirmAction("undoApproval")}>
-                  <RotateCcw className="mr-2 h-4 w-4" /> Undo Approval
+                  <RotateCcw className="mr-2 h-4 w-4" /> {t("Undo Approval")}
                 </Button>
               </>
             )}
@@ -248,13 +250,13 @@ const ShareAccountDetailPage: FC = () => {
             {isActive && (
               <>
                 <Button onClick={() => { setActionDialog("additionalShares"); reset(); }}>
-                  <Plus className="mr-2 h-4 w-4" /> Apply Additional Shares
+                  <Plus className="mr-2 h-4 w-4" /> {t("Apply Additional Shares")}
                 </Button>
                 <Button variant="outline" onClick={() => { setActionDialog("redeemShares"); reset(); }}>
-                  <XCircle className="mr-2 h-4 w-4" /> Redeem Shares
+                  <XCircle className="mr-2 h-4 w-4" /> {t("Redeem Shares")}
                 </Button>
                 <Button variant="destructive" onClick={() => setActionDialog("close")}>
-                  <XCircle className="mr-2 h-4 w-4" /> Close
+                  <XCircle className="mr-2 h-4 w-4" /> {t("Close")}
                 </Button>
               </>
             )}
@@ -264,9 +266,9 @@ const ShareAccountDetailPage: FC = () => {
 
       {commandMutation.isError && (
         <ErrorState
-          title={`Failed to ${actionDialog === "additionalShares" ? "apply shares" : actionDialog === "redeemShares" ? "redeem shares" : "perform action"}`}
+          title={t(`Failed to ${actionDialog === "additionalShares" ? "apply shares" : actionDialog === "redeemShares" ? "redeem shares" : "perform action"}`)}
           message={
-            commandMutation.error instanceof Error ? commandMutation.error.message : "An unexpected error occurred."
+            commandMutation.error instanceof Error ? commandMutation.error.message : t("An unexpected error occurred.")
           }
           onRetry={() => commandMutation.reset()}
         />
@@ -275,50 +277,50 @@ const ShareAccountDetailPage: FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Account Information</CardTitle>
+            <CardTitle>{t("Account Information")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <DetailRow label="Client" value={account.clientName ?? "\u2014"} />
-            <DetailRow label="Product" value={account.productName ?? "\u2014"} />
-            <DetailRow label="External ID" value={account.externalId ?? "\u2014"} />
+            <DetailRow label={t("Client")} value={account.clientName ?? "\u2014"} />
+            <DetailRow label={t("Product")} value={account.productName ?? "\u2014"} />
+            <DetailRow label={t("External ID")} value={account.externalId ?? "\u2014"} />
             <DetailRow
-              label="Savings Account"
+              label={t("Savings Account")}
               value={account.savingsAccountId ? `#${account.savingsAccountId}` : "\u2014"}
             />
             <DetailRow
-              label="Total Shares"
+              label={t("Total Shares")}
               value={account.summary?.totalShares?.toLocaleString() ?? "0"}
             />
-            <DetailRow label="Currency" value={account.currency?.displaySymbol ?? account.currency?.code ?? "\u2014"} />
+            <DetailRow label={t("Currency")} value={account.currency?.displaySymbol ?? account.currency?.code ?? "\u2014"} />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Summary</CardTitle>
+            <CardTitle>{t("Summary")}</CardTitle>
           </CardHeader>
           <CardContent>
             <DetailRow
-              label="Approved Shares"
+              label={t("Approved Shares")}
               value={account.summary?.totalApprovedShares?.toLocaleString() ?? "0"}
             />
             <DetailRow
-              label="Pending Shares"
+              label={t("Pending Shares")}
               value={account.summary?.totalPendingShares?.toLocaleString() ?? "0"}
             />
             <DetailRow
-              label="Current Market Price"
+              label={t("Current Market Price")}
               value={formatAmount(account.currentMarketPrice)}
             />
             {account.lockinPeriod != null && (
               <DetailRow
-                label="Lock-in Period"
+                label={t("Lock-in Period")}
                 value={`${account.lockinPeriod} ${account.lockPeriodTypeEnum?.value ?? ""}`}
               />
             )}
             {account.minimumActivePeriod != null && (
               <DetailRow
-                label="Min Active Period"
+                label={t("Min Active Period")}
                 value={`${account.minimumActivePeriod} days`}
               />
             )}
@@ -328,38 +330,38 @@ const ShareAccountDetailPage: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Timeline</CardTitle>
+          <CardTitle>{t("Timeline")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <DetailRow label="Submitted On" value={formatDate(account.timeline?.submittedOnDate)} />
-          <DetailRow label="Approved On" value={formatDate(account.timeline?.approvedDate)} />
-          <DetailRow label="Activated On" value={formatDate(account.timeline?.activatedDate)} />
-          <DetailRow label="Closed On" value={formatDate(account.timeline?.closedDate)} />
+          <DetailRow label={t("Submitted On")} value={formatDate(account.timeline?.submittedOnDate)} />
+          <DetailRow label={t("Approved On")} value={formatDate(account.timeline?.approvedDate)} />
+          <DetailRow label={t("Activated On")} value={formatDate(account.timeline?.activatedDate)} />
+          <DetailRow label={t("Closed On")} value={formatDate(account.timeline?.closedDate)} />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Purchased Shares</CardTitle>
+          <CardTitle>{t("Purchased Shares")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={purchasedSharesColumns}
             data={account.purchasedShares ?? []}
-            emptyState={{ message: "No purchased shares." }}
+            emptyState={{ message: t("No purchased shares.") }}
           />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Charges</CardTitle>
+          <CardTitle>{t("Charges")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={chargesColumns}
             data={account.charges ?? []}
-            emptyState={{ message: "No charges applied." }}
+            emptyState={{ message: t("No charges applied.") }}
           />
         </CardContent>
       </Card>
@@ -367,35 +369,35 @@ const ShareAccountDetailPage: FC = () => {
       {dividends && dividends.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Dividends</CardTitle>
+            <CardTitle>{t("Dividends")}</CardTitle>
           </CardHeader>
           <CardContent>
             <DataTable
               columns={[
-                { key: "id", header: "ID" },
+                { key: "id", header: t("ID") },
                 {
                   key: "amount",
-                  header: "Amount",
+                  header: t("Amount"),
                   accessorFn: (row) => formatAmount(row.amount),
                 },
                 {
                   key: "dividendPeriodStartDate",
-                  header: "Period Start",
+                  header: t("Period Start"),
                   accessorFn: (row) => formatDate(row.dividendPeriodStartDate),
                 },
                 {
                   key: "dividendPeriodEndDate",
-                  header: "Period End",
+                  header: t("Period End"),
                   accessorFn: (row) => formatDate(row.dividendPeriodEndDate),
                 },
                 {
                   key: "status",
-                  header: "Status",
+                  header: t("Status"),
                   accessorFn: (row) => <StatusBadge status={row.status?.code?.toLowerCase() ?? "unknown"} />,
                 },
               ]}
               data={dividends}
-              emptyState={{ message: "No dividends." }}
+              emptyState={{ message: t("No dividends.") }}
             />
           </CardContent>
         </Card>
@@ -404,9 +406,9 @@ const ShareAccountDetailPage: FC = () => {
       <ConfirmDialog
         open={confirmAction === "approve"}
         onOpenChange={(open) => { if (!open) setConfirmAction(null); }}
-        title="Approve Share Account"
-        description="Are you sure you want to approve this share account?"
-        confirmLabel="Approve"
+        title={t("Approve Share Account")}
+        description={t("Are you sure you want to approve this share account?")}
+        confirmLabel={t("Approve")}
         onConfirm={() => handleCommand("approve")}
         loading={commandMutation.isPending}
       />
@@ -414,9 +416,9 @@ const ShareAccountDetailPage: FC = () => {
       <ConfirmDialog
         open={confirmAction === "reject"}
         onOpenChange={(open) => { if (!open) setConfirmAction(null); }}
-        title="Reject Share Account"
-        description="Are you sure you want to reject this share account?"
-        confirmLabel="Reject"
+        title={t("Reject Share Account")}
+        description={t("Are you sure you want to reject this share account?")}
+        confirmLabel={t("Reject")}
         variant="destructive"
         onConfirm={() => handleCommand("reject")}
         loading={commandMutation.isPending}
@@ -425,9 +427,9 @@ const ShareAccountDetailPage: FC = () => {
       <ConfirmDialog
         open={confirmAction === "activate"}
         onOpenChange={(open) => { if (!open) setConfirmAction(null); }}
-        title="Activate Share Account"
-        description="Are you sure you want to activate this share account?"
-        confirmLabel="Activate"
+        title={t("Activate Share Account")}
+        description={t("Are you sure you want to activate this share account?")}
+        confirmLabel={t("Activate")}
         onConfirm={() => handleCommand("activate")}
         loading={commandMutation.isPending}
       />
@@ -435,9 +437,9 @@ const ShareAccountDetailPage: FC = () => {
       <ConfirmDialog
         open={confirmAction === "undoApproval"}
         onOpenChange={(open) => { if (!open) setConfirmAction(null); }}
-        title="Undo Approval"
-        description="Are you sure you want to undo the approval of this share account?"
-        confirmLabel="Undo Approval"
+        title={t("Undo Approval")}
+        description={t("Are you sure you want to undo the approval of this share account?")}
+        confirmLabel={t("Undo Approval")}
         variant="destructive"
         onConfirm={() => handleCommand("undoApproval")}
         loading={commandMutation.isPending}
@@ -449,25 +451,25 @@ const ShareAccountDetailPage: FC = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Apply Additional Shares</DialogTitle>
+            <DialogTitle>{t("Apply Additional Shares")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmitDialog)}>
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Requested Date</label>
+                <label className="block text-sm font-medium">{t("Requested Date")}</label>
                 <Input type="date" {...register("requestedDate")} error={errors.requestedDate?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Requested Shares</label>
+                <label className="block text-sm font-medium">{t("Requested Shares")}</label>
                 <Input type="number" {...register("requestedShares", { valueAsNumber: true })} error={errors.requestedShares?.message} />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => { setActionDialog(null); reset(); }}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={commandMutation.isPending}>
-                Submit
+                {t("Submit")}
               </Button>
             </DialogFooter>
           </form>
@@ -480,25 +482,25 @@ const ShareAccountDetailPage: FC = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Redeem Shares</DialogTitle>
+            <DialogTitle>{t("Redeem Shares")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmitDialog)}>
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Requested Date</label>
+                <label className="block text-sm font-medium">{t("Requested Date")}</label>
                 <Input type="date" {...register("requestedDate")} error={errors.requestedDate?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Requested Shares</label>
+                <label className="block text-sm font-medium">{t("Requested Shares")}</label>
                 <Input type="number" {...register("requestedShares", { valueAsNumber: true })} error={errors.requestedShares?.message} />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => { setActionDialog(null); reset(); }}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={commandMutation.isPending}>
-                Redeem
+                {t("Redeem")}
               </Button>
             </DialogFooter>
           </form>
@@ -508,9 +510,9 @@ const ShareAccountDetailPage: FC = () => {
       <ConfirmDialog
         open={actionDialog === "close"}
         onOpenChange={(open) => { if (!open) setActionDialog(null); }}
-        title="Close Share Account"
-        description="Are you sure you want to close this share account?"
-        confirmLabel="Close"
+        title={t("Close Share Account")}
+        description={t("Are you sure you want to close this share account?")}
+        confirmLabel={t("Close")}
         variant="destructive"
         onConfirm={() => {
           handleCommand("close");

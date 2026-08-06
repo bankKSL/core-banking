@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   TrendingUp,
   Award,
@@ -26,12 +27,11 @@ import {
   type ScoreGradeLetter,
 } from "@/lib/scoreGrade";
 
-// ─── Score Input Sub-Component ──────────────────────────────
-
 const ScoreInput: React.FC<{
   score: number | null;
   onChange: (value: number | null) => void;
 }> = ({ score, onChange }) => {
+  const { t } = useTranslation();
   const [raw, setRaw] = useState(score?.toString() ?? "");
 
   const handleChange = useCallback(
@@ -51,7 +51,7 @@ const ScoreInput: React.FC<{
   return (
     <div className="space-y-1.5">
       <Label htmlFor="credit-score-input" className="text-sm font-medium">
-        Enter Credit Score
+        {t("Enter Credit Score")}
       </Label>
       <Input
         id="credit-score-input"
@@ -63,14 +63,13 @@ const ScoreInput: React.FC<{
         onChange={handleChange}
         className="w-full max-w-xs text-lg font-mono"
       />
-      <p className="text-xs text-gray-500 dark:text-gray-400">Standard range: 300 – 900</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{t("Standard range: 300 – 900")}</p>
     </div>
   );
 };
 
-// ─── Gauge Bar Sub-Component ────────────────────────────────
-
 const GaugeBar: React.FC<{ score: number; grade: ScoreGrade }> = ({ score, grade }) => {
+  const { t } = useTranslation();
   const percent = useMemo(() => scoreToPercent(score), [score]);
 
   return (
@@ -97,20 +96,19 @@ const GaugeBar: React.FC<{ score: number; grade: ScoreGrade }> = ({ score, grade
         />
       </div>
       <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
-        <span>Very Poor</span>
-        <span>Poor</span>
-        <span>Fair</span>
-        <span>Good</span>
-        <span>Excellent</span>
-        <span>Exceptional</span>
+        <span>{t("Very Poor")}</span>
+        <span>{t("Poor")}</span>
+        <span>{t("Fair")}</span>
+        <span>{t("Good")}</span>
+        <span>{t("Excellent")}</span>
+        <span>{t("Exceptional")}</span>
       </div>
     </div>
   );
 };
 
-// ─── Grade Result Card ──────────────────────────────────────
-
 const GradeResult: React.FC<{ grade: ScoreGrade; score: number }> = ({ grade, score }) => {
+  const { t } = useTranslation();
   const shieldIcon = useMemo(() => {
     const map: Record<ScoreGradeLetter, React.ReactNode> = {
       "A+": <ShieldCheck className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />,
@@ -128,7 +126,7 @@ const GradeResult: React.FC<{ grade: ScoreGrade; score: number }> = ({ grade, sc
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Award className="h-5 w-5" />
-          Grade Result
+          {t("Grade Result")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -145,7 +143,7 @@ const GradeResult: React.FC<{ grade: ScoreGrade; score: number }> = ({ grade, sc
           </div>
           <div className="flex-1 space-y-3 text-sm">
             <div>
-              <span className="font-medium text-gray-600 dark:text-gray-400">Credit Score: </span>
+              <span className="font-medium text-gray-600 dark:text-gray-400">{t("Credit Score")}: </span>
               <span className="font-mono font-bold text-lg text-gray-900 dark:text-gray-100">{score}</span>
             </div>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{grade.description}</p>
@@ -153,14 +151,14 @@ const GradeResult: React.FC<{ grade: ScoreGrade; score: number }> = ({ grade, sc
               <div className="rounded-lg bg-gray-50 dark:bg-gray-900 p-3">
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <Info className="h-3 w-3" />
-                  Credit Assessment
+                  {t("Credit Assessment")}
                 </span>
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-1">{grade.creditAssessment}</p>
               </div>
               <div className="rounded-lg bg-gray-50 dark:bg-gray-900 p-3">
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <TrendingUp className="h-3 w-3" />
-                  Typical Interest Rate
+                  {t("Typical Interest Rate")}
                 </span>
                 <p className="text-sm font-mono font-medium text-gray-800 dark:text-gray-200 mt-1">
                   {grade.typicalInterestRate}
@@ -174,61 +172,61 @@ const GradeResult: React.FC<{ grade: ScoreGrade; score: number }> = ({ grade, sc
   );
 };
 
-// ─── Grading Scale Table ────────────────────────────────────
-
-const GradingScaleTable: React.FC = () => (
-  <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-    <CardHeader className="pb-3">
-      <CardTitle className="text-lg font-semibold flex items-center gap-2">
-        <BarChart3 className="h-5 w-5" />
-        Grading Scale Reference
-      </CardTitle>
-      <CardDescription>Standard credit score grading tiers used by the banking system</CardDescription>
-    </CardHeader>
-    <CardContent className="p-0">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Grade</TableHead>
-            <TableHead>Label</TableHead>
-            <TableHead className="text-right">Score Range</TableHead>
-            <TableHead className="hidden md:table-cell">Assessment</TableHead>
-            <TableHead className="hidden lg:table-cell">Typical Rate</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {SCORE_GRADES.map((g) => (
-            <TableRow key={g.letter}>
-              <TableCell>
-                <span
-                  className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-extrabold ${g.bgColor} ${g.color}`}
-                >
-                  {g.letter}
-                </span>
-              </TableCell>
-              <TableCell>
-                <Badge className={`text-xs font-semibold ${g.bgColor} ${g.color} border-0`}>{g.label}</Badge>
-              </TableCell>
-              <TableCell className="font-mono text-sm text-right">
-                {g.minScore} – {g.maxScore}
-              </TableCell>
-              <TableCell className="hidden md:table-cell text-sm text-gray-600 dark:text-gray-400 max-w-xs">
-                {g.creditAssessment}
-              </TableCell>
-              <TableCell className="hidden lg:table-cell text-sm font-mono text-gray-600 dark:text-gray-400">
-                {g.typicalInterestRate}
-              </TableCell>
+const GradingScaleTable: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <BarChart3 className="h-5 w-5" />
+          {t("Grading Scale Reference")}
+        </CardTitle>
+        <CardDescription>{t("Standard credit score grading tiers used by the banking system")}</CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("Grade")}</TableHead>
+              <TableHead>{t("Label")}</TableHead>
+              <TableHead className="text-right">{t("Score Range")}</TableHead>
+              <TableHead className="hidden md:table-cell">{t("Assessment")}</TableHead>
+              <TableHead className="hidden lg:table-cell">{t("Typical Rate")}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-);
-
-// ─── Main Page Component ────────────────────────────────────
+          </TableHeader>
+          <TableBody>
+            {SCORE_GRADES.map((g) => (
+              <TableRow key={g.letter}>
+                <TableCell>
+                  <span
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-extrabold ${g.bgColor} ${g.color}`}
+                  >
+                    {g.letter}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Badge className={`text-xs font-semibold ${g.bgColor} ${g.color} border-0`}>{g.label}</Badge>
+                </TableCell>
+                <TableCell className="font-mono text-sm text-right">
+                  {g.minScore} – {g.maxScore}
+                </TableCell>
+                <TableCell className="hidden md:table-cell text-sm text-gray-600 dark:text-gray-400 max-w-xs">
+                  {g.creditAssessment}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell text-sm font-mono text-gray-600 dark:text-gray-400">
+                  {g.typicalInterestRate}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+};
 
 const ScoreGradePage: React.FC = () => {
+  const { t } = useTranslation();
   const [score, setScore] = useState<number | null>(null);
 
   const grade = useMemo(() => {
@@ -244,8 +242,8 @@ const ScoreGradePage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Score Grade Calculator"
-        description="Calculate and visualize the credit grade for any credit score"
+        title={t("Score Grade Calculator")}
+        description={t("Calculate and visualize the credit grade for any credit score")}
       />
 
       <div className="grid gap-6 lg:grid-cols-5">
@@ -253,8 +251,8 @@ const ScoreGradePage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <Card className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold">Calculate Grade</CardTitle>
-              <CardDescription>Enter a credit score to see its grade</CardDescription>
+              <CardTitle className="text-lg font-semibold">{t("Calculate Grade")}</CardTitle>
+              <CardDescription>{t("Enter a credit score to see its grade")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <ScoreInput score={score} onChange={setScore} />
@@ -264,7 +262,7 @@ const ScoreGradePage: React.FC = () => {
                   <Separator />
                   <GaugeBar score={score} grade={grade!} />
                   <div className="rounded-lg bg-gray-50 dark:bg-gray-900 p-3 text-center">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Percentile Position</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{t("Percentile Position")}</span>
                     <p className="text-2xl font-bold font-mono text-gray-900 dark:text-gray-100">
                       {percent!.toFixed(1)}%
                     </p>
@@ -279,7 +277,7 @@ const ScoreGradePage: React.FC = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Score Distribution
+                {t("Score Distribution")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -319,7 +317,7 @@ const ScoreGradePage: React.FC = () => {
               <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
                 <AlertTriangle className="h-12 w-12 text-gray-400 dark:text-gray-500" />
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Enter a credit score to see the calculated grade
+                  {t("Enter a credit score to see the calculated grade")}
                 </p>
               </CardContent>
             </Card>

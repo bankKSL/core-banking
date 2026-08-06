@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -86,6 +87,7 @@ const savingsAccountSchema = z.object({
 type SavingsAccountFormValues = z.infer<typeof savingsAccountSchema>;
 
 const CreateDepositAccountPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -222,14 +224,14 @@ const CreateDepositAccountPage: React.FC = () => {
   return (
     <div className="m-auto max-w-6xl space-y-6 p-6">
       <PageHeader
-        title={isEditMode ? "Edit Savings Account" : "New Savings Account"}
-        description={isEditMode ? `Editing account #${id}` : "Open a new savings account"}
+        title={isEditMode ? t("Edit Savings Account") : t("New Savings Account")}
+        description={isEditMode ? `${t("Editing account")} #${id}` : t("Open a new savings account")}
         actions={
           <Button
             variant="outline"
             onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
           </Button>
         }
       />
@@ -240,7 +242,7 @@ const CreateDepositAccountPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <PiggyBank className="h-5 w-5" />
-              Office & Client
+              {t("Office & Client")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
@@ -256,7 +258,7 @@ const CreateDepositAccountPage: React.FC = () => {
               value={clientId}
               onChange={(v) => setValue("clientId", v, { shouldValidate: true })}
               disabled={isEditMode || !officeId}
-              placeholder={!officeId ? "Select office first" : "Search client by name\u2026"}
+              placeholder={!officeId ? t("Select office first") : `${t("Search client by name")}\u2026`}
               error={errors.clientId?.message}
             />
           </CardContent>
@@ -265,7 +267,7 @@ const CreateDepositAccountPage: React.FC = () => {
         {/* Product */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Savings Product</CardTitle>
+            <CardTitle className="text-base">{t("Savings Product")}</CardTitle>
           </CardHeader>
           <CardContent>
             <SavingProductSelect
@@ -279,27 +281,27 @@ const CreateDepositAccountPage: React.FC = () => {
         {/* Account Details */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Account Details</CardTitle>
+            <CardTitle className="text-base">{t("Account Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">External ID</label>
+              <label className="block text-sm font-medium">{t("External ID")}</label>
               <Input
                 {...register("externalId")}
-                placeholder="Optional external reference"
+                placeholder={t("Optional external reference")}
                 error={errors.externalId?.message}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Submitted On Date *</label>
+              <label className="block text-sm font-medium">{t("Submitted On Date")} *</label>
               <Input type="date" {...register("submittedOnDate")} error={errors.submittedOnDate?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Field Officer ID</label>
+              <label className="block text-sm font-medium">{t("Field Officer ID")}</label>
               <Input
                 type="number"
                 {...register("fieldOfficerId")}
-                placeholder="Optional"
+                placeholder={t("Optional")}
                 error={errors.fieldOfficerId?.message}
               />
             </div>
@@ -309,11 +311,11 @@ const CreateDepositAccountPage: React.FC = () => {
         {/* Interest Configuration */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Interest Configuration</CardTitle>
+            <CardTitle className="text-base">{t("Interest Configuration")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Interest Rate (% annual)</label>
+              <label className="block text-sm font-medium">{t("Interest Rate (% annual)")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -321,19 +323,19 @@ const CreateDepositAccountPage: React.FC = () => {
                 placeholder={
                   template?.nominalAnnualInterestRate != null
                     ? String(template.nominalAnnualInterestRate)
-                    : "From product"
+                    : t("From product")
                 }
                 error={errors.nominalAnnualInterestRate?.message}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium">Compounding Period</label>
+              <label className="block text-sm font-medium">{t("Compounding Period")}</label>
               <Select
                 value={watch("interestCompoundingPeriodType")}
                 onValueChange={(v) => setValue("interestCompoundingPeriodType", v)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={template?.interestCompoundingPeriodType?.value ?? "Select"} />
+                  <SelectValue placeholder={template?.interestCompoundingPeriodType?.value ?? t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
@@ -345,13 +347,13 @@ const CreateDepositAccountPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium">Posting Period</label>
+              <label className="block text-sm font-medium">{t("Posting Period")}</label>
               <Select
                 value={watch("interestPostingPeriodType")}
                 onValueChange={(v) => setValue("interestPostingPeriodType", v)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={template?.interestPostingPeriodType?.value ?? "Select"} />
+                  <SelectValue placeholder={template?.interestPostingPeriodType?.value ?? t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {INTEREST_POSTING_OPTIONS.map((o) => (
@@ -363,13 +365,13 @@ const CreateDepositAccountPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium">Calculation Type</label>
+              <label className="block text-sm font-medium">{t("Calculation Type")}</label>
               <Select
                 value={watch("interestCalculationType")}
                 onValueChange={(v) => setValue("interestCalculationType", v)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={template?.interestCalculationType?.value ?? "Select"} />
+                  <SelectValue placeholder={template?.interestCalculationType?.value ?? t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {INTEREST_CALCULATION_OPTIONS.map((o) => (
@@ -381,13 +383,13 @@ const CreateDepositAccountPage: React.FC = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium">Days in Year</label>
+              <label className="block text-sm font-medium">{t("Days in Year")}</label>
               <Select
                 value={watch("interestCalculationDaysInYearType")}
                 onValueChange={(v) => setValue("interestCalculationDaysInYearType", v)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={template?.interestCalculationDaysInYearType?.value ?? "Select"} />
+                  <SelectValue placeholder={template?.interestCalculationDaysInYearType?.value ?? t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {DAYS_IN_YEAR_OPTIONS.map((o) => (
@@ -404,11 +406,11 @@ const CreateDepositAccountPage: React.FC = () => {
         {/* Balance & Lock-in */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Balance & Lock-in</CardTitle>
+            <CardTitle className="text-base">{t("Balance & Lock-in")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Opening Balance</label>
+              <label className="block text-sm font-medium">{t("Min Opening Balance")}</label>
               <Input
                 type="number"
                 {...register("minRequiredOpeningBalance")}
@@ -416,12 +418,12 @@ const CreateDepositAccountPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Lock-in Period</label>
+              <label className="block text-sm font-medium">{t("Lock-in Period")}</label>
               <div className="flex gap-2">
                 <Input
                   type="number"
                   {...register("lockinPeriodFrequency")}
-                  placeholder="Period"
+                  placeholder={t("Period")}
                   className="flex-1"
                   error={errors.lockinPeriodFrequency?.message}
                 />
@@ -430,7 +432,7 @@ const CreateDepositAccountPage: React.FC = () => {
                   onValueChange={(v) => setValue("lockinPeriodFrequencyType", v)}
                 >
                   <SelectTrigger className="w-28">
-                    <SelectValue placeholder="Type" />
+                    <SelectValue placeholder={t("Type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
@@ -449,7 +451,7 @@ const CreateDepositAccountPage: React.FC = () => {
                 defaultChecked={template?.withdrawalFeeForTransfers ?? false}
               />
               <label className="block text-sm font-medium" htmlFor="withdrawalFeeForTransfers">
-                Withdrawal Fee for Transfers
+                {t("Withdrawal Fee for Transfers")}
               </label>
             </div>
             <div className="flex items-center gap-3 pt-2">
@@ -458,12 +460,12 @@ const CreateDepositAccountPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("enforceMinRequiredBalance", v)}
               />
               <label className="block text-sm font-medium" htmlFor="enforceMinRequiredBalance">
-                Enforce Min Balance
+                {t("Enforce Min Balance")}
               </label>
             </div>
             {enforceMinRequiredBalance && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Min Required Balance</label>
+                <label className="block text-sm font-medium">{t("Min Required Balance")}</label>
                 <Input type="number" {...register("minRequiredBalance")} error={errors.minRequiredBalance?.message} />
               </div>
             )}
@@ -473,18 +475,18 @@ const CreateDepositAccountPage: React.FC = () => {
         {/* Overdraft */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Overdraft</CardTitle>
+            <CardTitle className="text-base">{t("Overdraft")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="allowOverdraft" onCheckedChange={(v) => setValue("allowOverdraft", v)} />
               <label className="block text-sm font-medium" htmlFor="allowOverdraft">
-                Allow Overdraft
+                {t("Allow Overdraft")}
               </label>
             </div>
             {allowOverdraft && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Overdraft Limit</label>
+                <label className="block text-sm font-medium">{t("Overdraft Limit")}</label>
                 <Input type="number" {...register("overdraftLimit")} error={errors.overdraftLimit?.message} />
               </div>
             )}
@@ -494,25 +496,25 @@ const CreateDepositAccountPage: React.FC = () => {
         {/* Lien & Tax */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Lien & Tax</CardTitle>
+            <CardTitle className="text-base">{t("Lien & Tax")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 pt-2">
               <Switch id="lienAllowed" onCheckedChange={(v) => setValue("lienAllowed", v)} />
               <label className="block text-sm font-medium" htmlFor="lienAllowed">
-                Allow Lien
+                {t("Allow Lien")}
               </label>
             </div>
             {lienAllowed && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Max Lien Limit</label>
+                <label className="block text-sm font-medium">{t("Max Lien Limit")}</label>
                 <Input type="number" {...register("maxAllowedLienLimit")} error={errors.maxAllowedLienLimit?.message} />
               </div>
             )}
             <div className="flex items-center gap-3 pt-2">
               <Switch id="withHoldTax" onCheckedChange={(v) => setValue("withHoldTax", v)} />
               <label className="block text-sm font-medium" htmlFor="withHoldTax">
-                Withhold Tax
+                {t("Withhold Tax")}
               </label>
             </div>
           </CardContent>
@@ -524,7 +526,7 @@ const CreateDepositAccountPage: React.FC = () => {
             variant="outline"
             onClick={() => navigate(isEditMode ? `/deposits/saving-accounts/${id}` : "/deposits/saving-accounts")}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
           </Button>
           <Button
             type="submit"
@@ -532,7 +534,7 @@ const CreateDepositAccountPage: React.FC = () => {
             className="bg-[#D32F2F] hover:bg-red-700"
           >
             {(createAccount.isPending || updateAccount.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <Save className="mr-2 h-4 w-4" /> {isEditMode ? "Save Changes" : "Open Account"}
+            <Save className="mr-2 h-4 w-4" /> {isEditMode ? t("Save Changes") : t("Open Account")}
           </Button>
         </div>
       </form>

@@ -1,4 +1,5 @@
 import { type FC, useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +52,7 @@ function formatDate(dateStr?: string | null): string {
 }
 
 const DividendListPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: productsData } = useShareProducts();
   const products = productsData?.pageItems ?? [];
@@ -82,25 +84,25 @@ const DividendListPage: FC = () => {
 
   const columns: ColumnDef<Dividend>[] = useMemo(
     () => [
-      { key: "id", header: "ID" },
+      { key: "id", header: t("ID") },
       {
         key: "amount",
-        header: "Amount",
+        header: t("Amount"),
         accessorFn: (row) => formatAmount(row.amount),
       },
       {
         key: "dividendPeriodStartDate",
-        header: "Period Start",
+        header: t("Period Start"),
         accessorFn: (row) => formatDate(row.dividendPeriodStartDate),
       },
       {
         key: "dividendPeriodEndDate",
-        header: "Period End",
+        header: t("Period End"),
         accessorFn: (row) => formatDate(row.dividendPeriodEndDate),
       },
       {
         key: "status",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => <StatusBadge status={row.status?.code?.toLowerCase() ?? "unknown"} />,
       },
       {
@@ -123,7 +125,7 @@ const DividendListPage: FC = () => {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const onCreateSubmit = useCallback(
@@ -172,26 +174,26 @@ const DividendListPage: FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Dividends"
-        description="Manage share product dividends"
+        title={t("Dividends")}
+        description={t("Manage share product dividends")}
         actions={
           <Button variant="outline" onClick={() => navigate("/shares/products")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Products
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back to Products")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Select Product</CardTitle>
+          <CardTitle>{t("Select Product")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium">Share Product</label>
+              <label className="block text-sm font-medium">{t("Share Product")}</label>
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a product" />
+                  <SelectValue placeholder={t("Select a product")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(products ?? []).map((p) => (
@@ -209,7 +211,7 @@ const DividendListPage: FC = () => {
                   reset();
                 }}
               >
-                <Plus className="mr-2 h-4 w-4" /> Create Dividend
+                <Plus className="mr-2 h-4 w-4" /> {t("Create Dividend")}
               </Button>
             )}
           </div>
@@ -219,14 +221,14 @@ const DividendListPage: FC = () => {
       {selectedProductId && (
         <Card>
           <CardHeader>
-            <CardTitle>Dividends</CardTitle>
+            <CardTitle>{t("Dividends")}</CardTitle>
           </CardHeader>
           <CardContent>
             <DataTable
               columns={columns}
               data={dividendList}
               loading={isLoading}
-              emptyState={{ message: "No dividends found for this product." }}
+              emptyState={{ message: t("No dividends found for this product.") }}
             />
           </CardContent>
         </Card>
@@ -235,7 +237,7 @@ const DividendListPage: FC = () => {
       {!selectedProductId && (
         <Card>
           <CardContent className="py-12">
-            <p className="text-center text-sm text-gray-500">Select a share product to view its dividends.</p>
+            <p className="text-center text-sm text-gray-500">{t("Select a share product to view its dividends.")}</p>
           </CardContent>
         </Card>
       )}
@@ -243,12 +245,12 @@ const DividendListPage: FC = () => {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Dividend</DialogTitle>
+            <DialogTitle>{t("Create Dividend")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onCreateSubmit)}>
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Period Start Date</label>
+                <label className="block text-sm font-medium">{t("Period Start Date")}</label>
                 <Input
                   type="date"
                   {...register("dividendPeriodStartDate")}
@@ -256,7 +258,7 @@ const DividendListPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Period End Date</label>
+                <label className="block text-sm font-medium">{t("Period End Date")}</label>
                 <Input
                   type="date"
                   {...register("dividendPeriodEndDate")}
@@ -264,16 +266,16 @@ const DividendListPage: FC = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Amount</label>
+                <label className="block text-sm font-medium">{t("Amount")}</label>
                 <Input type="number" step="0.01" {...register("amount")} error={errors.amount?.message} />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => setShowCreateDialog(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={!isValid || createMutation.isPending}>
-                {createMutation.isPending ? "Creating..." : "Create"}
+                {createMutation.isPending ? t("Creating...") : t("Create")}
               </Button>
             </DialogFooter>
           </form>
@@ -285,9 +287,9 @@ const DividendListPage: FC = () => {
         onOpenChange={(open) => {
           if (!open) setApproveTarget(null);
         }}
-        title="Approve Dividend"
-        description="Are you sure you want to approve this dividend?"
-        confirmLabel="Approve"
+        title={t("Approve Dividend")}
+        description={t("Are you sure you want to approve this dividend?")}
+        confirmLabel={t("Approve")}
         onConfirm={handleApprove}
         loading={approveMutation.isPending}
       />
@@ -297,9 +299,9 @@ const DividendListPage: FC = () => {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title="Delete Dividend"
-        description="Are you sure you want to delete this dividend?"
-        confirmLabel="Delete"
+        title={t("Delete Dividend")}
+        description={t("Are you sure you want to delete this dividend?")}
+        confirmLabel={t("Delete")}
         variant="destructive"
         onConfirm={handleDelete}
         loading={deleteMutation.isPending}

@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label,
 );
 
 const StandingInstructionViewPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -74,15 +76,15 @@ const StandingInstructionViewPage: React.FC = () => {
     return (
       <div className="p-6 max-w-6xl m-auto">
         <PageHeader
-          title="Standing Instruction"
-          description="View standing instruction details"
+          title={t("Standing Instruction")}
+          description={t("View standing instruction details")}
           actions={
             <Button variant="outline" onClick={() => navigate("/transfers/standing-instructions")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load standing instruction." onRetry={refetch} />
+        <ErrorState message={t("Failed to load standing instruction.")} onRetry={refetch} />
       </div>
     );
   }
@@ -92,22 +94,22 @@ const StandingInstructionViewPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={instruction.name ?? "Standing Instruction"}
-        description="View standing instruction details"
+        title={instruction.name ?? t("Standing Instruction")}
+        description={t("View standing instruction details")}
         actions={
           <>
             <Button variant="outline" onClick={() => navigate("/transfers/standing-instructions")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
             </Button>
             <Button variant="outline" onClick={() => navigate(`/transfers/standing-instructions/edit/${id}`)}>
-              <Edit className="mr-2 h-4 w-4" /> Edit
+              <Edit className="mr-2 h-4 w-4" /> {t("Edit")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => setShowDeleteDialog(true)}
               disabled={instruction.status?.id === 3}
             >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
+              <Trash2 className="mr-2 h-4 w-4" /> {t("Delete")}
             </Button>
           </>
         }
@@ -116,14 +118,14 @@ const StandingInstructionViewPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>From</CardTitle>
+            <CardTitle>{t("From")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <DetailRow label="Office" value={instruction.fromOffice?.name ?? "—"} />
-            <DetailRow label="Client" value={instruction.fromClient?.displayName ?? "—"} />
-            <DetailRow label="Account Type" value={ACCOUNT_TYPE_LABELS[instruction.fromAccountType?.id] ?? "—"} />
+            <DetailRow label={t("Office")} value={instruction.fromOffice?.name ?? "—"} />
+            <DetailRow label={t("Client")} value={instruction.fromClient?.displayName ?? "—"} />
+            <DetailRow label={t("Account Type")} value={ACCOUNT_TYPE_LABELS[instruction.fromAccountType?.id] ?? "—"} />
             <DetailRow
-              label="Account"
+              label={t("Account")}
               value={`${instruction.fromAccount?.accountNo ?? "—"} — ${instruction.fromAccount?.productName ?? ""}`}
             />
           </CardContent>
@@ -131,14 +133,14 @@ const StandingInstructionViewPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>To</CardTitle>
+            <CardTitle>{t("To")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <DetailRow label="Office" value={instruction.toOffice?.name ?? "—"} />
-            <DetailRow label="Client" value={instruction.toClient?.displayName ?? "—"} />
-            <DetailRow label="Account Type" value={ACCOUNT_TYPE_LABELS[instruction.toAccountType?.id] ?? "—"} />
+            <DetailRow label={t("Office")} value={instruction.toOffice?.name ?? "—"} />
+            <DetailRow label={t("Client")} value={instruction.toClient?.displayName ?? "—"} />
+            <DetailRow label={t("Account Type")} value={ACCOUNT_TYPE_LABELS[instruction.toAccountType?.id] ?? "—"} />
             <DetailRow
-              label="Account"
+              label={t("Account")}
               value={`${instruction.toAccount?.accountNo ?? "—"} — ${instruction.toAccount?.productName ?? ""}`}
             />
           </CardContent>
@@ -147,44 +149,44 @@ const StandingInstructionViewPage: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Details</CardTitle>
+          <CardTitle>{t("Details")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DetailRow
-            label="Transfer Type"
+            label={t("Transfer Type")}
             value={TRANSFER_TYPE_LABELS[instruction.transferType?.id] ?? instruction.transferType?.value ?? "—"}
           />
           <DetailRow
-            label="Instruction Type"
+            label={t("Instruction Type")}
             value={
               INSTRUCTION_TYPE_LABELS[instruction.instructionType?.id] ?? instruction.instructionType?.value ?? "—"
             }
           />
-          <DetailRow label="Priority" value={priorityLabel} />
-          <DetailRow label="Status" value={<StandingInstructionStatusBadge status={instruction.status} />} />
-          <DetailRow label="Amount" value={formatAmount(instruction.amount)} />
+          <DetailRow label={t("Priority")} value={priorityLabel} />
+          <DetailRow label={t("Status")} value={<StandingInstructionStatusBadge status={instruction.status} />} />
+          <DetailRow label={t("Amount")} value={formatAmount(instruction.amount)} />
           <DetailRow
-            label="Recurrence Type"
+            label={t("Recurrence Type")}
             value={RECURRENCE_TYPE_LABELS[instruction.recurrenceType?.id] ?? instruction.recurrenceType?.value ?? "—"}
           />
           {instruction.recurrenceFrequency && (
-            <DetailRow label="Recurrence Frequency" value={instruction.recurrenceFrequency?.value ?? "—"} />
+            <DetailRow label={t("Recurrence Frequency")} value={instruction.recurrenceFrequency?.value ?? "—"} />
           )}
           {instruction.recurrenceInterval && (
-            <DetailRow label="Recurrence Interval" value={String(instruction.recurrenceInterval)} />
+            <DetailRow label={t("Recurrence Interval")} value={String(instruction.recurrenceInterval)} />
           )}
-          <DetailRow label="Valid From" value={formatDate(instruction.validFrom)} />
-          <DetailRow label="Valid Till" value={formatDate(instruction.validTill)} />
-          <DetailRow label="Last Run" value={formatDate(instruction.lastRunDate)} />
+          <DetailRow label={t("Valid From")} value={formatDate(instruction.validFrom)} />
+          <DetailRow label={t("Valid Till")} value={formatDate(instruction.validTill)} />
+          <DetailRow label={t("Last Run")} value={formatDate(instruction.lastRunDate)} />
         </CardContent>
       </Card>
 
       <ConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title="Delete Standing Instruction"
-        description="Are you sure you want to delete this standing instruction? This action soft-deletes the instruction."
-        confirmLabel="Delete"
+        title={t("Delete Standing Instruction")}
+        description={t("Are you sure you want to delete this standing instruction? This action soft-deletes the instruction.")}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

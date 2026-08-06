@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useClientNotes, useCreateClientNote, useUpdateClientNote, useDeleteClientNote } from "../hooks/useClientNotes";
 import { formatClientDate } from "../utils/client";
+import { useTranslation } from "react-i18next";
 
 const noteSchema = z.object({ note: z.string().min(1, "Note content is required") });
 type NoteFormValues = z.infer<typeof noteSchema>;
@@ -20,6 +21,7 @@ interface ClientNotesProps {
 }
 
 const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
+  const { t } = useTranslation();
   const { data: notes, isLoading } = useClientNotes(clientId);
   const createMutation = useCreateClientNote();
   const updateMutation = useUpdateClientNote();
@@ -76,11 +78,11 @@ const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <StickyNote className="h-5 w-5" />
-          Notes
+          {t("Notes")}
         </h3>
         <Button onClick={openCreate} size="sm">
           <Plus className="mr-1 h-4 w-4" />
-          Add Note
+          {t("Add Note")}
         </Button>
       </div>
 
@@ -92,7 +94,7 @@ const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
         <Card>
           <CardContent className="py-8 text-center">
             <StickyNote className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-            <p className="text-sm text-gray-500">No notes yet.</p>
+            <p className="text-sm text-gray-500">{t("No notes yet.")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -129,15 +131,15 @@ const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Note" : "Add Note"}</DialogTitle>
-            <DialogDescription>Enter note content.</DialogDescription>
+            <DialogTitle>{editingId ? t("Edit Note") : t("Add Note")}</DialogTitle>
+            <DialogDescription>{t("Enter note content.")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="block text-sm font-medium" htmlFor="note">
-                Note *
+                {t("Note")} *
               </label>
-              <Textarea id="note" {...register("note")} rows={5} placeholder="Write your note here..." />
+              <Textarea id="note" {...register("note")} rows={5} placeholder={t("Write your note here...")} />
               {errors.note && <p className="text-xs text-red-500">{errors.note.message}</p>}
             </div>
             <Button
@@ -148,7 +150,7 @@ const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingId ? "Update" : "Create"}
+              {editingId ? t("Update") : t("Create")}
             </Button>
           </form>
         </DialogContent>
@@ -157,7 +159,7 @@ const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
       <Dialog open={!!viewingNote} onOpenChange={() => setViewingNote(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Note</DialogTitle>
+            <DialogTitle>{t("Note")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm whitespace-pre-wrap">{viewingNote?.note}</p>
           {viewingNote?.createdOn && <p className="text-xs text-gray-400">{formatClientDate(viewingNote.createdOn)}</p>}
@@ -167,11 +169,11 @@ const ClientNotes: FC<ClientNotesProps> = ({ clientId }) => {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Note"
-        description="Are you sure? This cannot be undone."
+        title={t("Delete Note")}
+        description={t("Are you sure? This cannot be undone.")}
         onConfirm={handleDelete}
         variant="destructive"
-        confirmLabel="Delete"
+        confirmLabel={t("Delete")}
         loading={deleteMutation.isPending}
       />
     </div>

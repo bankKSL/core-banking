@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -11,6 +12,7 @@ import { useShareAccounts } from "../hooks/useShares";
 import type { ShareAccount } from "../api/shares";
 
 const ShareAccountListPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useShareAccounts();
 
@@ -18,29 +20,29 @@ const ShareAccountListPage = () => {
 
   const columns: ColumnDef<ShareAccount>[] = useMemo(
     () => [
-      { key: "accountNo", header: "Account No", sortable: true },
+      { key: "accountNo", header: t("Account No"), sortable: true },
       {
         key: "clientName",
-        header: "Client",
+        header: t("Client"),
         accessorFn: (row) => row.clientName ?? "—",
       },
       {
         key: "productName",
-        header: "Product",
+        header: t("Product"),
         accessorFn: (row) => row.productName ?? "—",
       },
       {
         key: "totalShares",
-        header: "Total Shares",
+        header: t("Total Shares"),
         accessorFn: (row) => row.summary?.totalShares?.toLocaleString() ?? "0",
       },
       {
         key: "status",
-        header: "Status",
+        header: t("Status"),
         accessorFn: (row) => <StatusBadge status={row.status?.code ?? "unknown"} />,
       },
     ],
-    [],
+    [t],
   );
 
   const handleRowClick = useCallback(
@@ -54,15 +56,15 @@ const ShareAccountListPage = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Share Accounts"
-          description="Manage client share accounts"
+          title={t("Share Accounts")}
+          description={t("Manage client share accounts")}
           actions={
             <Button onClick={() => navigate("/shares/accounts/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Account
+              <Plus className="mr-2 h-4 w-4" /> {t("New Account")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load share accounts." onRetry={refetch} />
+        <ErrorState message={t("Failed to load share accounts.")} onRetry={refetch} />
       </div>
     );
   }
@@ -70,18 +72,18 @@ const ShareAccountListPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Share Accounts"
-        description="Manage client share accounts"
+        title={t("Share Accounts")}
+        description={t("Manage client share accounts")}
         actions={
           <Button onClick={() => navigate("/shares/accounts/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Account
+            <Plus className="mr-2 h-4 w-4" /> {t("New Account")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Share Accounts</CardTitle>
+          <CardTitle>{t("All Share Accounts")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -89,7 +91,7 @@ const ShareAccountListPage = () => {
             data={accounts}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No share accounts found." }}
+            emptyState={{ message: t("No share accounts found.") }}
           />
         </CardContent>
       </Card>

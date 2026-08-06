@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePasswordPreferences, usePasswordPolicies, useUpdatePasswordPreference } from "../hooks/useConfiguration";
 
 const PasswordPolicyPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: activePolicies = [], isLoading: prefsLoading } = usePasswordPreferences();
   const { data: allPolicies = [], isLoading: templatesLoading } = usePasswordPolicies();
@@ -26,12 +28,12 @@ const PasswordPolicyPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Password Policy"
-        description="View and change the active password validation policy"
+        title={t("Password Policy")}
+        description={t("View and change the active password validation policy")}
         actions={
           <Button variant="outline" onClick={() => navigate("/configuration")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -39,7 +41,7 @@ const PasswordPolicyPage: FC = () => {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
-            Active Policy
+            {t("Active Policy")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -65,7 +67,7 @@ const PasswordPolicyPage: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Available Policies</CardTitle>
+          <CardTitle className="text-base">{t("Available Policies")}</CardTitle>
         </CardHeader>
         <CardContent>
           {templatesLoading ? (
@@ -75,7 +77,7 @@ const PasswordPolicyPage: FC = () => {
               ))}
             </div>
           ) : allPolicies.length === 0 ? (
-            <p className="text-sm text-gray-500">No password policies available.</p>
+            <p className="text-sm text-gray-500">{t("No password policies available.")}</p>
           ) : (
             <div className="space-y-3">
               {allPolicies.map((policy) => {
@@ -94,7 +96,7 @@ const PasswordPolicyPage: FC = () => {
                         <span className="font-medium text-sm">{policy.name}</span>
                         {isActive && (
                           <Badge variant="success" size="sm">
-                            Active
+                            {t("Active")}
                           </Badge>
                         )}
                       </div>
@@ -107,7 +109,7 @@ const PasswordPolicyPage: FC = () => {
                         onClick={() => handleActivate(policy.id)}
                         disabled={updateMutation.isPending}
                       >
-                        {activatingId === policy.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activate"}
+                        {activatingId === policy.id ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Activate")}
                       </Button>
                     )}
                   </div>

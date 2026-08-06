@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,8 +65,6 @@ const rdProductSchema = z.object({
   inMultiplesOfDepositTerm: z.coerce.number().int().positive().optional().or(z.literal("")),
   inMultiplesOfDepositTermTypeId: z.coerce.number().optional().or(z.literal("")),
   depositAmount: z.coerce.number().positive("Must be > 0"),
-  // minDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
-  // maxDepositAmount: z.coerce.number().min(0).optional().or(z.literal("")),
   recurringFrequency: z.coerce.number().int().positive(),
   recurringFrequencyType: z.coerce.number(),
   isMandatoryDeposit: z.boolean().optional(),
@@ -105,6 +104,7 @@ function enumId(v: any, fallback: number | undefined = 2): number | undefined {
 
 const RecurringDepositProductFormPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const { data: existingProduct, isLoading: productLoading } = useRecurringDepositProduct(id ? Number(id) : undefined);
@@ -162,8 +162,6 @@ const RecurringDepositProductFormPage: React.FC = () => {
       inMultiplesOfDepositTerm: "" as any,
       inMultiplesOfDepositTermTypeId: "" as any,
       depositAmount: undefined,
-      // minDepositAmount: "" as any,
-      // maxDepositAmount: "" as any,
       recurringFrequency: 1,
       recurringFrequencyType: 2,
       isMandatoryDeposit: false,
@@ -247,8 +245,6 @@ const RecurringDepositProductFormPage: React.FC = () => {
       inMultiplesOfDepositTerm: p.inMultiplesOfDepositTerm ?? ("" as any),
       inMultiplesOfDepositTermTypeId: enumId(p.inMultiplesOfDepositTermType, undefined) ?? ("" as any),
       depositAmount: p.depositAmount ?? undefined,
-      // minDepositAmount: p.minDepositAmount ?? ("" as any),
-      // maxDepositAmount: p.maxDepositAmount ?? ("" as any),
       recurringFrequency: p.recurringFrequency ?? 1,
       recurringFrequencyType: enumId(p.recurringFrequencyType, 2) ?? 2,
       isMandatoryDeposit: !!p.isMandatoryDeposit,
@@ -386,11 +382,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Recurring Deposit Product" : "Create Recurring Deposit Product"}
-        description="Configure recurring deposit product terms, frequency, and interest rates."
+        title={isEdit ? t("Edit Recurring Deposit Product") : t("Create Recurring Deposit Product")}
+        description={t("Configure recurring deposit product terms, frequency, and interest rates.")}
         actions={
           <Button variant="outline" onClick={() => navigate("/deposits/recurring-products")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -398,20 +394,20 @@ const RecurringDepositProductFormPage: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Product Details</CardTitle>
+            <CardTitle className="text-base">{t("Product Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input {...register("name")} error={errors.name?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Short Name *</label>
+              <label className="block text-sm font-medium">{t("Short Name")} *</label>
               <Input
                 {...register("shortName")}
                 error={errors.shortName?.message}
                 maxLength={4}
-                placeholder="No spaces"
+                placeholder={t("No spaces")}
               />
             </div>
             <CurrencySelect
@@ -420,24 +416,24 @@ const RecurringDepositProductFormPage: React.FC = () => {
               error={errors.currencyCode?.message}
             />
             <div className="col-span-2 space-y-1.5">
-              <label className="block text-sm font-medium">Description *</label>
+              <label className="block text-sm font-medium">{t("Description")} *</label>
               <Textarea
                 {...register("description")}
                 rows={3}
-                placeholder="Brief product description"
+                placeholder={t("Brief product description")}
                 error={errors.description?.message}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Decimal Places</label>
+              <label className="block text-sm font-medium">{t("Decimal Places")}</label>
               <Input type="number" {...register("digitsAfterDecimal", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">In Multiples Of</label>
+              <label className="block text-sm font-medium">{t("In Multiples Of")}</label>
               <Input
                 type="number"
                 {...register("inMultiplesOf", { valueAsNumber: true })}
-                placeholder="Rounding denomination"
+                placeholder={t("Rounding denomination")}
               />
             </div>
           </CardContent>
@@ -445,11 +441,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Interest Settings</CardTitle>
+            <CardTitle className="text-base">{t("Interest Settings")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Nominal Annual Interest Rate (%)</label>
+              <label className="block text-sm font-medium">{t("Nominal Annual Interest Rate (%)")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -459,7 +455,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
             </div>
             <div />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Compounding Period *</label>
+              <label className="block text-sm font-medium">{t("Compounding Period")} *</label>
               <Select
                 value={String(watch("interestCompoundingPeriodType"))}
                 onValueChange={(v) => setValue("interestCompoundingPeriodType", Number(v))}
@@ -477,7 +473,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Posting Period *</label>
+              <label className="block text-sm font-medium">{t("Posting Period")} *</label>
               <Select
                 value={String(watch("interestPostingPeriodType"))}
                 onValueChange={(v) => setValue("interestPostingPeriodType", Number(v))}
@@ -495,7 +491,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Calculation Type *</label>
+              <label className="block text-sm font-medium">{t("Calculation Type")} *</label>
               <Select
                 value={String(watch("interestCalculationType"))}
                 onValueChange={(v) => setValue("interestCalculationType", Number(v))}
@@ -513,7 +509,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Days In Year *</label>
+              <label className="block text-sm font-medium">{t("Days In Year")} *</label>
               <Select
                 value={String(watch("interestCalculationDaysInYearType"))}
                 onValueChange={(v) => setValue("interestCalculationDaysInYearType", Number(v))}
@@ -531,7 +527,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Balance for Interest Calc</label>
+              <label className="block text-sm font-medium">{t("Min Balance for Interest Calc")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -543,21 +539,21 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Lock-in Period</CardTitle>
+            <CardTitle className="text-base">{t("Lock-in Period")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Lock-in Frequency</label>
+              <label className="block text-sm font-medium">{t("Lock-in Frequency")}</label>
               <Input type="number" {...register("lockinPeriodFrequency", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Lock-in Type</label>
+              <label className="block text-sm font-medium">{t("Lock-in Type")}</label>
               <Select
                 value={watch("lockinPeriodFrequencyType") ? String(watch("lockinPeriodFrequencyType")) : ""}
                 onValueChange={(v) => setValue("lockinPeriodFrequencyType", v ? Number(v) : ("" as any))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {lockinTypeOptions.map((o: any) => (
@@ -573,11 +569,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Deposit Terms</CardTitle>
+            <CardTitle className="text-base">{t("Deposit Terms")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Recurring Deposit Amount *</label>
+              <label className="block text-sm font-medium">{t("Recurring Deposit Amount")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -587,7 +583,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
             </div>
             <div />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Deposit Term *</label>
+              <label className="block text-sm font-medium">{t("Min Deposit Term")} *</label>
               <Input
                 type="number"
                 {...register("minDepositTerm", { valueAsNumber: true })}
@@ -595,7 +591,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Term Type</label>
+              <label className="block text-sm font-medium">{t("Min Term Type")}</label>
               <Select
                 value={String(watch("minDepositTermTypeId"))}
                 onValueChange={(v) => setValue("minDepositTermTypeId", Number(v))}
@@ -613,17 +609,17 @@ const RecurringDepositProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Max Deposit Term</label>
+              <label className="block text-sm font-medium">{t("Max Deposit Term")}</label>
               <Input type="number" {...register("maxDepositTerm", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Max Term Type</label>
+              <label className="block text-sm font-medium">{t("Max Term Type")}</label>
               <Select
                 value={watch("maxDepositTermTypeId") ? String(watch("maxDepositTermTypeId")) : ""}
                 onValueChange={(v) => setValue("maxDepositTermTypeId", v ? Number(v) : ("" as any))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {periodFreqOptions.map((o: any) => (
@@ -634,27 +630,19 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Deposit Amount</label>
-              <Input type="number" step="0.01" {...register("minDepositAmount", { valueAsNumber: true })} />
-            </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Max Deposit Amount</label>
-              <Input type="number" step="0.01" {...register("maxDepositAmount", { valueAsNumber: true })} />
-            </div> */}
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">In Multiples Of Deposit Term</label>
+              <label className="block text-sm font-medium">{t("In Multiples Of Deposit Term")}</label>
               <Input type="number" {...register("inMultiplesOfDepositTerm", { valueAsNumber: true })} />
             </div>
             {inMultiplesOfDepositTerm && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Multiples Term Type</label>
+                <label className="block text-sm font-medium">{t("Multiples Term Type")}</label>
                 <Select
                   value={watch("inMultiplesOfDepositTermTypeId") ? String(watch("inMultiplesOfDepositTermTypeId")) : ""}
                   onValueChange={(v) => setValue("inMultiplesOfDepositTermTypeId", v ? Number(v) : ("" as any))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder={t("Select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {periodFreqOptions.map((o: any) => (
@@ -671,15 +659,15 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Recurring Frequency</CardTitle>
+            <CardTitle className="text-base">{t("Recurring Frequency")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Deposit Every *</label>
+              <label className="block text-sm font-medium">{t("Deposit Every")} *</label>
               <Input type="number" {...register("recurringFrequency", { valueAsNumber: true })} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Frequency Type</label>
+              <label className="block text-sm font-medium">{t("Frequency Type")}</label>
               <Select
                 value={String(watch("recurringFrequencyType"))}
                 onValueChange={(v) => setValue("recurringFrequencyType", Number(v))}
@@ -701,7 +689,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Recurring Details</CardTitle>
+            <CardTitle className="text-base">{t("Recurring Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 flex items-center gap-2 pt-2">
@@ -713,7 +701,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 className="h-4 w-4 rounded border-gray-300"
               />
               <label htmlFor="isMandatoryDeposit" className="text-sm font-medium">
-                Mandatory Deposit
+                {t("Mandatory Deposit")}
               </label>
             </div>
             <div className="col-span-2 flex items-center gap-2">
@@ -725,7 +713,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 className="h-4 w-4 rounded border-gray-300"
               />
               <label htmlFor="allowWithdrawal" className="text-sm font-medium">
-                Allow Withdrawal
+                {t("Allow Withdrawal")}
               </label>
             </div>
             <div className="col-span-2 flex items-center gap-2">
@@ -737,7 +725,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 className="h-4 w-4 rounded border-gray-300"
               />
               <label htmlFor="adjustAdvanceTowardsFuturePayments" className="text-sm font-medium">
-                Adjust Advance Towards Future Payments
+                {t("Adjust Advance Towards Future Payments")}
               </label>
             </div>
           </CardContent>
@@ -745,7 +733,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Pre-closure &amp; Tax</CardTitle>
+            <CardTitle className="text-base">{t("Pre-closure & Tax")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="col-span-2 flex items-center gap-2 pt-2">
@@ -757,17 +745,17 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 className="h-4 w-4 rounded border-gray-300"
               />
               <label htmlFor="preClosurePenalApplicable" className="text-sm font-medium">
-                Apply Pre-closure Penalty
+                {t("Apply Pre-closure Penalty")}
               </label>
             </div>
             {preClosurePenalApplicable && (
               <>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Penalty Interest (%)</label>
+                  <label className="block text-sm font-medium">{t("Penalty Interest (%)")}</label>
                   <Input type="number" step="0.01" {...register("preClosurePenalInterest", { valueAsNumber: true })} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Penalty Type</label>
+                  <label className="block text-sm font-medium">{t("Penalty Type")}</label>
                   <Select
                     value={
                       watch("preClosurePenalInterestOnTypeId") ? String(watch("preClosurePenalInterestOnTypeId")) : ""
@@ -775,7 +763,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                     onValueChange={(v) => setValue("preClosurePenalInterestOnTypeId", v ? Number(v) : ("" as any))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t("Select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {preClosurePenaltyOptions.map((o: any) => (
@@ -797,18 +785,18 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 className="h-4 w-4 rounded border-gray-300"
               />
               <label htmlFor="withHoldTax" className="text-sm font-medium">
-                Withhold Tax
+                {t("Withhold Tax")}
               </label>
             </div>
             {withHoldTax && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Tax Group</label>
+                <label className="block text-sm font-medium">{t("Tax Group")}</label>
                 <Select
                   value={watch("taxGroupId") ? String(watch("taxGroupId")) : ""}
                   onValueChange={(v) => setValue("taxGroupId", v ? Number(v) : ("" as any))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select tax group" />
+                    <SelectValue placeholder={t("Select tax group")} />
                   </SelectTrigger>
                   <SelectContent>
                     {taxGroupOpts.map((o: any) => (
@@ -825,11 +813,11 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Accounting Rule</CardTitle>
+            <CardTitle className="text-base">{t("Accounting Rule")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Accounting Rule *</label>
+              <label className="block text-sm font-medium">{t("Accounting Rule")} *</label>
               <Select
                 value={String(watch("accountingRule"))}
                 onValueChange={(v) => setValue("accountingRule", Number(v))}
@@ -851,13 +839,13 @@ const RecurringDepositProductFormPage: React.FC = () => {
             <CardContent className="grid grid-cols-2 gap-4 border-t pt-4">
               {GL_FIELDS.map(({ name, label }) => (
                 <div key={name} className="space-y-1.5">
-                  <label className="block text-sm font-medium">{label}</label>
+                  <label className="block text-sm font-medium">{t(label)}</label>
                   <Select
                     value={watch(name as any) ? String(watch(name as any)) : ""}
                     onValueChange={(v) => setValue(name as any, v ? Number(v) : ("" as any))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={`Select ${label}`} />
+                      <SelectValue placeholder={`${t("Select")} ${t(label)}`} />
                     </SelectTrigger>
                     <SelectContent>
                       {[
@@ -878,13 +866,13 @@ const RecurringDepositProductFormPage: React.FC = () => {
               {accountingRule === ACCOUNTING_ACCRUAL &&
                 GL_FIELDS_ACCRUAL_ONLY.map(({ name, label }) => (
                   <div key={name} className="space-y-1.5">
-                    <label className="block text-sm font-medium">{label}</label>
+                    <label className="block text-sm font-medium">{t(label)}</label>
                     <Select
                       value={watch(name as any) ? String(watch(name as any)) : ""}
                       onValueChange={(v) => setValue(name as any, v ? Number(v) : ("" as any))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={`Select ${label}`} />
+                        <SelectValue placeholder={`${t("Select")} ${t(label)}`} />
                       </SelectTrigger>
                       <SelectContent>
                         {[
@@ -909,9 +897,9 @@ const RecurringDepositProductFormPage: React.FC = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Interest Rate Chart (Slabs)</CardTitle>
+              <CardTitle className="text-base">{t("Interest Rate Chart (Slabs)")}</CardTitle>
               <Button type="button" variant="outline" size="sm" onClick={addSlab}>
-                <Plus className="mr-1 h-4 w-4" /> Add Slab
+                <Plus className="mr-1 h-4 w-4" /> {t("Add Slab")}
               </Button>
             </div>
           </CardHeader>
@@ -919,7 +907,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
             {slabs.map((slab, i) => (
               <div key={i} className="rounded-lg border border-gray-200 p-4 space-y-3 dark:border-gray-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Slab #{i + 1}</span>
+                  <span className="text-sm font-medium">{t("Slab")} #{i + 1}</span>
                   {slabs.length > 1 && (
                     <button type="button" onClick={() => removeSlab(i)} className="text-gray-400 hover:text-red-500">
                       <Trash2 className="h-4 w-4" />
@@ -928,7 +916,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium">Period Type</label>
+                    <label className="text-xs font-medium">{t("Period Type")}</label>
                     <Select
                       value={String(slab.periodType)}
                       onValueChange={(v) => updateSlab(i, "periodType", Number(v))}
@@ -954,7 +942,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium">Annual Rate (%)</label>
+                    <label className="text-xs font-medium">{t("Annual Rate (%)")}</label>
                     <Input
                       type="number"
                       step="0.01"
@@ -964,7 +952,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium">From Period</label>
+                    <label className="text-xs font-medium">{t("From Period")}</label>
                     <Input
                       type="number"
                       placeholder="e.g. 0"
@@ -980,16 +968,16 @@ const RecurringDepositProductFormPage: React.FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/deposits/recurring-products")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Product"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Save Changes") : t("Create Product")}
               </>
             )}
           </Button>

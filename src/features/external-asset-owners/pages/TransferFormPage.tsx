@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save, Loader2, ArrowRightLeft } from "lucide-react";
@@ -15,17 +16,18 @@ import { useExecuteTransferByLoanId } from "../hooks/useExternalAssetOwners";
 
 type TransferType = "sale" | "buyback" | "intermediarySale";
 
-const TRANSFER_TYPE_OPTIONS: { id: TransferType; label: string }[] = [
-  { id: "sale", label: "Sale" },
-  { id: "buyback", label: "Buyback" },
-  { id: "intermediarySale", label: "Intermediary Sale" },
-];
-
 const TransferFormPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const executeMutation = useExecuteTransferByLoanId();
   const [transferType, setTransferType] = useState<TransferType>("sale");
   const [loanId, setLoanId] = useState("");
+
+  const TRANSFER_TYPE_OPTIONS: { id: TransferType; label: string }[] = [
+    { id: "sale", label: t("Sale") },
+    { id: "buyback", label: t("Buyback") },
+    { id: "intermediarySale", label: t("Intermediary Sale") },
+  ];
 
   const {
     register,
@@ -91,12 +93,12 @@ const TransferFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="New Transfer"
-        description="Create a loan sale, buyback, or intermediary sale"
+        title={t("New Transfer")}
+        description={t("Create a loan sale, buyback, or intermediary sale")}
         actions={
           <Button variant="outline" onClick={() => navigate("/external-asset-owners/transfers")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -105,15 +107,15 @@ const TransferFormPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <ArrowRightLeft className="h-5 w-5" />
-              Transfer Details
+              {t("Transfer Details")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium">Transfer Type *</label>
+              <label className="block text-sm font-medium">{t("Transfer Type")} *</label>
               <Select value={transferType} onValueChange={(v) => handleTypeChange(v as TransferType)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("Select type")} />
                 </SelectTrigger>
                 <SelectContent>
                   {TRANSFER_TYPE_OPTIONS.map((o) => (
@@ -130,7 +132,7 @@ const TransferFormPage: FC = () => {
             {isSale && (
               <>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Owner External ID *</label>
+                  <label className="block text-sm font-medium">{t("Owner External ID")} *</label>
                   <Input
                     {...register("ownerExternalId")}
                     placeholder="e.g. 36efeb06-d835-48a1-99eb-09bd1d348c1e"
@@ -139,7 +141,7 @@ const TransferFormPage: FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Purchase Price Ratio *</label>
+                  <label className="block text-sm font-medium">{t("Purchase Price Ratio")} *</label>
                   <Input
                     {...register("purchasePriceRatio")}
                     placeholder="e.g. 1.23456789"
@@ -148,33 +150,33 @@ const TransferFormPage: FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Transfer External Group ID</label>
-                  <Input {...register("transferExternalGroupId")} placeholder="Optional group identifier" />
+                  <label className="block text-sm font-medium">{t("Transfer External Group ID")}</label>
+                  <Input {...register("transferExternalGroupId")} placeholder={t("Optional group identifier")} />
                 </div>
               </>
             )}
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Settlement Date *</label>
+              <label className="block text-sm font-medium">{t("Settlement Date")} *</label>
               <Input type="date" {...register("settlementDate")} error={errors.settlementDate?.message} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Transfer External ID</label>
-              <Input {...register("transferExternalId")} placeholder="Auto-generated if empty" />
-              <p className="text-xs text-gray-500">Optional. A unique external ID will be generated if not provided.</p>
+              <label className="block text-sm font-medium">{t("Transfer External ID")}</label>
+              <Input {...register("transferExternalId")} placeholder={t("Auto-generated if empty")} />
+              <p className="text-xs text-gray-500">{t("Optional. A unique external ID will be generated if not provided.")}</p>
             </div>
           </CardContent>
         </Card>
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/external-asset-owners/transfers")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            Submit Transfer
+            {t("Submit Transfer")}
           </Button>
         </div>
       </form>

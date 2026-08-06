@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -11,6 +12,7 @@ import { useProvisioningCategories, useDeleteProvisioningCategory } from "../hoo
 import type { ProvisioningCategory } from "../api/provisioning";
 
 const ProvisioningCategoryListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: categories = [], isLoading, isError, refetch } = useProvisioningCategories();
   const deleteMutation = useDeleteProvisioningCategory();
@@ -30,12 +32,12 @@ const ProvisioningCategoryListPage: React.FC = () => {
     () => [
       {
         key: "categoryName",
-        header: "Name",
+        header: t("Name"),
         accessorFn: (row) => <span className="font-medium">{row.categoryName}</span>,
       },
       {
         key: "categoryDescription",
-        header: "Description",
+        header: t("Description"),
         accessorFn: (row) => row.categoryDescription ?? "—",
       },
       {
@@ -58,7 +60,7 @@ const ProvisioningCategoryListPage: React.FC = () => {
         ),
       },
     ],
-    [navigate],
+    [navigate, t],
   );
 
   const handleRowClick = useCallback(
@@ -72,15 +74,15 @@ const ProvisioningCategoryListPage: React.FC = () => {
     return (
       <div className="p-6">
         <PageHeader
-          title="Provisioning Categories"
-          description="Manage provisioning categories"
+          title={t("Provisioning Categories")}
+          description={t("Manage provisioning categories")}
           actions={
             <Button onClick={() => navigate("/provisioning/categories/new")}>
-              <Plus className="mr-2 h-4 w-4" /> New Category
+              <Plus className="mr-2 h-4 w-4" /> {t("New Category")}
             </Button>
           }
         />
-        <ErrorState message="Failed to load provisioning categories." onRetry={refetch} />
+        <ErrorState message={t("Failed to load provisioning categories.")} onRetry={refetch} />
       </div>
     );
   }
@@ -88,18 +90,18 @@ const ProvisioningCategoryListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Provisioning Categories"
-        description="Manage provisioning categories"
+        title={t("Provisioning Categories")}
+        description={t("Manage provisioning categories")}
         actions={
           <Button onClick={() => navigate("/provisioning/categories/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Category
+            <Plus className="mr-2 h-4 w-4" /> {t("New Category")}
           </Button>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>All Categories</CardTitle>
+          <CardTitle>{t("All Categories")}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -107,7 +109,7 @@ const ProvisioningCategoryListPage: React.FC = () => {
             data={categories}
             onRowClick={handleRowClick}
             loading={isLoading}
-            emptyState={{ message: "No provisioning categories found." }}
+            emptyState={{ message: t("No provisioning categories found.") }}
           />
         </CardContent>
       </Card>
@@ -115,9 +117,9 @@ const ProvisioningCategoryListPage: React.FC = () => {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}
-        title="Delete Category"
-        description={`Are you sure you want to delete "${deleteTarget?.categoryName}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Category")}
+        description={t("Are you sure you want to delete \"{{name}}\"?", { name: deleteTarget?.categoryName })}
+        confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"
         loading={deleteMutation.isPending}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -184,6 +185,7 @@ const loanProductSchema = z
 type LoanProductFormValues = z.infer<typeof loanProductSchema>;
 
 const LoanProductFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -369,11 +371,11 @@ const LoanProductFormPage: React.FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={isEdit ? "Edit Loan Product" : "Create Loan Product"}
-        description="Configure the loan product terms and settings."
+        title={isEdit ? t("Edit Loan Product") : t("Create Loan Product")}
+        description={t("Configure the loan product terms and settings.")}
         actions={
           <Button variant="outline" onClick={() => navigate("/lending/products")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
@@ -382,33 +384,33 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Product Details ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Product Details</CardTitle>
+            <CardTitle className="text-base">{t("Product Details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Name *</label>
+              <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input {...register("name")} error={errors.name?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Short Name</label>
+              <label className="block text-sm font-medium">{t("Short Name")}</label>
               <Input {...register("shortName")} error={errors.shortName?.message} />
             </div>
             <div className="space-y-1.5 col-span-2">
-              <label className="block text-sm font-medium">Description</label>
-              <Textarea {...register("description")} rows={3} placeholder="Brief product description" />
+              <label className="block text-sm font-medium">{t("Description")}</label>
+              <Textarea {...register("description")} rows={3} placeholder={t("Brief product description")} />
             </div>
             <div className="space-y-1.5 col-span-2">
-              <label className="block text-sm font-medium">External ID</label>
+              <label className="block text-sm font-medium">{t("External ID")}</label>
               <Input {...register("externalId")} error={errors.externalId?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Fund</label>
+              <label className="block text-sm font-medium">{t("Fund")}</label>
               <Select
                 value={watch("fundId") ? String(watch("fundId")) : ""}
                 onValueChange={(v) => setValue("fundId", Number(v))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select fund" />
+                  <SelectValue placeholder={t("Select fund")} />
                 </SelectTrigger>
                 <SelectContent>
                   {funds.map((f: any) => (
@@ -430,11 +432,11 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Loan Terms ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Loan Terms</CardTitle>
+            <CardTitle className="text-base">{t("Loan Terms")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Principal *</label>
+              <label className="block text-sm font-medium">{t("Principal")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -448,7 +450,7 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Interest Rate (%) *</label>
+              <label className="block text-sm font-medium">{t("Interest Rate (%)")} *</label>
               <Input
                 type="number"
                 step="0.01"
@@ -457,7 +459,7 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Principal</label>
+              <label className="block text-sm font-medium">{t("Min Principal")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -471,7 +473,7 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Max Principal</label>
+              <label className="block text-sm font-medium">{t("Max Principal")}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -485,7 +487,7 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Number of Repayments *</label>
+              <label className="block text-sm font-medium">{t("Number of Repayments")} *</label>
               <Input
                 type="number"
                 {...register("numberOfRepayments", {
@@ -498,11 +500,11 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Repayment Every *</label>
+              <label className="block text-sm font-medium">{t("Repayment Every")} *</label>
               <Input type="number" {...register("repaymentEvery")} error={errors.repaymentEvery?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Min Number of Repayments</label>
+              <label className="block text-sm font-medium">{t("Min Number of Repayments")}</label>
               <Input
                 type="number"
                 {...register("minNumberOfRepayments", {
@@ -515,7 +517,7 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Max Number of Repayments</label>
+              <label className="block text-sm font-medium">{t("Max Number of Repayments")}</label>
               <Input
                 type="number"
                 {...register("maxNumberOfRepayments", {
@@ -533,11 +535,11 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Repayment & Interest Settings ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Repayment & Interest Settings</CardTitle>
+            <CardTitle className="text-base">{t("Repayment & Interest Settings")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Repayment Frequency *</label>
+              <label className="block text-sm font-medium">{t("Repayment Frequency")} *</label>
               <Select
                 value={String(watch("repaymentFrequencyType"))}
                 onValueChange={(v) => setValue("repaymentFrequencyType", Number(v))}
@@ -555,7 +557,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Interest Rate Frequency</label>
+              <label className="block text-sm font-medium">{t("Interest Rate Frequency")}</label>
               <Select
                 value={String(watch("interestRateFrequencyType") ?? 3)}
                 onValueChange={(v) => setValue("interestRateFrequencyType", Number(v))}
@@ -573,7 +575,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Amortization Type</label>
+              <label className="block text-sm font-medium">{t("Amortization Type")}</label>
               <Select
                 value={String(watch("amortizationType"))}
                 onValueChange={(v) => setValue("amortizationType", Number(v))}
@@ -591,7 +593,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Interest Type</label>
+              <label className="block text-sm font-medium">{t("Interest Type")}</label>
               <Select value={String(watch("interestType"))} onValueChange={(v) => setValue("interestType", Number(v))}>
                 <SelectTrigger>
                   <SelectValue />
@@ -606,19 +608,19 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Grace on Principal Payment</label>
+              <label className="block text-sm font-medium">{t("Grace on Principal Payment")}</label>
               <Input type="number" {...register("graceOnPrincipalPayment")} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Grace on Interest Payment</label>
+              <label className="block text-sm font-medium">{t("Grace on Interest Payment")}</label>
               <Input type="number" {...register("graceOnInterestPayment")} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Grace on Interest Charged</label>
+              <label className="block text-sm font-medium">{t("Grace on Interest Charged")}</label>
               <Input type="number" {...register("graceOnInterestCharged")} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Grace on Arrears Ageing</label>
+              <label className="block text-sm font-medium">{t("Grace on Arrears Ageing")}</label>
               <Input type="number" {...register("graceOnArrearsAgeing")} />
             </div>
             <div
@@ -633,7 +635,7 @@ const LoanProductFormPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("allowPartialPeriodInterestCalculation", v === true)}
               />
               <label htmlFor="allowPartialPeriodInterestCalculation" className="block text-sm font-medium">
-                Allow Partial Period Interest Calculation
+                {t("Allow Partial Period Interest Calculation")}
               </label>
             </div>
           </CardContent>
@@ -642,11 +644,11 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Schedule & Calendar ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Schedule & Calendar</CardTitle>
+            <CardTitle className="text-base">{t("Schedule & Calendar")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Loan Schedule Type</label>
+              <label className="block text-sm font-medium">{t("Loan Schedule Type")}</label>
               <Select
                 value={String(watch("loanScheduleType") ?? "CUMULATIVE")}
                 onValueChange={(v) => setValue("loanScheduleType", v)}
@@ -664,14 +666,14 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Transaction Processing Strategy</label>
+              <label className="block text-sm font-medium">{t("Transaction Processing Strategy")}</label>
               <Select
                 value={watch("transactionProcessingStrategyCode") ?? ""}
                 onValueChange={(v) => setValue("transactionProcessingStrategyCode", v)}
                 disabled={isProgressive}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select strategy" />
+                  <SelectValue placeholder={t("Select strategy")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(template?.transactionProcessingStrategyOptions ?? [])
@@ -689,7 +691,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Days In Month Type</label>
+              <label className="block text-sm font-medium">{t("Days In Month Type")}</label>
               <Select
                 value={String(watch("daysInMonthType") ?? 1)}
                 onValueChange={(v) => setValue("daysInMonthType", Number(v))}
@@ -707,7 +709,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">Days In Year Type</label>
+              <label className="block text-sm font-medium">{t("Days In Year Type")}</label>
               <Select
                 value={String(watch("daysInYearType") ?? 1)}
                 onValueChange={(v) => setValue("daysInYearType", Number(v))}
@@ -730,7 +732,7 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Interest Recalculation ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Interest Recalculation</CardTitle>
+            <CardTitle className="text-base">{t("Interest Recalculation")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div
@@ -743,13 +745,13 @@ const LoanProductFormPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("isInterestRecalculationEnabled", v === true)}
               />
               <label htmlFor="isInterestRecalculationEnabled" className="block text-sm font-medium">
-                Interest Recalculation Enabled
+                {t("Interest Recalculation Enabled")}
               </label>
             </div>
             {watch("isInterestRecalculationEnabled") && (
               <>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Compounding Method</label>
+                  <label className="block text-sm font-medium">{t("Compounding Method")}</label>
                   <Select
                     value={
                       watch("interestRecalculationCompoundingMethod")
@@ -759,7 +761,7 @@ const LoanProductFormPage: React.FC = () => {
                     onValueChange={(v) => setValue("interestRecalculationCompoundingMethod", Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t("Select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.interestRecalculationCompoundingTypeOptions ?? []).map((o) => (
@@ -771,13 +773,13 @@ const LoanProductFormPage: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Reschedule Strategy Method</label>
+                  <label className="block text-sm font-medium">{t("Reschedule Strategy Method")}</label>
                   <Select
                     value={watch("rescheduleStrategyMethod") ? String(watch("rescheduleStrategyMethod")) : ""}
                     onValueChange={(v) => setValue("rescheduleStrategyMethod", Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t("Select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.rescheduleStrategyTypeOptions ?? []).map((o) => (
@@ -789,7 +791,7 @@ const LoanProductFormPage: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Rest Frequency Type</label>
+                  <label className="block text-sm font-medium">{t("Rest Frequency Type")}</label>
                   <Select
                     value={
                       watch("recalculationRestFrequencyType") ? String(watch("recalculationRestFrequencyType")) : ""
@@ -797,7 +799,7 @@ const LoanProductFormPage: React.FC = () => {
                     onValueChange={(v) => setValue("recalculationRestFrequencyType", Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t("Select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.interestRecalculationFrequencyTypeOptions ?? []).map((o) => (
@@ -809,7 +811,7 @@ const LoanProductFormPage: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Pre-Closure Interest Calculation</label>
+                  <label className="block text-sm font-medium">{t("Pre-Closure Interest Calculation")}</label>
                   <Select
                     value={
                       watch("preClosureInterestCalculationStrategy")
@@ -819,7 +821,7 @@ const LoanProductFormPage: React.FC = () => {
                     onValueChange={(v) => setValue("preClosureInterestCalculationStrategy", Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select" />
+                      <SelectValue placeholder={t("Select")} />
                     </SelectTrigger>
                     <SelectContent>
                       {(template?.preClosureInterestCalculationStrategyOptions ?? []).map((o) => (
@@ -838,7 +840,7 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Multi-Disburse ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Multi-Disburse</CardTitle>
+            <CardTitle className="text-base">{t("Multi-Disburse")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div
@@ -851,17 +853,17 @@ const LoanProductFormPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("multiDisburseLoan", v === true)}
               />
               <label htmlFor="multiDisburseLoan" className="block text-sm font-medium">
-                Multi-Disburse Loan
+                {t("Multi-Disburse Loan")}
               </label>
             </div>
             {watch("multiDisburseLoan") && (
               <>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Max Tranche Count</label>
+                  <label className="block text-sm font-medium">{t("Max Tranche Count")}</label>
                   <Input type="number" {...register("maxTrancheCount")} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Outstanding Loan Balance</label>
+                  <label className="block text-sm font-medium">{t("Outstanding Loan Balance")}</label>
                   <Input type="number" step="0.01" {...register("outstandingLoanBalance")} />
                 </div>
                 <div
@@ -874,12 +876,12 @@ const LoanProductFormPage: React.FC = () => {
                     onCheckedChange={(v) => setValue("canDefineInstallmentAmount", v === true)}
                   />
                   <label htmlFor="canDefineInstallmentAmount" className="block text-sm font-medium">
-                    Can Define Installment Amount
+                    {t("Can Define Installment Amount")}
                   </label>
                 </div>
                 {watch("canDefineInstallmentAmount") && (
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Installment Amount In Multiples Of</label>
+                    <label className="block text-sm font-medium">{t("Installment Amount In Multiples Of")}</label>
                     <Input type="number" step="0.01" {...register("installmentAmountInMultiplesOf")} />
                   </div>
                 )}
@@ -891,7 +893,7 @@ const LoanProductFormPage: React.FC = () => {
         {/* ── Down Payment ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Down Payment</CardTitle>
+            <CardTitle className="text-base">{t("Down Payment")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div
@@ -904,7 +906,7 @@ const LoanProductFormPage: React.FC = () => {
                 onCheckedChange={(v) => setValue("enableDownPayment", v === true)}
               />
               <label htmlFor="enableDownPayment" className="block text-sm font-medium">
-                Enable Down Payment
+                {t("Enable Down Payment")}
               </label>
             </div>
             {watch("enableDownPayment") && (
@@ -921,11 +923,11 @@ const LoanProductFormPage: React.FC = () => {
                     onCheckedChange={(v) => setValue("enableAutoRepaymentForDownPayment", v === true)}
                   />
                   <label htmlFor="enableAutoRepaymentForDownPayment" className="block text-sm font-medium">
-                    Auto Repayment for Down Payment
+                    {t("Auto Repayment for Down Payment")}
                   </label>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Repayment Start Date Type</label>
+                  <label className="block text-sm font-medium">{t("Repayment Start Date Type")}</label>
                   <Input type="number" {...register("repaymentStartDateType")} />
                 </div>
               </>
@@ -937,7 +939,7 @@ const LoanProductFormPage: React.FC = () => {
         {isProgressive && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Progressive Settings</CardTitle>
+              <CardTitle className="text-base">{t("Progressive Settings")}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
               {/* Buydown Fee */}
@@ -951,7 +953,7 @@ const LoanProductFormPage: React.FC = () => {
                   onCheckedChange={(v) => setValue("enableBuyDownFee", v === true)}
                 />
                 <label htmlFor="enableBuyDownFee" className="block text-sm font-medium">
-                  Enable Buy Down Fee
+                  {t("Enable Buy Down Fee")}
                 </label>
               </div>
               {watch("enableBuyDownFee") && (
@@ -966,17 +968,17 @@ const LoanProductFormPage: React.FC = () => {
                       onCheckedChange={(v) => setValue("merchantBuyDownFee", v === true)}
                     />
                     <label htmlFor="merchantBuyDownFee" className="block text-sm font-medium">
-                      Merchant Buy Down Fee
+                      {t("Merchant Buy Down Fee")}
                     </label>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Buy Down Fee Calculation Type</label>
+                    <label className="block text-sm font-medium">{t("Buy Down Fee Calculation Type")}</label>
                     <Select
                       value={watch("buyDownFeeCalculationType") ?? ""}
                       onValueChange={(v) => setValue("buyDownFeeCalculationType", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.buyDownFeeCalculationTypeOptions ?? []).map((o) => (
@@ -988,13 +990,13 @@ const LoanProductFormPage: React.FC = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Buy Down Fee Strategy</label>
+                    <label className="block text-sm font-medium">{t("Buy Down Fee Strategy")}</label>
                     <Select
                       value={watch("buyDownFeeStrategy") ?? ""}
                       onValueChange={(v) => setValue("buyDownFeeStrategy", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.buyDownFeeStrategyOptions ?? []).map((o) => (
@@ -1006,13 +1008,13 @@ const LoanProductFormPage: React.FC = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Buy Down Fee Income Type</label>
+                    <label className="block text-sm font-medium">{t("Buy Down Fee Income Type")}</label>
                     <Select
                       value={watch("buyDownFeeIncomeType") ?? ""}
                       onValueChange={(v) => setValue("buyDownFeeIncomeType", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.buyDownFeeIncomeTypeOptions ?? []).map((o) => (
@@ -1037,19 +1039,19 @@ const LoanProductFormPage: React.FC = () => {
                   onCheckedChange={(v) => setValue("enableIncomeCapitalization", v === true)}
                 />
                 <label htmlFor="enableIncomeCapitalization" className="block text-sm font-medium">
-                  Enable Income Capitalization
+                  {t("Enable Income Capitalization")}
                 </label>
               </div>
               {watch("enableIncomeCapitalization") && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Capitalized Income Calculation Type</label>
+                    <label className="block text-sm font-medium">{t("Capitalized Income Calculation Type")}</label>
                     <Select
                       value={watch("capitalizedIncomeCalculationType") ?? ""}
                       onValueChange={(v) => setValue("capitalizedIncomeCalculationType", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.capitalizedIncomeCalculationTypeOptions ?? []).map((o) => (
@@ -1061,13 +1063,13 @@ const LoanProductFormPage: React.FC = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Capitalized Income Strategy</label>
+                    <label className="block text-sm font-medium">{t("Capitalized Income Strategy")}</label>
                     <Select
                       value={watch("capitalizedIncomeStrategy") ?? ""}
                       onValueChange={(v) => setValue("capitalizedIncomeStrategy", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.capitalizedIncomeStrategyOptions ?? []).map((o) => (
@@ -1079,13 +1081,13 @@ const LoanProductFormPage: React.FC = () => {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">Capitalized Income Type</label>
+                    <label className="block text-sm font-medium">{t("Capitalized Income Type")}</label>
                     <Select
                       value={watch("capitalizedIncomeType") ?? ""}
                       onValueChange={(v) => setValue("capitalizedIncomeType", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder={t("Select")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(template?.capitalizedIncomeTypeOptions ?? []).map((o) => (
@@ -1101,7 +1103,7 @@ const LoanProductFormPage: React.FC = () => {
 
               {/* Payment/Credit Allocation Editor */}
               <div className="col-span-2 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-400 text-center">
-                Payment/Credit Allocation Editor — Custom child component (not yet implemented)
+                {t("Payment/Credit Allocation Editor — Custom child component (not yet implemented)")}
               </div>
             </CardContent>
           </Card>
@@ -1109,7 +1111,7 @@ const LoanProductFormPage: React.FC = () => {
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" type="button" onClick={() => navigate("/lending/products")}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             type="submit"
@@ -1118,11 +1120,11 @@ const LoanProductFormPage: React.FC = () => {
           >
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Saving…")}
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" /> {isEdit ? "Save Changes" : "Create Product"}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Save Changes") : t("Create Product")}
               </>
             )}
           </Button>

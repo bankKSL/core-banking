@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertCircle, Tag } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,6 +13,7 @@ interface LoanDelinquencyCardProps {
 }
 
 const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
+  const { t } = useTranslation();
   const tagsQuery = useDelinquencyTags(loan.id);
   const tags = tagsQuery.data ?? [];
 
@@ -25,40 +27,40 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-gray-400" />
-            Delinquency Status
+            {t("Delinquency Status")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">In Arrears</span>
+            <span className="text-gray-500">{t("In Arrears")}</span>
             <Badge variant={loan.inArrears ? "error" : "success"} size="sm">
-              {loan.inArrears ? "Yes" : "No"}
+              {loan.inArrears ? t("Yes") : t("No")}
             </Badge>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">NPA</span>
+            <span className="text-gray-500">{t("NPA")}</span>
             <Badge variant={loan.isNPA ? "error" : "success"} size="sm">
-              {loan.isNPA ? "Yes" : "No"}
+              {loan.isNPA ? t("Yes") : t("No")}
             </Badge>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Days Delinquent</span>
+            <span className="text-gray-500">{t("Days Delinquent")}</span>
             <span className="font-mono">{delinquent?.delinquentDays ?? 0}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Delinquent Amount</span>
+            <span className="text-gray-500">{t("Delinquent Amount")}</span>
             <span className="font-mono text-red-600">{formatMoney(delinquent?.delinquentAmount ?? 0, currencyCode)}</span>
           </div>
           {range && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Delinquency Range</span>
+              <span className="text-gray-500">{t("Delinquency Range")}</span>
               <Badge variant="warning" size="sm">
                 {range.classification}
               </Badge>
             </div>
           )}
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Last Repayment</span>
+            <span className="text-gray-500">{t("Last Repayment")}</span>
             <span>{formatFineractDate(delinquent?.lastRepaymentDate ?? loan.summary?.lastRepaymentDate)}</span>
           </div>
         </CardContent>
@@ -68,7 +70,7 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Tag className="h-4 w-4 text-gray-400" />
-            Delinquency Tag History ({tags.length})
+            {t("Delinquency Tag History")} ({tags.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -79,14 +81,14 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
               ))}
             </div>
           ) : tags.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">No delinquency tags recorded.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No delinquency tags recorded.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Classification</TableHead>
-                  <TableHead>Added On</TableHead>
-                  <TableHead>Lifted On</TableHead>
+                  <TableHead>{t("Classification")}</TableHead>
+                  <TableHead>{t("Added On")}</TableHead>
+                  <TableHead>{t("Lifted On")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

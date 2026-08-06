@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 type SelectionMode = "account" | "tags";
 
 const AccountingRuleFormPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -80,12 +82,12 @@ const AccountingRuleFormPage: React.FC = () => {
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.officeId) e.officeId = "Office is required";
-    if (debitMode === "account" && !form.accountToDebit) e.accountToDebit = "Debit account is required";
-    if (debitMode === "tags" && form.debitTagIds.length === 0) e.debitTags = "Select at least one debit tag";
-    if (creditMode === "account" && !form.accountToCredit) e.accountToCredit = "Credit account is required";
-    if (creditMode === "tags" && form.creditTagIds.length === 0) e.creditTags = "Select at least one credit tag";
+    if (!form.name.trim()) e.name = t("Name is required");
+    if (!form.officeId) e.officeId = t("Office is required");
+    if (debitMode === "account" && !form.accountToDebit) e.accountToDebit = t("Debit account is required");
+    if (debitMode === "tags" && form.debitTagIds.length === 0) e.debitTags = t("Select at least one debit tag");
+    if (creditMode === "account" && !form.accountToCredit) e.accountToCredit = t("Credit account is required");
+    if (creditMode === "tags" && form.creditTagIds.length === 0) e.creditTags = t("Select at least one credit tag");
     setErrors(e);
     return Object.keys(e).length === 0;
   };

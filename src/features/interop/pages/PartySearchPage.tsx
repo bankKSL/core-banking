@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Search, User, CheckCircle2 } from "lucide-react";
@@ -16,6 +17,7 @@ import { usePartyLookup } from "../hooks/useInterop";
 import { IDENTIFIER_TYPE_OPTIONS } from "../types/interop";
 
 const PartySearchPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchIdType, setSearchIdType] = useState<string>("");
   const [searchIdValue, setSearchIdValue] = useState<string>("");
@@ -45,27 +47,27 @@ const PartySearchPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title="Lookup Party"
-        description="Find an account by secondary identifier (MSISDN, email, IBAN, etc.)"
+        title={t("Lookup Party")}
+        description={t("Find an account by secondary identifier (MSISDN, email, IBAN, etc.)")}
         actions={
           <Button variant="outline" onClick={() => navigate("/interop/dashboard")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Search by Identifier</CardTitle>
+          <CardTitle className="text-base">{t("Search by Identifier")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium">Identifier Type *</label>
+                <label className="block text-sm font-medium">{t("Identifier Type")} *</label>
                 <Select onValueChange={(v) => setValue("idType", v)} defaultValue="MSISDN">
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {IDENTIFIER_TYPE_OPTIONS.map((o) => (
@@ -78,13 +80,13 @@ const PartySearchPage: FC = () => {
                 {errors.idType && <p className="text-xs text-red-500 mt-1">{errors.idType.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Identifier Value *</label>
+                <label className="block text-sm font-medium">{t("Identifier Value")} *</label>
                 <Input {...register("idValue")} placeholder="e.g. 254700111222" error={errors.idValue?.message} />
               </div>
               <div className="flex items-end">
                 <Button type="submit" className="bg-[#D32F2F] hover:bg-red-700 w-full">
                   <Search className="mr-2 h-4 w-4" />
-                  Search
+                  {t("Search")}
                 </Button>
               </div>
             </div>
@@ -105,7 +107,7 @@ const PartySearchPage: FC = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-              Party Found
+              {t("Party Found")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -113,32 +115,32 @@ const PartySearchPage: FC = () => {
               <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                 <User className="h-8 w-8 text-gray-400" />
                 <div>
-                  <p className="font-medium">{party.displayName ?? "Unknown"}</p>
+                  <p className="font-medium">{party.displayName ?? t("Unknown")}</p>
                   <p className="text-sm text-gray-500 font-mono">{party.accountId}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-gray-500">External Account ID</p>
+                  <p className="text-xs text-gray-500">{t("External Account ID")}</p>
                   <p className="font-mono text-sm">{party.accountId}</p>
                 </div>
                 {party.identifierType && (
                   <div>
-                    <p className="text-xs text-gray-500">Identifier Type</p>
+                    <p className="text-xs text-gray-500">{t("Identifier Type")}</p>
                     <Badge variant="info">{party.identifierType}</Badge>
                   </div>
                 )}
               </div>
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" size="sm" onClick={() => navigate(`/interop/account?id=${party.accountId}`)}>
-                  View Account
+                  {t("View Account")}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate(`/interop/transfers?accountId=${party.accountId}`)}
                 >
-                  New Transfer
+                  {t("New Transfer")}
                 </Button>
               </div>
             </div>
@@ -149,7 +151,7 @@ const PartySearchPage: FC = () => {
       {searched && !isLoading && !party && (
         <Card>
           <CardContent className="p-6 text-center text-gray-500">
-            No party found with the specified identifier.
+            {t("No party found with the specified identifier.")}
           </CardContent>
         </Card>
       )}

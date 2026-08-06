@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, Trash2, Percent } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -16,6 +17,7 @@ import {
 import type { InterestRateChart } from "@/features/deposits/api/deposit";
 
 const InterestRateChartListPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: charts = [], isLoading, isError, error, refetch } = useInterestRateCharts();
   const deleteMutation = useDeleteInterestRateChart();
@@ -36,27 +38,27 @@ const InterestRateChartListPage: React.FC = () => {
   const columns: ColumnDef<InterestRateChart>[] = [
     {
       key: "name",
-      header: "Name",
+      header: t("Name"),
       cell: (r) => <span className="font-semibold">{r.name}</span>,
     },
     {
       key: "description",
-      header: "Description",
+      header: t("Description"),
       cell: (r) => <span className="text-sm text-gray-500">{r.description || "—"}</span>,
     },
     {
       key: "fromDate",
-      header: "From Date",
+      header: t("From Date"),
       cell: (r) => <span className="font-mono text-sm">{r.fromDate}</span>,
     },
     {
       key: "endDate",
-      header: "End Date",
+      header: t("End Date"),
       cell: (r) => <span className="font-mono text-sm">{r.endDate ?? "—"}</span>,
     },
     {
       key: "slabs",
-      header: "Slabs",
+      header: t("Slabs"),
       cell: (r) => <span>{r.chartSlabs?.length ?? 0}</span>,
     },
     {
@@ -76,18 +78,18 @@ const InterestRateChartListPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Interest Rate Charts"
-          description="Manage interest rate chart definitions"
+          title={t("Interest Rate Charts")}
+          description={t("Manage interest rate chart definitions")}
           actions={
             <Button onClick={() => navigate("/interest-rate-charts/new")} className="bg-[#D32F2F] hover:bg-red-700">
-              <Plus className="mr-2 h-4 w-4" /> New Chart
+              <Plus className="mr-2 h-4 w-4" /> {t("New Chart")}
             </Button>
           }
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
-          <span className="text-sm">Failed to load: {error?.message ?? "Unknown error"}</span>
+          <span className="text-sm">{t("Failed to load")}: {error?.message ?? t("Unknown error")}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t("Retry")}
           </Button>
         </div>
       </div>
@@ -97,11 +99,11 @@ const InterestRateChartListPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Interest Rate Charts"
-        description="Manage interest rate chart definitions"
+        title={t("Interest Rate Charts")}
+        description={t("Manage interest rate chart definitions")}
         actions={
           <Button onClick={() => navigate("/interest-rate-charts/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" /> New Chart
+            <Plus className="mr-2 h-4 w-4" /> {t("New Chart")}
           </Button>
         }
       />
@@ -114,17 +116,17 @@ const InterestRateChartListPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard title="Total Charts" value={charts.length} icon={Percent} />
+          <StatCard title={t("Total Charts")} value={charts.length} icon={Percent} />
         </div>
       )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All Charts</CardTitle>
+          <CardTitle>{t("All Charts")}</CardTitle>
           <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search charts..."
+              placeholder={t("Search charts...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -143,7 +145,7 @@ const InterestRateChartListPage: React.FC = () => {
               columns={columns}
               data={filtered}
               onRowClick={(row) => navigate(`/interest-rate-charts/${row.id}`)}
-              emptyState={{ message: "No interest rate charts found." }}
+              emptyState={{ message: t("No interest rate charts found.") }}
             />
           )}
         </CardContent>
@@ -154,9 +156,9 @@ const InterestRateChartListPage: React.FC = () => {
         onOpenChange={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
         loading={deleteMutation.isPending}
-        title="Delete Chart"
-        description={`Delete "${deleteTarget?.name}"?`}
-        confirmLabel="Delete"
+        title={t("Delete Chart")}
+        description={`${t("Delete")} "${deleteTarget?.name}"?`}
+        confirmLabel={t("Delete")}
         variant="destructive"
       />
     </div>

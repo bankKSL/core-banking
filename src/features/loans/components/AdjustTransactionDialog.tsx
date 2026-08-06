@@ -1,4 +1,5 @@
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { Undo2, Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
   onOpenChange,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>("idle");
   const [modifyDate, setModifyDate] = useState("");
   const [modifyAmount, setModifyAmount] = useState(0);
@@ -72,11 +74,11 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Adjust Transaction</DialogTitle>
+            <DialogTitle>{t("Adjust Transaction")}</DialogTitle>
             <DialogDescription>
               {transaction
-                ? `${transaction.type?.value ?? "Transaction"} — ${formatMoney(transaction.amount)} on ${formatFineractDate(transaction.date)}`
-                : "Select an adjustment option."}
+                ? `${transaction.type?.value ?? t("Transaction")} — ${formatMoney(transaction.amount)} on ${formatFineractDate(transaction.date)}`
+                : t("Select an adjustment option.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -90,8 +92,8 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
               >
                 <Undo2 className="h-5 w-5 text-amber-500" />
                 <div className="text-left">
-                  <p className="text-sm font-medium">Undo Transaction</p>
-                  <p className="text-xs text-gray-500">Reverse this transaction completely.</p>
+                  <p className="text-sm font-medium">{t("Undo Transaction")}</p>
+                  <p className="text-xs text-gray-500">{t("Reverse this transaction completely.")}</p>
                 </div>
               </Button>
               <Button
@@ -113,8 +115,8 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
               >
                 <Pencil className="h-5 w-5 text-blue-500" />
                 <div className="text-left">
-                  <p className="text-sm font-medium">Modify Transaction</p>
-                  <p className="text-xs text-gray-500">Change the date or amount of this transaction.</p>
+                  <p className="text-sm font-medium">{t("Modify Transaction")}</p>
+                  <p className="text-xs text-gray-500">{t("Change the date or amount of this transaction.")}</p>
                 </div>
               </Button>
             </div>
@@ -124,7 +126,7 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
             <div className="space-y-4">
               <div className="flex flex-col gap-1.5">
                 <label className="block text-sm font-medium" htmlFor="modifyDate">
-                  Transaction Date
+                  {t("Transaction Date")}
                 </label>
                 <Input
                   id="modifyDate"
@@ -136,7 +138,7 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="block text-sm font-medium" htmlFor="modifyAmount">
-                  Transaction Amount
+                  {t("Transaction Amount")}
                 </label>
                 <Input
                   id="modifyAmount"
@@ -149,11 +151,11 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setMode("idle")} disabled={isMutating}>
-                  Back
+                  {t("Back")}
                 </Button>
                 <Button onClick={() => modifyMutation.mutate()} disabled={isMutating}>
                   {modifyMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
+                  {t("Save Changes")}
                 </Button>
               </div>
             </div>
@@ -165,9 +167,9 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
       <ConfirmDialog
         open={mode === "undo"}
         onOpenChange={(open) => !open && setMode("idle")}
-        title="Undo Transaction"
-        description={`Reverse the ${transaction?.type?.value ?? "transaction"} of ${formatMoney(transaction?.amount ?? 0)}? This action cannot be undone.`}
-        confirmLabel="Undo"
+        title={t("Undo Transaction")}
+        description={`${t("Reverse the")} ${transaction?.type?.value ?? t("transaction")} ${t("of")} ${formatMoney(transaction?.amount ?? 0)}? ${t("This action cannot be undone.")}`}
+        confirmLabel={t("Undo")}
         variant="destructive"
         loading={undoMutation.isPending}
         onConfirm={() => undoMutation.mutate()}

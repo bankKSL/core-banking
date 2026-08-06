@@ -1,5 +1,6 @@
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Activity,
   Search,
@@ -16,60 +17,61 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useHealthCheck } from "../hooks/useInterop";
 
-const quickActions = [
-  {
-    label: "Lookup Party",
-    description: "Find account by MSISDN, email, or other identifier",
-    path: "/interop/party/search",
-    icon: Search,
-    color: "text-blue-600",
-  },
-  {
-    label: "Register Identifier",
-    description: "Link an identifier to a savings account",
-    path: "/interop/party/register",
-    icon: UserPlus,
-    color: "text-emerald-600",
-  },
-  {
-    label: "Create Transfer",
-    description: "Quote, prepare, and commit a transfer",
-    path: "/interop/transfers",
-    icon: ArrowRightLeft,
-    color: "text-purple-600",
-  },
-  {
-    label: "Account Details",
-    description: "View account info, identifiers, transactions, KYC",
-    path: "/interop/account",
-    icon: Eye,
-    color: "text-orange-600",
-  },
-  {
-    label: "Disburse Loan",
-    description: "Disburse a loan by external account ID",
-    path: "/interop/loan/disburse",
-    icon: HandCoins,
-    color: "text-cyan-600",
-  },
-  {
-    label: "Loan Repayment",
-    description: "Make a loan repayment by external account ID",
-    path: "/interop/loan/repayment",
-    icon: Landmark,
-    color: "text-rose-600",
-  },
-];
-
 const InteropDashboard: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: health, isLoading: healthLoading } = useHealthCheck();
+
+  const quickActions = [
+    {
+      label: t("Lookup Party"),
+      description: t("Find account by MSISDN, email, or other identifier"),
+      path: "/interop/party/search",
+      icon: Search,
+      color: "text-blue-600",
+    },
+    {
+      label: t("Register Identifier"),
+      description: t("Link an identifier to a savings account"),
+      path: "/interop/party/register",
+      icon: UserPlus,
+      color: "text-emerald-600",
+    },
+    {
+      label: t("Create Transfer"),
+      description: t("Quote, prepare, and commit a transfer"),
+      path: "/interop/transfers",
+      icon: ArrowRightLeft,
+      color: "text-purple-600",
+    },
+    {
+      label: t("Account Details"),
+      description: t("View account info, identifiers, transactions, KYC"),
+      path: "/interop/account",
+      icon: Eye,
+      color: "text-orange-600",
+    },
+    {
+      label: t("Disburse Loan"),
+      description: t("Disburse a loan by external account ID"),
+      path: "/interop/loan/disburse",
+      icon: HandCoins,
+      color: "text-cyan-600",
+    },
+    {
+      label: t("Loan Repayment"),
+      description: t("Make a loan repayment by external account ID"),
+      path: "/interop/loan/repayment",
+      icon: Landmark,
+      color: "text-rose-600",
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Interoperation"
-        description="Mojaloop-compatible digital financial services — party management, quotes, transfers, and loan operations"
+        title={t("Interoperation")}
+        description={t("Mojaloop-compatible digital financial services — party management, quotes, transfers, and loan operations")}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -77,24 +79,24 @@ const InteropDashboard: FC = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Activity className="h-4 w-4" />
-              Service Health
+              {t("Service Health")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {healthLoading ? (
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Checking...
+                {t("Checking...")}
               </div>
             ) : health === "OK" ? (
               <div className="flex items-center gap-2 text-sm text-emerald-600">
                 <CheckCircle2 className="h-5 w-5" />
-                <span className="font-medium">Operational ({health})</span>
+                <span className="font-medium">{t("Operational")} ({health})</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 text-sm text-red-600">
                 <XCircle className="h-5 w-5" />
-                <span className="font-medium">Unavailable</span>
+                <span className="font-medium">{t("Unavailable")}</span>
               </div>
             )}
           </CardContent>
@@ -103,7 +105,7 @@ const InteropDashboard: FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle>{t("Quick Actions")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

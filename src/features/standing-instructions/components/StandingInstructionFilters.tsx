@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,30 +38,31 @@ const StandingInstructionFilters: React.FC<StandingInstructionFiltersProps> = ({
   onRefresh,
   isRefreshing,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-end gap-4">
       <div className="flex-1 min-w-50 space-y-1.5">
         <label className="block text-sm font-medium" htmlFor="si-search">
-          Search
+          {t("Search")}
         </label>
         <Input
           id="si-search"
-          placeholder="Search by client name..."
+          placeholder={t("Search by client name...")}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
       <div className="w-45 space-y-1.5">
-        <label className="block text-sm font-medium">Transfer Type</label>
+        <label className="block text-sm font-medium">{t("Transfer Type")}</label>
         <Select
           value={transferType ? String(transferType) : ""}
           onValueChange={(v) => onTransferTypeChange(v ? Number(v) : null)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="All types" />
+            <SelectValue placeholder={t("All types")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All types</SelectItem>
+            <SelectItem value="">{t("All types")}</SelectItem>
             {TRANSFER_TYPE_OPTIONS.map((opt) => (
               <SelectItem key={opt.id} value={String(opt.id)}>
                 {opt.label}
@@ -70,13 +72,13 @@ const StandingInstructionFilters: React.FC<StandingInstructionFiltersProps> = ({
         </Select>
       </div>
       <div className="w-37.5 space-y-1.5">
-        <label className="block text-sm font-medium">Status</label>
+        <label className="block text-sm font-medium">{t("Status")}</label>
         <Select value={status ? String(status) : ""} onValueChange={(v) => onStatusChange(v ? Number(v) : null)}>
           <SelectTrigger>
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder={t("All statuses")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All statuses</SelectItem>
+            <SelectItem value="">{t("All statuses")}</SelectItem>
             {STATUS_OPTIONS.map((opt) => (
               <SelectItem key={opt.id} value={String(opt.id)}>
                 {opt.label}
@@ -87,7 +89,7 @@ const StandingInstructionFilters: React.FC<StandingInstructionFiltersProps> = ({
       </div>
       <Button variant="outline" onClick={onRefresh} disabled={isRefreshing}>
         <RotateCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-        Refresh
+        {t("Refresh")}
       </Button>
     </div>
   );

@@ -1,5 +1,6 @@
 import { type FC, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +17,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 const ForgotPasswordPage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { forgotPassword, isSendingReset, resetPasswordSent, resetError, clearResetState, isAuthenticated } =
     useAuthStore();
@@ -83,8 +85,8 @@ const ForgotPasswordPage: FC = () => {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/25">
               <LayoutDashboard className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">CoreBank</h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Reset your password</p>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{t("CoreBank")}</h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("Reset your password")}</p>
           </div>
 
           {resetPasswordSent ? (
@@ -92,17 +94,17 @@ const ForgotPasswordPage: FC = () => {
               <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50">
                 <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
-              <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Check your inbox</h2>
+              <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t("Check your inbox")}</h2>
               <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
                 If an account exists for <span className="font-medium">{emailValue}</span>, we&apos;ve sent a password
                 reset link.
               </p>
               <p className="mb-6 text-xs text-gray-400 dark:text-gray-500">
-                Didn&apos;t receive it? Check your spam folder or try again.
+                {t("Didn't receive it? Check your spam folder or try again.")}
               </p>
               <Button variant="outline" onClick={handleBackToLogin} className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to login
+                {t("Back to login")}
               </Button>
             </div>
           ) : (
@@ -115,12 +117,12 @@ const ForgotPasswordPage: FC = () => {
               )}
 
               <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
-                Enter your email address and we&apos;ll send you a link to reset your password.
+                {t("Enter your email address and we'll send you a link to reset your password.")}
               </p>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">Email address</label>
+                  <label className="block text-sm font-medium">{t("Email address")}</label>
                   <div className="relative">
                     <Input
                       {...register("email")}
@@ -146,10 +148,10 @@ const ForgotPasswordPage: FC = () => {
                   {isSendingReset ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Sending reset link...
+                      {t("Sending reset link...")}
                     </span>
                   ) : (
-                    "Send reset link"
+                    t("Send reset link")
                   )}
                 </Button>
               </form>
@@ -161,7 +163,7 @@ const ForgotPasswordPage: FC = () => {
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-[#D32F2F] hover:text-primary-700 transition-colors"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  Back to login
+                  {t("Back to login")}
                 </button>
               </div>
             </>
@@ -169,7 +171,7 @@ const ForgotPasswordPage: FC = () => {
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">
-          &copy; {new Date().getFullYear()} CoreBank. All rights reserved.
+          &copy; {new Date().getFullYear()} {t("CoreBank")}. {t("All rights reserved.")}
         </p>
       </div>
     </div>
