@@ -121,6 +121,13 @@ const LoanForm: FC<LoanFormProps> = ({
   const clientIdVal = watch("clientId");
   const [selectedOriginators, setSelectedOriginators] = useState<LoanOriginator[]>([]);
 
+  // Per-field read-only matrix (doc §22 / §16.1):
+  //   clientId & loanProductId  → locked after submission
+  //   principal, numberOfRepayments, interestRatePerPeriod → locked after approval
+  //   approvedPrincipal        → locked after disbursement
+  const statusId = loan?.status?.id;
+  const afterApproval = statusId != null && statusId >= 200;
+
   // Report client/product changes so the page can (re)load the template (doc §3).
   useEffect(() => {
     if (mode === "create") onClientChange?.(clientIdVal);
@@ -202,7 +209,7 @@ const LoanForm: FC<LoanFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit((values) => onSubmit(values as any))} className="space-y-6">
+    <form onSubmit={handleSubmit((values) => onSubmit(values as FormFields))} className="space-y-6">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {error}
@@ -250,7 +257,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               step="0.01"
               {...register("principal")}
-              disabled={isSubmitting}
+              disabled={isSubmitting || afterApproval}
               error={errors.principal?.message}
             />
           </div>
@@ -290,7 +297,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <Input
               type="number"
               {...register("numberOfRepayments")}
-              disabled={isSubmitting}
+              disabled={isSubmitting || afterApproval}
               error={errors.numberOfRepayments?.message}
             />
           </div>

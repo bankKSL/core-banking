@@ -244,6 +244,11 @@ export async function writeOffLoan(loanId: number, payload: LoanCommandRequest =
   return makeTransaction(loanId, payload as Record<string, unknown>, "writeoff");
 }
 
+/** Undo write off: POST /loans/{id}/transactions?command=undowriteoff (doc §5.6) */
+export async function undoWriteOffLoan(loanId: number, payload: LoanCommandRequest = {}): Promise<LoanCommandResponse> {
+  return makeTransaction(loanId, payload as Record<string, unknown>, "undowriteoff");
+}
+
 export async function rejectLoanApplication(
   loanId: number,
   payload: LoanCommandRequest = {},

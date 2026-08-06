@@ -21,6 +21,7 @@ import LoanNotesCard from "../components/LoanNotesCard";
 import LoanDocumentsCard from "../components/LoanDocumentsCard";
 import LoanPDCsCard from "../components/LoanPDCsCard";
 import InterestPauseCard from "../components/InterestPauseCard";
+import LoanAccountingCard from "../components/LoanAccountingCard";
 import { LoanOriginatorsCard } from "@/features/loan-originators";
 
 const LoanViewPage: FC = () => {
@@ -67,6 +68,10 @@ const LoanViewPage: FC = () => {
   const charges = loan.charges ?? [];
   const collateral = loan.collateral ?? [];
   const guarantors = loan.guarantors ?? [];
+
+  // Accounting data is only meaningful after disbursement (doc §18). Hide the
+  // tab when the backend has not yet provided accounting figures.
+  const hasAccountingData = !!loan.summary && transactions.length > 0;
 
   return (
     <div className="max-w-6xl m-auto space-y-6">
@@ -119,6 +124,7 @@ const LoanViewPage: FC = () => {
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="pdcs">Post-Dated Checks</TabsTrigger>
           <TabsTrigger value="interestPause">Interest Pause</TabsTrigger>
+          {hasAccountingData && <TabsTrigger value="accounting">Accounting</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="details" className="mt-4">
@@ -172,6 +178,12 @@ const LoanViewPage: FC = () => {
         <TabsContent value="interestPause" className="mt-4">
           <InterestPauseCard loanId={loan.id} />
         </TabsContent>
+
+        {hasAccountingData && (
+          <TabsContent value="accounting" className="mt-4">
+            <LoanAccountingCard loan={loan} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

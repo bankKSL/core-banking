@@ -184,6 +184,9 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
             <DialogTitle>Add Charge</DialogTitle>
             <DialogDescription>Apply a new fee or penalty to this loan.</DialogDescription>
           </DialogHeader>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+            This charge will be added to the loan balance.
+          </div>
           <form onSubmit={onAddSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">Charge *</label>

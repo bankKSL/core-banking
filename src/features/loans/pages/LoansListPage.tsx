@@ -13,6 +13,7 @@ import {
   useLoans,
   LOAN_STATUS_CONFIG,
   LOANS_PAGE_SIZE,
+  LOAN_PAGE_SIZE_OPTIONS,
   LOAN_SEARCH_DEBOUNCE_MS,
   LOAN_SORT_OPTIONS,
   LOAN_DEFAULT_ORDER_BY,
@@ -29,10 +30,13 @@ const LoansListPage: FC = () => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [externalIdInput, setExternalIdInput] = useState("");
+  const [externalId, setExternalId] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<string>(LOAN_DEFAULT_ORDER_BY);
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">(LOAN_DEFAULT_SORT_ORDER);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(LOANS_PAGE_SIZE);
 
   // Debounce the search input (doc §27 #7) so we don't fire a request per keystroke.
   useEffect(() => {
@@ -40,40 +44,49 @@ const LoansListPage: FC = () => {
     return () => clearTimeout(t);
   }, [searchInput]);
 
+  useEffect(() => {
+    const t = setTimeout(() => setExternalId(externalIdInput), LOAN_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [externalIdInput]);
+
   const queryParams = useMemo(() => {
     const params: Record<string, unknown> = {
-      offset: (page - 1) * LOANS_PAGE_SIZE,
-      limit: LOANS_PAGE_SIZE,
+      offset: (page - 1) * pageSize,
+      limit: pageSize,
       orderBy,
       sortOrder,
     };
-    // doc §10: only `accountNo` and `externalId` exact-match search is supported.
+    // doc §10: `accountNo` and `externalId` exact-match search.
     if (search) params.accountNo = search;
+    if (externalId) params.externalId = externalId;
     if (statusFilter !== "all") {
       const statusId = STATUS_NAME_TO_ID[statusFilter];
       if (statusId) params.status = statusId;
     }
     return params;
-  }, [page, search, statusFilter, orderBy, sortOrder]);
+  }, [page, pageSize, search, externalId, statusFilter, orderBy, sortOrder]);
 
   const { data: loansData, isLoading, isError, error, refetch } = useLoans(queryParams);
 
   const data = useMemo(() => loansData?.pageItems ?? [], [loansData]);
   const totalFilteredRecords = loansData?.totalFilteredRecords ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalFilteredRecords / LOANS_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalFilteredRecords / pageSize));
   const safePage = Math.min(page, totalPages);
 
   // Partial-match client-side filter for the visible page only (doc §10 inference).
   const filtered = useMemo(() => {
     const q = searchInput.toLowerCase();
-    if (!q) return data;
-    return data.filter(
-      (a) =>
+    const eid = externalIdInput.toLowerCase();
+    return data.filter((a) => {
+      const matchesQuery =
+        !q ||
         (a.clientName ?? "").toLowerCase().includes(q) ||
         (a.accountNo ?? "").toLowerCase().includes(q) ||
-        (a.loanProductName ?? "").toLowerCase().includes(q),
-    );
-  }, [data, searchInput]);
+        (a.loanProductName ?? "").toLowerCase().includes(q);
+      const matchesExternalId = !eid || (a.externalId ?? "").toLowerCase().includes(eid);
+      return matchesQuery && matchesExternalId;
+    });
+  }, [data, searchInput, externalIdInput]);
 
   const columns: ColumnDef<Loan>[] = [
     {
@@ -161,13 +174,25 @@ const LoansListPage: FC = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Loans</CardTitle>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="relative w-80">
+            <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by customer, account or product..."
                 value={searchInput}
                 onChange={(e) => {
                   setSearchInput(e.target.value);
+                  setPage(1);
+                }}
+                className="pl-10"
+              />
+            </div>
+            <div className="relative w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="External ID..."
+                value={externalIdInput}
+                onChange={(e) => {
+                  setExternalIdInput(e.target.value);
                   setPage(1);
                 }}
                 className="pl-10"
@@ -228,13 +253,34 @@ const LoansListPage: FC = () => {
             onRowClick={(r) => navigate(`/loans/view/${r.id}`)}
           />
           {totalFilteredRecords > 0 && (
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Rows per page</span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(v) => {
+                    setPageSize(Number(v));
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOAN_PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Pagination
                 currentPage={safePage}
                 totalPages={totalPages}
                 onPageChange={setPage}
                 totalItems={totalFilteredRecords}
-                pageSize={LOANS_PAGE_SIZE}
+                pageSize={pageSize}
               />
             </div>
           )}

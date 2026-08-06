@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/store";
+import { useNetworkStore } from "@/store/network";
 
 // ─── Base Axios Instance ──────────────────────────────────────
 const client = axios.create({
@@ -37,6 +38,20 @@ client.interceptors.response.use(
     // 401 → force logout
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
+      return Promise.reject(error);
+    }
+    // Distinguish connection / timeout errors from HTTP error responses
+    // (400/403/404/409/500 are handled by the mutation/query error paths).
+    const code = error.code;
+    const isNetworkError = code === "ERR_NETWORK";
+    const isTimeout = code === "ECONNABORTED" || (error.message ?? "").toLowerCase().includes("timeout");
+    if (!error.response && (isNetworkError || isTimeout)) {
+      useNetworkStore.getState().reportNetworkError(
+        isTimeout ? "timeout" : "connection",
+        isTimeout
+          ? "The request timed out. Please check your connection and try again."
+          : "Unable to connect to the server. Please check your connection and try again.",
+      );
     }
     return Promise.reject(error);
   },

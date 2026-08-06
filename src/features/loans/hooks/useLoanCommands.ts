@@ -9,6 +9,7 @@ import {
   undoDisbursal,
   withdrawLoanApplication,
   makeTransaction,
+  undoWriteOffLoan,
 } from "../api/loan";
 import type { LoanCommandRequest } from "../types/loan";
 import { loanKeys } from "./useLoans";
@@ -113,6 +114,19 @@ export function useLoanTransactionCommand() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
       qc.invalidateQueries({ queryKey: loanKeys.schedule(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+/** Undo write off: POST /loans/{id}/transactions?command=undowriteoff */
+export function useUndoWriteOff() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, payload }: { loanId: number; payload?: LoanCommandRequest }) =>
+      undoWriteOffLoan(loanId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
       qc.invalidateQueries({ queryKey: loanKeys.all });
     },
   });

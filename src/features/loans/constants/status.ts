@@ -9,6 +9,7 @@ export const LOAN_STATUS_LABELS: Record<string, string> = {
   Closed: "Closed",
   Overpaid: "Overpaid",
   Rejected: "Rejected",
+  Withdrawn: "Withdrawn",
 };
 
 export const LOAN_STATUS_CONFIG: Record<
@@ -28,6 +29,7 @@ export const LOAN_STATUS_CONFIG: Record<
   Closed: { variant: "default", label: "Closed" },
   Overpaid: { variant: "warning", label: "Overpaid" },
   Rejected: { variant: "error", label: "Rejected" },
+  Withdrawn: { variant: "warning", label: "Withdrawn" },
 };
 
 /** Finfact numeric loan status to string mapping (doc §17.1) */
@@ -69,7 +71,9 @@ export const LOAN_SORT_OPTIONS: ReadonlyArray<{ value: string; label: string }> 
   { value: "l.submittedon_date", label: "Submitted On" },
 ];
 
-export const LOANS_PAGE_SIZE = 15;
+export const LOANS_PAGE_SIZE = 20;
+/** Page-size options exposed in the loan list pagination control (doc §27). */
+export const LOAN_PAGE_SIZE_OPTIONS = [20, 50, 100];
 export const LOAN_SEARCH_DEBOUNCE_MS = 400;
 
 /**
@@ -90,8 +94,8 @@ export function resolveStatusCode(loan: {
 
 /** Interest type labels for display */
 export const INTEREST_TYPE_LABELS: Record<string, string> = {
-  Flat: "Flat Rate",
-  "Declining Balance": "Reducing Balance",
+  Flat: "Flat",
+  "Declining Balance": "Declining Balance",
 };
 
 /** Amortization type labels for display */

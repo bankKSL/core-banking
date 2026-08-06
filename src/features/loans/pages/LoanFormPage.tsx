@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 import { useLoanProductTemplate } from "../hooks/useLoanProducts";
 import { useLoanTemplate } from "../hooks/useLoanTemplate";
 import { useCreateLoan } from "../hooks/useCreateLoan";
@@ -23,6 +24,7 @@ const LoanFormPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { success: toastSuccess } = useToast();
   const isEditMode = !!id;
   const urlClientId = searchParams.get("clientId") ? Number(searchParams.get("clientId")) : undefined;
 
@@ -121,13 +123,15 @@ const LoanFormPage: FC = () => {
       if (isEditMode && id) {
         delete payload.originators;
         await updateMutation.mutateAsync({ loanId: Number(id), payload: payload as Partial<LoanCreateRequest> });
+        toastSuccess("Loan updated successfully");
         navigate(`/loans/view/${id}`);
       } else {
         const result = await createMutation.mutateAsync(payload as unknown as LoanCreateRequest);
+        toastSuccess("Loan application submitted successfully");
         navigate(`/loans/view/${result.resourceId ?? result.loanId}`);
       }
     },
-    [createMutation, updateMutation, navigate, isEditMode, id],
+    [createMutation, updateMutation, navigate, isEditMode, id, toastSuccess],
   );
 
   const error = createMutation.error?.message ?? updateMutation.error?.message ?? null;

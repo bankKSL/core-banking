@@ -74,11 +74,29 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
   const isDestructive = TRANSACTION_DESTRUCTIVE_COMMANDS.has(transactionType);
   const label = TRANSACTION_COMMAND_LABELS[transactionType] ?? transactionType;
 
+  // Doc §19: warn on overpayment / partial payment relative to the outstanding balance.
+  const amount = watch("transactionAmount");
+  const outstanding = loanSummary?.outstandingLoanBalance;
+  const balanceWarning =
+    needsAmount && amount != null && outstanding != null
+      ? amount > outstanding
+        ? "Payment amount exceeds outstanding balance"
+        : amount < outstanding
+          ? "Partial payment will not close the loan"
+          : null
+      : null;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           {error}
+        </div>
+      )}
+
+      {balanceWarning && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <span>{balanceWarning}</span>
         </div>
       )}
 
@@ -131,7 +149,6 @@ const LoanTransactionForm: FC<LoanTransactionFormProps> = ({
                 step="0.01"
                 {...register("transactionAmount", { valueAsNumber: true })}
                 disabled={isSubmitting}
-                readOnly
               />
             </div>
           )}

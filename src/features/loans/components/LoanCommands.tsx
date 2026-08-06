@@ -19,8 +19,8 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +36,7 @@ import {
   useWithdrawLoan,
   useUndoApproval,
   useUndoDisbursal,
+  useUndoWriteOff,
 } from "../hooks/useLoanCommands";
 import { useDeleteLoan } from "../hooks/useDeleteLoan";
 import type { Loan } from "../types/loan";
@@ -48,10 +49,11 @@ interface LoanCommandsProps {
 const today = () => new Date().toISOString().split("T")[0];
 
 type DateCommand = "approve" | "disburse" | "disburseToSavings";
-type ConfirmCommand = "reject" | "withdraw" | "undoApproval" | "undoDisbursal" | "delete";
+type ConfirmCommand = "reject" | "withdraw" | "undoApproval" | "undoDisbursal" | "undoWriteOff" | "delete";
 
 const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
   const navigate = useNavigate();
+  const { success: toastSuccess } = useToast();
   const approveMut = useApproveLoan();
   const disburseMut = useDisburseLoan();
   const disburseToSavingsMut = useDisburseLoanToSavings();
@@ -59,6 +61,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
   const withdrawMut = useWithdrawLoan();
   const undoApprovalMut = useUndoApproval();
   const undoDisbursalMut = useUndoDisbursal();
+  const undoWriteOffMut = useUndoWriteOff();
   const deleteMut = useDeleteLoan();
 
   const statusId = loan.status?.id;
@@ -67,6 +70,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
   const isActive = statusId === 300;
   const isChargedOff = !!loan.chargedOff || loan.subStatus?.code === "chargeOff";
   const isClosed = statusId != null && [400, 500, 600, 601, 602].includes(statusId);
+  const isWrittenOff = statusId === 601;
   const isOverpaid = statusId === 700;
 
   const [dateCommand, setDateCommand] = useState<DateCommand | null>(null);
@@ -97,6 +101,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
     withdrawMut.isPending ||
     undoApprovalMut.isPending ||
     undoDisbursalMut.isPending ||
+    undoWriteOffMut.isPending ||
     deleteMut.isPending;
 
   const handleDateCommand = useCallback(async () => {
@@ -114,6 +119,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           locale: "en",
         },
       });
+      toastSuccess("Loan approved successfully");
     } else if (dateCommand === "disburse") {
       await disburseMut.mutateAsync({
         loanId: loan.id,
@@ -125,11 +131,13 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           locale: "en",
         },
       });
+      toastSuccess("Loan disbursed successfully");
     } else {
       await disburseToSavingsMut.mutateAsync({
         loanId: loan.id,
         payload: { actualDisbursementDate: dateInput, note, dateFormat: "yyyy-MM-dd", locale: "en" },
       });
+      toastSuccess("Loan disbursed successfully");
     }
     setDateCommand(null);
     onSuccess?.();
@@ -143,6 +151,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
     approveMut,
     disburseMut,
     disburseToSavingsMut,
+    toastSuccess,
     onSuccess,
   ]);
 
@@ -161,6 +170,9 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       case "undoDisbursal":
         await undoDisbursalMut.mutateAsync(loan.id);
         break;
+      case "undoWriteOff":
+        await undoWriteOffMut.mutateAsync({ loanId: loan.id });
+        break;
       case "delete":
         await deleteMut.mutateAsync(loan.id);
         navigate("/loans");
@@ -175,6 +187,7 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
     withdrawMut,
     undoApprovalMut,
     undoDisbursalMut,
+    undoWriteOffMut,
     deleteMut,
     navigate,
     onSuccess,
@@ -380,6 +393,20 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
           </>
         )}
 
+        {isWrittenOff && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmCommand("undoWriteOff")}
+              className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+            >
+              <Undo2 className="mr-1 h-4 w-4" />
+              Undo Write Off
+            </Button>
+          </>
+        )}
+
         {isOverpaid && (
           <>
             <Button variant="outline" size="sm" onClick={() => goToTransaction("refundbycash")}>
@@ -521,6 +548,16 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
         confirmLabel="Undo"
         variant="destructive"
         loading={undoDisbursalMut.isPending}
+        onConfirm={handleConfirmCommand}
+      />
+      <ConfirmDialog
+        open={confirmCommand === "undoWriteOff"}
+        onOpenChange={(open) => !open && setConfirmCommand(null)}
+        title="Undo Write Off"
+        description={`Undo write off for loan ${loan.accountNo ?? `#${loan.id}`}? The loan will become active again.`}
+        confirmLabel="Undo"
+        variant="destructive"
+        loading={undoWriteOffMut.isPending}
         onConfirm={handleConfirmCommand}
       />
       <ConfirmDialog

@@ -1,21 +1,33 @@
-import { type FC, useCallback } from "react";
-import { data, useNavigate, useParams } from "react-router-dom";
+import { type FC, useCallback, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useToast } from "@/components/ui/toast";
 import { useLoan } from "../hooks/useLoan";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { makeTransaction, approveLoan, disburseLoan, disburseLoanToSavings, undoDisbursal } from "../api/loan";
 import { useTransactionTemplate } from "../hooks/useTransactionTemplate";
 import { loanKeys } from "../hooks/useLoans";
-import { TRANSACTION_COMMAND_LABELS, TRANSACTION_NO_DATE_COMMANDS } from "../constants/transactions";
+import { TRANSACTION_COMMAND_LABELS, TRANSACTION_NO_DATE_COMMANDS, TRANSACTION_DESTRUCTIVE_COMMANDS, TRANSACTION_AMOUNT_COMMANDS } from "../constants/transactions";
 import LoanTransactionForm, { type TransactionFormValues } from "../components/LoanTransactionForm";
+
+const SUCCESS_MESSAGES: Record<string, string> = {
+  approve: "Loan approved successfully",
+  disburse: "Loan disbursed successfully",
+  disburseToSavings: "Loan disbursed successfully",
+  repayment: "Repayment recorded successfully",
+  writeoff: "Loan written off successfully",
+};
 
 const LoanTransactionFormPage: FC = () => {
   const { loanId, transactionType } = useParams<{ loanId: string; transactionType: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { success: toastSuccess } = useToast();
+  const [pendingConfirm, setPendingConfirm] = useState<TransactionFormValues | null>(null);
 
   const { data: loan } = useLoan(loanId);
   const templateQuery = useTransactionTemplate(loanId ? Number(loanId) : undefined, transactionType);
@@ -67,7 +79,7 @@ const LoanTransactionFormPage: FC = () => {
       if (!TRANSACTION_NO_DATE_COMMANDS.has(transactionType)) {
         txPayload.transactionDate = values.transactionDate;
       }
-      if (values.transactionAmount != null) {
+      if (TRANSACTION_AMOUNT_COMMANDS.has(transactionType) && values.transactionAmount != null) {
         txPayload.transactionAmount = values.transactionAmount;
       }
       if (values.paymentTypeId) txPayload.paymentTypeId = values.paymentTypeId;
@@ -79,6 +91,8 @@ const LoanTransactionFormPage: FC = () => {
       return makeTransaction(id, txPayload, transactionType!);
     },
     onSuccess: () => {
+      const message = SUCCESS_MESSAGES[transactionType ?? ""];
+      if (message) toastSuccess(message);
       qc.invalidateQueries({ queryKey: loanKeys.detail(loanId!) });
       qc.invalidateQueries({ queryKey: loanKeys.schedule(Number(loanId)) });
       qc.invalidateQueries({ queryKey: loanKeys.all });
@@ -88,11 +102,21 @@ const LoanTransactionFormPage: FC = () => {
 
   const label = TRANSACTION_COMMAND_LABELS[transactionType ?? ""] ?? transactionType ?? "";
 
+  const isDestructive = TRANSACTION_DESTRUCTIVE_COMMANDS.has(transactionType ?? "");
+  const confirmTitle = isDestructive ? `Confirm ${label}` : "";
+
   const handleSubmit = useCallback(
     async (values: TransactionFormValues) => {
+      // Destructive / irreversible commands require an explicit confirmation
+      // (doc §19) before the API is called.
+      if (isDestructive && !pendingConfirm) {
+        setPendingConfirm(values);
+        return;
+      }
+      setPendingConfirm(null);
       await mutation.mutateAsync(values);
     },
-    [mutation],
+    [mutation, isDestructive, pendingConfirm],
   );
 
   // Command templates may carry payment type options and/or a suggested amount
@@ -134,6 +158,25 @@ const LoanTransactionFormPage: FC = () => {
         onSubmit={handleSubmit}
         isSubmitting={mutation.isPending}
         error={null}
+      />
+
+      <ConfirmDialog
+        open={!!pendingConfirm}
+        onOpenChange={(open) => {
+          if (!open) setPendingConfirm(null);
+        }}
+        title={confirmTitle}
+        description={`Are you sure you want to ${label.toLowerCase()} this loan?${
+          isDestructive ? " This action cannot be undone." : ""
+        }`}
+        confirmLabel="Confirm"
+        variant="destructive"
+        loading={mutation.isPending}
+        onConfirm={() => {
+          if (pendingConfirm) {
+            handleSubmit(pendingConfirm);
+          }
+        }}
       />
     </div>
   );

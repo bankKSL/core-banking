@@ -45,6 +45,17 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           <InfoRow icon={<Hash className="h-4 w-4" />} label="Account No" value={loan.accountNo ?? `#${loan.id}`} />
           <InfoRow icon={<Hash className="h-4 w-4" />} label="External ID" value={loan.externalId ?? "—"} />
           <InfoRow icon={<Building2 className="h-4 w-4" />} label="Status" value={<LoanStatusBadge code={status} />} />
+          {loan.subStatus && (
+            <InfoRow
+              icon={<Building2 className="h-4 w-4" />}
+              label="Sub-Status"
+              value={
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                  {loan.subStatus.value}
+                </span>
+              }
+            />
+          )}
           <InfoRow icon={<Landmark className="h-4 w-4" />} label="Product" value={loan.loanProductName} />
           <InfoRow
             icon={<User className="h-4 w-4" />}

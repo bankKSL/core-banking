@@ -1,10 +1,4 @@
-import {
-  HashRouter as Router,
-  // BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import CampaignList from "./pages/CampaignList";
@@ -88,6 +82,7 @@ import LoginPage from "./pages/LoginPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { useAuthStore } from "./store";
 import ApiErrorHandler from "./components/shared/ApiErrorHandler";
+import NetworkErrorBanner from "./components/shared/NetworkErrorBanner";
 import DepositAccountDetailPage from "./pages/DepositAccountDetailPage";
 import TransferListPage from "./pages/TransferListPage";
 import TransferFormPage from "./pages/TransferFormPage";
@@ -122,12 +117,7 @@ import {
   InteropTransferPage,
   InteropAccountDetailPage,
 } from "@/features/interop";
-import {
-  COBDashboard,
-  BusinessStepConfigPage,
-  CatchUpPage,
-  LockedLoansPage,
-} from "@/features/cob";
+import { COBDashboard, BusinessStepConfigPage, CatchUpPage, LockedLoansPage } from "@/features/cob";
 import {
   ConfigurationDashboard,
   GlobalConfigPage,
@@ -135,12 +125,7 @@ import {
   PasswordPolicyPage,
   BusinessDatePage,
 } from "@/features/configuration";
-import {
-  CampaignListPage,
-  CampaignFormPage,
-  EmailCampaignFormPage,
-  CampaignDetailPage,
-} from "@/features/campaigns";
+import { CampaignListPage, CampaignFormPage, EmailCampaignFormPage, CampaignDetailPage } from "@/features/campaigns";
 import OfficeListPage from "@/features/offices/pages/OfficeListPage";
 import OfficeFormPage from "@/features/offices/pages/OfficeFormPage";
 import OfficeTransactionListPage from "@/features/offices/pages/OfficeTransactionListPage";
@@ -185,6 +170,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return (
     <>
       <ApiErrorHandler />
+      <NetworkErrorBanner />
       {children}
     </>
   );
@@ -192,8 +178,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    // <BrowserRouter>
-    <Router>
+    <BrowserRouter>
       <Routes>
         {/* Public: Login page */}
         <Route
@@ -439,15 +424,17 @@ function App() {
                   {/* Calendars & Meetings (entity-specific) */}
                   <Route path="/:entityType/:entityId/calendars" element={<CalendarListPage />} />
                   <Route path="/:entityType/:entityId/meetings" element={<MeetingListPage />} />
-                  <Route path="/:entityType/:entityId/meetings/:meetingId/attendance" element={<MeetingAttendancePage />} />
+                  <Route
+                    path="/:entityType/:entityId/meetings/:meetingId/attendance"
+                    element={<MeetingAttendancePage />}
+                  />
                 </Routes>
               </AppLayout>
             </RequireAuth>
           }
         />
       </Routes>
-    </Router>
-    // </BrowserRouter>
+    </BrowserRouter>
   );
 }
 
