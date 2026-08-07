@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import type { Loan } from "../types/loan";
-import { LOAN_STATUS_ID_MAP } from "../constants/status";
+import { LOAN_STATUS_ID_MAP, LOAN_CODE_TO_KEY } from "../constants/status";
 import LoanStatusBadge from "./LoanStatusBadge";
 
 interface LoanTableProps {
@@ -20,7 +20,7 @@ const LoanTable: FC<LoanTableProps> = ({ data, loading, onRowClick }) => {
   const navigate = useNavigate();
 
   const resolveStatusCode = (loan: Loan): string => {
-    if (loan.status?.code) return loan.status.code;
+    if (loan.status?.code) return LOAN_CODE_TO_KEY[loan.status.code] ?? loan.status.code;
     if (loan.status?.id != null) return LOAN_STATUS_ID_MAP[loan.status.id] ?? t("Unknown");
     return t("Unknown");
   };

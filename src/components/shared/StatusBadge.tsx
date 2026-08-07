@@ -129,7 +129,7 @@ const sizeClasses: Record<"sm" | "md" | "lg", string> = {
   lg: "h-8 px-3 text-sm gap-1.5",
 };
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label: labelOverride, className, size = "md" }) => {
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label: labelOverride, className, size = "sm" }) => {
   const { t } = useTranslation();
   const config = getStatusConfig(status);
   const label = labelOverride ?? t(statusLabelMap[status] ?? status);

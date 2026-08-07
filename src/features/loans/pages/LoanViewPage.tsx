@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useLoan } from "../hooks/useLoan";
-import { LOAN_STATUS_CONFIG, LOAN_STATUS_ID_MAP } from "../constants/status";
+import { LOAN_STATUS_CONFIG, LOAN_STATUS_ID_MAP, LOAN_CODE_TO_KEY } from "../constants/status";
 import LoanDetails from "../components/LoanDetails";
 import LoanCommands from "../components/LoanCommands";
 import LoanTransactionsTable from "../components/LoanTransactionsTable";
@@ -61,7 +61,8 @@ const LoanViewPage: FC = () => {
     );
   }
 
-  const statusCode = loan.status?.code ?? LOAN_STATUS_ID_MAP[loan.status?.id ?? -1] ?? "";
+  const rawCode = loan.status?.code;
+  const statusCode = (rawCode && LOAN_CODE_TO_KEY[rawCode]) ?? rawCode ?? LOAN_STATUS_ID_MAP[loan.status?.id ?? -1] ?? "";
   const statusCfg = LOAN_STATUS_CONFIG[statusCode];
 
   const currencyCode = loan.summary?.currency?.code ?? "USD";
@@ -115,12 +116,24 @@ const LoanViewPage: FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="details">{t("General")}</TabsTrigger>
-          <TabsTrigger value="transactions">{t("Transactions")} ({transactions.length})</TabsTrigger>
-          <TabsTrigger value="schedule">{t("Schedule")} ({schedulePeriods.length})</TabsTrigger>
-          <TabsTrigger value="charges">{t("Charges")} ({charges.length})</TabsTrigger>
-          <TabsTrigger value="collateral">{t("Collateral")} ({collateral.length})</TabsTrigger>
-          <TabsTrigger value="guarantors">{t("Guarantors")} ({guarantors.length})</TabsTrigger>
-          <TabsTrigger value="originators">{t("Originators")} ({loan.originators?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="transactions">
+            {t("Transactions")} ({transactions.length})
+          </TabsTrigger>
+          <TabsTrigger value="schedule">
+            {t("Schedule")} ({schedulePeriods.length})
+          </TabsTrigger>
+          <TabsTrigger value="charges">
+            {t("Charges")} ({charges.length})
+          </TabsTrigger>
+          <TabsTrigger value="collateral">
+            {t("Collateral")} ({collateral.length})
+          </TabsTrigger>
+          <TabsTrigger value="guarantors">
+            {t("Guarantors")} ({guarantors.length})
+          </TabsTrigger>
+          <TabsTrigger value="originators">
+            {t("Originators")} ({loan.originators?.length ?? 0})
+          </TabsTrigger>
           <TabsTrigger value="delinquency">{t("Delinquency")}</TabsTrigger>
           <TabsTrigger value="notes">{t("Notes")}</TabsTrigger>
           <TabsTrigger value="documents">{t("Documents")}</TabsTrigger>
@@ -154,11 +167,7 @@ const LoanViewPage: FC = () => {
         </TabsContent>
 
         <TabsContent value="originators" className="mt-4">
-          <LoanOriginatorsCard
-            loanId={loan.id}
-            originators={loan.originators}
-            canEdit={loan.status?.id === 100}
-          />
+          <LoanOriginatorsCard loanId={loan.id} originators={loan.originators} canEdit={loan.status?.id === 100} />
         </TabsContent>
 
         <TabsContent value="delinquency" className="mt-4">

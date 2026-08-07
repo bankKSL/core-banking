@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { fetchClients } from "@/features/clients";
 import { fetchLoans } from "@/features/loans";
 import { fetchSavingsAccounts } from "@/features/deposits";
-import { LOAN_STATUS_ID_MAP } from "@/features/loans/constants/status";
+import { LOAN_STATUS_ID_MAP, LOAN_CODE_TO_KEY } from "@/features/loans/constants/status";
 import type { Loan } from "@/features/loans/types/loan";
 
 // ─── Constants ───────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ const formatDate = (d: string) => {
 };
 
 const resolveStatusString = (loan: Loan): string => {
-  if (loan.status?.code) return loan.status.code;
+  if (loan.status?.code) return LOAN_CODE_TO_KEY[loan.status.code] ?? loan.status.code;
   if (loan.status?.id != null) return LOAN_STATUS_ID_MAP[loan.status.id] ?? "Unknown";
   return "Unknown";
 };

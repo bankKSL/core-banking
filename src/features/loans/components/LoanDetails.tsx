@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { User, DollarSign, Calendar, Clock, Percent, Hash, Building2, Landmark } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Loan } from "../types/loan";
-import { LOAN_STATUS_ID_MAP } from "../constants/status";
+import { LOAN_STATUS_ID_MAP, LOAN_CODE_TO_KEY } from "../constants/status";
 import LoanStatusBadge from "./LoanStatusBadge";
 
 interface LoanDetailsProps {
@@ -24,7 +24,7 @@ const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode
 );
 
 const resolveStatus = (loan: Loan, t: (key: string) => string): string => {
-  if (loan.status?.code) return loan.status.code;
+  if (loan.status?.code) return LOAN_CODE_TO_KEY[loan.status.code] ?? loan.status.code;
   if (loan.status?.id != null) return LOAN_STATUS_ID_MAP[loan.status.id] ?? t("Unknown");
   return t("Unknown");
 };

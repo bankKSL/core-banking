@@ -59,6 +59,25 @@ export const STATUS_NAME_TO_ID: Record<string, number> = Object.entries(LOAN_STA
   {} as Record<string, number>,
 );
 
+/** Map raw Fineract status codes to config keys used by LOAN_STATUS_CONFIG */
+export const LOAN_CODE_TO_KEY: Record<string, string> = {
+  "loanStatusType.submitted.and.pending.approval": "Submitted and pending approval",
+  "loanStatusType.approved": "Approved",
+  "loanStatusType.active": "Active",
+  "loanStatusType.disbursed": "Disbursed",
+  "loanStatusType.closed.obligations.met": "Closed (obligations met)",
+  "loanStatusType.closed.written.off": "Closed (written off)",
+  "loanStatusType.closed.reschedule.outstanding.amount": "Closed (rescheduled)",
+  "loanStatusType.closed": "Closed",
+  "loanStatusType.overpaid": "Overpaid",
+  "loanStatusType.rejected": "Rejected",
+  "loanStatusType.withdrawn.by.client": "Withdrawn",
+  "loanStatusType.withdrawn": "Withdrawn",
+  "loanStatusType.transfer.in.progress": "Transfer in progress",
+  "loanStatusType.transfer.on.hold": "Transfer on hold",
+  "loanStatusType.invalid": "Invalid",
+};
+
 /** Default sort applied to every list query (doc §11 / §27 #1) */
 export const LOAN_DEFAULT_ORDER_BY = "l.id";
 export const LOAN_DEFAULT_SORT_ORDER: "ASC" | "DESC" = "DESC";
@@ -88,6 +107,7 @@ export function resolveStatusCode(loan: {
 }): string {
   const s = loan.status;
   if (!s) return "Unknown";
+  if (s.code && s.code in LOAN_CODE_TO_KEY) return LOAN_CODE_TO_KEY[s.code];
   if (s.code) return s.code;
   if (s.value && s.value in STATUS_NAME_TO_ID) return s.value;
   if (s.id != null && s.id in LOAN_STATUS_ID_MAP) return LOAN_STATUS_ID_MAP[s.id];
