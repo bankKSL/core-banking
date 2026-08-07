@@ -23,6 +23,16 @@ import LoanDocumentsCard from "../components/LoanDocumentsCard";
 import LoanPDCsCard from "../components/LoanPDCsCard";
 import InterestPauseCard from "../components/InterestPauseCard";
 import LoanAccountingCard from "../components/LoanAccountingCard";
+import LoanReschedulesCard from "../components/LoanReschedulesCard";
+import LoanDatatablesCard from "../components/LoanDatatablesCard";
+import LoanExternalAssetOwnerCard from "../components/LoanExternalAssetOwnerCard";
+import LoanBuydownFeesCard from "../components/LoanBuydownFeesCard";
+import LoanDeferredIncomeCard from "../components/LoanDeferredIncomeCard";
+import LoanTermVariationsCard from "../components/LoanTermVariationsCard";
+import LoanTrancheDetailsCard from "../components/LoanTrancheDetailsCard";
+import LoanFloatingRatesCard from "../components/LoanFloatingRatesCard";
+import LoanOverdueChargesCard from "../components/LoanOverdueChargesCard";
+import LoanStandingInstructionsCard from "../components/LoanStandingInstructionsCard";
 import { LoanOriginatorsCard } from "@/features/loan-originators";
 
 const LoanViewPage: FC = () => {
@@ -139,6 +149,16 @@ const LoanViewPage: FC = () => {
           <TabsTrigger value="documents">{t("Documents")}</TabsTrigger>
           <TabsTrigger value="pdcs">{t("Post-Dated Checks")}</TabsTrigger>
           <TabsTrigger value="interestPause">{t("Interest Pause")}</TabsTrigger>
+          <TabsTrigger value="reschedules">{t("Reschedules")}</TabsTrigger>
+          <TabsTrigger value="datatables">{t("Data Tables")}</TabsTrigger>
+          <TabsTrigger value="externalAssetOwner">{t("External Asset Owner")}</TabsTrigger>
+          <TabsTrigger value="buydownFees">{t("Buy-down Fees")}</TabsTrigger>
+          <TabsTrigger value="deferredIncome">{t("Deferred Income")}</TabsTrigger>
+          <TabsTrigger value="termVariations">{t("Term Variations")}</TabsTrigger>
+          <TabsTrigger value="trancheDetails">{t("Tranche Details")}</TabsTrigger>
+          <TabsTrigger value="floatingRates">{t("Floating Interest Rates")}</TabsTrigger>
+          <TabsTrigger value="overdueCharges">{t("Overdue Charges")}</TabsTrigger>
+          <TabsTrigger value="standingInstructions">{t("Standing Instructions")}</TabsTrigger>
           {hasAccountingData && <TabsTrigger value="accounting">{t("Accounting")}</TabsTrigger>}
         </TabsList>
 
@@ -188,6 +208,46 @@ const LoanViewPage: FC = () => {
 
         <TabsContent value="interestPause" className="mt-4">
           <InterestPauseCard loanId={loan.id} />
+        </TabsContent>
+
+        <TabsContent value="reschedules" className="mt-4">
+          <LoanReschedulesCard loanId={loan.id} />
+        </TabsContent>
+
+        <TabsContent value="datatables" className="mt-4">
+          <LoanDatatablesCard loanId={loan.id} />
+        </TabsContent>
+
+        <TabsContent value="externalAssetOwner" className="mt-4">
+          <LoanExternalAssetOwnerCard loanId={loan.id} />
+        </TabsContent>
+
+        <TabsContent value="buydownFees" className="mt-4">
+          <LoanBuydownFeesCard loanId={loan.id} currencyCode={currencyCode} />
+        </TabsContent>
+
+        <TabsContent value="deferredIncome" className="mt-4">
+          <LoanDeferredIncomeCard loanId={loan.id} currencyCode={currencyCode} />
+        </TabsContent>
+
+        <TabsContent value="termVariations" className="mt-4">
+          <LoanTermVariationsCard loan={loan} />
+        </TabsContent>
+
+        <TabsContent value="trancheDetails" className="mt-4">
+          <LoanTrancheDetailsCard loan={loan} currencyCode={currencyCode} />
+        </TabsContent>
+
+        <TabsContent value="floatingRates" className="mt-4">
+          <LoanFloatingRatesCard loan={loan} />
+        </TabsContent>
+
+        <TabsContent value="overdueCharges" className="mt-4">
+          <LoanOverdueChargesCard loan={loan} currencyCode={currencyCode} />
+        </TabsContent>
+
+        <TabsContent value="standingInstructions" className="mt-4">
+          <LoanStandingInstructionsCard loanId={loan.id} />
         </TabsContent>
 
         {hasAccountingData && (

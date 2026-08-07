@@ -25,6 +25,12 @@ export type RepaymentFrequency =
 export type LoanTransactionType =
   "disbursement" | "repayment" | "waiveInterest" | "waiveCharges" | "writeOff" | "recoveryPayment" | "accrual";
 
+export interface CodeName {
+  id: number;
+  value: string;
+  code?: string;
+}
+
 // ─── Loan Product ────────────────────────────────────────────────
 
 export interface LoanProduct {
@@ -32,11 +38,14 @@ export interface LoanProduct {
   name: string;
   shortName?: string;
   description?: string;
+  fund?: { id: number; name: string };
   fundId?: number;
   fundName?: string;
   includeInBorrowerCycle?: boolean;
-  startDate?: string;
-  closeDate?: string;
+  useBorrowerCycle?: boolean;
+  startDate?: string | number[];
+  closeDate?: string | number[];
+  status?: string;
   currency: {
     code: string;
     name: string;
@@ -53,35 +62,60 @@ export interface LoanProduct {
   minNumberOfRepayments: number;
   maxNumberOfRepayments: number;
   repaymentEvery: number;
-  repaymentFrequencyType: { id: number; code: string; value: string };
+  repaymentFrequencyType: CodeName;
   interestRatePerPeriod: number;
   minInterestRatePerPeriod: number;
   maxInterestRatePerPeriod: number;
-  interestRateFrequencyType?: { id: number; code: string; value: string };
+  interestRateFrequencyType?: CodeName;
   annualInterestRate: number;
   isLinkedToFloatingInterestRates?: boolean;
   isFloatingInterestRateCalculationAllowed?: boolean;
   allowVariableInstallments?: boolean;
-  amortizationType: { id: number; code: string; value: string };
-  interestType: { id: number; code: string; value: string };
-  interestCalculationPeriodType: { id: number; code: string; value: string };
+  amortizationType: CodeName;
+  interestType: CodeName;
+  interestCalculationPeriodType: CodeName;
+  transactionProcessingStrategyCode?: string;
   transactionProcessingStrategyId?: number;
   transactionProcessingStrategyName?: string;
-  daysInMonthType?: { id: number; code: string; value: string };
-  daysInYearType?: { id: number; code: string; value: string };
-  isInterestRecalculationEnabled?: boolean;
+  accountingRule?: CodeName;
+  accountingMappings?: unknown;
   charges: Array<{
     id: number;
     chargeId: number;
     name: string;
-    chargeTimeType: { id: number; code: string; value: string };
-    chargeCalculationType: { id: number; code: string; value: string };
+    chargeTimeType: CodeName;
+    chargeCalculationType: CodeName;
     amount: number;
-    chargePaymentMode: { id: number; code: string; value: string };
+    chargePaymentMode: CodeName;
     isPenalty: boolean;
     isActive: boolean;
   }>;
-  accountingMappings?: unknown;
+  overdueCharges?: Array<{
+    id: number;
+    chargeId: number;
+    name: string;
+    chargeTimeType: CodeName;
+    chargeCalculationType: CodeName;
+    amount: number;
+    chargePaymentMode: CodeName;
+    isPenalty: boolean;
+    isActive: boolean;
+  }>;
+  daysInMonthType?: CodeName;
+  daysInYearType?: CodeName;
+  isInterestRecalculationEnabled?: boolean;
+  multiDisburseLoan?: boolean;
+  maxTrancheCount?: number;
+  outstandingLoanBalance?: number;
+  canDefineInstallmentAmount?: boolean;
+  graceOnPrincipalPayment?: number;
+  graceOnInterestPayment?: number;
+  graceOnInterestCharged?: number;
+  inArrearsTolerance?: number;
+  allowPartialPeriodInterestCalculation?: boolean;
+  loanScheduleType?: CodeName | string;
+  externalId?: string;
+  delinquencyBucketId?: number;
 }
 
 // ─── Loan ────────────────────────────────────────────────────────
@@ -90,7 +124,7 @@ export interface Loan {
   id: number;
   accountNo?: string;
   externalId?: string;
-  status: { id: number; code: string; value: string };
+  status: { id: number; code: string; value: string; pendingApproval?: boolean; waitingForDisbursal?: boolean; active?: boolean; closedObligationsMet?: boolean; closedWrittenOff?: boolean; closedRescheduled?: boolean; overpaid?: boolean };
   subStatus?: { id: number; code: string; value: string };
   loanProductId: number;
   loanProductName: string;
@@ -99,6 +133,7 @@ export interface Loan {
   clientName?: string;
   clientOfficeId?: number;
   group?: { id: number; name: string } | null;
+  groupName?: string;
   loanType?: { id: number; code: string; value: string };
   loanOfficerId?: number;
   loanOfficerName?: string;
@@ -106,22 +141,24 @@ export interface Loan {
   loanPurposeName?: string;
   fundId?: number;
   fundName?: string;
+  officeId?: number;
+  officeName?: string;
   principal: number;
   approvedPrincipal?: number;
   proposedPrincipal?: number;
   netDisbursalAmount?: number;
   termFrequency: number;
-  termPeriodFrequencyType: { id: number; code: string; value: string };
+  termPeriodFrequencyType: CodeName;
   numberOfRepayments: number;
   repaymentEvery: number;
-  repaymentFrequencyType: { id: number; code: string; value: string };
+  repaymentFrequencyType: CodeName;
   interestRatePerPeriod: number;
-  interestRateFrequencyType?: { id: number; code: string; value: string };
+  interestRateFrequencyType?: CodeName;
   annualInterestRate: number;
   isFloatingInterestRate?: boolean;
-  amortizationType: { id: number; code: string; value: string };
-  interestType: { id: number; code: string; value: string };
-  interestCalculationPeriodType: { id: number; code: string; value: string };
+  amortizationType: CodeName;
+  interestType: CodeName;
+  interestCalculationPeriodType: CodeName;
   allowPartialPeriodInterestCalculation?: boolean;
   inArrearsTolerance?: number;
   transactionProcessingStrategyId?: number;
@@ -155,12 +192,22 @@ export interface Loan {
   isNPA?: boolean;
   fraud?: boolean;
   chargedOff?: boolean;
-  overdueSinceDate?: string;
+  overdueSinceDate?: string | number[];
   emiAmount?: number;
   fixedEmiAmount?: number;
   maxOutstandingLoanBalance?: number;
-  expectedDisbursementDate?: string;
-  submittedOnDate?: string;
+  multiDisburseLoan?: boolean;
+  maxTrancheCount?: number;
+  outstandingLoanBalance?: number;
+  expectedDisbursementDate?: string | number[];
+  submittedOnDate?: string | number[];
+  linkAccountId?: number;
+  isTopup?: boolean;
+  loanIdToClose?: number;
+  enableDownPayment?: boolean;
+  enableInstallmentLevelDelinquency?: boolean;
+  loanDocuments?: unknown[];
+  notes?: unknown[];
 }
 
 /** Repayment schedule block as returned with associations=repaymentSchedule|all */
@@ -213,17 +260,19 @@ export interface LoanSummary {
 }
 
 export interface LoanTimeline {
-  submittedOnDate?: string;
+  submittedOnDate?: string | number[];
   submittedByUsername?: string;
-  expectedDisbursementDate?: string;
-  expectedMaturityDate?: string;
-  actualDisbursementDate?: string;
-  approvedOnDate?: string;
+  expectedDisbursementDate?: string | number[];
+  expectedMaturityDate?: string | number[];
+  actualDisbursementDate?: string | number[];
+  approvedOnDate?: string | number[];
   approvedByUsername?: string;
-  rejectedOnDate?: string;
+  rejectedOnDate?: string | number[];
   rejectedByUsername?: string;
-  closedOnDate?: string;
+  closedOnDate?: string | number[];
   closedByUsername?: string;
+  withdrawnOnDate?: string | number[];
+  disbursedByUsername?: string;
 }
 
 export interface LoanRepaymentPeriod {
@@ -298,8 +347,8 @@ export interface LoanTransaction {
 // ─── List / Pagination ───────────────────────────────────────────
 
 export interface LoanListResponse {
-  totalFilteredRecords: number;
-  pageItems: Loan[];
+  totalFilteredRecords?: number;
+  pageItems?: Loan[];
 }
 
 export interface LoanListParams {
@@ -428,13 +477,20 @@ export interface LoanCreateRequest {
   expectedDisbursementDate: string;
   submittedOnDate: string;
   transactionProcessingStrategyId?: number;
+  transactionProcessingStrategyCode?: string;
+  amortizationType?: number;
+  interestType?: number;
+  interestCalculationPeriodType?: number;
   loanPurposeName?: string;
+  loanPurposeId?: number;
   loanOfficerId?: number;
   fundId?: number;
   linkAccountId?: number;
   externalId?: string;
   maxOutstandingLoanBalance?: number;
   charges?: Array<{ chargeId: number; amount: number; dueDate?: string }>;
+  collateral?: Array<{ collateralTypeId: number; value: number; description?: string }>;
+  guarantors?: Array<{ clientId: number; amount: number; guarantorTypeId?: number }>;
   originators?: LoanApplicationOriginator[];
   disbursementData?: Array<{
     expectedDisbursementDate: string;

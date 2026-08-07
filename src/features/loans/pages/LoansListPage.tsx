@@ -99,7 +99,7 @@ const LoansListPage: FC = () => {
     {
       key: "clientName",
       header: t("Customer"),
-      cell: (r) => <span className="font-medium">{r.clientName ?? `Client #${r.clientId}`}</span>,
+      cell: (r) => <span className="font-medium">{r.clientName ?? r.groupName ?? `Client #${r.clientId}`}</span>,
     },
     {
       key: "loanProductName",
@@ -118,6 +118,16 @@ const LoansListPage: FC = () => {
         const cfg = LOAN_STATUS_CONFIG[resolveStatusCode(r)];
         return <StatusBadge status={cfg?.variant ?? "default"} label={cfg?.label ?? resolveStatusCode(r)} size="sm" />;
       },
+    },
+    {
+      key: "loanOfficerName",
+      header: t("Loan Officer"),
+      cell: (r) => <span className="text-sm">{r.loanOfficerName ?? "—"}</span>,
+    },
+    {
+      key: "officeName",
+      header: t("Office"),
+      cell: (r) => <span className="text-sm">{r.officeName ?? "—"}</span>,
     },
     {
       key: "actions",

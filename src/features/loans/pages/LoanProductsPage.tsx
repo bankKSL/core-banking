@@ -10,20 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { useLoanProducts, useDeleteLoanProduct } from "@/features/loans";
+import { useLoanProducts, useDeleteLoanProduct, formatFineractDate } from "@/features/loans";
 import type { LoanProduct } from "@/features/loans";
-
-/** Extract string value from Finfact enum objects {id,code,value} or primitive */
-function enumVal(v: any, fallback = ""): string {
-  if (v == null) return fallback;
-  if (typeof v === "object") return v.code ?? v.value ?? String(v.id) ?? fallback;
-  return String(v);
-}
 
 const LoanProductsPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: products = [], isLoading, refetch } = useLoanProducts();
+  const { data: products = [], isLoading } = useLoanProducts();
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<LoanProduct | null>(null);
   const deleteMutation = useDeleteLoanProduct();
@@ -50,28 +43,37 @@ const LoanProductsPage: React.FC = () => {
       header: t("Short Name"),
       accessorFn: (r) => <span className="text-sm text-gray-500">{r.shortName ?? "—"}</span>,
     },
+    {
+      key: "description",
+      header: t("Description"),
+      accessorFn: (r) => <span className="text-sm">{r.description ?? "—"}</span>,
+    },
     { key: "currency", header: t("Currency"), accessorFn: (r) => <span>{r.currency?.code ?? "—"}</span> },
     {
-      key: "principal",
-      header: t("Principal"),
-      accessorFn: (r) => <span className="font-mono">{r.principal?.toLocaleString()}</span>,
-    },
-    { key: "rate", header: t("Rate"), accessorFn: (r) => <span>{r.interestRatePerPeriod}%</span> },
-    {
-      key: "repayments",
-      header: t("Repayments"),
-      accessorFn: (r) => (
-        <span>
-          {r.numberOfRepayments} × {r.repaymentEvery}
-        </span>
-      ),
+      key: "fund",
+      header: t("Fund"),
+      accessorFn: (r) => <span>{r.fund?.name ?? r.fundName ?? "—"}</span>,
     },
     {
-      key: "scheduleType",
-      header: t("Schedule"),
+      key: "startDate",
+      header: t("Start Date"),
+      accessorFn: (r) => <span>{formatFineractDate(r.startDate)}</span>,
+    },
+    {
+      key: "closeDate",
+      header: t("Close Date"),
+      accessorFn: (r) => <span>{formatFineractDate(r.closeDate)}</span>,
+    },
+    {
+      key: "status",
+      header: t("Status"),
       accessorFn: (r) => {
-        const st = enumVal(r.loanScheduleType, "CUMULATIVE");
-        return <Badge>{st}</Badge>;
+        const s = r.status ?? (r.closeDate ? "closed" : "active");
+        return (
+          <Badge variant={s === "active" ? "success" : "default"} size="sm">
+            {s}
+          </Badge>
+        );
       },
     },
     {
@@ -134,7 +136,7 @@ const LoanProductsPage: React.FC = () => {
               columns={columns}
               data={filtered}
               emptyState={{ message: t("No products found.") }}
-              minWidth={900}
+              minWidth={1200}
             />
           )}
         </CardContent>

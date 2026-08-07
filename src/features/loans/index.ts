@@ -24,6 +24,7 @@ export type {
   InterestCalculationPeriodType,
   RepaymentFrequency,
   LoanTransactionType,
+  CodeName,
   Fund,
   LoanCharge,
   LoanChargeTemplate,

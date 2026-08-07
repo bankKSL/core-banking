@@ -1,13 +1,14 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil, Landmark, DollarSign, Repeat, Percent, CalendarClock, FileText } from "lucide-react";
+import { ArrowLeft, Pencil, Landmark, DollarSign, Repeat, Percent, CalendarClock, FileText, Shield, Settings, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useLoanProduct } from "@/features/loans";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useLoanProduct, formatFineractDate } from "@/features/loans";
 
 function enumVal(v: any, fallback = ""): string {
   if (v == null) return fallback;
@@ -140,7 +141,9 @@ const LoanProductViewPage: React.FC = () => {
               label={t("In Multiples Of")}
               value={p.currency?.inMultiplesOf ?? 0}
             />
-            <InfoRow icon={<Landmark className="h-4 w-4" />} label={t("Fund")} value={p.fundName ?? "—"} />
+            <InfoRow icon={<Landmark className="h-4 w-4" />} label={t("Fund")} value={p.fund?.name ?? p.fundName ?? "—"} />
+            <InfoRow icon={<CalendarClock className="h-4 w-4" />} label={t("Start Date")} value={formatFineractDate(p.startDate)} />
+            <InfoRow icon={<CalendarClock className="h-4 w-4" />} label={t("Close Date")} value={formatFineractDate(p.closeDate)} />
             <InfoRow
               icon={
                 <Badge variant={isProgressive ? "info" : "default"} size="sm" rounded>
@@ -282,6 +285,146 @@ const LoanProductViewPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Charges */}
+      {p.charges?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <DollarSign className="h-5 w-5 text-[#D32F2F]" />
+              {t("Charges")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("Name")}</TableHead>
+                    <TableHead>{t("Type")}</TableHead>
+                    <TableHead>{t("Amount")}</TableHead>
+                    <TableHead>{t("Collected As")}</TableHead>
+                    <TableHead>{t("Penalty")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {p.charges.map((charge: any, i: number) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium">{charge.name}</TableCell>
+                      <TableCell>{enumVal(charge.chargeTimeType)}</TableCell>
+                      <TableCell className="font-mono">{charge.amount?.toLocaleString()}</TableCell>
+                      <TableCell>{enumVal(charge.chargeCalculationType)}</TableCell>
+                      <TableCell>
+                        <Badge variant={charge.isPenalty ? "error" : "default"} size="sm">
+                          {charge.isPenalty ? t("Yes") : t("No")}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Accounting */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Shield className="h-5 w-5 text-[#D32F2F]" />
+            {t("Accounting")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
+          <InfoRow
+            icon={<Shield className="h-4 w-4" />}
+            label={t("Accounting Rule")}
+            value={
+              <Badge variant={enumVal(p.accountingRule) === "CASH" ? "info" : enumVal(p.accountingRule) === "ACCRUAL" ? "default" : "outline"}>
+                {enumVal(p.accountingRule, "NONE")}
+              </Badge>
+            }
+          />
+          {p.accountingMappings && typeof p.accountingMappings === "object" && Object.entries(p.accountingMappings as Record<string, unknown>).map(([key, val]) => (
+            <InfoRow
+              key={key}
+              icon={<FileText className="h-4 w-4" />}
+              label={key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
+              value={typeof val === "object" && val !== null ? (val as any).name ?? JSON.stringify(val) : String(val ?? "—")}
+            />
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Advanced Rules */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Settings className="h-5 w-5 text-[#D32F2F]" />
+            {t("Advanced Rules")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
+          <InfoRow
+            icon={<Settings className="h-4 w-4" />}
+            label={t("Multi-Disburse")}
+            value={
+              <Badge variant={p.multiDisburseLoan ? "success" : "default"} size="sm">
+                {p.multiDisburseLoan ? t("Enabled") : t("Disabled")}
+              </Badge>
+            }
+          />
+          {p.multiDisburseLoan && (
+            <>
+              <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Max Tranche Count")} value={p.maxTrancheCount ?? "—"} />
+              <InfoRow icon={<DollarSign className="h-4 w-4" />} label={t("Max Outstanding Balance")} value={p.outstandingLoanBalance?.toLocaleString() ?? "—"} />
+              <InfoRow
+                icon={<FileText className="h-4 w-4" />}
+                label={t("Can Define Installment Amount")}
+                value={p.canDefineInstallmentAmount ? t("Yes") : t("No")}
+              />
+            </>
+          )}
+          <InfoRow
+            icon={<Repeat className="h-4 w-4" />}
+            label={t("Borrower Cycle")}
+            value={
+              <Badge variant={p.includeInBorrowerCycle || p.useBorrowerCycle ? "info" : "default"} size="sm">
+                {p.includeInBorrowerCycle || p.useBorrowerCycle ? t("Enabled") : t("Disabled")}
+              </Badge>
+            }
+          />
+          <InfoRow
+            icon={<AlertCircle className="h-4 w-4" />}
+            label={t("Interest Recalculation")}
+            value={
+              <Badge variant={p.isInterestRecalculationEnabled ? "warning" : "default"} size="sm">
+                {p.isInterestRecalculationEnabled ? t("Enabled") : t("Disabled")}
+              </Badge>
+            }
+          />
+          <InfoRow
+            icon={<Percent className="h-4 w-4" />}
+            label={t("Floating Interest Rates")}
+            value={
+              <Badge variant={p.isLinkedToFloatingInterestRates ? "info" : "default"} size="sm">
+                {p.isLinkedToFloatingInterestRates ? t("Linked") : t("Not Linked")}
+              </Badge>
+            }
+          />
+          <InfoRow
+            icon={<FileText className="h-4 w-4" />}
+            label={t("Allow Partial Period Interest")}
+            value={p.allowPartialPeriodInterestCalculation ? t("Yes") : t("No")}
+          />
+          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Days In Month")} value={getLabel("daysInMonthType", enumId(p.daysInMonthType))} />
+          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Days In Year")} value={getLabel("daysInYearType", enumId(p.daysInYearType))} />
+          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Grace on Principal")} value={p.graceOnPrincipalPayment ?? 0} />
+          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Grace on Interest")} value={p.graceOnInterestPayment ?? 0} />
+          <InfoRow icon={<DollarSign className="h-4 w-4" />} label={t("Arrears Tolerance")} value={p.inArrearsTolerance?.toLocaleString() ?? "0"} />
+        </CardContent>
+      </Card>
 
       {/* Active Chart (if any) */}
       {(product as any).activeChart?.chartSlabs?.length > 0 && (

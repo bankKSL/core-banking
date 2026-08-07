@@ -26,8 +26,9 @@ import { currentDate } from "@/lib/utils";
 // ─── Loan Products ───────────────────────────────────────────────
 
 export async function fetchLoanProducts(params?: { offset?: number; limit?: number }): Promise<LoanProduct[]> {
-  const { data } = await client.get<LoanProduct[]>("/loanproducts", { params });
-  return data;
+  const { data } = await client.get<LoanProduct[] | { pageItems?: LoanProduct[] }>("/loanproducts", { params });
+  if (Array.isArray(data)) return data;
+  return data?.pageItems ?? [];
 }
 
 export async function fetchLoanProduct(productId: number): Promise<LoanProduct> {
@@ -60,7 +61,10 @@ export async function deleteLoanProduct(productId: number): Promise<void> {
 // ─── Loans ───────────────────────────────────────────────────────
 
 export async function fetchLoans(params: LoanListParams = {}): Promise<LoanListResponse> {
-  const { data } = await client.get<LoanListResponse>("/loans", { params });
+  const { data } = await client.get<LoanListResponse | Loan[]>("/loans", { params });
+  if (Array.isArray(data)) {
+    return { totalFilteredRecords: data.length, pageItems: data };
+  }
   return data;
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -332,7 +332,7 @@ const LoanProductFormPage: React.FC = () => {
       compoundingFrequencyType: p.interestRecalculationData?.compoundingFrequencyType?.id ?? undefined,
       isArrearsBasedOnOriginalSchedule: !!p.interestRecalculationData?.isArrearsBasedOnOriginalSchedule,
       inArrearsTolerance: p.inArrearsTolerance ?? undefined,
-      fundId: p.fundId ?? undefined,
+      fundId: p.fund?.id ?? p.fundId ?? undefined,
       digitsAfterDecimal: p.currency?.decimalPlaces ?? 2,
       inMultiplesOf: p.currency?.inMultiplesOf ?? 0,
       accountingRule: p.accountingRule?.id ?? 1,
