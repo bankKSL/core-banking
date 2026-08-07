@@ -14,26 +14,29 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser, useUserTemplate, useCreateUser, useUpdateUser } from "../hooks/useUsers";
 
-const userSchema = z.object({
-  username: z.string().min(1, "Username is required").max(100),
-  firstname: z.string().min(1, "First name is required").max(100),
-  lastname: z.string().min(1, "Last name is required").max(100),
-  email: z.string().email().optional().or(z.literal("")),
-  officeId: z.string().min(1, "Office is required"),
-  staffId: z.string().optional(),
-  roles: z.array(z.string()).min(1, "At least one role is required"),
-  password: z.string().optional(),
-  repeatPassword: z.string().optional(),
-  sendPasswordToEmail: z.boolean().optional(),
-  passwordNeverExpires: z.boolean().optional(),
-  isLoginRetriesEnabled: z.boolean().optional(),
-  isPasswordResetAllowed: z.boolean().optional(),
-});
+type UserFormValues = z.infer<ReturnType<typeof getUserSchema>>;
 
-type UserFormValues = z.infer<typeof userSchema>;
+function getUserSchema(t: (key: string) => string) {
+  return z.object({
+    username: z.string().min(1, t("Username is required")).max(100),
+    firstname: z.string().min(1, t("First name is required")).max(100),
+    lastname: z.string().min(1, t("Last name is required")).max(100),
+    email: z.string().email().optional().or(z.literal("")),
+    officeId: z.string().min(1, t("Office is required")),
+    staffId: z.string().optional(),
+    roles: z.array(z.string()).min(1, t("At least one role is required")),
+    password: z.string().optional(),
+    repeatPassword: z.string().optional(),
+    sendPasswordToEmail: z.boolean().optional(),
+    passwordNeverExpires: z.boolean().optional(),
+    isLoginRetriesEnabled: z.boolean().optional(),
+    isPasswordResetAllowed: z.boolean().optional(),
+  });
+}
 
 const UserFormPage: FC = () => {
   const { t } = useTranslation();
+  const userSchema = getUserSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -140,7 +143,7 @@ const UserFormPage: FC = () => {
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? t("Edit User") : t("Create User")}
-        description={isEdit ? t(`Editing user #${id}`) : t("Register a new application user")}
+        description={isEdit ? t("Editing user #{{id}}", { id }) : t("Register a new application user")}
         actions={
           <Button variant="outline" onClick={() => navigate("/admin/users")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
@@ -167,7 +170,7 @@ const UserFormPage: FC = () => {
             </div>
             <div className="col-span-2 space-y-1.5">
               <label className="block text-sm font-medium">{t("Email")}</label>
-              <Input type="email" {...register("email")} placeholder="user@example.com" error={errors.email?.message} />
+              <Input type="email" {...register("email")} placeholder={t("user@example.com")} error={errors.email?.message} />
             </div>
           </CardContent>
         </Card>

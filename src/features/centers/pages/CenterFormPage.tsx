@@ -18,30 +18,33 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useCenter, useCenterTemplate, useCreateCenter, useUpdateCenter } from "../hooks/useCenters";
 import { currentDate } from "@/lib/utils";
 
-const centerFormSchema = z
-  .object({
-    name: z.string({ message: "Name is required" }).min(1, "Name is required"),
-    officeId: z.number({ message: "Office is required" }).int().positive("Office is required"),
-    staffId: z.number().optional().or(z.literal("")),
-    externalId: z.string().optional().or(z.literal("")),
-    active: z.boolean().default(true),
-    activationDate: z.string().optional().or(z.literal("")),
-    submittedOnDate: z.string().optional().or(z.literal("")),
-  })
-  .superRefine((values, ctx) => {
-    if (values.active && !values.activationDate) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["activationDate"],
-        message: "Activation date is required when the center is active",
-      });
-    }
-  });
+type CenterFormValues = z.infer<ReturnType<typeof getCenterFormSchema>>;
 
-type CenterFormValues = z.infer<typeof centerFormSchema>;
+function getCenterFormSchema(t: (key: string) => string) {
+  return z
+    .object({
+      name: z.string({ message: t("Name is required") }).min(1, t("Name is required")),
+      officeId: z.number({ message: t("Office is required") }).int().positive(t("Office is required")),
+      staffId: z.number().optional().or(z.literal("")),
+      externalId: z.string().optional().or(z.literal("")),
+      active: z.boolean().default(true),
+      activationDate: z.string().optional().or(z.literal("")),
+      submittedOnDate: z.string().optional().or(z.literal("")),
+    })
+    .superRefine((values, ctx) => {
+      if (values.active && !values.activationDate) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["activationDate"],
+          message: t("Activation date is required when the center is active"),
+        });
+      }
+    });
+}
 
 const CenterFormPage: FC = () => {
   const { t } = useTranslation();
+  const centerFormSchema = getCenterFormSchema(t);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;

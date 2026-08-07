@@ -1,5 +1,6 @@
 import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import type { Office } from "@/types";
@@ -12,13 +13,14 @@ interface OfficeTableProps {
 }
 
 const OfficeTable: React.FC<OfficeTableProps> = ({ data, onRowClick, onEdit, onDelete }) => {
+  const { t } = useTranslation();
   const columns: ColumnDef<Office>[] = [
-    { key: "nameDecorated", header: "Office Name", sortable: true },
-    { key: "externalId", header: "External ID" },
-    { key: "openingDate", header: "Opening Date" },
+    { key: "nameDecorated", header: t("Office Name"), sortable: true },
+    { key: "externalId", header: t("External ID") },
+    { key: "openingDate", header: t("Opening Date") },
     {
       key: "parentName",
-      header: "Parent Office",
+      header: t("Parent Office"),
       cell: (row) => row.parentName ?? "—",
     },
     {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import i18n from "@/i18n";
 
 // ============================================================
 // GL Account
@@ -8,8 +9,8 @@ export const glAccountTypeSchema = z.number().int().min(1).max(5);
 export const glAccountUsageSchema = z.number().int().min(1).max(2);
 
 export const createGLAccountSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be 200 characters or less"),
-  glCode: z.string().min(1, "GL Code is required").max(45, "GL Code must be 45 characters or less"),
+  name: z.string().min(1, i18n.t("Name is required")).max(200, i18n.t("Name must be 200 characters or less")),
+  glCode: z.string().min(1, i18n.t("GL Code is required")).max(45, i18n.t("GL Code must be 45 characters or less")),
   type: glAccountTypeSchema,
   usage: glAccountUsageSchema,
   manualEntriesAllowed: z.boolean(),
@@ -32,26 +33,26 @@ export const updateGLAccountSchema = z
     description: z.string().max(500).optional(),
     disabled: z.boolean().optional(),
   })
-  .refine((data) => Object.keys(data).length > 0, { message: "At least one field must be provided for update" });
+  .refine((data) => Object.keys(data).length > 0, { message: i18n.t("At least one field must be provided for update") });
 
 // ============================================================
 // Journal Entry
 // ============================================================
 
 export const creditDebitSchema = z.object({
-  glAccountId: z.number({ message: "GL Account is required" }).int().positive(),
-  amount: z.number({ message: "Amount is required" }).positive("Amount must be positive"),
+  glAccountId: z.number({ message: i18n.t("GL Account is required") }).int().positive(),
+  amount: z.number({ message: i18n.t("Amount is required") }).positive(i18n.t("Amount must be positive")),
 });
 
 export const createJournalEntrySchema = z
   .object({
-    officeId: z.number({ message: "Office is required" }).int().positive(),
-    transactionDate: z.string({ message: "Transaction date is required" }).min(1),
-    currencyCode: z.string({ message: "Currency is required" }).min(1),
+    officeId: z.number({ message: i18n.t("Office is required") }).int().positive(),
+    transactionDate: z.string({ message: i18n.t("Transaction date is required") }).min(1),
+    currencyCode: z.string({ message: i18n.t("Currency is required") }).min(1),
     dateFormat: z.string().optional(),
     locale: z.string().optional(),
-    credits: z.array(creditDebitSchema).min(1, "At least one credit entry is required"),
-    debits: z.array(creditDebitSchema).min(1, "At least one debit entry is required"),
+    credits: z.array(creditDebitSchema).min(1, i18n.t("At least one credit entry is required")),
+    debits: z.array(creditDebitSchema).min(1, i18n.t("At least one debit entry is required")),
     comments: z.string().max(500).optional(),
     referenceNumber: z.string().max(100).optional(),
     accountingRuleId: z.number().int().positive().optional(),
@@ -69,7 +70,7 @@ export const createJournalEntrySchema = z
       const totalDebits = data.debits.reduce((sum, d) => sum + d.amount, 0);
       return Math.abs(totalCredits - totalDebits) < 0.001;
     },
-    { message: "Total debits must equal total credits", path: ["debits"] },
+    { message: i18n.t("Total debits must equal total credits"), path: ["debits"] },
   );
 
 export type CreateJournalEntryFormValues = z.infer<typeof createJournalEntrySchema>;
@@ -80,8 +81,8 @@ export type CreateJournalEntryFormValues = z.infer<typeof createJournalEntrySche
 
 export const createAccountingRuleSchema = z
   .object({
-    name: z.string().min(1, "Name is required"),
-    officeId: z.number({ message: "Office is required" }).int().positive(),
+    name: z.string().min(1, i18n.t("Name is required")),
+    officeId: z.number({ message: i18n.t("Office is required") }).int().positive(),
     description: z.string().optional(),
     accountToDebit: z.number().int().positive().optional(),
     accountToCredit: z.number().int().positive().optional(),
@@ -91,11 +92,11 @@ export const createAccountingRuleSchema = z
     allowMultipleDebitEntries: z.boolean().optional(),
   })
   .refine((data) => data.accountToDebit || (data.debitTags && data.debitTags.length > 0), {
-    message: "Either accountToDebit or debitTags is required",
+    message: i18n.t("Either accountToDebit or debitTags is required"),
     path: ["accountToDebit"],
   })
   .refine((data) => data.accountToCredit || (data.creditTags && data.creditTags.length > 0), {
-    message: "Either accountToCredit or creditTags is required",
+    message: i18n.t("Either accountToCredit or creditTags is required"),
     path: ["accountToCredit"],
   });
 
@@ -106,8 +107,8 @@ export type CreateAccountingRuleFormValues = z.infer<typeof createAccountingRule
 // ============================================================
 
 export const createFinancialActivityMappingSchema = z.object({
-  financialActivityId: z.number({ message: "Financial activity is required" }).int().positive(),
-  glAccountId: z.number({ message: "GL Account is required" }).int().positive(),
+  financialActivityId: z.number({ message: i18n.t("Financial activity is required") }).int().positive(),
+  glAccountId: z.number({ message: i18n.t("GL Account is required") }).int().positive(),
 });
 
 export type CreateFinancialActivityMappingFormValues = z.infer<typeof createFinancialActivityMappingSchema>;
@@ -117,8 +118,8 @@ export type CreateFinancialActivityMappingFormValues = z.infer<typeof createFina
 // ============================================================
 
 export const createGLClosureSchema = z.object({
-  officeId: z.number({ message: "Office is required" }).int().positive(),
-  closingDate: z.string({ message: "Closing date is required" }).min(1),
+  officeId: z.number({ message: i18n.t("Office is required") }).int().positive(),
+  closingDate: z.string({ message: i18n.t("Closing date is required") }).min(1),
   dateFormat: z.string().optional(),
   locale: z.string().optional(),
   comments: z.string().optional(),
@@ -131,7 +132,7 @@ export type CreateGLClosureFormValues = z.infer<typeof createGLClosureSchema>;
 // ============================================================
 
 export const executePeriodicAccrualSchema = z.object({
-  tillDate: z.string({ message: "Till date is required" }).min(1),
+  tillDate: z.string({ message: i18n.t("Till date is required") }).min(1),
   dateFormat: z.string().optional(),
   locale: z.string().optional(),
 });
@@ -143,7 +144,7 @@ export type ExecutePeriodicAccrualFormValues = z.infer<typeof executePeriodicAcc
 // ============================================================
 
 export const createProvisioningEntrySchema = z.object({
-  date: z.string({ message: "Date is required" }).min(1),
+  date: z.string({ message: i18n.t("Date is required") }).min(1),
   dateFormat: z.string().optional(),
   locale: z.string().optional(),
   createjournalentries: z.boolean().optional(),

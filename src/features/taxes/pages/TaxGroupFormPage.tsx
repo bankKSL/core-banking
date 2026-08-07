@@ -27,21 +27,24 @@ function formatDateInput(dateVal: number[] | null | undefined): string {
   return d.toISOString().split("T")[0];
 }
 
-const taxComponentEntrySchema = z.object({
-  taxComponentId: z.number({ message: "Tax component is required" }),
-  startDate: z.string().optional().default(""),
-  endDate: z.string().optional().default(""),
-});
+type TaxGroupFormValues = z.input<ReturnType<typeof getTaxGroupFormSchema>>;
 
-const taxGroupFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  taxComponents: z.array(taxComponentEntrySchema),
-});
+function getTaxGroupFormSchema(t: (key: string) => string) {
+  const taxComponentEntrySchema = z.object({
+    taxComponentId: z.number({ message: t("Tax component is required") }),
+    startDate: z.string().optional().default(""),
+    endDate: z.string().optional().default(""),
+  });
 
-type TaxGroupFormValues = z.input<typeof taxGroupFormSchema>;
+  return z.object({
+    name: z.string().min(1, t("Name is required")),
+    taxComponents: z.array(taxComponentEntrySchema),
+  });
+}
 
 const TaxGroupFormPage: FC = () => {
   const { t } = useTranslation();
+  const taxGroupFormSchema = getTaxGroupFormSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -60,7 +63,7 @@ const TaxGroupFormPage: FC = () => {
     reset,
     formState: { errors },
   } = useForm<TaxGroupFormValues>({
-    resolver: zodResolver(taxGroupFormSchema),
+    resolver: zodResolver(taxGroupFormSchema) as any,
     defaultValues: {
       name: "",
       taxComponents: [],

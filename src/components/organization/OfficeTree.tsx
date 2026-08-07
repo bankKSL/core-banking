@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { ChevronRight, Building2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { Office } from "@/types";
 
@@ -15,10 +16,11 @@ interface OfficeTreeProps {
 }
 
 const OfficeTree: React.FC<OfficeTreeProps> = ({ offices, selectedId, onSelect }) => {
+  const { t } = useTranslation();
   const tree = useMemo(() => buildTree(offices), [offices]);
 
   if (!tree.length) {
-    return <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">No offices found.</p>;
+    return <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">{t("No offices found.")}</p>;
   }
 
   return (

@@ -291,7 +291,7 @@ const AuditLogsPage: FC = () => {
                   <SelectItem value="all">{t("All Results")}</SelectItem>
                   {PROCESSING_RESULTS.map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                      {t(r.charAt(0).toUpperCase() + r.slice(1))}
                     </SelectItem>
                   ))}
                 </SelectContent>

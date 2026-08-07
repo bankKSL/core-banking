@@ -15,19 +15,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAdhocQuery, useCreateAdhocQuery, useUpdateAdhocQuery } from "../hooks/useReports";
 
-const adhocQueryFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  query: z.string().min(1, "Query is required"),
-  tableName: z.string(),
-  tableFields: z.string(),
-  email: z.string(),
-  isActive: z.boolean(),
-});
+type AdhocQueryFormValues = z.infer<ReturnType<typeof getAdhocQueryFormSchema>>;
 
-type AdhocQueryFormValues = z.infer<typeof adhocQueryFormSchema>;
+function getAdhocQueryFormSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t("Name is required")),
+    query: z.string().min(1, t("Query is required")),
+    tableName: z.string(),
+    tableFields: z.string(),
+    email: z.string(),
+    isActive: z.boolean(),
+  });
+}
 
 const AdhocQueryFormPage: FC = () => {
   const { t } = useTranslation();
+  const adhocQueryFormSchema = getAdhocQueryFormSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -42,7 +45,7 @@ const AdhocQueryFormPage: FC = () => {
     watch,
     formState: { errors },
   } = useForm<AdhocQueryFormValues>({
-    resolver: zodResolver(adhocQueryFormSchema),
+    resolver: zodResolver(adhocQueryFormSchema) as any,
     defaultValues: {
       name: "",
       query: "",

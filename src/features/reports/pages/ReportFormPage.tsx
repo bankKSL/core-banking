@@ -16,28 +16,31 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReport, useReportTemplate, useCreateReport, useUpdateReport } from "../hooks/useReports";
 
-const reportFormSchema = z.object({
-  reportName: z.string().min(1, "Report name is required"),
-  reportType: z.string(),
-  reportSubType: z.string(),
-  reportCategory: z.string(),
-  description: z.string(),
-  reportSql: z.string(),
-  useReport: z.boolean(),
-  parameters: z.array(
-    z.object({
-      parameterName: z.string(),
-      parameterType: z.string(),
-      selectOne: z.boolean(),
-      reportParameterName: z.string(),
-    }),
-  ),
-});
+type ReportFormValues = z.infer<ReturnType<typeof getReportFormSchema>>;
 
-type ReportFormValues = z.infer<typeof reportFormSchema>;
+function getReportFormSchema(t: (key: string) => string) {
+  return z.object({
+    reportName: z.string().min(1, t("Report name is required")),
+    reportType: z.string(),
+    reportSubType: z.string(),
+    reportCategory: z.string(),
+    description: z.string(),
+    reportSql: z.string(),
+    useReport: z.boolean(),
+    parameters: z.array(
+      z.object({
+        parameterName: z.string(),
+        parameterType: z.string(),
+        selectOne: z.boolean(),
+        reportParameterName: z.string(),
+      }),
+    ),
+  });
+}
 
 const ReportFormPage: FC = () => {
   const { t } = useTranslation();
+  const reportFormSchema = getReportFormSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -53,7 +56,7 @@ const ReportFormPage: FC = () => {
     watch,
     formState: { errors },
   } = useForm<ReportFormValues>({
-    resolver: zodResolver(reportFormSchema),
+    resolver: zodResolver(reportFormSchema) as any,
     defaultValues: {
       reportName: "",
       reportType: "",

@@ -1,3 +1,5 @@
+import i18n from "@/i18n";
+
 // ─── Group Status Configuration ─────────────────────────────────
 
 export const GROUP_STATUS_CONFIG: Record<
@@ -7,20 +9,20 @@ export const GROUP_STATUS_CONFIG: Record<
     label: string;
   }
 > = {
-  "grouping.status.pending": { variant: "info", label: "Pending" },
-  "grouping.status.active": { variant: "success", label: "Active" },
-  "grouping.status.closed": { variant: "default", label: "Closed" },
-  "grouping.status.transfer.in.progress": { variant: "warning", label: "Transfer in Progress" },
-  pending: { variant: "info", label: "Pending" },
-  active: { variant: "success", label: "Active" },
-  closed: { variant: "default", label: "Closed" },
+  "grouping.status.pending": { variant: "info", label: i18n.t("Pending") },
+  "grouping.status.active": { variant: "success", label: i18n.t("Active") },
+  "grouping.status.closed": { variant: "default", label: i18n.t("Closed") },
+  "grouping.status.transfer.in.progress": { variant: "warning", label: i18n.t("Transfer in Progress") },
+  pending: { variant: "info", label: i18n.t("Pending") },
+  active: { variant: "success", label: i18n.t("Active") },
+  closed: { variant: "default", label: i18n.t("Closed") },
 };
 
 /** Fineract numeric group status → label mapping */
 export const GROUP_STATUS_ID_MAP: Record<number, string> = {
-  100: "Pending",
-  300: "Active",
-  600: "Closed",
+  100: i18n.t("Pending"),
+  300: i18n.t("Active"),
+  600: i18n.t("Closed"),
 };
 
 /** Normalize a group row to a human-readable status label */

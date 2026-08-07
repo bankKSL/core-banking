@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import type {
   CampaignStatus,
@@ -129,8 +130,9 @@ const sizeClasses: Record<"sm" | "md" | "lg", string> = {
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label: labelOverride, className, size = "md" }) => {
+  const { t } = useTranslation();
   const config = getStatusConfig(status);
-  const label = labelOverride ?? statusLabelMap[status] ?? status;
+  const label = labelOverride ?? t(statusLabelMap[status] ?? status);
 
   // For draft, skipped, waived — render as a secondary/outline style
   if (

@@ -15,7 +15,7 @@ const languages = [
 ];
 
 const LanguageSwitcher: FC = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const handleLanguageChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
@@ -29,7 +29,7 @@ const LanguageSwitcher: FC = () => {
           variant="ghost"
           size="icon"
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          aria-label="Change language"
+          aria-label={t("Change language")}
         >
           <Globe className="h-5 w-5" />
         </Button>

@@ -91,16 +91,16 @@ const FormulaBuilderPage: React.FC = () => {
 
   const validation = useMemo(() => {
     if (!formula.trim()) {
-      return { valid: false, message: "Formula is empty", issues: [] as string[] };
+      return { valid: false, message: t("Formula is empty"), issues: [] as string[] };
     }
     const issues: string[] = [];
     const openParens = (formula.match(/\(/g) || []).length;
     const closeParens = (formula.match(/\)/g) || []).length;
     if (openParens !== closeParens) {
-      issues.push(`Unmatched parentheses: ${openParens} open vs ${closeParens} close`);
+      issues.push(t("Unmatched parentheses: {{open}} open vs {{close}} close", { open: openParens, close: closeParens }));
     }
     if (/\/\s*0(?!\d)/.test(formula)) {
-      issues.push("Potential division by zero");
+      issues.push(t("Potential division by zero"));
     }
     const knownKeys = new Set([
       ...formulaVariables.map((v) => v.key),
@@ -110,11 +110,11 @@ const FormulaBuilderPage: React.FC = () => {
     const words = formula.match(/[a-zA-Z_]\w*/g) || [];
     const unknownVars = words.filter((w) => !knownKeys.has(w) && isNaN(Number(w)) && w !== "true" && w !== "false");
     if (unknownVars.length > 0) {
-      issues.push(`Unknown identifiers: ${[...new Set(unknownVars)].join(", ")}`);
+      issues.push(t("Unknown identifiers: {{identifiers}}", { identifiers: [...new Set(unknownVars)].join(", ") }));
     }
     return {
       valid: issues.length === 0,
-      message: issues.length === 0 ? "Formula looks valid" : issues[0],
+      message: issues.length === 0 ? t("Formula looks valid") : issues[0],
       issues,
     };
   }, [formula]);
@@ -170,7 +170,7 @@ const FormulaBuilderPage: React.FC = () => {
               onChange={handleTextareaChange}
               onClick={handleTextareaClick}
               onKeyUp={handleTextareaKeyUp}
-              placeholder="e.g. balance * (interestRate + 0.02) / 100"
+              placeholder={t("e.g. balance * (interestRate + 0.02) / 100")}
               className="font-mono text-sm bg-gray-50 dark:bg-gray-900 min-h-[160px] resize-y"
             />
             <Separator />

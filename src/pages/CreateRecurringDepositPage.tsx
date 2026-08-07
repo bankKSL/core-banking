@@ -559,7 +559,7 @@ const CreateRecurringDepositPage: React.FC = () => {
                   <Input
                     type="number"
                     {...register("recurringFrequency")}
-                    placeholder="e.g. 1"
+                    placeholder={t("e.g. 1")}
                     error={errors.recurringFrequency?.message}
                   />
                 </div>

@@ -16,16 +16,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUser, useDeleteUser, useChangePassword } from "../hooks/useUsers";
 
-const passwordSchema = z
-  .object({
-    newPassword: z.string().min(1, "Password is required"),
-    repeatPassword: z.string().min(1, "Confirm your password"),
-  })
-  .refine((data) => data.newPassword === data.repeatPassword, {
-    message: "Passwords do not match",
-    path: ["repeatPassword"],
-  });
-type PasswordFormValues = z.infer<typeof passwordSchema>;
+type PasswordFormValues = z.infer<ReturnType<typeof getPasswordSchema>>;
+
+function getPasswordSchema(t: (key: string) => string) {
+  return z
+    .object({
+      newPassword: z.string().min(1, t("Password is required")),
+      repeatPassword: z.string().min(1, t("Confirm your password")),
+    })
+    .refine((data) => data.newPassword === data.repeatPassword, {
+      message: t("Passwords do not match"),
+      path: ["repeatPassword"],
+    });
+}
 
 const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({ icon, label, value }) => (
   <div className="flex items-start gap-3 py-2">
@@ -39,6 +42,7 @@ const InfoRow: FC<{ icon: React.ReactNode; label: string; value: React.ReactNode
 
 const UserDetailPage: FC = () => {
   const { t } = useTranslation();
+  const passwordSchema = getPasswordSchema(t);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: user, isLoading, isError, refetch } = useUser(id);
@@ -53,7 +57,7 @@ const UserDetailPage: FC = () => {
     reset,
     formState: { errors },
   } = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordSchema),
+    resolver: zodResolver(passwordSchema) as any,
     defaultValues: { newPassword: "", repeatPassword: "" },
   });
 
@@ -195,7 +199,7 @@ const UserDetailPage: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Change Password")}</DialogTitle>
-            <DialogDescription>{t(`Set a new password for ${user.username}.`)}</DialogDescription>
+            <DialogDescription>{t("Set a new password for {{username}}.", { username: user.username })}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
@@ -222,7 +226,7 @@ const UserDetailPage: FC = () => {
           navigate("/admin/users");
         }}
         title={t("Delete User")}
-        description={t(`Delete ${user.username}? The account will be disabled.`)}
+        description={t("Delete {{username}}? The account will be disabled.", { username: user.username })}
         variant="destructive"
         confirmLabel={t("Delete")}
       />

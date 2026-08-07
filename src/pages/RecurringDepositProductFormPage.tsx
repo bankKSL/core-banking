@@ -449,7 +449,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                placeholder="e.g. 5.0"
+                placeholder={t("e.g. 5.0")}
                 {...register("nominalAnnualInterestRate", { valueAsNumber: true })}
               />
             </div>
@@ -946,7 +946,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                     <Input
                       type="number"
                       step="0.01"
-                      placeholder="e.g. 4.5"
+                      placeholder={t("e.g. 4.5")}
                       value={slab.annualInterestRate || ""}
                       onChange={(e) => updateSlab(i, "annualInterestRate", parseFloat(e.target.value) || 0)}
                     />
@@ -955,7 +955,7 @@ const RecurringDepositProductFormPage: React.FC = () => {
                     <label className="text-xs font-medium">{t("From Period")}</label>
                     <Input
                       type="number"
-                      placeholder="e.g. 0"
+                      placeholder={t("e.g. 0")}
                       value={slab.fromPeriod ?? ""}
                       onChange={(e) => updateSlab(i, "fromPeriod", parseInt(e.target.value) || 0)}
                     />

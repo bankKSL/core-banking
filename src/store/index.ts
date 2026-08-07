@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import i18n from "@/i18n";
 import { login } from "@/features/authentication/api/login";
 import type { AuthUser, FineractLoginResponse } from "@/features/authentication/types/auth";
 
@@ -44,7 +45,7 @@ function mapLoginError(error: unknown): string {
       };
     };
     if (axiosError.response?.status === 401) {
-      return "Invalid username or password.";
+      return i18n.t("Invalid username or password.");
     }
     const serverMessage =
       axiosError.response?.data?.message ??
@@ -53,9 +54,9 @@ function mapLoginError(error: unknown): string {
     if (serverMessage) return serverMessage;
   }
   if (error instanceof Error && error.message.toLowerCase().includes("network")) {
-    return "Unable to connect to server. Please check your connection.";
+    return i18n.t("Unable to connect to server. Please check your connection.");
   }
-  return "Unable to sign in. Please try again.";
+  return i18n.t("Unable to sign in. Please try again.");
 }
 
 // ─── Auth Store ──────────────────────────────────────────────
@@ -93,7 +94,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await login({ username, password });
       if (!response.authenticated) {
-        set({ isLoggingIn: false, loginError: "Invalid username or password." });
+        set({ isLoggingIn: false, loginError: i18n.t("Invalid username or password.") });
         persistAuth({ isAuthenticated: false, user: null, basicAuth: null });
         return false;
       }
@@ -132,7 +133,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isSendingReset: false, resetPasswordSent: true, resetError: null });
       return true;
     }
-    set({ isSendingReset: false, resetError: "Please enter a valid email address." });
+    set({ isSendingReset: false, resetError: i18n.t("Please enter a valid email address.") });
     return false;
   },
   clearResetState: () => set({ resetPasswordSent: false, resetError: null }),

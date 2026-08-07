@@ -26,24 +26,27 @@ const APPTABLE_OPTIONS = [
 
 const COLUMN_TYPE_OPTIONS = ["Boolean", "Date", "DateTime", "Decimal", "Dropdown", "Number", "String", "Text"];
 
-const columnSchema = z.object({
-  name: z.string().min(1, "Column name is required"),
-  type: z.string().min(1),
-  length: z.number().default(0),
-  mandatory: z.boolean().default(false),
-});
+type DatatableFormValues = z.infer<ReturnType<typeof getDatatableFormSchema>>;
 
-const datatableFormSchema = z.object({
-  datatableName: z.string().min(1, "Datatable name is required"),
-  apptableName: z.string().min(1, "App table is required"),
-  multiRow: z.boolean().default(false),
-  columns: z.array(columnSchema).min(1, "At least one column is required"),
-});
+function getDatatableFormSchema(t: (key: string) => string) {
+  const columnSchema = z.object({
+    name: z.string().min(1, t("Column name is required")),
+    type: z.string().min(1),
+    length: z.number().default(0),
+    mandatory: z.boolean().default(false),
+  });
 
-type DatatableFormValues = z.input<typeof datatableFormSchema>;
+  return z.object({
+    datatableName: z.string().min(1, t("Datatable name is required")),
+    apptableName: z.string().min(1, t("App table is required")),
+    multiRow: z.boolean().default(false),
+    columns: z.array(columnSchema).min(1, t("At least one column is required")),
+  });
+}
 
 const DatatableFormPage: FC = () => {
   const { t } = useTranslation();
+  const datatableFormSchema = getDatatableFormSchema(t);
   const navigate = useNavigate();
   const createMutation = useCreateDatatable();
 
@@ -54,7 +57,7 @@ const DatatableFormPage: FC = () => {
     watch,
     formState: { errors },
   } = useForm<DatatableFormValues>({
-    resolver: zodResolver(datatableFormSchema),
+    resolver: zodResolver(datatableFormSchema) as any,
     defaultValues: {
       datatableName: "",
       apptableName: "",
@@ -122,7 +125,7 @@ const DatatableFormPage: FC = () => {
               <label className="block text-sm font-medium">{t("Datatable Name")} *</label>
               <Input
                 {...register("datatableName")}
-                placeholder="e.g. extra_client_details"
+                placeholder={t("e.g. extra_client_details")}
                 error={errors.datatableName?.message}
               />
             </div>

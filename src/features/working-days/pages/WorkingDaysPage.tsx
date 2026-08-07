@@ -37,17 +37,20 @@ function buildRrule(selectedDays: string[]): string {
   return `FREQ=WEEKLY;BYDAY=${days.join(",")}`;
 }
 
-const workingDaysSchema = z.object({
-  selectedDays: z.array(z.string()).min(1, "Select at least one working day"),
-  rescheduleTypeId: z.number({ message: "Repayment reschedule type is required" }),
-  extendTermDaily: z.boolean(),
-  extendTermHolidays: z.boolean(),
-});
+type WorkingDaysFormValues = z.infer<ReturnType<typeof getWorkingDaysSchema>>;
 
-type WorkingDaysFormValues = z.infer<typeof workingDaysSchema>;
+function getWorkingDaysSchema(t: (key: string) => string) {
+  return z.object({
+    selectedDays: z.array(z.string()).min(1, t("Select at least one working day")),
+    rescheduleTypeId: z.number({ message: t("Repayment reschedule type is required") }),
+    extendTermDaily: z.boolean(),
+    extendTermHolidays: z.boolean(),
+  });
+}
 
 const WorkingDaysPage: FC = () => {
   const { t } = useTranslation();
+  const workingDaysSchema = getWorkingDaysSchema(t);
   const {
     data: config,
     isLoading: isConfigLoading,
@@ -66,7 +69,7 @@ const WorkingDaysPage: FC = () => {
     reset,
     formState: { errors },
   } = useForm<WorkingDaysFormValues>({
-    resolver: zodResolver(workingDaysSchema),
+    resolver: zodResolver(workingDaysSchema) as any,
     defaultValues: {
       selectedDays: [],
       rescheduleTypeId: undefined,

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 import {
   Dialog,
@@ -29,12 +30,15 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "default",
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const isDestructive = variant === "destructive";
+  const resolvedConfirmLabel = confirmLabel ?? t("Confirm");
+  const resolvedCancelLabel = cancelLabel ?? t("Cancel");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,7 +56,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
           <Button variant={isDestructive ? "destructive" : "default"} onClick={onConfirm} disabled={loading}>
             {loading && (
@@ -66,7 +70,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             )}
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

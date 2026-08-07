@@ -17,22 +17,25 @@ import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useStaff, useCreateStaff, useUpdateStaff } from "../hooks/useStaff";
 import { currentDate } from "@/lib/utils";
 
-const staffFormSchema = z.object({
-  officeId: z.number({ message: "Office is required" }).int().positive(),
-  firstname: z.string().min(1, "First name is required"),
-  lastname: z.string().min(1, "Last name is required"),
-  isLoanOfficer: z.boolean(),
-  isActive: z.boolean(),
-  joiningDate: z.string().optional().or(z.literal("")),
-  mobileNo: z.string().optional().or(z.literal("")),
-  emailAddress: z.string().optional().or(z.literal("")),
-  externalId: z.string().optional().or(z.literal("")),
-});
+type StaffFormValues = z.infer<ReturnType<typeof getStaffFormSchema>>;
 
-type StaffFormValues = z.infer<typeof staffFormSchema>;
+function getStaffFormSchema(t: (key: string) => string) {
+  return z.object({
+    officeId: z.number({ message: t("Office is required") }).int().positive(),
+    firstname: z.string().min(1, t("First name is required")),
+    lastname: z.string().min(1, t("Last name is required")),
+    isLoanOfficer: z.boolean(),
+    isActive: z.boolean(),
+    joiningDate: z.string().optional().or(z.literal("")),
+    mobileNo: z.string().optional().or(z.literal("")),
+    emailAddress: z.string().optional().or(z.literal("")),
+    externalId: z.string().optional().or(z.literal("")),
+  });
+}
 
 const StaffFormPage: FC = () => {
   const { t } = useTranslation();
+  const staffFormSchema = getStaffFormSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -49,7 +52,7 @@ const StaffFormPage: FC = () => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<StaffFormValues>({
-    resolver: zodResolver(staffFormSchema),
+    resolver: zodResolver(staffFormSchema) as any,
     defaultValues: {
       officeId: 0,
       firstname: "",
@@ -146,7 +149,7 @@ const StaffFormPage: FC = () => {
     <div className="p-6 max-w-2xl m-auto space-y-6">
       <PageHeader
         title={isEdit ? t("Edit Staff") : t("New Staff")}
-        description={isEdit ? t(`Editing "${staffMember?.displayName ?? ""}"`) : t("Create a new staff member")}
+        description={isEdit ? t('Editing "{{name}}"', { name: staffMember?.displayName ?? "" }) : t("Create a new staff member")}
         actions={
           <Button variant="outline" onClick={() => navigate("/staff")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}

@@ -58,7 +58,7 @@ const ScoreInput: React.FC<{
         type="number"
         min={0}
         max={999}
-        placeholder="e.g. 720"
+        placeholder={t("e.g. 720")}
         value={raw}
         onChange={handleChange}
         className="w-full max-w-xs text-lg font-mono"

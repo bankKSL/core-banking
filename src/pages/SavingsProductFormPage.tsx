@@ -36,15 +36,16 @@ function EnumSelect({
   options: Array<{ id: number; value: string }> | undefined;
   placeholder?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Select value={value !== undefined ? String(value) : ""} onValueChange={(v) => onChange(Number(v))}>
       <SelectTrigger>
-        <SelectValue placeholder={placeholder ?? "Select"} />
+        <SelectValue placeholder={placeholder ?? t("Select")} />
       </SelectTrigger>
       <SelectContent>
         {(options ?? []).map((o) => (
           <SelectItem key={o.id} value={String(o.id)}>
-            {o.value}
+            {t(o.value)}
           </SelectItem>
         ))}
       </SelectContent>
@@ -354,7 +355,7 @@ const SavingsProductFormPage: React.FC = () => {
                 {...register("shortName")}
                 error={errors.shortName?.message}
                 maxLength={4}
-                placeholder="e.g. REG"
+                placeholder={t("e.g. REG")}
               />
             </div>
             <CurrencySelect
@@ -478,7 +479,7 @@ const SavingsProductFormPage: React.FC = () => {
                 value={watch("lockinPeriodFrequencyType")}
                 onChange={(v) => setValue("lockinPeriodFrequencyType", v)}
                 options={lockinTypeOptions}
-                placeholder="Select"
+                placeholder={t("Select")}
               />
               {errors.lockinPeriodFrequencyType && (
                 <p className="text-sm text-red-500">{errors.lockinPeriodFrequencyType.message as string}</p>
@@ -504,7 +505,7 @@ const SavingsProductFormPage: React.FC = () => {
                 onValueChange={(v) => setValue("withdrawalFeeType", v ? Number(v) : undefined)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("Select")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(tp?.withdrawalFeeTypeOptions ?? []).map((o) => (
@@ -688,7 +689,7 @@ const SavingsProductFormPage: React.FC = () => {
                   onValueChange={(v) => setValue("taxGroupId", Number(v))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select tax group" />
+                    <SelectValue placeholder={t("Select tax group")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(tp?.taxGroupOptions ?? []).map((o) => (

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronUp, ChevronDown, ChevronsUpDown, Inbox } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,6 +65,7 @@ function DataTable<T>({
   responsive = true,
   minWidth = 640,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
@@ -200,7 +202,7 @@ function DataTable<T>({
         <div className="flex flex-col items-center justify-center py-16 px-4">
           {emptyState?.icon ?? <Inbox className="h-12 w-12 text-gray-300 dark:text-gray-600" />}
           <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
-            {emptyState?.title ?? "No data found"}
+            {emptyState?.title ?? t("No data found")}
           </h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{emptyState?.message}</p>
         </div>
@@ -224,7 +226,7 @@ function DataTable<T>({
                   checked={allSelected}
                   indeterminate={someSelected}
                   onCheckedChange={handleSelectAll}
-                  aria-label="Select all"
+                  aria-label={t("Select all")}
                 />
               </TableHead>
             )}

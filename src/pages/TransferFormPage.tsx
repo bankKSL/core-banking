@@ -228,9 +228,9 @@ const TransferFormPage: React.FC = () => {
               <SelectValue placeholder={state.clientId ? t("Select type") : t("Select client first")} />
             </SelectTrigger>
             <SelectContent>
-              {ACCOUNT_TYPES.map((t) => (
-                <SelectItem key={t.id} value={String(t.id)}>
-                  {t.label}
+              {ACCOUNT_TYPES.map((at) => (
+                <SelectItem key={at.id} value={String(at.id)}>
+                  {t(at.label)}
                 </SelectItem>
               ))}
             </SelectContent>

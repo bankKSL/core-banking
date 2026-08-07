@@ -366,7 +366,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -384,7 +384,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {INTEREST_POSTING_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -402,7 +402,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {INTEREST_CALCULATION_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -420,7 +420,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {DAYS_IN_YEAR_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -464,7 +464,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {PERIOD_FREQUENCIES.map((f) => (
                     <SelectItem key={f.id} value={String(f.id)}>
-                      {f.label}
+                      {t(f.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -486,7 +486,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {PERIOD_FREQUENCIES.map((f) => (
                     <SelectItem key={f.id} value={String(f.id)}>
-                      {f.label}
+                      {t(f.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -516,7 +516,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -562,7 +562,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                     <SelectContent>
                       {PRE_CLOSURE_PENALTY_ON_OPTIONS.map((o) => (
                         <SelectItem key={o.id} value={String(o.id)}>
-                          {o.label}
+                          {t(o.label)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -601,7 +601,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                 <SelectContent>
                   {ACCOUNTING_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -643,7 +643,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                       <SelectContent>
                         {CHART_PERIOD_TYPES.map((pt) => (
                           <SelectItem key={pt.id} value={String(pt.id)}>
-                            {pt.label}
+                            {t(pt.label)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -654,7 +654,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                     <Input
                       type="number"
                       step="0.01"
-                      placeholder="e.g. 4.5"
+                      placeholder={t("e.g. 4.5")}
                       value={slab.annualInterestRate || ""}
                       onChange={(e) => updateSlab(i, "annualInterestRate", parseFloat(e.target.value) || 0)}
                     />
@@ -663,7 +663,7 @@ const FixedDepositProductFormPage: React.FC = () => {
                     <label className="text-xs font-medium">{t("From Period")}</label>
                     <Input
                       type="number"
-                      placeholder="e.g. 0"
+                      placeholder={t("e.g. 0")}
                       value={slab.fromPeriod ?? ""}
                       onChange={(e) => updateSlab(i, "fromPeriod", parseInt(e.target.value) || 0)}
                     />

@@ -26,6 +26,8 @@ export interface FineractErrorResponse {
  * API error response. Falls back to the top-level defaultUserMessage,
  * then to `error.message`, then to a generic message.
  */
+import i18n from "@/i18n";
+
 export function getFineractErrorMessage(error: unknown): string {
   // 1. Try Axios response body shaped like FineractErrorResponse
   const axiosErr = error as { response?: { data?: FineractErrorResponse } };
@@ -47,5 +49,5 @@ export function getFineractErrorMessage(error: unknown): string {
   }
 
   // 3. Unknown shape
-  return "An unexpected error occurred.";
+  return i18n.t("An unexpected error occurred.");
 }

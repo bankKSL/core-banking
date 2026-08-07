@@ -74,7 +74,7 @@ const ForgotPasswordPage: FC = () => {
       <button
         onClick={toggleTheme}
         className="fixed right-4 top-4 z-50 rounded-lg border border-gray-200 bg-white p-2.5 text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label={theme === "dark" ? t("Switch to light mode") : t("Switch to dark mode")}
       >
         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       </button>
@@ -128,7 +128,7 @@ const ForgotPasswordPage: FC = () => {
                     <Input
                       {...register("email")}
                       type="email"
-                      placeholder="you@corebank.com"
+                      placeholder={t("you@corebank.com")}
                       autoComplete="email"
                       disabled={isSendingReset}
                       error={errors.email?.message}

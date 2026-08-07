@@ -33,24 +33,25 @@ import type { Cashier } from "../types/teller";
 
 const STATUS_LABELS: Record<number, string> = { 100: "Pending", 300: "Active", 400: "Inactive", 600: "Closed" };
 
-const cashierSchema = z.object({
-  selectedStaffId: z.string().min(1, "Staff is required"),
-  cashierStartDate: z.string().min(1, "Start date is required"),
-  cashierEndDate: z.string().min(1, "End date is required"),
-  isFullDay: z.boolean(),
-  cashierDescription: z.string().optional(),
-});
-type CashierFormValues = z.input<typeof cashierSchema>;
-
-const cashTxnSchema = z.object({
-  txnAmount: z.coerce.number({ message: "Amount is required" }).positive("Must be positive"),
-  txnDate: z.string().min(1, "Date is required"),
-  txnNote: z.string().min(1, "Note is required"),
-});
-type CashTxnFormValues = z.input<typeof cashTxnSchema>;
-
 const TellerDetailPage: FC = () => {
   const { t } = useTranslation();
+
+  const cashierSchema = z.object({
+    selectedStaffId: z.string().min(1, t("Staff is required")),
+    cashierStartDate: z.string().min(1, t("Start date is required")),
+    cashierEndDate: z.string().min(1, t("End date is required")),
+    isFullDay: z.boolean(),
+    cashierDescription: z.string().optional(),
+  });
+  type CashierFormValues = z.input<typeof cashierSchema>;
+
+  const cashTxnSchema = z.object({
+    txnAmount: z.coerce.number({ message: t("Amount is required") }).positive(t("Must be positive")),
+    txnDate: z.string().min(1, t("Date is required")),
+    txnNote: z.string().min(1, t("Note is required")),
+  });
+  type CashTxnFormValues = z.input<typeof cashTxnSchema>;
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: teller, isLoading } = useTeller(id);

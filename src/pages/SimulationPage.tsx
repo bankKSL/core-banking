@@ -80,11 +80,11 @@ const SimulationPage: React.FC = () => {
     try {
       parsed = JSON.parse(inputJson);
     } catch {
-      setJsonError("Invalid JSON format. Please check your input.");
+      setJsonError(t("Invalid JSON format. Please check your input."));
       return;
     }
     if (!selectedCampaign) {
-      setJsonError("Please select a campaign first.");
+      setJsonError(t("Please select a campaign first."));
       return;
     }
 

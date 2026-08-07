@@ -340,7 +340,7 @@ const CreateDepositAccountPage: React.FC = () => {
                 <SelectContent>
                   {INTEREST_COMPOUNDING_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -358,7 +358,7 @@ const CreateDepositAccountPage: React.FC = () => {
                 <SelectContent>
                   {INTEREST_POSTING_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -376,7 +376,7 @@ const CreateDepositAccountPage: React.FC = () => {
                 <SelectContent>
                   {INTEREST_CALCULATION_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -394,7 +394,7 @@ const CreateDepositAccountPage: React.FC = () => {
                 <SelectContent>
                   {DAYS_IN_YEAR_OPTIONS.map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
-                      {o.label}
+                      {t(o.label)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -437,7 +437,7 @@ const CreateDepositAccountPage: React.FC = () => {
                   <SelectContent>
                     {LOCKIN_PERIOD_TYPE_OPTIONS.map((o) => (
                       <SelectItem key={o.id} value={String(o.id)}>
-                        {o.label}
+                        {t(o.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>

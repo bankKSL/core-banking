@@ -214,7 +214,7 @@ const ExchangeRatePage: React.FC = () => {
       key: "source",
       header: t("Source"),
       sortable: true,
-      accessorFn: (r) => <Badge className={sourceColors[r.source]}>{sourceLabels[r.source]}</Badge>,
+      accessorFn: (r) => <Badge className={sourceColors[r.source]}>{t(sourceLabels[r.source])}</Badge>,
     },
     {
       key: "isActive",
@@ -325,7 +325,7 @@ const ExchangeRatePage: React.FC = () => {
                   country: "",
                   symbol: c.displaySymbol,
                 }))}
-                placeholder="Select a currency"
+                placeholder={t("Select a currency")}
               />
             </div>
             <div>

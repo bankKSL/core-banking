@@ -26,20 +26,23 @@ function formatDateInput(dateVal: number[] | null | undefined): string {
   return d.toISOString().split("T")[0];
 }
 
-const taxComponentFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  percentage: z.string().min(1, "Percentage is required"),
-  startDate: z.string().optional().default(""),
-  debitAccountType: z.number().nullable().default(null),
-  debitAccountId: z.number().nullable().default(null),
-  creditAccountType: z.number().nullable().default(null),
-  creditAccountId: z.number().nullable().default(null),
-});
+type TaxComponentFormValues = z.input<ReturnType<typeof getTaxComponentFormSchema>>;
 
-type TaxComponentFormValues = z.input<typeof taxComponentFormSchema>;
+function getTaxComponentFormSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t("Name is required")),
+    percentage: z.string().min(1, t("Percentage is required")),
+    startDate: z.string().optional().default(""),
+    debitAccountType: z.number().nullable().default(null),
+    debitAccountId: z.number().nullable().default(null),
+    creditAccountType: z.number().nullable().default(null),
+    creditAccountId: z.number().nullable().default(null),
+  });
+}
 
 const TaxComponentFormPage: FC = () => {
   const { t } = useTranslation();
+  const taxComponentFormSchema = getTaxComponentFormSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -58,7 +61,7 @@ const TaxComponentFormPage: FC = () => {
     reset,
     formState: { errors },
   } = useForm<TaxComponentFormValues>({
-    resolver: zodResolver(taxComponentFormSchema),
+    resolver: zodResolver(taxComponentFormSchema) as any,
     defaultValues: {
       name: "",
       percentage: "",

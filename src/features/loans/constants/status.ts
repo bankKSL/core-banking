@@ -1,15 +1,17 @@
+import i18n from "@/i18n";
+
 export const LOAN_STATUS_LABELS: Record<string, string> = {
-  "Submitted and pending approval": "Pending",
-  Approved: "Approved",
-  Active: "Active",
-  Disbursed: "Disbursed",
-  "Closed (obligations met)": "Closed",
-  "Closed (written off)": "Written Off",
-  "Closed (rescheduled)": "Rescheduled",
-  Closed: "Closed",
-  Overpaid: "Overpaid",
-  Rejected: "Rejected",
-  Withdrawn: "Withdrawn",
+  "Submitted and pending approval": i18n.t("Pending"),
+  Approved: i18n.t("Approved"),
+  Active: i18n.t("Active"),
+  Disbursed: i18n.t("Disbursed"),
+  "Closed (obligations met)": i18n.t("Closed"),
+  "Closed (written off)": i18n.t("Written Off"),
+  "Closed (rescheduled)": i18n.t("Rescheduled"),
+  Closed: i18n.t("Closed"),
+  Overpaid: i18n.t("Overpaid"),
+  Rejected: i18n.t("Rejected"),
+  Withdrawn: i18n.t("Withdrawn"),
 };
 
 export const LOAN_STATUS_CONFIG: Record<
@@ -19,17 +21,17 @@ export const LOAN_STATUS_CONFIG: Record<
     label: string;
   }
 > = {
-  "Submitted and pending approval": { variant: "info", label: "Pending" },
-  Approved: { variant: "success", label: "Approved" },
-  Active: { variant: "success", label: "Active" },
-  Disbursed: { variant: "info", label: "Disbursed" },
-  "Closed (obligations met)": { variant: "default", label: "Closed" },
-  "Closed (written off)": { variant: "error", label: "Written Off" },
-  "Closed (rescheduled)": { variant: "warning", label: "Rescheduled" },
-  Closed: { variant: "default", label: "Closed" },
-  Overpaid: { variant: "warning", label: "Overpaid" },
-  Rejected: { variant: "error", label: "Rejected" },
-  Withdrawn: { variant: "warning", label: "Withdrawn" },
+  "Submitted and pending approval": { variant: "info", label: i18n.t("Pending") },
+  Approved: { variant: "success", label: i18n.t("Approved") },
+  Active: { variant: "success", label: i18n.t("Active") },
+  Disbursed: { variant: "info", label: i18n.t("Disbursed") },
+  "Closed (obligations met)": { variant: "default", label: i18n.t("Closed") },
+  "Closed (written off)": { variant: "error", label: i18n.t("Written Off") },
+  "Closed (rescheduled)": { variant: "warning", label: i18n.t("Rescheduled") },
+  Closed: { variant: "default", label: i18n.t("Closed") },
+  Overpaid: { variant: "warning", label: i18n.t("Overpaid") },
+  Rejected: { variant: "error", label: i18n.t("Rejected") },
+  Withdrawn: { variant: "warning", label: i18n.t("Withdrawn") },
 };
 
 /** Finfact numeric loan status to string mapping (doc §17.1) */
@@ -63,12 +65,12 @@ export const LOAN_DEFAULT_SORT_ORDER: "ASC" | "DESC" = "DESC";
 
 /** Sortable columns exposed in the UI sort selector (doc §11) */
 export const LOAN_SORT_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
-  { value: "l.id", label: "Loan ID" },
-  { value: "l.account_no", label: "Account Number" },
-  { value: "l.loan_status_id", label: "Status" },
-  { value: "l.principal", label: "Principal" },
-  { value: "l.total_outstanding_derived", label: "Outstanding" },
-  { value: "l.submittedon_date", label: "Submitted On" },
+  { value: "l.id", label: i18n.t("Loan ID") },
+  { value: "l.account_no", label: i18n.t("Account Number") },
+  { value: "l.loan_status_id", label: i18n.t("Status") },
+  { value: "l.principal", label: i18n.t("Principal") },
+  { value: "l.total_outstanding_derived", label: i18n.t("Outstanding") },
+  { value: "l.submittedon_date", label: i18n.t("Submitted On") },
 ];
 
 export const LOANS_PAGE_SIZE = 20;
@@ -94,23 +96,23 @@ export function resolveStatusCode(loan: {
 
 /** Interest type labels for display */
 export const INTEREST_TYPE_LABELS: Record<string, string> = {
-  Flat: "Flat",
-  "Declining Balance": "Declining Balance",
+  Flat: i18n.t("Flat"),
+  "Declining Balance": i18n.t("Declining Balance"),
 };
 
 /** Amortization type labels for display */
 export const AMORTIZATION_TYPE_LABELS: Record<string, string> = {
-  "Equal installments": "Equal Installments (EMI)",
-  "Equal principal payments": "Equal Principal",
+  "Equal installments": i18n.t("Equal Installments (EMI)"),
+  "Equal principal payments": i18n.t("Equal Principal"),
 };
 
 export const REPAYMENT_FREQ_LABELS: Record<string, string> = {
-  Daily: "Daily",
-  Weekly: "Weekly",
-  "Every two weeks": "Bi-Weekly",
-  Monthly: "Monthly",
-  "Every two months": "Bi-Monthly",
-  Quarterly: "Quarterly",
-  "Semi Annual": "Semi-Annual",
-  Annual: "Annual",
+  Daily: i18n.t("Daily"),
+  Weekly: i18n.t("Weekly"),
+  "Every two weeks": i18n.t("Bi-Weekly"),
+  Monthly: i18n.t("Monthly"),
+  "Every two months": i18n.t("Bi-Monthly"),
+  Quarterly: i18n.t("Quarterly"),
+  "Semi Annual": i18n.t("Semi-Annual"),
+  Annual: i18n.t("Annual"),
 };

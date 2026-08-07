@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import i18n from "@/i18n";
 import { useAuthStore } from "@/store";
 import { useNetworkStore } from "@/store/network";
 
@@ -49,8 +50,8 @@ client.interceptors.response.use(
       useNetworkStore.getState().reportNetworkError(
         isTimeout ? "timeout" : "connection",
         isTimeout
-          ? "The request timed out. Please check your connection and try again."
-          : "Unable to connect to the server. Please check your connection and try again.",
+          ? i18n.t("The request timed out. Please check your connection and try again.")
+          : i18n.t("Unable to connect to the server. Please check your connection and try again."),
       );
     }
     return Promise.reject(error);

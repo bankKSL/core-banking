@@ -1,11 +1,12 @@
 import { z } from "zod";
+import i18n from "@/i18n";
 
 export const calendarFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  typeId: z.number({ message: "Type is required" }).int().positive(),
+  title: z.string().min(1, i18n.t("Title is required")),
+  typeId: z.number({ message: i18n.t("Type is required") }).int().positive(),
   description: z.string().optional().or(z.literal("")),
   location: z.string().optional().or(z.literal("")),
-  startDate: z.string().min(1, "Start date is required"),
+  startDate: z.string().min(1, i18n.t("Start date is required")),
   endDate: z.string().optional().or(z.literal("")),
   repeating: z.boolean(),
   frequency: z.number().int().optional().nullable(),

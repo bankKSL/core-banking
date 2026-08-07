@@ -19,33 +19,36 @@ import type { EnumOption } from "../api/charges";
 const PERCENTAGE_CALC_TYPES = [2, 3, 4, 5];
 const PERIODIC_TIME_TYPES = [6, 7, 8, 11];
 
-const chargeFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  chargeAppliesTo: z.number({ message: "Charge applies to is required" }).int().min(1),
-  currencyCode: z.string().min(1, "Currency is required"),
-  chargeTimeType: z.number().int(),
-  chargeCalculationType: z.number().int(),
-  amount: z.string().min(1, "Amount is required"),
-  chargePaymentMode: z.number().int(),
-  penalty: z.boolean(),
-  active: z.boolean(),
-  minCap: z.string().optional().default(""),
-  maxCap: z.string().optional().default(""),
-  incomeAccountId: z.number().int().nullable().default(null),
-  taxGroupId: z.number().int().nullable().default(null),
-  feeFrequency: z.number().int().nullable().default(null),
-  feeInterval: z.string().optional().default(""),
-  feeOnMonthDay: z.string().optional().default(""),
-  paymentTypeId: z.number().int().nullable().default(null),
-  enablePaymentType: z.boolean().default(false),
-  enableFreeWithdrawalCharge: z.boolean().default(false),
-  freeWithdrawalFrequency: z.number().int().nullable().default(null),
-});
+type ChargeFormValues = z.infer<ReturnType<typeof getChargeFormSchema>>;
 
-type ChargeFormValues = z.input<typeof chargeFormSchema>;
+function getChargeFormSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t("Name is required")),
+    chargeAppliesTo: z.number({ message: t("Charge applies to is required") }).int().min(1),
+    currencyCode: z.string().min(1, t("Currency is required")),
+    chargeTimeType: z.number().int(),
+    chargeCalculationType: z.number().int(),
+    amount: z.string().min(1, t("Amount is required")),
+    chargePaymentMode: z.number().int(),
+    penalty: z.boolean(),
+    active: z.boolean(),
+    minCap: z.string().optional().default(""),
+    maxCap: z.string().optional().default(""),
+    incomeAccountId: z.number().int().nullable().default(null),
+    taxGroupId: z.number().int().nullable().default(null),
+    feeFrequency: z.number().int().nullable().default(null),
+    feeInterval: z.string().optional().default(""),
+    feeOnMonthDay: z.string().optional().default(""),
+    paymentTypeId: z.number().int().nullable().default(null),
+    enablePaymentType: z.boolean().default(false),
+    enableFreeWithdrawalCharge: z.boolean().default(false),
+    freeWithdrawalFrequency: z.number().int().nullable().default(null),
+  });
+}
 
 const ChargeFormPage: FC = () => {
   const { t } = useTranslation();
+  const chargeFormSchema = getChargeFormSchema(t);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
@@ -65,7 +68,7 @@ const ChargeFormPage: FC = () => {
     reset,
     formState: { errors },
   } = useForm<ChargeFormValues>({
-    resolver: zodResolver(chargeFormSchema),
+    resolver: zodResolver(chargeFormSchema) as any,
     defaultValues: {
       name: "",
       chargeAppliesTo: 1,

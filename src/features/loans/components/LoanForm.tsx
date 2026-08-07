@@ -229,7 +229,7 @@ const LoanForm: FC<LoanFormProps> = ({
               value={clientIdVal}
               onChange={handleClientChange}
               disabled={isSubmitting || mode === "edit"}
-              error={errors.clientId?.message}
+              error={t(errors.clientId?.message ?? "")}
             />
           </div>
 
@@ -241,7 +241,7 @@ const LoanForm: FC<LoanFormProps> = ({
               onChange={handleProductSelect}
               loading={templateLoading}
               disabled={isSubmitting || mode === "edit" || (mode === "create" && !clientIdVal)}
-              error={errors.productId?.message}
+              error={t(errors.productId?.message ?? "")}
             />
           </div>
         </CardContent>
@@ -260,7 +260,7 @@ const LoanForm: FC<LoanFormProps> = ({
               step="0.01"
               {...register("principal")}
               disabled={isSubmitting || afterApproval}
-              error={errors.principal?.message}
+              error={t(errors.principal?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -269,7 +269,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("loanTermFrequency")}
               disabled={isSubmitting}
-              error={errors.loanTermFrequency?.message}
+              error={t(errors.loanTermFrequency?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -291,7 +291,7 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
             {errors.loanTermFrequencyType && (
-              <p className="text-xs text-red-500">{errors.loanTermFrequencyType.message}</p>
+              <p className="text-xs text-red-500">{t(errors.loanTermFrequencyType.message ?? "")}</p>
             )}
           </div>
           <div className="space-y-1.5">
@@ -300,7 +300,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("numberOfRepayments")}
               disabled={isSubmitting || afterApproval}
-              error={errors.numberOfRepayments?.message}
+              error={t(errors.numberOfRepayments?.message ?? "")}
             />
           </div>
         </CardContent>
@@ -318,7 +318,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("repaymentEvery")}
               disabled={isSubmitting}
-              error={errors.repaymentEvery?.message}
+              error={t(errors.repaymentEvery?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -340,7 +340,7 @@ const LoanForm: FC<LoanFormProps> = ({
               </SelectContent>
             </Select>
             {errors.repaymentFrequencyType && (
-              <p className="text-xs text-red-500">{errors.repaymentFrequencyType.message}</p>
+              <p className="text-xs text-red-500">{t(errors.repaymentFrequencyType.message ?? "")}</p>
             )}
           </div>
         </CardContent>
@@ -431,7 +431,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("graceOnPrincipalPayment")}
               disabled={isSubmitting}
-              error={errors.graceOnPrincipalPayment?.message}
+              error={t(errors.graceOnPrincipalPayment?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -440,7 +440,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("graceOnInterestPayment")}
               disabled={isSubmitting}
-              error={errors.graceOnInterestPayment?.message}
+              error={t(errors.graceOnInterestPayment?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -449,7 +449,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("graceOnInterestCharged")}
               disabled={isSubmitting}
-              error={errors.graceOnInterestCharged?.message}
+              error={t(errors.graceOnInterestCharged?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -458,7 +458,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="number"
               {...register("graceOnArrearsAgeing")}
               disabled={isSubmitting}
-              error={errors.graceOnArrearsAgeing?.message}
+              error={t(errors.graceOnArrearsAgeing?.message ?? "")}
             />
           </div>
         </CardContent>
@@ -503,7 +503,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="date"
               {...register("submittedOnDate")}
               disabled={isSubmitting}
-              error={errors.submittedOnDate?.message}
+              error={t(errors.submittedOnDate?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
@@ -512,7 +512,7 @@ const LoanForm: FC<LoanFormProps> = ({
               type="date"
               {...register("expectedDisbursementDate")}
               disabled={isSubmitting}
-              error={errors.expectedDisbursementDate?.message}
+              error={t(errors.expectedDisbursementDate?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5 col-span-2">

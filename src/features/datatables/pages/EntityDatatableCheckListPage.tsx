@@ -21,17 +21,20 @@ import {
 } from "../hooks/useDatatables";
 import type { EntityDatatableCheck } from "../api/datatables";
 
-const createCheckSchema = z.object({
-  entity: z.string().min(1, "Entity is required"),
-  datatableName: z.string().min(1, "Datatable is required"),
-  status: z.number({ message: "Status is required" }),
-  productId: z.string().optional(),
-});
+type CreateCheckFormValues = z.infer<ReturnType<typeof getCreateCheckSchema>>;
 
-type CreateCheckFormValues = z.infer<typeof createCheckSchema>;
+function getCreateCheckSchema(t: (key: string) => string) {
+  return z.object({
+    entity: z.string().min(1, t("Entity is required")),
+    datatableName: z.string().min(1, t("Datatable is required")),
+    status: z.number({ message: t("Status is required") }),
+    productId: z.string().optional(),
+  });
+}
 
 const EntityDatatableCheckListPage: FC = () => {
   const { t } = useTranslation();
+  const createCheckSchema = getCreateCheckSchema(t);
   const { data: checks = [], isLoading, isError, refetch } = useEntityDatatableChecks();
   const { data: template } = useEntityDatatableCheckTemplate();
   const createMutation = useCreateEntityDatatableCheck();
@@ -47,7 +50,7 @@ const EntityDatatableCheckListPage: FC = () => {
     reset,
     formState: { isValid },
   } = useForm<CreateCheckFormValues>({
-    resolver: zodResolver(createCheckSchema),
+    resolver: zodResolver(createCheckSchema) as any,
     defaultValues: { entity: "", datatableName: "", status: 0, productId: "" },
     mode: "onChange",
   });
