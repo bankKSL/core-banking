@@ -1,12 +1,11 @@
 import { type FC, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Search, Bell, Menu, Moon, Sun, User, LogOut, ChevronDown, Settings } from "lucide-react";
+import { Bell, Menu, Moon, Sun, User, LogOut, ChevronDown, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore, useAuthStore } from "@/store";
 import { useLogout } from "@/features/authentication";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -140,7 +139,7 @@ const TopNav: FC = () => {
                   rounded
                   className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center px-1 text-[9px] leading-none"
                 >
-                  3
+                  0
                 </Badge>
               </Button>
             </DropdownMenuTrigger>
@@ -171,7 +170,9 @@ const TopNav: FC = () => {
                     AU
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 md:inline">{t("Admin")}</span>
+                <span className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 md:inline">
+                  {t("Admin")}
+                </span>
                 <ChevronDown className="hidden h-3.5 w-3.5 text-gray-400 md:inline" />
               </button>
             </DropdownMenuTrigger>
