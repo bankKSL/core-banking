@@ -15,3 +15,7 @@ export type { LoginCredentials } from "./api/login";
 export { useLogin, authKeys } from "./hooks/useLogin";
 export { useLogout } from "./hooks/useLogout";
 export { useCurrentUser } from "./hooks/useCurrentUser";
+
+// ─── Pages ───────────────────────────────────────────────
+export { default as LoginPage } from "./pages/LoginPage";
+export { default as ForgotPasswordPage } from "./pages/ForgotPasswordPage";

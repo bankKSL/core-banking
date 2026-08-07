@@ -29,3 +29,6 @@ export { default as RoleListPage } from "./pages/RoleListPage";
 export { default as RoleFormPage } from "./pages/RoleFormPage";
 export { default as RoleDetailPage } from "./pages/RoleDetailPage";
 export { default as PermissionsPage } from "./pages/PermissionsPage";
+
+export { default as AuditLogsPage } from "./pages/AuditLogsPage";
+export { default as BatchOperationsPage } from "./pages/BatchOperationsPage";

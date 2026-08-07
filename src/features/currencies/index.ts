@@ -5,3 +5,5 @@ export { fetchCurrencies, updateCurrencies } from "./api/currencies";
 export { currencyKeys, useCurrencies, useUpdateCurrencies } from "./hooks/useCurrencies";
 
 export { default as CurrenciesPage } from "./pages/CurrenciesPage";
+
+export { default as ExchangeRatePage } from "./pages/ExchangeRatePage";

@@ -66,3 +66,6 @@ export { default as GlobalConfigPage } from "./pages/GlobalConfigPage";
 export { default as ExternalServicesPage } from "./pages/ExternalServicesPage";
 export { default as PasswordPolicyPage } from "./pages/PasswordPolicyPage";
 export { default as BusinessDatePage } from "./pages/BusinessDatePage";
+
+export { default as ScoreGradePage } from "./pages/ScoreGradePage";
+export { default as SettingsPage } from "./pages/SettingsPage";

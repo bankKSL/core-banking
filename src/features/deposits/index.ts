@@ -328,3 +328,27 @@ export {
   useUpdateChartSlab,
   useDeleteChartSlab,
 } from "./hooks/useInterestRateCharts";
+
+// ─── Pages ───────────────────────────────────────────────
+export { default as AccountActionPage } from "./pages/AccountActionPage";
+export { default as CreateDepositAccountPage } from "./pages/CreateDepositAccountPage";
+export { default as CreateFixedDepositPage } from "./pages/CreateFixedDepositPage";
+export { default as CreateRecurringDepositPage } from "./pages/CreateRecurringDepositPage";
+export { default as DepositAccountDetailPage } from "./pages/DepositAccountDetailPage";
+export { default as DepositAccountsPage } from "./pages/DepositAccountsPage";
+export { default as FixedDepositDetailPage } from "./pages/FixedDepositDetailPage";
+export { default as FixedDepositProductDetailPage } from "./pages/FixedDepositProductDetailPage";
+export { default as FixedDepositProductFormPage } from "./pages/FixedDepositProductFormPage";
+export { default as FixedDepositProductsPage } from "./pages/FixedDepositProductsPage";
+export { default as FixedDepositsPage } from "./pages/FixedDepositsPage";
+export { default as InterestRateChartFormPage } from "./pages/InterestRateChartFormPage";
+export { default as InterestRateChartListPage } from "./pages/InterestRateChartListPage";
+export { default as RecurringDepositDetailPage } from "./pages/RecurringDepositDetailPage";
+export { default as RecurringDepositProductDetailPage } from "./pages/RecurringDepositProductDetailPage";
+export { default as RecurringDepositProductFormPage } from "./pages/RecurringDepositProductFormPage";
+export { default as RecurringDepositProductsPage } from "./pages/RecurringDepositProductsPage";
+export { default as RecurringDepositsPage } from "./pages/RecurringDepositsPage";
+export { default as SavingsProductDetailPage } from "./pages/SavingsProductDetailPage";
+export { default as SavingsProductFormPage } from "./pages/SavingsProductFormPage";
+export { default as SavingsProductsPage } from "./pages/SavingsProductsPage";
+export { default as SavingsTransactionFormPage } from "./pages/SavingsTransactionFormPage";

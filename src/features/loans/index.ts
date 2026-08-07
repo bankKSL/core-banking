@@ -304,3 +304,7 @@ export { default as LoanGuarantorsCard } from "./components/LoanGuarantorsCard";
 export { default as LoanDelinquencyCard } from "./components/LoanDelinquencyCard";
 export { default as LoanTransactionForm } from "./components/LoanTransactionForm";
 export type { TransactionFormValues } from "./components/LoanTransactionForm";
+
+export { default as LoanProductsPage } from "./pages/LoanProductsPage";
+export { default as LoanProductFormPage } from "./pages/LoanProductFormPage";
+export { default as LoanProductViewPage } from "./pages/LoanProductViewPage";

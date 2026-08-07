@@ -95,3 +95,12 @@ export { default as CampaignListPage } from "./pages/CampaignListPage";
 export { default as CampaignFormPage } from "./pages/CampaignFormPage";
 export { default as EmailCampaignFormPage } from "./pages/EmailCampaignFormPage";
 export { default as CampaignDetailPage } from "./pages/CampaignDetailPage";
+
+export { default as ActionsPage } from "./pages/ActionsPage";
+export { default as CampaignList } from "./pages/CampaignList";
+export { default as CreateCampaign } from "./pages/CreateCampaign";
+export { default as CategoryPage } from "./pages/CategoryPage";
+export { default as ConditionsPage } from "./pages/ConditionsPage";
+export { default as ExecutionLogsPage } from "./pages/ExecutionLogsPage";
+export { default as SimulationPage } from "./pages/SimulationPage";
+export { default as FormulaBuilderPage } from "./pages/FormulaBuilderPage";

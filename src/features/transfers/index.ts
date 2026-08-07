@@ -27,3 +27,7 @@ export {
   buildStandingInstructionRequest,
   parseDate,
 } from "./api";
+
+// ─── Pages ───────────────────────────────────────────────
+export { default as TransferListPage } from "./pages/TransferListPage";
+export { default as TransferFormPage } from "./pages/TransferFormPage";

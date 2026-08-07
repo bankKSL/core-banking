@@ -169,3 +169,15 @@ export {
   useCreateProvisioningEntry,
   useProvisioningEntryCommand,
 } from "./hooks/useProvisioningEntries";
+
+// ─── Pages ───────────────────────────────────────────────
+export { default as AccountingClosuresPage } from "./pages/AccountingClosuresPage";
+export { default as AccountingRuleFormPage } from "./pages/AccountingRuleFormPage";
+export { default as AccountingRulesPage } from "./pages/AccountingRulesPage";
+export { default as FinancialActivityMappingsPage } from "./pages/FinancialActivityMappingsPage";
+export { default as GLAccountFormPage } from "./pages/GLAccountFormPage";
+export { default as GLAccountsPage } from "./pages/GLAccountsPage";
+export { default as JournalEntriesPage } from "./pages/JournalEntriesPage";
+export { default as JournalEntryFormPage } from "./pages/JournalEntryFormPage";
+export { default as PeriodicAccrualPage } from "./pages/PeriodicAccrualPage";
+export { default as ProvisioningEntriesPage } from "./pages/ProvisioningEntriesPage";
