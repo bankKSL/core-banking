@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,10 +21,11 @@ export function CurrencySelect({
   onChange,
   onCurrencyChange,
   error,
-  label = "Currency *",
-  placeholder = "Search currency…",
+  label,
+  placeholder,
   disabled,
 }: CurrencySelectProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -32,6 +34,9 @@ export function CurrencySelect({
 
   const { data, isLoading } = useCurrencies();
   const currencyOptions = data?.selectedCurrencyOptions ?? [];
+
+  const resolvedLabel = label ?? t("Currency *");
+  const resolvedPlaceholder = placeholder ?? t("Search currency…");
 
   const selected = currencyOptions.find((c) => c.code === value);
 
@@ -62,7 +67,7 @@ export function CurrencySelect({
 
   return (
     <div ref={ref} className="relative space-y-1.5">
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-sm font-medium">{resolvedLabel}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
@@ -90,7 +95,7 @@ export function CurrencySelect({
           )}
 
           <Input
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -125,7 +130,7 @@ export function CurrencySelect({
 
       {open && !selected && query.length >= 1 && filtered.length === 0 && !isLoading && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No currencies found
+          {t("No currencies found")}
         </div>
       )}
     </div>

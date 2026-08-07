@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { officeCreateSchema, type OfficeCreateFormData } from "@/lib/validations/office";
@@ -19,6 +20,7 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
   onCancel,
   isSubmitting = false,
 }) => {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -42,37 +44,37 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Name */}
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium">Office Name *</label>
-        <Input placeholder="e.g. Head Office" {...register("name")} error={errors.name?.message} />
+        <label className="block text-sm font-medium">{t("Office Name *")}</label>
+        <Input placeholder={t("e.g. Head Office")} {...register("name")} error={errors.name?.message} />
       </div>
 
       <OfficeSelect
         value={parentId?.toString() ?? ""}
         onChange={(v) => setValue("parentId", v ? Number(v) : undefined, { shouldValidate: true })}
-        includeNone="None (root office)"
-        label="Parent Office"
+        includeNone={t("None (root office)")}
+        label={t("Parent Office")}
         disabled={isSubmitting}
       />
 
       {/* Opening Date */}
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium">Opening Date *</label>
+        <label className="block text-sm font-medium">{t("Opening Date *")}</label>
         <Input type="date" {...register("openingDate")} error={errors.openingDate?.message} />
       </div>
 
       {/* External ID */}
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium">External ID</label>
-        <Input placeholder="e.g. EXT-001" {...register("externalId")} error={errors.externalId?.message} />
+        <label className="block text-sm font-medium">{t("External ID")}</label>
+        <Input placeholder={t("e.g. EXT-001")} {...register("externalId")} error={errors.externalId?.message} />
       </div>
 
       {/* Actions */}
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t("Cancel")}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : defaultValues?.name ? "Save Changes" : "Create Office"}
+          {isSubmitting ? t("Saving...") : defaultValues?.name ? t("Save Changes") : t("Create Office")}
         </Button>
       </div>
     </form>

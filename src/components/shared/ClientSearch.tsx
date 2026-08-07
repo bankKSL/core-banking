@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
 import { Search, X, BadgeCheck, ExternalLink, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -23,10 +24,11 @@ export function ClientSearch({
   onBlur,
   disabled,
   error,
-  label = "Client *",
-  placeholder = "Search client by name…",
+  label,
+  placeholder,
   name,
 }: ClientSearchProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -38,6 +40,9 @@ export function ClientSearch({
 
   const clients = data?.pageItems ?? [];
   const selected = clients.find((c) => c.id === value);
+
+  const resolvedLabel = label ?? t("Client *");
+  const resolvedPlaceholder = placeholder ?? t("Search client by name…");
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -58,11 +63,13 @@ export function ClientSearch({
 
   return (
     <div ref={ref} className="relative space-y-1.5">
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-sm font-medium">{resolvedLabel}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
-          <span className="flex-1 text-sm">{selected.displayName ?? `Client #${selected.id}`}</span>
+          <span className="flex-1 text-sm">
+            {selected.displayName ?? t("Client #{{id}}", { id: selected.id })}
+          </span>
           {!disabled && (
             <button
               type="button"
@@ -87,7 +94,7 @@ export function ClientSearch({
 
           <Input
             id={name ?? "clientSearch"}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -112,7 +119,7 @@ export function ClientSearch({
                 setQuery("");
               }}
             >
-              <span>{c.displayName ?? `Client #${c.id}`}</span>
+              <span>{c.displayName ?? t("Client #{{id}}", { id: c.id })}</span>
               {c.accountNo && <span className="ml-2 text-xs text-gray-400">#{c.accountNo}</span>}
             </button>
           ))}
@@ -121,7 +128,7 @@ export function ClientSearch({
 
       {open && !selected && query.length >= 2 && clients.length === 0 && !isLoading && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No clients found
+          {t("No clients found")}
         </div>
       )}
 
@@ -133,7 +140,7 @@ export function ClientSearch({
         onClick={() => window.open("/clients/new", "_blank")}
       >
         <ExternalLink className="mr-1 h-3 w-3" />
-        Create New Client
+        {t("Create New Client")}
       </Button>
     </div>
   );

@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +44,7 @@ const CLOSE_PAYMENT_TYPES = [
 ];
 
 const AccountActionPage: FC = () => {
+  const { t } = useTranslation();
   const { accountType, accountId, command } = useParams<{ accountType: string; accountId: string; command: string }>();
   const navigate = useNavigate();
   const { data: account, isLoading } = useSavingsAccount(accountId ?? undefined);
@@ -51,7 +53,7 @@ const AccountActionPage: FC = () => {
   const closeMutation = useCloseSavingsAccount();
 
   const commandKey = command ?? "approve";
-  const title = COMMAND_LABELS[commandKey] ?? `Execute ${commandKey}`;
+  const title = t(COMMAND_LABELS[commandKey] ?? "Execute {{command}}", { command: commandKey });
 
   const [withdrawBalance, setWithdrawBalance] = useState(false);
   const [closePaymentTypeId, setClosePaymentTypeId] = useState("1");
@@ -102,11 +104,13 @@ const AccountActionPage: FC = () => {
     <div className="p-6 max-w-xl m-auto space-y-6">
       <PageHeader
         title={title}
-        description={account ? `${account.accountNo} — ${account.clientName ?? `Client #${account.clientId}`}` : ""}
+        description={
+          account ? `${account.accountNo} — ${account.clientName ?? t("Client #{{id}}", { id: account.clientId })}` : ""
+        }
         actions={
           <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
+            {t("Back")}
           </Button>
         }
       />
@@ -122,13 +126,15 @@ const AccountActionPage: FC = () => {
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Action Date *</label>
+                <label className="block text-sm font-medium">{t("Action Date")} *</label>
                 <Input type="date" {...register("actionDate")} error={errors.actionDate?.message} />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">Note {commandKey !== "activate" ? "(optional)" : ""}</label>
+                <label className="block text-sm font-medium">
+                  {t("Note")} {commandKey !== "activate" ? `(${t("Optional")})` : ""}
+                </label>
                 {commandKey !== "activate" && (
-                  <Textarea id="note" rows={4} {...register("note")} placeholder="Optional note..." />
+                  <Textarea id="note" rows={4} {...register("note")} placeholder={t("Optional note...")} />
                 )}
               </div>
 
@@ -143,12 +149,12 @@ const AccountActionPage: FC = () => {
                       className="h-4 w-4"
                     />
                     <label htmlFor="withdrawBalance" className="text-sm font-medium">
-                      Withdraw Balance
+                      {t("Withdraw Balance")}
                     </label>
                   </div>
                   {withdrawBalance && (
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium">Payment Type *</label>
+                      <label className="block text-sm font-medium">{t("Payment Type")} *</label>
                       <Select value={closePaymentTypeId} onValueChange={setClosePaymentTypeId}>
                         <SelectTrigger>
                           <SelectValue />
@@ -156,7 +162,7 @@ const AccountActionPage: FC = () => {
                         <SelectContent>
                           {CLOSE_PAYMENT_TYPES.map((pt) => (
                             <SelectItem key={pt.id} value={String(pt.id)}>
-                              {pt.name}
+                              {t(pt.name)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -172,7 +178,7 @@ const AccountActionPage: FC = () => {
                       className="h-4 w-4"
                     />
                     <label htmlFor="postInterestValidation" className="text-sm font-medium">
-                      Post Interest Validation on Closure
+                      {t("Post Interest Validation on Closure")}
                     </label>
                   </div>
                 </>
@@ -181,7 +187,7 @@ const AccountActionPage: FC = () => {
               <Button type="submit" disabled={isSubmitting} className="bg-[#D32F2F] hover:bg-red-700">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
-                Execute {commandKey}
+                {t("Execute {{command}}", { command: commandKey })}
               </Button>
             </form>
           )}

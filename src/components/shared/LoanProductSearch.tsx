@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, BadgeCheck, ExternalLink, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,10 +32,11 @@ export function LoanProductSearch({
   disabled,
   loading,
   error,
-  label = "Loan Product *",
-  placeholder = "Search product by name…",
+  label,
+  placeholder,
   name,
 }: LoanProductSearchProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -48,7 +50,10 @@ export function LoanProductSearch({
     selected &&
     ((selected as any).loanScheduleType?.code === "PROGRESSIVE" ||
       (selected as any).loanScheduleType === "PROGRESSIVE");
-  const scheduleLabel = selected && isProgressive ? "Progressive" : selected ? "Cumulative" : null;
+  const scheduleLabel = selected && isProgressive ? t("Progressive") : selected ? t("Cumulative") : null;
+
+  const resolvedLabel = label ?? t("Loan Product *");
+  const resolvedPlaceholder = placeholder ?? t("Search product by name…");
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -69,7 +74,7 @@ export function LoanProductSearch({
   return (
     <div ref={ref} className="relative space-y-1.5">
       <label className="block text-sm font-medium" htmlFor={name ?? "productSearch"}>
-        {label}
+        {resolvedLabel}
       </label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
@@ -103,7 +108,7 @@ export function LoanProductSearch({
           )}
           <Input
             id={name ?? "productSearch"}
-            placeholder={loading ? "Loading products..." : placeholder}
+            placeholder={loading ? t("Loading products...") : resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -133,7 +138,7 @@ export function LoanProductSearch({
               >
                 <span className="flex-1">{p.name}</span>
                 <Badge variant={prog ? "info" : "default"} size="sm" rounded>
-                  {prog ? "Progressive" : "Cumulative"}
+                  {prog ? t("Progressive") : t("Cumulative")}
                 </Badge>
               </button>
             );
@@ -149,7 +154,7 @@ export function LoanProductSearch({
         onClick={() => window.open("/lending/products", "_blank")}
       >
         <ExternalLink className="mr-1 h-3 w-3" />
-        Create New Product
+        {t("Create New Product")}
       </Button>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAccountingRules } from "@/features/accounting";
@@ -16,16 +17,20 @@ export function AccountingRuleSelect({
   value,
   onChange,
   error,
-  label = "Accounting Rule *",
-  placeholder = "Search accounting rule…",
+  label,
+  placeholder,
   disabled,
 }: AccountingRuleSelectProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const { data: rules = [], isLoading } = useAccountingRules();
+
+  const resolvedLabel = label ?? t("Accounting Rule *");
+  const resolvedPlaceholder = placeholder ?? t("Search accounting rule…");
 
   const filtered = query
     ? rules.filter(
@@ -55,7 +60,7 @@ export function AccountingRuleSelect({
 
   return (
     <div ref={ref} className="relative space-y-1.5">
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-sm font-medium">{resolvedLabel}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
@@ -83,7 +88,7 @@ export function AccountingRuleSelect({
           )}
 
           <Input
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -116,7 +121,7 @@ export function AccountingRuleSelect({
 
       {open && !selected && query.length >= 1 && filtered.length === 0 && !isLoading && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No accounting rules found
+          {t("No accounting rules found")}
         </div>
       )}
     </div>

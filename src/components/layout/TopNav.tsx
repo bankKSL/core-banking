@@ -1,5 +1,6 @@
 import { type FC, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Search, Bell, Menu, Moon, Sun, User, LogOut, ChevronDown, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore, useAuthStore } from "@/store";
@@ -26,33 +27,34 @@ import {
 } from "@/components/ui/breadcrumb";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-// ----- Breadcrumb path label mapping -----
-const pathLabels: Record<string, string> = {
-  "/": "Dashboard",
-  "/campaign": "Campaign",
-  "/category": "Category",
-  "/products": "Products",
-  "/conditions": "Conditions",
-  "/formula-builder": "Formula Builder",
-  "/actions": "Actions",
-  "/simulation": "Simulation",
-  "/execution-logs": "Execution Logs",
-  "/audit-logs": "Audit Logs",
-  "/exchange-rates": "Exchange Rates",
-  "/lending/applications/new": "New Application",
-  "/deposits/saving-accounts/new": "New Account",
-  "/settings": "Settings",
-};
-
 function useBreadcrumbs() {
+  const { t } = useTranslation();
   const location = useLocation();
   const segments = location.pathname.split("/").filter(Boolean);
 
+  // ----- Breadcrumb path label mapping -----
+  const pathLabels: Record<string, string> = {
+    "/": t("Dashboard"),
+    "/campaign": t("Campaign"),
+    "/category": t("Category"),
+    "/products": t("Products"),
+    "/conditions": t("Conditions"),
+    "/formula-builder": t("Formula Builder"),
+    "/actions": t("Actions"),
+    "/simulation": t("Simulation"),
+    "/execution-logs": t("Execution Logs"),
+    "/audit-logs": t("Audit Logs"),
+    "/exchange-rates": t("Exchange Rates"),
+    "/lending/applications/new": t("New Application"),
+    "/deposits/saving-accounts/new": t("New Account"),
+    "/settings": t("Settings"),
+  };
+
   if (segments.length === 0) {
-    return [{ label: "Dashboard", path: "/", active: true }];
+    return [{ label: t("Dashboard"), path: "/", active: true }];
   }
 
-  const crumbs = [{ label: "Dashboard", path: "/", active: false }];
+  const crumbs = [{ label: t("Dashboard"), path: "/", active: false }];
 
   let accumulatedPath = "";
   segments.forEach((segment, i) => {
@@ -69,6 +71,7 @@ function useBreadcrumbs() {
 }
 
 const TopNav: FC = () => {
+  const { t } = useTranslation();
   const { sidebarCollapsed, toggleSidebar, theme, toggleTheme } = useUIStore();
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
@@ -100,7 +103,7 @@ const TopNav: FC = () => {
           size="icon"
           onClick={toggleSidebar}
           className="shrink-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={sidebarCollapsed ? t("Expand sidebar") : t("Collapse sidebar")}
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -116,7 +119,7 @@ const TopNav: FC = () => {
             size="icon"
             onClick={toggleTheme}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={theme === "dark" ? t("Switch to light mode") : t("Switch to dark mode")}
           >
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
@@ -128,7 +131,7 @@ const TopNav: FC = () => {
                 variant="ghost"
                 size="icon"
                 className="relative text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                aria-label="Notifications"
+                aria-label={t("Notifications")}
               >
                 <Bell className="h-5 w-5" />
                 <Badge
@@ -142,11 +145,11 @@ const TopNav: FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("Notifications")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <div className="px-2 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                 <Bell className="mx-auto mb-2 h-8 w-8 opacity-30" />
-                <p>No new notifications</p>
+                <p>{t("No new notifications")}</p>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -160,35 +163,35 @@ const TopNav: FC = () => {
                   "hover:bg-gray-100 dark:hover:bg-gray-800",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D32F2F]/50",
                 )}
-                aria-label="User menu"
+                aria-label={t("User menu")}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatar.png" alt="Admin User" />
+                  <AvatarImage src="/avatar.png" alt={t("Admin User")} />
                   <AvatarFallback className="bg-[#D32F2F]/10 text-[#D32F2F] text-xs font-semibold dark:bg-[#D32F2F]/20">
                     AU
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 md:inline">Admin</span>
+                <span className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 md:inline">{t("Admin")}</span>
                 <ChevronDown className="hidden h-3.5 w-3.5 text-gray-400 md:inline" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-0.5">
-                  <span>{user?.username ?? "Admin User"}</span>
+                  <span>{user?.username ?? t("Admin User")}</span>
                   <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                    {user?.officeName ?? "Head Office"}
+                    {user?.officeName ?? t("Head Office")}
                   </span>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
-                Profile
+                {t("Profile")}
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                {t("Settings")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -199,7 +202,7 @@ const TopNav: FC = () => {
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                {t("Logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

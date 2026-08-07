@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, BadgeCheck, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +27,10 @@ export function ProductSearch({
   products,
   disabled,
   error,
-  label = "Product *",
-  placeholder = "Search product by name…",
+  label,
+  placeholder,
 }: ProductSearchProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -43,6 +45,9 @@ export function ProductSearch({
     : products;
 
   const selected = products.find((p) => String(p.id) === value);
+
+  const resolvedLabel = label ?? t("Product *");
+  const resolvedPlaceholder = placeholder ?? t("Search product by name…");
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -62,7 +67,7 @@ export function ProductSearch({
 
   return (
     <div ref={ref} className="relative space-y-1.5">
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-sm font-medium">{resolvedLabel}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
@@ -88,7 +93,7 @@ export function ProductSearch({
         <div className="relative">
           <Search className="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -125,7 +130,7 @@ export function ProductSearch({
 
       {open && !selected && query.length >= 1 && filtered.length === 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No products found
+          {t("No products found")}
         </div>
       )}
     </div>

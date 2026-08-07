@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ const Pagination: React.FC<PaginationProps> = ({
   pageSize,
   className,
 }) => {
+  const { t } = useTranslation();
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
@@ -68,21 +70,19 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4", className)}>
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Showing <span className="font-medium text-gray-900 dark:text-gray-100">{startItem}</span> to{" "}
-        <span className="font-medium text-gray-900 dark:text-gray-100">{endItem}</span> of{" "}
-        <span className="font-medium text-gray-900 dark:text-gray-100">{totalItems}</span> results
+        {t("Showing {{from}} to {{to}} of {{total}} results", { from: startItem, to: endItem, total: totalItems })}
       </p>
 
-      <nav className="flex items-center gap-1" aria-label="Pagination">
+      <nav className="flex items-center gap-1" aria-label={t("Pagination")}>
         <Button
           variant="outline"
           size="sm"
           onClick={handlePrevious}
           disabled={isFirstPage}
-          aria-label="Go to previous page"
+          aria-label={t("Go to previous page")}
         >
           <ChevronLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Previous</span>
+          <span className="hidden sm:inline">{t("Previous")}</span>
         </Button>
 
         <div className="flex items-center gap-1">
@@ -103,7 +103,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 size="sm"
                 className={cn("h-8 w-8 p-0", isActive && "bg-[#D32F2F] text-white hover:bg-[#D32F2F]/90")}
                 onClick={() => onPageChange(page)}
-                aria-label={`Go to page ${page}`}
+                aria-label={t("Go to page {{page}}", { page })}
                 aria-current={isActive ? "page" : undefined}
               >
                 {page}
@@ -112,8 +112,14 @@ const Pagination: React.FC<PaginationProps> = ({
           })}
         </div>
 
-        <Button variant="outline" size="sm" onClick={handleNext} disabled={isLastPage} aria-label="Go to next page">
-          <span className="hidden sm:inline">Next</span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleNext}
+          disabled={isLastPage}
+          aria-label={t("Go to next page")}
+        >
+          <span className="hidden sm:inline">{t("Next")}</span>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </nav>

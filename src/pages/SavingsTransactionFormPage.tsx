@@ -116,7 +116,7 @@ const SavingsTransactionFormPage: FC = () => {
     <div className="p-6 max-w-xl m-auto space-y-6">
       <PageHeader
         title={title}
-        description={account ? `${account.accountNo} — ${account.clientName ?? `Client #${account.clientId}`}` : ""}
+        description={account ? `${account.accountNo} — ${account.clientName ?? t("Client #{{id}}", { id: account.clientId })}` : ""}
         actions={
           <Button variant="outline" size="sm" onClick={() => navigate(`/deposits/saving-accounts/${id}`)}>
             <ArrowLeft className="mr-1 h-4 w-4" />
@@ -176,10 +176,10 @@ const SavingsTransactionFormPage: FC = () => {
                     <SelectValue placeholder={t("Select payment type")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Select payment type</SelectItem>
-                    <SelectItem value="1">Cash</SelectItem>
-                    <SelectItem value="2">Cheque</SelectItem>
-                    <SelectItem value="3">Bank Transfer</SelectItem>
+                    <SelectItem value="">{t("Select payment type")}</SelectItem>
+                    <SelectItem value="1">{t("Cash")}</SelectItem>
+                    <SelectItem value="2">{t("Cheque")}</SelectItem>
+                    <SelectItem value="3">{t("Bank Transfer")}</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.paymentTypeId && <p className="text-sm text-red-500 mt-1">{errors.paymentTypeId.message}</p>}

@@ -39,6 +39,7 @@ interface DonutChartProps {
 }
 
 const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
+  const { t } = useTranslation();
   const total = data.reduce((s, d) => s + d.value, 0);
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
@@ -81,7 +82,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
           {total}
         </text>
         <text x="50" y="62" textAnchor="middle" className="text-[8px] fill-gray-500 dark:fill-gray-400" fontSize="8">
-          Total
+          {t("Total")}
         </text>
       </svg>
       <div className="flex flex-wrap justify-center gap-3">
@@ -181,14 +182,14 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const loanChartData = [
-    { label: "Active", value: activeLoans, color: LOAN_DONUT_COLORS.active },
-    { label: "Pending", value: pendingLoans.length, color: LOAN_DONUT_COLORS.pending },
-    { label: "Closed", value: closedLoans, color: LOAN_DONUT_COLORS.closed },
+    { label: t("Active"), value: activeLoans, color: LOAN_DONUT_COLORS.active },
+    { label: t("Pending"), value: pendingLoans.length, color: LOAN_DONUT_COLORS.pending },
+    { label: t("Closed"), value: closedLoans, color: LOAN_DONUT_COLORS.closed },
   ];
 
   const savingsChartData = [
-    { label: "Active", value: savingsActive, color: SAVINGS_DONUT_COLORS.active },
-    { label: "Pending", value: savingsPending, color: SAVINGS_DONUT_COLORS.pending },
+    { label: t("Active"), value: savingsActive, color: SAVINGS_DONUT_COLORS.active },
+    { label: t("Pending"), value: savingsPending, color: SAVINGS_DONUT_COLORS.pending },
   ];
 
   return (
@@ -298,7 +299,7 @@ const Dashboard: React.FC = () => {
                     onClick={() => navigate(`/loans/view/${loan.id}`)}
                   >
                     <TableCell className="font-mono text-xs font-medium">{loan.accountNo ?? `#${loan.id}`}</TableCell>
-                    <TableCell className="text-sm">{loan.clientName ?? `Client #${loan.clientId}`}</TableCell>
+                    <TableCell className="text-sm">{loan.clientName ?? t("Client #{{id}}", { id: loan.clientId })}</TableCell>
                     <TableCell className="text-sm">{loan.loanProductName}</TableCell>
                     <TableCell className="text-right font-mono text-sm">
                       {formatCurrency(loan.proposedPrincipal ?? loan.principal ?? 0)}

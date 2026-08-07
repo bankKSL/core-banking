@@ -96,8 +96,9 @@ const ForgotPasswordPage: FC = () => {
               </div>
               <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t("Check your inbox")}</h2>
               <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                If an account exists for <span className="font-medium">{emailValue}</span>, we&apos;ve sent a password
-                reset link.
+                {t("If an account exists for {{email}}, we've sent a password reset link.", {
+                  email: <span className="font-medium">{emailValue}</span>,
+                })}
               </p>
               <p className="mb-6 text-xs text-gray-400 dark:text-gray-500">
                 {t("Didn't receive it? Check your spam folder or try again.")}

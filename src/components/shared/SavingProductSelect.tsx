@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, BadgeCheck, ExternalLink, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,16 +19,20 @@ export function SavingProductSelect({
   value,
   onChange,
   error,
-  label = "Savings Product *",
-  placeholder = "Search product by name\u2026",
+  label,
+  placeholder,
   disabled,
 }: SavingProductSelectProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const { data: products, isLoading } = useSavingsProducts();
+
+  const resolvedLabel = label ?? t("Savings Product *");
+  const resolvedPlaceholder = placeholder ?? t("Search product by name…");
 
   const filtered = (products ?? []).filter((p) => !query || p.name.toLowerCase().includes(query.toLowerCase()));
   const selected = (products ?? []).find((p) => p.id === value);
@@ -50,7 +55,7 @@ export function SavingProductSelect({
 
   return (
     <div ref={ref} className="relative space-y-1.5">
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-sm font-medium">{resolvedLabel}</label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
@@ -78,7 +83,7 @@ export function SavingProductSelect({
           )}
 
           <Input
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -109,7 +114,7 @@ export function SavingProductSelect({
 
       {open && !selected && !isLoading && query && filtered.length === 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No products found
+          {t("No products found")}
         </div>
       )}
 
@@ -123,7 +128,7 @@ export function SavingProductSelect({
         onClick={() => window.open("/deposits/products", "_blank")}
       >
         <ExternalLink className="mr-1 h-3 w-3" />
-        Create New Product
+        {t("Create New Product")}
       </Button>
     </div>
   );

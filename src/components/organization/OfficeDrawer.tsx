@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { X, Building2, MapPin, Calendar, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -13,6 +14,8 @@ interface OfficeDrawerProps {
 }
 
 const OfficeDrawer: React.FC<OfficeDrawerProps> = ({ office, open, onClose, onEdit }) => {
+  const { t } = useTranslation();
+
   if (!office) return null;
 
   return (
@@ -41,7 +44,7 @@ const OfficeDrawer: React.FC<OfficeDrawerProps> = ({ office, open, onClose, onEd
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{office.name}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Office #{office.id}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("Office")} #{office.id}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -52,18 +55,18 @@ const OfficeDrawer: React.FC<OfficeDrawerProps> = ({ office, open, onClose, onEd
 
         {/* Details */}
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
-          <DetailRow icon={Building2} label="Full Name" value={office.nameDecorated} />
-          <DetailRow icon={Hash} label="External ID" value={office.externalId || "—"} />
-          <DetailRow icon={Calendar} label="Opening Date" value={office.openingDate} />
-          <DetailRow icon={MapPin} label="Parent Office" value={office.parentName ?? "None (root)"} />
-          <DetailRow icon={Hash} label="Hierarchy" value={office.hierarchy} />
+          <DetailRow icon={Building2} label={t("Full Name")} value={office.nameDecorated} />
+          <DetailRow icon={Hash} label={t("External ID")} value={office.externalId || "—"} />
+          <DetailRow icon={Calendar} label={t("Opening Date")} value={office.openingDate} />
+          <DetailRow icon={MapPin} label={t("Parent Office")} value={office.parentName ?? t("None (root)")} />
+          <DetailRow icon={Hash} label={t("Hierarchy")} value={office.hierarchy} />
         </div>
 
         {/* Footer */}
         <div className="shrink-0 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
           {onEdit && (
             <Button className="w-full" onClick={() => onEdit(office)}>
-              Edit Office
+              {t("Edit Office")}
             </Button>
           )}
         </div>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, WifiOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,15 @@ import { useNetworkStore } from "@/store/network";
  * without a full reload. HTTP error responses are handled elsewhere.
  */
 export function NetworkErrorBanner() {
+  const { t } = useTranslation();
   const error = useNetworkStore((s) => s.error);
   const clear = useNetworkStore((s) => s.clearNetworkError);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!error) return;
-    const t = setTimeout(() => clear(error.id), 8000);
-    return () => clearTimeout(t);
+    const timeoutId = setTimeout(() => clear(error.id), 8000);
+    return () => clearTimeout(timeoutId);
   }, [error, clear]);
 
   if (!error) return null;
@@ -33,15 +35,15 @@ export function NetworkErrorBanner() {
         <WifiOff className="h-5 w-5 shrink-0 text-amber-600" />
         <div className="min-w-0">
           <p className="font-medium text-amber-700 dark:text-amber-300">
-            {error.kind === "timeout" ? "Request timed out" : "Connection problem"}
+            {error.kind === "timeout" ? t("Request timed out") : t("Connection problem")}
           </p>
           <p className="truncate text-xs text-gray-500 dark:text-gray-400">{error.message}</p>
         </div>
         <Button size="sm" variant="outline" onClick={handleRetry}>
           <RefreshCw className="mr-1.5 h-4 w-4" />
-          Retry
+          {t("Retry")}
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => clear(error.id)} aria-label="Dismiss">
+        <Button size="sm" variant="ghost" onClick={() => clear(error.id)} aria-label={t("Dismiss")}>
           <X className="h-4 w-4" />
         </Button>
       </div>

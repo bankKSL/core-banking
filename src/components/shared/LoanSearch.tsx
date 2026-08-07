@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLoans, LOAN_SEARCH_DEBOUNCE_MS, type LoanListParams } from "@/features/loans";
@@ -20,10 +21,11 @@ export function LoanSearch({
   onBlur,
   disabled,
   error,
-  label = "Loan ID *",
-  placeholder = "Search loan by account no…",
+  label,
+  placeholder,
   name,
 }: LoanSearchProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -51,6 +53,9 @@ export function LoanSearch({
 
   const selected = data?.pageItems?.find((l) => l.id === value);
 
+  const resolvedLabel = label ?? t("Loan ID *");
+  const resolvedPlaceholder = placeholder ?? t("Search loan by account no…");
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -71,13 +76,13 @@ export function LoanSearch({
   return (
     <div ref={ref} className="relative space-y-1.5">
       <label className="block text-sm font-medium" htmlFor={name ?? "loanSearch"}>
-        {label}
+        {resolvedLabel}
       </label>
       {selected ? (
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800">
           <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-500" />
           <span className="flex-1 text-sm">
-            Loan #{selected.id}
+            {t("Loan #{{id}}", { id: selected.id })}
             {selected.accountNo && <span className="ml-1 text-gray-400">({selected.accountNo})</span>}
             {selected.clientName && <span className="ml-1 text-gray-500">- {selected.clientName}</span>}
           </span>
@@ -105,7 +110,7 @@ export function LoanSearch({
 
           <Input
             id={name ?? "loanSearch"}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -139,7 +144,7 @@ export function LoanSearch({
 
       {open && !selected && query.length >= 2 && loans.length === 0 && !isLoading && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          No loans found
+          {t("No loans found")}
         </div>
       )}
     </div>
