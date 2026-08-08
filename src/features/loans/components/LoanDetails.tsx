@@ -44,9 +44,17 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-          <InfoRow icon={<Hash className="h-4 w-4" />} label={t("Account No")} value={loan.accountNo ?? `#${loan.id}`} />
+          <InfoRow
+            icon={<Hash className="h-4 w-4" />}
+            label={t("Account No")}
+            value={loan.accountNo ?? `#${loan.id}`}
+          />
           <InfoRow icon={<Hash className="h-4 w-4" />} label={t("External ID")} value={loan.externalId ?? "—"} />
-          <InfoRow icon={<Building2 className="h-4 w-4" />} label={t("Status")} value={<LoanStatusBadge code={status} />} />
+          <InfoRow
+            icon={<Building2 className="h-4 w-4" />}
+            label={t("Status")}
+            value={<LoanStatusBadge code={status} />}
+          />
           {loan.subStatus && (
             <InfoRow
               icon={<Building2 className="h-4 w-4" />}
@@ -156,19 +164,27 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
             label={t("Submitted On")}
-            value={loan.timeline?.submittedOnDate ? new Date(loan.timeline.submittedOnDate).toLocaleDateString() : "—"}
+            value={
+              loan.timeline?.submittedOnDate
+                ? new Date(loan.timeline.submittedOnDate.toString()).toLocaleDateString()
+                : "—"
+            }
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
             label={t("Approved On")}
-            value={loan.timeline?.approvedOnDate ? new Date(loan.timeline.approvedOnDate).toLocaleDateString() : "—"}
+            value={
+              loan.timeline?.approvedOnDate
+                ? new Date(loan?.timeline?.approvedOnDate.toString()).toLocaleDateString()
+                : "—"
+            }
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
             label={t("Disbursed On")}
             value={
               loan.timeline?.actualDisbursementDate
-                ? new Date(loan.timeline.actualDisbursementDate).toLocaleDateString()
+                ? new Date(loan.timeline.actualDisbursementDate.toString()).toLocaleDateString()
                 : "—"
             }
           />
@@ -177,14 +193,16 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
             label={t("Expected Disbursement")}
             value={
               loan.timeline?.expectedDisbursementDate
-                ? new Date(loan.timeline.expectedDisbursementDate).toLocaleDateString()
+                ? new Date(loan.timeline.expectedDisbursementDate.toString()).toLocaleDateString()
                 : "—"
             }
           />
           <InfoRow
             icon={<Calendar className="h-4 w-4" />}
             label={t("Closed On")}
-            value={loan.timeline?.closedOnDate ? new Date(loan.timeline.closedOnDate).toLocaleDateString() : "—"}
+            value={
+              loan.timeline?.closedOnDate ? new Date(loan.timeline.closedOnDate.toString()).toLocaleDateString() : "—"
+            }
           />
         </CardContent>
       </Card>

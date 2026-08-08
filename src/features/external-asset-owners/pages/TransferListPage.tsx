@@ -84,7 +84,7 @@ const TransferListPage: FC = () => {
         }
       />
       <Card>
-        <CardHeader className="flex flex-col gap-4">
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle>{t("All Transfers")}</CardTitle>
           <div className="flex items-center gap-3">
             <div className="relative w-48">

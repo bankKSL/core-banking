@@ -12,7 +12,7 @@ interface LoanStandingInstructionsCardProps {
 
 const LoanStandingInstructionsCard: FC<LoanStandingInstructionsCardProps> = ({ loanId }) => {
   const { t } = useTranslation();
-  const { data: siData, isLoading } = useStandingInstructions({ loanId });
+  const { data: siData, isLoading } = useStandingInstructions({ fromAccountId: loanId });
   const instructions = siData?.pageItems ?? siData ?? [];
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
@@ -44,8 +44,12 @@ const LoanStandingInstructionsCard: FC<LoanStandingInstructionsCardProps> = ({ l
                 {instructions.map((si: any) => (
                   <TableRow key={si.id}>
                     <TableCell className="font-medium">{si.name}</TableCell>
-                    <TableCell className="font-mono text-sm">{si.fromAccount?.accountNo ?? si.fromAccountId ?? "—"}</TableCell>
-                    <TableCell className="font-mono text-sm">{si.toAccount?.accountNo ?? si.toAccountId ?? "—"}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {si.fromAccount?.accountNo ?? si.fromAccountId ?? "—"}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {si.toAccount?.accountNo ?? si.toAccountId ?? "—"}
+                    </TableCell>
                     <TableCell className="font-mono">{si.amount?.toLocaleString() ?? "—"}</TableCell>
                     <TableCell>{si.status ?? "—"}</TableCell>
                   </TableRow>

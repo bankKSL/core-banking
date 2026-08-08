@@ -189,7 +189,7 @@ const InteropAccountDetailPage: FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-3">
-            <div className="flex-1">
+            <div className="flex-1 space-y-1.5">
               <label cursor-pointer htmlFor="searchAccountId">
                 {t("Account External ID")}
               </label>

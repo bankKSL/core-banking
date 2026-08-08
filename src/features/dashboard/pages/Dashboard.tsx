@@ -103,10 +103,17 @@ const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
 const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(n);
 
-const formatDate = (d: string) => {
-  const date = new Date(d);
+const formatDate = (d: string | number[]) => {
+  let iso: string;
+  if (Array.isArray(d) && d.length >= 3) {
+    const [y, m, dy] = d;
+    iso = `${y}-${String(m).padStart(2, "0")}-${String(dy).padStart(2, "0")}`;
+  } else {
+    iso = String(d);
+  }
+  const date = new Date(iso);
   return isNaN(date.getTime())
-    ? d
+    ? iso
     : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 

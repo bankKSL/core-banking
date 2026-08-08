@@ -341,7 +341,7 @@ const LoanProductViewPage: React.FC = () => {
             icon={<Shield className="h-4 w-4" />}
             label={t("Accounting Rule")}
             value={
-              <Badge variant={enumVal(p.accountingRule) === "CASH" ? "info" : enumVal(p.accountingRule) === "ACCRUAL" ? "default" : "outline"}>
+              <Badge variant={enumVal(p.accountingRule) === "CASH" ? "info" : enumVal(p.accountingRule) === "ACCRUAL" ? "default" : "warning"}>
                 {enumVal(p.accountingRule, "NONE")}
               </Badge>
             }

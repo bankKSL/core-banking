@@ -75,7 +75,17 @@ function Hash(props: React.SVGProps<SVGSVGElement>) {
 const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
 
-const formatDate = (d?: string) => (d ? new Date(d).toLocaleDateString() : "—");
+const formatDate = (d?: string | number[]) => {
+  if (!d) return "—";
+  let iso: string;
+  if (Array.isArray(d) && d.length >= 3) {
+    const [y, m, dy] = d;
+    iso = `${y}-${String(m).padStart(2, "0")}-${String(dy).padStart(2, "0")}`;
+  } else {
+    iso = String(d);
+  }
+  return new Date(iso).toLocaleDateString();
+};
 
 const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({
   icon,
@@ -524,9 +534,9 @@ const RecurringDepositDetailPage: React.FC = () => {
                     <TableBody>
                       {Array.from({ length: installments }).map((_, i) => {
                         const dueDate = rd.expectedFirstDepositOnDate
-                          ? new Date(rd.expectedFirstDepositOnDate)
+                          ? new Date(Array.isArray(rd.expectedFirstDepositOnDate) ? ((rd.expectedFirstDepositOnDate as number[]).slice(0, 3).map((v, i) => String(v).padStart(i === 0 ? 4 : 2, "0")).join("-")) : rd.expectedFirstDepositOnDate)
                           : rd.timeline?.activatedOnDate
-                            ? new Date(rd.timeline.activatedOnDate)
+                            ? new Date(Array.isArray(rd.timeline.activatedOnDate) ? ((rd.timeline.activatedOnDate as number[]).slice(0, 3).map((v, i) => String(v).padStart(i === 0 ? 4 : 2, "0")).join("-")) : rd.timeline.activatedOnDate)
                             : new Date();
                         dueDate.setMonth(dueDate.getMonth() + i * freq);
                         const balanceAfter = amount * (i + 1);

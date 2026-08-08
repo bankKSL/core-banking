@@ -235,7 +235,7 @@ const LoanViewPage: FC = () => {
         </TabsContent>
 
         <TabsContent value="trancheDetails" className="mt-4">
-          <LoanTrancheDetailsCard loan={loan} currencyCode={currencyCode} />
+          <LoanTrancheDetailsCard loan={loan} />
         </TabsContent>
 
         <TabsContent value="floatingRates" className="mt-4">

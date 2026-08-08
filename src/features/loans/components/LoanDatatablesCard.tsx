@@ -44,12 +44,13 @@ const LoanDatatablesCard: FC<LoanDatatablesCardProps> = ({ loanId }) => {
 const DatatableSection: FC<{ datatable: any; entityId: number }> = ({ datatable, entityId }) => {
   const { t } = useTranslation();
   const tableName = datatable.registeredTableName ?? datatable.name;
-  const { data: entries, isLoading } = useDatatableEntries(tableName, entityId);
+  const { data: entries, isLoading } = useDatatableEntries(tableName, entityId, true);
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
 
-  const columnHeaders = entries?.columnHeaders ?? [];
-  const dataRows = entries?.data ?? [];
+  const result = entries as unknown as { columnHeaders?: any[]; data?: any[] } | undefined;
+  const columnHeaders = result?.columnHeaders ?? [];
+  const dataRows = result?.data ?? [];
 
   return (
     <Card>

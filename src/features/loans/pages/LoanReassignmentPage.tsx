@@ -17,7 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
 import { useToast } from "@/components/ui/toast";
 import { useReassignmentTemplate, useExecuteReassignment } from "../hooks/useLoanReassignment";
-import { useLoanPermissions } from "../hooks/useLoanPermissions";
 import type { LoanSummary, ClientSummary, GroupSummary } from "../api/loanReassignment";
 
 const loanReassignmentSchema = z.object({
@@ -49,11 +48,8 @@ const LoanReassignmentPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { success } = useToast();
-  const { can } = useLoanPermissions();
   const [selectedLoanIds, setSelectedLoanIds] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const hasPermission = can("bulkReassign");
 
   const {
     control,
@@ -77,6 +73,7 @@ const LoanReassignmentPage: FC = () => {
   const toLoanOfficerId = watch("toLoanOfficerId");
 
   const { data: template, isLoading: isTemplateLoading } = useReassignmentTemplate(officeId);
+
   const {
     data: accountSummary,
     isLoading: isAccountSummaryLoading,
@@ -146,38 +143,21 @@ const LoanReassignmentPage: FC = () => {
     navigate("/loans");
   }, [executeMutation, navigate, selectedLoanIds, success, getValues]);
 
-  if (!hasPermission) {
-    return (
-      <div className="p-6 max-w-2xl m-auto space-y-6">
-        <PageHeader
-          title={t("Bulk Loan Reassignment")}
-          description={t("Reassign loans between loan officers")}
-          actions={
-            <Button variant="outline" onClick={() => navigate("/loans")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
-            </Button>
-          }
-        />
-        <ErrorState title={t("Permission denied")} message={t("You do not have permission to perform bulk loan reassignment.")} />
-      </div>
-    );
-  }
-
-  if (isTemplateLoading) {
-    return (
-      <div className="p-6 max-w-2xl m-auto space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
-        <Card>
-          <CardContent className="py-6 space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // if (isTemplateLoading) {
+  //   return (
+  //     <div className="p-6 max-w-2xl m-auto space-y-6">
+  //       <Skeleton className="h-8 w-64" />
+  //       <Skeleton className="h-4 w-96" />
+  //       <Card>
+  //         <CardContent className="py-6 space-y-4">
+  //           {Array.from({ length: 4 }).map((_, i) => (
+  //             <Skeleton key={i} className="h-10 w-full" />
+  //           ))}
+  //         </CardContent>
+  //       </Card>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="p-6 max-w-3xl m-auto space-y-6">
@@ -237,9 +217,7 @@ const LoanReassignmentPage: FC = () => {
                     </Select>
                   )}
                 />
-                {errors.fromLoanOfficerId && (
-                  <p className="text-xs text-red-500">{errors.fromLoanOfficerId.message}</p>
-                )}
+                {errors.fromLoanOfficerId && <p className="text-xs text-red-500">{errors.fromLoanOfficerId.message}</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -265,9 +243,7 @@ const LoanReassignmentPage: FC = () => {
                     </Select>
                   )}
                 />
-                {errors.toLoanOfficerId && (
-                  <p className="text-xs text-red-500">{errors.toLoanOfficerId.message}</p>
-                )}
+                {errors.toLoanOfficerId && <p className="text-xs text-red-500">{errors.toLoanOfficerId.message}</p>}
               </div>
             </div>
 
@@ -454,10 +430,7 @@ function ClientGroupCard({ entity, selectedLoanIds, onToggleLoan }: ClientGroupC
             key={loan.id}
             className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1 py-0.5 -mx-1"
           >
-            <Checkbox
-              checked={selectedLoanIds.has(loan.id)}
-              onCheckedChange={() => onToggleLoan(loan.id)}
-            />
+            <Checkbox checked={selectedLoanIds.has(loan.id)} onCheckedChange={() => onToggleLoan(loan.id)} />
             <span className="flex-1">{loan.accountNo}</span>
             <span className="text-xs text-gray-500">{loan.loanProductName}</span>
             <span className={`text-xs px-1.5 py-0.5 rounded-full ${getLoanStatusColor(loan.status.code)}`}>
