@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StaffSearch } from "@/components/shared/StaffSearch";
 import { useUser, useUserTemplate, useCreateUser, useUpdateUser } from "../hooks/useUsers";
 
 type UserFormValues = z.infer<ReturnType<typeof getUserSchema>>;
@@ -199,10 +200,11 @@ const UserFormPage: FC = () => {
               </Select>
               {errors.officeId && <p className="text-xs text-red-500 mt-1">{errors.officeId.message}</p>}
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Staff ID")}</label>
-              <Input type="number" {...register("staffId")} placeholder={t("Optional")} />
-            </div>
+            <StaffSearch
+              value={watch("staffId") ? Number(watch("staffId")) : 0}
+              onChange={(v) => setValue("staffId", v ? String(v) : "", { shouldValidate: true })}
+              error={errors.staffId?.message}
+            />
           </CardContent>
         </Card>
 
