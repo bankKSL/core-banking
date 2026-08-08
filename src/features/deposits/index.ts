@@ -103,6 +103,7 @@ export {
   prematureCloseRecurringDeposit,
   rejectRecurringDeposit,
   withdrawRecurringDeposit,
+  undoApprovalRecurringDeposit,
   calculateInterestRecurringDeposit,
   postInterestRecurringDeposit,
   calculatePrematureAmountRecurringDeposit,
@@ -178,10 +179,43 @@ export {
 // API — Recurring Deposit Transactions
 export {
   fetchRecurringDepositTransactions,
+  fetchRecurringDepositTransaction,
+  fetchRecurringDepositTransactionTemplate,
+  fetchRecurringDepositTransactionTemplate2,
+  modifyRecurringDepositTransaction,
   undoRecurringDepositTransaction,
   makeRecurringDepositTransaction,
+  fetchRecurringDepositAccountForEdit,
+  fetchRecurringDepositClosureTemplate,
+  fetchRecurringDepositChargesTemplate,
+  createRecurringDepositCharge,
+  updateRecurringDepositCharge,
+  payRecurringDepositCharge,
+  waiveRecurringDepositCharge,
+  deleteRecurringDepositCharge,
+  fetchChargeDefinition,
+  updateRecurringDepositWithHoldTax,
+  fetchStandingInstructions,
+  fetchStandingInstructionTemplate,
+  createStandingInstruction,
+  fetchStandingInstruction,
+  fetchStandingInstructionForEdit,
+  updateStandingInstruction,
+  deleteStandingInstruction,
+  fetchStandingInstructionTransactions,
+  fetchAccountTransferTemplate,
+  createAccountTransfer,
+  fetchAccountTransfer,
+  undoAccountTransfer,
 } from "./api/deposit";
-export type { RecurringDepositTransaction } from "./api/deposit";
+export type {
+  RecurringDepositTransaction,
+  RecurringDepositClosureTemplate,
+  StandingInstruction,
+  StandingInstructionListResponse,
+  StandingInstructionTemplate,
+  AccountTransferTemplate,
+} from "./api/deposit";
 
 // API — Savings Charges
 export {

@@ -341,29 +341,44 @@ export interface RecurringDepositAccount {
   externalId?: string;
   clientId: number;
   clientName?: string;
-  depositProductId: number;
+  productId: number;
+  productName?: string;
+  depositProductId?: number;
   depositProductName?: string;
   status: { id: number; code: string; value: string };
-  currency: { code: string; name: string; displaySymbol: string };
+  currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+  summary?: {
+    totalDeposits?: number;
+    totalWithdrawals?: number;
+    totalInterestEarned?: number;
+    accountBalance?: number;
+  };
   depositAmount: number;
   maturityAmount?: number;
+  maturityDate?: string | number[];
   accountBalance: number;
   totalDeposits?: number;
   totalInterestEarned?: number;
-  recurringDepositAmount: number;
-  recurringDepositFrequency: number;
-  recurringDepositFrequencyType: { id: number; code: string; value: string };
+  mandatoryRecommendedDepositAmount?: number;
+  recurringDepositAmount?: number;
+  recurringDepositFrequency?: number;
+  recurringDepositFrequencyType?: { id: number; code: string; value: string };
   depositPeriod: number;
-  depositPeriodFrequencyType: { id: number; code: string; value: string };
-  interestRate: number;
+  depositPeriodFrequency?: { id: number; code: string; value: string };
+  depositPeriodFrequencyType?: { id: number; code: string; value: string };
+  interestRate?: number;
   nominalAnnualInterestRate?: number;
   interestCompoundingPeriodType?: { id: number; code: string; value: string };
   interestPostingPeriodType?: { id: number; code: string; value: string };
   interestCalculationType?: { id: number; code: string; value: string };
   interestCalculationDaysInYearType?: { id: number; code: string; value: string };
-  expectedFirstDepositOnDate?: string;
+  expectedFirstDepositOnDate?: string | number[];
   expectedMaturityDate?: string;
-  maturityDate?: string;
+  recurringFrequency?: number;
+  recurringFrequencyType?: { id: number; code: string; value: string };
+  submittedOnDate?: string | number[];
+  approvedOnDate?: string | number[];
+  activatedOnDate?: string | number[];
   timeline: {
     submittedOnDate?: string;
     approvedOnDate?: string;
@@ -375,6 +390,7 @@ export interface RecurringDepositAccount {
   preClosurePenalInterest?: number;
   preClosurePenalInterestOnType?: { id: number; code: string; value: string };
   withHoldTax?: boolean;
+  taxGroup?: { id: number; name: string } | null;
   taxGroupId?: number;
   client?: { id: number; displayName: string };
   group?: { id: number; name: string };
@@ -390,8 +406,10 @@ export interface RecurringDepositAccount {
   linkAccountId?: number;
   maturityInstructionId?: number;
   transferToSavingsId?: number;
-  recurringFrequency?: number;
-  recurringFrequencyType?: { id: number; code: string; value: string };
+  transactions?: unknown[];
+  charges?: unknown[];
+  activeChart?: unknown;
+  depositProduct?: { shortName?: string };
 }
 
 export interface RecurringDepositListParams {
@@ -411,35 +429,69 @@ export interface RecurringDepositProduct {
   shortName?: string;
   description?: string;
   currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string; inMultiplesOf?: number };
+  minDepositAmount?: number;
   depositAmount: number;
+  maxDepositAmount?: number;
+  interestCompoundingPeriodType: { id: number; code: string; description?: string; value?: string };
+  interestPostingPeriodType: { id: number; code: string; description?: string; value?: string };
+  interestCalculationType: { id: number; code: string; description?: string; value?: string };
+  interestCalculationDaysInYearType: { id: number; code: string; description?: string; value?: string };
+  isMandatoryDeposit?: boolean;
+  adjustAdvanceTowardsFuturePayments?: boolean;
+  allowWithdrawal?: boolean;
+  lockinPeriodFrequency?: number;
+  lockinPeriodFrequencyType?: { id: number; code: string; description?: string; value?: string };
   minDepositTerm: number;
-  maxDepositTerm?: number;
-  minDepositTermType: { id: number; code: string; description: string };
-  maxDepositTermType?: { id: number; code: string; description: string };
+  minDepositTermType?: { id: number; code: string; description?: string };
+  minDepositTermTypeId?: { id: number; code: string; description?: string };
   inMultiplesOfDepositTerm?: number;
+  inMultiplesOfDepositTermType?: { id: number; code: string; description?: string };
+  inMultiplesOfDepositTermTypeId?: { id: number; code: string; description?: string };
+  maxDepositTerm?: number;
+  maxDepositTermType?: { id: number; code: string; description?: string };
+  maxDepositTermTypeId?: { id: number; code: string; description?: string };
   preClosurePenalApplicable: boolean;
   preClosurePenalInterest?: number;
-  preClosurePenalInterestOnType?: { id: number; code: string; description: string };
-  interestCompoundingPeriodType: { id: number; code: string; description: string };
-  interestPostingPeriodType: { id: number; code: string; description: string };
-  interestCalculationType: { id: number; code: string; description: string };
-  interestCalculationDaysInYearType: { id: number; code: string; description: string };
-  accountingRule: { id: number; code: string; description: string };
+  preClosurePenalInterestOnType?: { id: number; code: string; description?: string; value?: string };
+  withHoldTax?: boolean;
+  taxGroup?: { id: number; name: string } | null;
+  taxGroupId?: number;
   activeChart?: {
     id: number;
-    fromDate: string;
-    endDate?: string;
+    name?: string;
+    fromDate: string | number[];
+    endDate?: string | number[] | null;
+    isPrimaryGroupingByAmount?: boolean;
     chartSlabs: Array<{
       id: number;
       description: string;
-      periodType: { id: number; code: string; description: string };
+      periodType: { id: number; code: string; description?: string; value?: string };
       fromPeriod: number;
-      toPeriod: number;
+      toPeriod?: number | null;
+      amountRangeFrom?: number | null;
+      amountRangeTo?: number | null;
       annualInterestRate: number;
+      incentives?: unknown[];
     }>;
   };
-  withHoldTax?: boolean;
-  taxGroupId?: number;
+  charges?: Array<{ id: number; name?: string }>;
+  accountingRule?: { id: number; code?: string; description?: string; value?: string };
+  accountingMappings?: {
+    savingsReferenceAccount?: { id: number; name: string; glCode?: string };
+    savingsControlAccount?: { id: number; name: string; glCode?: string };
+    transfersInSuspenseAccount?: { id: number; name: string; glCode?: string };
+    interestOnSavingsAccount?: { id: number; name: string; glCode?: string };
+    incomeFromFeeAccount?: { id: number; name: string; glCode?: string };
+    incomeFromPenaltyAccount?: { id: number; name: string; glCode?: string };
+    feesReceivableAccount?: { id: number; name: string; glCode?: string };
+    penaltiesReceivableAccount?: { id: number; name: string; glCode?: string };
+    interestPayableAccount?: { id: number; name: string; glCode?: string };
+  };
+  paymentChannelToFundSourceMappings?: unknown[];
+  feeToIncomeAccountMappings?: unknown[];
+  penaltyToIncomeAccountMappings?: unknown[];
+  recurringFrequency?: number;
+  recurringFrequencyType?: { id: number; code: string; description?: string; value?: string };
 }
 
 export interface RecurringDepositProductCreateRequest {
@@ -460,6 +512,8 @@ export interface RecurringDepositProductCreateRequest {
   minDepositTerm: number;
   minDepositTermTypeId: number;
   depositAmount: number;
+  minDepositAmount?: number;
+  maxDepositAmount?: number;
   recurringFrequency: number;
   recurringFrequencyType: number;
   lockinPeriodFrequency?: number;
@@ -468,8 +522,6 @@ export interface RecurringDepositProductCreateRequest {
   maxDepositTermTypeId?: number;
   inMultiplesOfDepositTerm?: number;
   inMultiplesOfDepositTermTypeId?: number;
-  minDepositAmount?: number;
-  maxDepositAmount?: number;
   preClosurePenalApplicable?: boolean;
   preClosurePenalInterest?: number;
   preClosurePenalInterestOnTypeId?: number;
@@ -479,16 +531,37 @@ export interface RecurringDepositProductCreateRequest {
   withHoldTax?: boolean;
   taxGroupId?: number;
   charts?: Array<{
+    name?: string;
+    description?: string;
     fromDate?: string;
     endDate?: string;
+    isPrimaryGroupingByAmount?: boolean;
     locale?: string;
     dateFormat?: string;
     chartSlabs: Array<{
       periodType: number;
       fromPeriod: number;
+      toPeriod?: number | null;
+      amountRangeFrom?: number | null;
+      amountRangeTo?: number | null;
       annualInterestRate: number;
+      description?: string;
+      incentives?: unknown[];
     }>;
   }>;
+  charges?: Array<{ id: number }>;
+  savingsReferenceAccountId?: number;
+  savingsControlAccountId?: number;
+  transfersInSuspenseAccountId?: number;
+  interestOnSavingsAccountId?: number;
+  incomeFromFeeAccountId?: number;
+  incomeFromPenaltyAccountId?: number;
+  feesReceivableAccountId?: number;
+  penaltiesReceivableAccountId?: number;
+  interestPayableAccountId?: number;
+  paymentChannelToFundSourceMappings?: Array<{ paymentTypeId: number; fundSourceAccountId: number }>;
+  feeToIncomeAccountMappings?: Array<{ chargeId: number; incomeAccountId: number }>;
+  penaltyToIncomeAccountMappings?: Array<{ chargeId: number; incomeAccountId: number }>;
 }
 
 // ─── Recurring Deposit Account Create ────────────────────────────
@@ -502,6 +575,7 @@ export interface RecurringDepositAccountCreateRequest {
   depositPeriod: number;
   depositPeriodFrequencyId: number;
   isCalendarInherited?: boolean;
+  expectedFirstDepositOnDate?: string;
   recurringFrequency?: number;
   recurringFrequencyType?: number;
   accountNo?: string;
@@ -517,7 +591,6 @@ export interface RecurringDepositAccountCreateRequest {
   isMandatoryDeposit?: boolean;
   allowWithdrawal?: boolean;
   adjustAdvanceTowardsFuturePayments?: boolean;
-  expectedFirstDepositOnDate?: string;
   transferInterestToSavings?: boolean;
   linkAccountId?: number;
   maturityInstructionId?: number;
@@ -532,7 +605,14 @@ export interface RecurringDepositAccountCreateRequest {
   inMultiplesOfDepositTerm?: number;
   inMultiplesOfDepositTermTypeId?: number;
   withHoldTax?: boolean;
-  charges?: Array<{ chargeId: number; amount: number }>;
+  charges?: Array<{
+    chargeId: number;
+    amount: number;
+    dueDate?: string;
+    feeOnMonthDay?: string;
+    feeInterval?: number;
+  }>;
+  monthDayFormat?: string;
   locale?: string;
   dateFormat?: string;
 }

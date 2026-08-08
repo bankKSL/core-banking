@@ -347,7 +347,18 @@ export async function fetchRecurringDepositAccounts(
 }
 
 export async function fetchRecurringDepositAccount(accountId: number | string): Promise<RecurringDepositAccount> {
-  const { data } = await client.get<RecurringDepositAccount>(`/recurringdepositaccounts/${accountId}`);
+  const { data } = await client.get<RecurringDepositAccount>(`/recurringdepositaccounts/${accountId}`, {
+    params: { associations: "all" },
+  });
+  return data;
+}
+
+export async function fetchRecurringDepositAccountForEdit(
+  accountId: number | string,
+): Promise<RecurringDepositAccount> {
+  const { data } = await client.get<RecurringDepositAccount>(`/recurringdepositaccounts/${accountId}`, {
+    params: { associations: "charges", template: true },
+  });
   return data;
 }
 
@@ -426,12 +437,25 @@ export async function activateRecurringDeposit(accountId: number, activatedOnDat
   );
 }
 
-export async function closeRecurringDeposit(accountId: number, closedOnDate?: string) {
-  return recurringDepositCommand(
-    accountId,
-    "close",
-    closedOnDate ? { closedOnDate } : { closedOnDate: new Date().toISOString().split("T")[0] },
+export async function closeRecurringDeposit(accountId: number, payload?: Record<string, unknown>) {
+  return recurringDepositCommand(accountId, "close", payload ?? { closedOnDate: new Date().toISOString().split("T")[0] });
+}
+
+export interface RecurringDepositClosureTemplate {
+  savingsAccounts?: Array<{ id: number; accountNo: string; productName?: string }>;
+  maturityAmount?: number;
+  onAccountClosureOptions?: Array<{ id: number; value: string }>;
+  paymentTypeOptions?: Array<{ id: number; name: string }>;
+}
+
+export async function fetchRecurringDepositClosureTemplate(
+  accountId: number | string,
+): Promise<RecurringDepositClosureTemplate> {
+  const { data } = await client.get<RecurringDepositClosureTemplate>(
+    `/recurringdepositaccounts/${accountId}/template`,
+    { params: { command: "close" } },
   );
+  return data;
 }
 
 export async function prematureCloseRecurringDeposit(accountId: number, closedOnDate?: string) {
@@ -456,6 +480,10 @@ export async function withdrawRecurringDeposit(accountId: number, withdrawnOnDat
     "withdrawnByApplicant",
     withdrawnOnDate ? { withdrawnOnDate } : { withdrawnOnDate: new Date().toISOString().split("T")[0] },
   );
+}
+
+export async function undoApprovalRecurringDeposit(accountId: number) {
+  return recurringDepositCommand(accountId, "undoapproval");
 }
 
 export async function calculateInterestRecurringDeposit(accountId: number) {
@@ -607,6 +635,290 @@ export async function makeRecurringDepositTransaction(
     { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
     { params: { command } },
   );
+  return data;
+}
+
+/** GET /recurringdepositaccounts/{accountId}/transactions/{transactionId} */
+export async function fetchRecurringDepositTransaction(
+  accountId: number | string,
+  transactionId: number | string,
+): Promise<RecurringDepositTransaction> {
+  const { data } = await client.get<RecurringDepositTransaction>(
+    `/recurringdepositaccounts/${accountId}/transactions/${transactionId}`,
+  );
+  return data;
+}
+
+/** GET /recurringdepositaccounts/{accountId}/transactions/{transactionId}?template=true */
+export async function fetchRecurringDepositTransactionTemplate(
+  accountId: number | string,
+  transactionId: number | string,
+): Promise<SavingsTransactionTemplate> {
+  const { data } = await client.get<SavingsTransactionTemplate>(
+    `/recurringdepositaccounts/${accountId}/transactions/${transactionId}`,
+    { params: { template: true } },
+  );
+  return data;
+}
+
+/** POST /recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=modify */
+export async function modifyRecurringDepositTransaction(
+  accountId: number | string,
+  transactionId: number | string,
+  payload: SavingsTransactionRequest,
+): Promise<SavingsCommandResponse> {
+  const { data } = await client.post<SavingsCommandResponse>(
+    `/recurringdepositaccounts/${accountId}/transactions/${transactionId}`,
+    { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
+    { params: { command: "modify" } },
+  );
+  return data;
+}
+
+/** GET /recurringdepositaccounts/{accountId}/transactions/template?command=deposit|withdrawal */
+export async function fetchRecurringDepositTransactionTemplate2(
+  accountId: number | string,
+  command: "deposit" | "withdrawal",
+): Promise<SavingsTransactionTemplate> {
+  const { data } = await client.get<SavingsTransactionTemplate>(
+    `/recurringdepositaccounts/${accountId}/transactions/template`,
+    { params: { command } },
+  );
+  return data;
+}
+
+/** GET /savingsaccounts/{accountId}/charges/template (for RD charges) */
+export async function fetchRecurringDepositChargesTemplate(
+  accountId: number | string,
+): Promise<SavingsChargesTemplate> {
+  const { data } = await client.get<SavingsChargesTemplate>(`/savingsaccounts/${accountId}/charges/template`);
+  return data;
+}
+
+/** POST /savingsaccounts/{accountId}/charges (for RD charges) */
+export async function createRecurringDepositCharge(
+  accountId: number | string,
+  payload: PostSavingsChargeRequest,
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.post(`/savingsaccounts/${accountId}/charges`, payload);
+  return data;
+}
+
+/** PUT /savingsaccounts/{accountId}/charges/{chargeId} (for RD charges) */
+export async function updateRecurringDepositCharge(
+  accountId: number | string,
+  chargeId: number | string,
+  payload: { amount: number },
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.put(`/savingsaccounts/${accountId}/charges/${chargeId}`, payload);
+  return data;
+}
+
+/** POST /savingsaccounts/{accountId}/charges/{chargeId}?command=paycharge (for RD charges) */
+export async function payRecurringDepositCharge(
+  accountId: number | string,
+  chargeId: number | string,
+  payload: { amount?: number; dueDate?: string; dateFormat?: string; locale?: string } = {},
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${accountId}/charges/${chargeId}`,
+    payload,
+    { params: { command: "paycharge" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{accountId}/charges/{chargeId}?command=waive (for RD charges) */
+export async function waiveRecurringDepositCharge(
+  accountId: number | string,
+  chargeId: number | string,
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.post(
+    `/savingsaccounts/${accountId}/charges/${chargeId}`,
+    {},
+    { params: { command: "waive" } },
+  );
+  return data;
+}
+
+/** DELETE /savingsaccounts/{accountId}/charges/{chargeId} (for RD charges) */
+export async function deleteRecurringDepositCharge(
+  accountId: number | string,
+  chargeId: number | string,
+): Promise<{ savingsAccountId: number; resourceId: number }> {
+  const { data } = await client.delete(`/savingsaccounts/${accountId}/charges/${chargeId}`);
+  return data;
+}
+
+/** GET /charges/{chargeId}?template=true */
+export async function fetchChargeDefinition(
+  chargeId: number | string,
+): Promise<Record<string, unknown>> {
+  const { data } = await client.get(`/charges/${chargeId}`, { params: { template: true } });
+  return data;
+}
+
+/** POST /savingsaccounts/{accountId}?command=updateWithHoldTax (for RD accounts) */
+export async function updateRecurringDepositWithHoldTax(
+  accountId: number | string,
+  withHoldTax: boolean,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(
+    `/savingsaccounts/${accountId}`,
+    { withHoldTax },
+    { params: { command: "updateWithHoldTax" } },
+  );
+  return data;
+}
+
+// ─── Standing Instructions (for Recurring Deposits) ──────────────
+
+export interface StandingInstruction {
+  id: number;
+  name: string;
+  transferType?: { id: number; value: string };
+  priority?: { id: number; value: string };
+  status?: { id: number; value: string };
+  fromAccountType?: { id: number; value: string };
+  fromAccountId?: number;
+  fromClient?: { id: number; displayName: string };
+  fromOffice?: { id: number; name: string };
+  toAccountType?: { id: number; value: string };
+  toAccountId?: number;
+  toClient?: { id: number; displayName: string };
+  toOffice?: { id: number; name: string };
+  instructionType?: { id: number; value: string };
+  amount?: number;
+  validFrom?: string;
+  validTill?: string;
+  recurrenceType?: { id: number; value: string };
+  recurrenceInterval?: number;
+  recurrenceFrequency?: { id: number; value: string };
+  recurrenceOnMonthDay?: string;
+}
+
+export interface StandingInstructionListResponse {
+  totalFilteredRecords?: number;
+  pageItems?: StandingInstruction[];
+}
+
+export interface StandingInstructionTemplate {
+  fromAccountTypeOptions?: Array<{ id: number; value: string }>;
+  toAccountTypeOptions?: Array<{ id: number; value: string }>;
+  transferTypeOptions?: Array<{ id: number; value: string }>;
+  priorityOptions?: Array<{ id: number; value: string }>;
+  statusOptions?: Array<{ id: number; value: string }>;
+  instructionTypeOptions?: Array<{ id: number; value: string }>;
+  recurrenceTypeOptions?: Array<{ id: number; value: string }>;
+  recurrenceFrequencyOptions?: Array<{ id: number; value: string }>;
+}
+
+/** GET /standinginstructions?clientId=X&fromAccountId=Y&fromAccountType=2 */
+export async function fetchStandingInstructions(
+  params: { clientId?: number; fromAccountId?: number; fromAccountType?: number; offset?: number; limit?: number },
+): Promise<StandingInstructionListResponse> {
+  const { data } = await client.get<StandingInstructionListResponse>("/standinginstructions", { params });
+  return data;
+}
+
+/** GET /standinginstructions/template */
+export async function fetchStandingInstructionTemplate(): Promise<StandingInstructionTemplate> {
+  const { data } = await client.get<StandingInstructionTemplate>("/standinginstructions/template");
+  return data;
+}
+
+/** POST /standinginstructions */
+export async function createStandingInstruction(
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>("/standinginstructions", payload);
+  return data;
+}
+
+/** GET /standinginstructions/{id} */
+export async function fetchStandingInstruction(id: number | string): Promise<StandingInstruction> {
+  const { data } = await client.get<StandingInstruction>(`/standinginstructions/${id}`);
+  return data;
+}
+
+/** GET /standinginstructions/{id}?associations=template */
+export async function fetchStandingInstructionForEdit(
+  id: number | string,
+): Promise<StandingInstruction & StandingInstructionTemplate> {
+  const { data } = await client.get<StandingInstruction & StandingInstructionTemplate>(
+    `/standinginstructions/${id}`,
+    { params: { associations: "template" } },
+  );
+  return data;
+}
+
+/** PUT /standinginstructions/{id}?command=update */
+export async function updateStandingInstruction(
+  id: number | string,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(`/standinginstructions/${id}`, payload, {
+    params: { command: "update" },
+  });
+  return data;
+}
+
+/** DELETE /standinginstructions/{id}?command=delete */
+export async function deleteStandingInstruction(id: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.delete<{ resourceId: number }>(`/standinginstructions/${id}`, {
+    params: { command: "delete" },
+  });
+  return data;
+}
+
+/** GET /standinginstructions/{id}?associations=transactions */
+export async function fetchStandingInstructionTransactions(
+  id: number | string,
+  params?: { limit?: number; offset?: number },
+): Promise<{ totalFilteredRecords?: number; pageItems?: unknown[] }> {
+  const { data } = await client.get(`/standinginstructions/${id}`, {
+    params: { associations: "transactions", ...params },
+  });
+  return data;
+}
+
+// ─── Account Transfers (for Recurring Deposits) ──────────────────
+
+export interface AccountTransferTemplate {
+  fromAccountId?: number;
+  fromAccountType?: number;
+  fromAccountOptions?: Array<{ id: number; accountNo: string }>;
+  toAccountOptions?: Array<{ id: number; accountNo: string; productName?: string }>;
+  paymentTypeOptions?: Array<{ id: number; name: string }>;
+}
+
+/** GET /accounttransfers/template?fromAccountId=X&fromAccountType=2 */
+export async function fetchAccountTransferTemplate(
+  params: { fromAccountId?: number; fromAccountType?: number },
+): Promise<AccountTransferTemplate> {
+  const { data } = await client.get<AccountTransferTemplate>("/accounttransfers/template", { params });
+  return data;
+}
+
+/** POST /accounttransfers */
+export async function createAccountTransfer(
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>("/accounttransfers", payload);
+  return data;
+}
+
+/** GET /accounttransfers/{id} */
+export async function fetchAccountTransfer(id: number | string): Promise<Record<string, unknown>> {
+  const { data } = await client.get(`/accounttransfers/${id}`);
+  return data;
+}
+
+/** POST /accounttransfers/{id}?command=undo */
+export async function undoAccountTransfer(id: number | string): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>(`/accounttransfers/${id}`, {}, {
+    params: { command: "undo" },
+  });
   return data;
 }
 
