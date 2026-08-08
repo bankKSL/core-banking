@@ -303,7 +303,7 @@ const DepositAccountDetailPage: React.FC = () => {
 
   const handleUnassignOfficer = async () => {
     if (!account) return;
-    await unassignOfficerMutation.mutateAsync(account.id);
+    await unassignOfficerMutation.mutateAsync({ accountId: account.id });
     refetch();
   };
 

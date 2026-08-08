@@ -1245,20 +1245,50 @@ export async function applyAnnualFeesSavings(accountId: number): Promise<void> {
   await client.post(`/savingsaccounts/${accountId}`, null, { params: { command: "applyAnnualFees" } });
 }
 
+/** PUT /savingsaccounts/{accountId}?command=updateWithHoldTax */
+export async function updateWithHoldTax(
+  accountId: number,
+  withHoldTax: boolean,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(
+    `/savingsaccounts/${accountId}`,
+    { withHoldTax },
+    { params: { command: "updateWithHoldTax" } },
+  );
+  return data;
+}
+
+/** POST /savingsaccounts/{accountId}/transactions?command=postInterestAsOn */
+export async function postInterestAsOn(
+  accountId: number,
+  payload: { transactionDate: string; IsPostInterestAsOn: boolean; dateFormat?: string; locale?: string },
+): Promise<SavingsCommandResponse> {
+  const { data } = await client.post<SavingsCommandResponse>(
+    `/savingsaccounts/${accountId}/transactions`,
+    { ...payload, locale: payload.locale ?? "en", dateFormat: payload.dateFormat ?? "yyyy-MM-dd" },
+    { params: { command: "postInterestAsOn" } },
+  );
+  return data;
+}
+
 /** POST /savingsaccounts/{accountId}?command=assignSavingsOfficer */
-export async function assignSavingsOfficer(accountId: number, officerId: number): Promise<void> {
+export async function assignSavingsOfficer(
+  accountId: number,
+  officerId: number,
+  assignmentDate?: string,
+): Promise<void> {
   await client.post(
     `/savingsaccounts/${accountId}`,
-    { savingsOfficerId: officerId },
+    { toSavingsOfficerId: officerId, assignmentDate: assignmentDate ?? new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" },
     { params: { command: "assignSavingsOfficer" } },
   );
 }
 
 /** POST /savingsaccounts/{accountId}?command=unassignSavingsOfficer */
-export async function unassignSavingsOfficer(accountId: number): Promise<void> {
+export async function unassignSavingsOfficer(accountId: number, unassignedDate?: string): Promise<void> {
   await client.post(
     `/savingsaccounts/${accountId}`,
-    { unassignDate: new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" },
+    { unassignedDate: unassignedDate ?? new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" },
     { params: { command: "unassignSavingsOfficer" } },
   );
 }

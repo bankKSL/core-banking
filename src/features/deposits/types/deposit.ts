@@ -571,7 +571,7 @@ export interface SavingsProductCreateRequest {
   lienAllowed?: boolean;
   maxAllowedLienLimit?: number;
   accountingRule: number;
-  charges?: Array<{ chargeId: number }>;
+  charges?: number[];
   isDormancyTrackingActive?: boolean;
   daysToInactive?: number;
   daysToDormancy?: number;

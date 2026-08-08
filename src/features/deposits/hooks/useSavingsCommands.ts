@@ -151,8 +151,8 @@ export function useApplyAnnualFeesSavings() {
 export function useAssignSavingsOfficer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ accountId, officerId }: { accountId: number; officerId: number }) =>
-      assignSavingsOfficer(accountId, officerId),
+    mutationFn: ({ accountId, officerId, assignmentDate }: { accountId: number; officerId: number; assignmentDate?: string }) =>
+      assignSavingsOfficer(accountId, officerId, assignmentDate),
     onSuccess: (_data, { accountId }) => {
       qc.invalidateQueries({ queryKey: depositKeys.all });
       qc.invalidateQueries({ queryKey: depositKeys.savingsDetail(accountId) });
@@ -163,8 +163,8 @@ export function useAssignSavingsOfficer() {
 export function useUnassignSavingsOfficer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (accountId: number) => unassignSavingsOfficer(accountId),
-    onSuccess: (_, accountId) => {
+    mutationFn: ({ accountId, unassignedDate }: { accountId: number; unassignedDate?: string }) => unassignSavingsOfficer(accountId, unassignedDate),
+    onSuccess: (_data, { accountId }) => {
       qc.invalidateQueries({ queryKey: depositKeys.all });
       qc.invalidateQueries({ queryKey: depositKeys.savingsDetail(accountId) });
     },
