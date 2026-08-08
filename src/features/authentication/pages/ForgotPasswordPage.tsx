@@ -85,7 +85,7 @@ const ForgotPasswordPage: FC = () => {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#D32F2F] shadow-lg shadow-[#D32F2F]/25">
               <LayoutDashboard className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{t("CoreBank")}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{t("Welcome")}</h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("Reset your password")}</p>
           </div>
 
@@ -172,7 +172,7 @@ const ForgotPasswordPage: FC = () => {
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-600">
-          &copy; {new Date().getFullYear()} {t("CoreBank")}. {t("All rights reserved.")}
+          &copy; {new Date().getFullYear()} {t("Welcome")}. {t("All rights reserved.")}
         </p>
       </div>
     </div>

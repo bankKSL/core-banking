@@ -24,7 +24,7 @@ const PRIORITIES = ["1", "2", "3", "4", "5"] as const;
 
 const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
-  const [systemName, setSystemName] = useState("Core Banking Formula Engine");
+  const [systemName, setSystemName] = useState("Formula Engine");
   const [defaultCurrency, setDefaultCurrency] = useState("USD");
   const [timeZone, setTimeZone] = useState("America/New_York (EST)");
 
@@ -59,11 +59,7 @@ const SettingsPage: React.FC = () => {
             <Input value={systemName} onChange={(e) => setSystemName(e.target.value)} placeholder={t("System name")} />
           </div>
 
-          <CurrencySelect
-            value={defaultCurrency}
-            onChange={setDefaultCurrency}
-            label={t("Default Currency")}
-          />
+          <CurrencySelect value={defaultCurrency} onChange={setDefaultCurrency} label={t("Default Currency")} />
 
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Time Zone")}</label>
@@ -103,7 +99,9 @@ const SettingsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Slack Integration")}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t("Send notifications to a Slack channel.")}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {t("Send notifications to a Slack channel.")}
+                </p>
               </div>
               <Switch checked={slackIntegration} onCheckedChange={setSlackIntegration} />
             </div>
@@ -130,7 +128,9 @@ const SettingsPage: React.FC = () => {
         </CardHeader>
         <CardContent className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Max Rules Per Campaign")}</label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              {t("Max Rules Per Campaign")}
+            </label>
             <Input
               type="number"
               value={maxRules}
@@ -157,7 +157,9 @@ const SettingsPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("Auto-Approve Threshold (%)")}</label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              {t("Auto-Approve Threshold (%)")}
+            </label>
             <Input
               type="number"
               value={autoApproveThreshold}

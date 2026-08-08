@@ -201,7 +201,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t("Dashboard")} description={t("Core Banking System Overview")} actions={<></>} />
+      <PageHeader title={t("Dashboard")} description={t("Overview")} actions={<></>} />
 
       {/* ─── Widget Cards ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -223,7 +223,12 @@ const Dashboard: React.FC = () => {
           icon={PiggyBank}
           variant="default"
         />
-        <StatCard title={t("API Configuration")} value={loading ? "—" : t("Connected")} icon={Settings} variant="default" />
+        <StatCard
+          title={t("API Configuration")}
+          value={loading ? "—" : t("Connected")}
+          icon={Settings}
+          variant="default"
+        />
       </div>
 
       {/* ─── Donut Charts Row ───────────────────────────────────── */}
@@ -306,7 +311,9 @@ const Dashboard: React.FC = () => {
                     onClick={() => navigate(`/loans/view/${loan.id}`)}
                   >
                     <TableCell className="font-mono text-xs font-medium">{loan.accountNo ?? `#${loan.id}`}</TableCell>
-                    <TableCell className="text-sm">{loan.clientName ?? t("Client #{{id}}", { id: loan.clientId })}</TableCell>
+                    <TableCell className="text-sm">
+                      {loan.clientName ?? t("Client #{{id}}", { id: loan.clientId })}
+                    </TableCell>
                     <TableCell className="text-sm">{loan.loanProductName}</TableCell>
                     <TableCell className="text-right font-mono text-sm">
                       {formatCurrency(loan.proposedPrincipal ?? loan.principal ?? 0)}
