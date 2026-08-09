@@ -1,9 +1,9 @@
-import { type FC, useEffect } from "react";
+import { type FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Loader2, UserRound } from "lucide-react";
+import { ArrowLeft, Save, Loader2, UserRound, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,22 +14,37 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
-import { useStaff, useCreateStaff, useUpdateStaff } from "../hooks/useStaff";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useStaff, useStaffWithTemplate, useCreateStaff, useUpdateStaff } from "../hooks/useStaff";
 import { currentDate } from "@/lib/utils";
+import type { Office } from "@/types";
 
 type StaffFormValues = z.infer<ReturnType<typeof getStaffFormSchema>>;
 
 function getStaffFormSchema(t: (key: string) => string) {
   return z.object({
     officeId: z.number({ message: t("Office is required") }).int().positive(),
-    firstname: z.string().min(1, t("First name is required")),
-    lastname: z.string().min(1, t("Last name is required")),
+    firstname: z.string().min(1, t("First name is required")).max(50),
+    lastname: z.string().min(1, t("Last name is required")).max(50),
     isLoanOfficer: z.boolean(),
     isActive: z.boolean(),
     joiningDate: z.string().optional().or(z.literal("")),
-    mobileNo: z.string().optional().or(z.literal("")),
-    emailAddress: z.string().optional().or(z.literal("")),
-    externalId: z.string().optional().or(z.literal("")),
+    mobileNo: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine(
+        (val) => !val || /^\+?[0-9]{7,15}$/.test(val),
+        { message: t("Mobile number must be 7-15 digits, optionally starting with +") }
+      ),
+    emailAddress: z.string().optional().or(z.literal("")).refine(
+      (val) => !val || val.length <= 50,
+      { message: t("Email must be 50 characters or less") }
+    ),
+    externalId: z.string().optional().or(z.literal("")).refine(
+      (val) => !val || val.length <= 100,
+      { message: t("External ID must be 100 characters or less") }
+    ),
   });
 }
 
@@ -41,8 +56,12 @@ const StaffFormPage: FC = () => {
   const isEdit = !!id;
 
   const { data: staffMember, isLoading: staffLoading, isError: staffError } = useStaff(id ? Number(id) : undefined);
+  const { data: staffWithTemplate } = useStaffWithTemplate(id ? Number(id) : undefined);
   const createMutation = useCreateStaff();
   const updateMutation = useUpdateStaff();
+
+  const [forceStatusDialogOpen, setForceStatusDialogOpen] = useState(false);
+  const [pendingValues, setPendingValues] = useState<StaffFormValues | null>(null);
 
   const {
     register,
@@ -67,6 +86,17 @@ const StaffFormPage: FC = () => {
   });
 
   const isActive = watch("isActive");
+
+  const allowedOffices: Office[] | undefined = staffWithTemplate?.allowedOffices?.map((o) => ({
+    id: o.id,
+    name: o.name,
+    nameDecorated: o.nameDecorated,
+    externalId: "",
+    openingDate: "",
+    hierarchy: "",
+    parentId: null,
+    parentName: null,
+  }));
 
   useEffect(() => {
     if (!staffMember) return;
@@ -101,6 +131,8 @@ const StaffFormPage: FC = () => {
 
     if (!isEdit) {
       payload.officeId = values.officeId;
+    } else if (values.officeId !== staffMember?.officeId) {
+      payload.officeId = values.officeId;
     }
 
     if (isEdit) {
@@ -108,6 +140,38 @@ const StaffFormPage: FC = () => {
     } else {
       await createMutation.mutateAsync(payload as any);
     }
+    navigate("/staff");
+  };
+
+  const handleFormSubmit = (values: StaffFormValues) => {
+    if (isEdit && isActive === false && staffMember?.isActive === true) {
+      setPendingValues(values);
+      setForceStatusDialogOpen(true);
+    } else {
+      onSubmit(values);
+    }
+  };
+
+  const handleForceStatusConfirm = async () => {
+    if (!pendingValues) return;
+    setForceStatusDialogOpen(false);
+
+    const payload: Record<string, unknown> = {
+      firstname: pendingValues.firstname,
+      lastname: pendingValues.lastname,
+      isLoanOfficer: pendingValues.isLoanOfficer ?? false,
+      isActive: false,
+      forceStatus: true,
+      joiningDate: pendingValues.joiningDate ? (currentDate(pendingValues.joiningDate) ?? pendingValues.joiningDate) : undefined,
+      mobileNo: pendingValues.mobileNo || undefined,
+      emailAddress: pendingValues.emailAddress || undefined,
+      externalId: pendingValues.externalId || undefined,
+      officeId: pendingValues.officeId !== staffMember?.officeId ? pendingValues.officeId : undefined,
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+    };
+
+    await updateMutation.mutateAsync({ id: Number(id), payload: payload as any });
     navigate("/staff");
   };
 
@@ -157,7 +221,7 @@ const StaffFormPage: FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -169,8 +233,9 @@ const StaffFormPage: FC = () => {
             <OfficeSelect
               value={watch("officeId") ? String(watch("officeId")) : ""}
               onChange={(v) => setValue("officeId", Number(v), { shouldValidate: true })}
-              disabled={isEdit}
+              disabled={false}
               error={errors.officeId?.message}
+              allowedParents={isEdit ? allowedOffices : undefined}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -215,17 +280,17 @@ const StaffFormPage: FC = () => {
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Mobile No")}</label>
-              <Input {...register("mobileNo")} placeholder={t("Enter mobile number")} />
+              <Input {...register("mobileNo")} placeholder={t("Enter mobile number")} error={errors.mobileNo?.message} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Email Address")}</label>
-              <Input type="email" {...register("emailAddress")} placeholder={t("Enter email address")} />
+              <Input type="email" {...register("emailAddress")} placeholder={t("Enter email address")} error={errors.emailAddress?.message} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("External ID")}</label>
-              <Input {...register("externalId")} placeholder={t("Optional external identifier")} />
+              <Input {...register("externalId")} placeholder={t("Optional external identifier")} error={errors.externalId?.message} />
             </div>
           </CardContent>
         </Card>
@@ -255,6 +320,38 @@ const StaffFormPage: FC = () => {
           </Button>
         </div>
       </form>
+
+      <Dialog open={forceStatusDialogOpen} onOpenChange={setForceStatusDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-600">
+              <AlertTriangle className="h-5 w-5" />
+              {t("Confirm Deactivation")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("This staff member has assigned clients, groups, loans, or savings accounts. Deactivating may affect these assignments.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              {t("Are you sure you want to force deactivation? This action cannot be undone.")}
+            </p>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setForceStatusDialogOpen(false)}>
+              {t("Cancel")}
+            </Button>
+            <Button
+              onClick={handleForceStatusConfirm}
+              disabled={updateMutation.isPending}
+              className="bg-amber-600 hover:bg-amber-700"
+            >
+              {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("Force Deactivate")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
