@@ -1,8 +1,8 @@
-export { useOffices, useOffice, useCreateOffice, useUpdateOffice } from "@/hooks/useOffices";
+export { useOffices, useOffice, useOfficeTemplate, useCreateOffice, useUpdateOffice } from "@/hooks/useOffices";
 
 export { officeService } from "@/api/office.service";
 
-export type { Office, OfficeCreateRequest, OfficeUpdateRequest } from "@/types";
+export type { Office, OfficeTemplate, OfficeCreateRequest, OfficeUpdateRequest } from "@/types";
 
 export { officeCreateSchema, officeUpdateSchema } from "@/lib/validations/office";
 export type { OfficeCreateFormData, OfficeUpdateFormData } from "@/lib/validations/office";

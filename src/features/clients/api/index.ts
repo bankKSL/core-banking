@@ -93,3 +93,6 @@ export type {
   ClientTransactionListResponse,
   ClientTransactionCommandResponse,
 } from "./transactions";
+
+export { fetchClientImage, uploadClientImage, deleteClientImage, uploadClientTemplate } from "./images";
+export type { ClientImageParams, ClientImageCreateResponse, ClientUploadTemplateResponse } from "./images";

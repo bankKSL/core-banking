@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { officeService } from "@/api/office.service";
-import type { Office, OfficeCreateRequest, OfficeUpdateRequest } from "@/types";
+import type { Office, OfficeCreateRequest, OfficeUpdateRequest, OfficeTemplate } from "@/types";
 
 const OFFICE_KEY = "offices";
 
@@ -21,6 +21,16 @@ export function useOffice(id: number | null) {
     queryKey: [OFFICE_KEY, id],
     queryFn: () => officeService.getById(id!),
     enabled: id !== null && id > 0,
+    staleTime: 60_000,
+  });
+}
+
+// ─── useOfficeTemplate ────────────────────────────────────────
+/** Fetch office template for create form */
+export function useOfficeTemplate() {
+  return useQuery<OfficeTemplate>({
+    queryKey: [OFFICE_KEY, "template"],
+    queryFn: officeService.getTemplate,
     staleTime: 60_000,
   });
 }

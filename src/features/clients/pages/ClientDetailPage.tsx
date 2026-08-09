@@ -46,6 +46,7 @@ import ClientDocuments from "../components/ClientDocuments";
 import ClientNotes from "../components/ClientNotes";
 import ClientCollaterals from "../components/ClientCollaterals";
 import ClientTransactions from "../components/ClientTransactions";
+import ClientImage from "../components/ClientImage";
 import { getClientStatus, getClientDisplayName } from "../utils/client";
 import type { ClientLoanAccount, ClientSavingsAccount } from "../api/client";
 import { useTranslation } from "react-i18next";
@@ -106,7 +107,11 @@ const ClientDetailPage: FC = () => {
   if (isError || !client) {
     return (
       <div className="p-6">
-        <ErrorState title={t("Failed to load client")} message={t("Could not fetch client details.")} onRetry={() => refetch()} />
+        <ErrorState
+          title={t("Failed to load client")}
+          message={t("Could not fetch client details.")}
+          onRetry={() => refetch()}
+        />
       </div>
     );
   }
@@ -117,57 +122,62 @@ const ClientDetailPage: FC = () => {
 
   return (
     <div className="p-6">
-      <PageHeader
-        title={displayName}
-        description={t("Client #{{id}}", { id: client.id })}
-        actions={
-          <div className="flex items-center gap-2">
-            <ClientStatusBadge status={status} size="lg" />
-            <ClientCommands
-              clientId={client.id}
-              status={status}
-              displayName={displayName}
-              template={template}
-              currentStaffId={client.staffId}
-              onSuccess={() => refetch()}
-            />
-            {isPending && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowActivateConfirm(true)}
-                className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
-              >
-                <CheckCircle2 className="mr-1 h-4 w-4" />
-                {t("Activate")}
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/edit`)}>
-              <Pencil className="mr-1 h-4 w-4" />
-              {t("Edit")}
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/calendars`)}>
-              <Calendar className="mr-1 h-4 w-4" />
-              {t("Calendars")}
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/meetings`)}>
-              <CalendarClock className="mr-1 h-4 w-4" />
-              {t("Meetings")}
-            </Button>
-            {isPending && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <Trash2 className="mr-1 h-4 w-4" />
-                {t("Delete")}
-              </Button>
-            )}
-          </div>
-        }
-      />
+      <div className="flex items-start gap-4 pb-4">
+        <ClientImage client={client} size="lg" />
+        <div className="flex-1 min-w-0">
+          <PageHeader
+            title={displayName}
+            description={t("Client #{{id}}", { id: client.id })}
+            actions={
+              <div className="flex items-center gap-2">
+                <ClientStatusBadge status={status} size="lg" />
+                <ClientCommands
+                  clientId={client.id}
+                  status={status}
+                  displayName={displayName}
+                  template={template}
+                  currentStaffId={client.staffId}
+                  onSuccess={() => refetch()}
+                />
+                {isPending && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowActivateConfirm(true)}
+                    className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                  >
+                    <CheckCircle2 className="mr-1 h-4 w-4" />
+                    {t("Activate")}
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/edit`)}>
+                  <Pencil className="mr-1 h-4 w-4" />
+                  {t("Edit")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/calendars`)}>
+                  <Calendar className="mr-1 h-4 w-4" />
+                  {t("Calendars")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}/meetings`)}>
+                  <CalendarClock className="mr-1 h-4 w-4" />
+                  {t("Meetings")}
+                </Button>
+                {isPending && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="text-red-600 border-red-200 hover:bg-red-50"
+                  >
+                    <Trash2 className="mr-1 h-4 w-4" />
+                    {t("Delete")}
+                  </Button>
+                )}
+              </div>
+            }
+          />
+        </div>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
         <TabsList className="flex-wrap h-auto gap-1">
@@ -301,8 +311,12 @@ const ClientDetailPage: FC = () => {
                           </div>
                           <p className="text-sm font-medium">{loan.productName}</p>
                           <div className="flex justify-between mt-2 text-xs text-gray-500">
-                            <span>{t("Balance")}: {formatCurrency(loan.accountBalance ?? 0, loan.currency.code)}</span>
-                            <span>{t("Out")}: {formatCurrency(loan.amountOutstanding ?? 0, loan.currency.code)}</span>
+                            <span>
+                              {t("Balance")}: {formatCurrency(loan.accountBalance ?? 0, loan.currency.code)}
+                            </span>
+                            <span>
+                              {t("Out")}: {formatCurrency(loan.amountOutstanding ?? 0, loan.currency.code)}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -339,8 +353,12 @@ const ClientDetailPage: FC = () => {
                           </div>
                           <p className="text-sm font-medium">{sav.productName}</p>
                           <div className="flex justify-between mt-2 text-xs text-gray-500">
-                            <span>{t("Balance")}: {formatCurrency(sav.accountBalance, sav.currency.code)}</span>
-                            <span>{t("Deposits")}: {formatCurrency(sav.totalDeposits ?? 0, sav.currency.code)}</span>
+                            <span>
+                              {t("Balance")}: {formatCurrency(sav.accountBalance, sav.currency.code)}
+                            </span>
+                            <span>
+                              {t("Deposits")}: {formatCurrency(sav.totalDeposits ?? 0, sav.currency.code)}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -399,7 +417,9 @@ const ClientDetailPage: FC = () => {
         open={showActivateConfirm}
         onOpenChange={setShowActivateConfirm}
         title={t("Activate Client")}
-        description={t("Activate {{displayName}}? The client will become active and eligible for financial services.", { displayName })}
+        description={t("Activate {{displayName}}? The client will become active and eligible for financial services.", {
+          displayName,
+        })}
         onConfirm={handleActivate}
         variant="default"
       />
@@ -407,7 +427,10 @@ const ClientDetailPage: FC = () => {
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         title={t("Delete Client")}
-        description={t("⚠️ Delete {{displayName}}? Only pending clients with no active loans or savings can be deleted. This cannot be undone.", { displayName })}
+        description={t(
+          "⚠️ Delete {{displayName}}? Only pending clients with no active loans or savings can be deleted. This cannot be undone.",
+          { displayName },
+        )}
         onConfirm={handleDelete}
         variant="destructive"
         confirmLabel={t("Delete")}

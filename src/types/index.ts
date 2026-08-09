@@ -496,6 +496,18 @@ export interface Office {
   parentName: string | null;
 }
 
+export interface OfficeTemplate {
+  id: number | null;
+  name: string | null;
+  nameDecorated: string | null;
+  externalId: string | null;
+  openingDate: string; // ISO date - defaults to today
+  hierarchy: string | null;
+  parentId: number | null;
+  parentName: string | null;
+  allowedParents: Office[];
+}
+
 export interface OfficeCreateRequest {
   name: string;
   parentId?: number;

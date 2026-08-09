@@ -9,6 +9,7 @@ import { useClients, useClientPages } from "../hooks/useClients";
 import { useClientTemplate } from "../hooks/useClientTemplate";
 import ClientTable from "../components/ClientTable";
 import ClientFilters from "../components/ClientFilters";
+import ClientBulkImport from "../components/ClientBulkImport";
 import { CLIENTS_PAGE_SIZE, SEARCH_DEBOUNCE_MS } from "../constants/status";
 import { useTranslation } from "react-i18next";
 
@@ -101,10 +102,13 @@ const ClientListPage: FC = () => {
         title={t("Clients")}
         description={t("Manage clients registered in Finfact")}
         actions={
-          <Button onClick={() => navigate("/clients/new")} className="bg-[#D32F2F] hover:bg-red-700">
-            <Plus className="mr-2 h-4 w-4" />
-            {t("Create Client")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <ClientBulkImport />
+            <Button onClick={() => navigate("/clients/new")} className="bg-[#D32F2F] hover:bg-red-700">
+              <Plus className="mr-2 h-4 w-4" />
+              {t("Create Client")}
+            </Button>
+          </div>
         }
       />
 

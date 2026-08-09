@@ -1,5 +1,5 @@
 import api from "./client";
-import type { Office, OfficeCreateRequest, OfficeUpdateRequest } from "@/types";
+import type { Office, OfficeCreateRequest, OfficeUpdateRequest, OfficeTemplate } from "@/types";
 
 // ─── Office Service ───────────────────────────────────────────
 const OFFICES = "/offices";
@@ -16,6 +16,12 @@ export const officeService = {
   getById: async (id: number): Promise<Office> => {
     const { data } = await api.get<Office>(`${OFFICES}/${id}`);
     return normalizeOffice(data);
+  },
+
+  /** Get office template for create form */
+  getTemplate: async (): Promise<OfficeTemplate> => {
+    const { data } = await api.get<OfficeTemplate>(`${OFFICES}/template`);
+    return normalizeOfficeTemplate(data);
   },
 
   /** Create a new office */
@@ -48,5 +54,16 @@ function normalizeOffice(raw: any): Office {
     openingDate: Array.isArray(raw.openingDate)
       ? new Date(raw.openingDate[0], raw.openingDate[1] - 1, raw.openingDate[2]).toISOString().split("T")[0]
       : (raw.openingDate ?? ""),
+  };
+}
+
+/** Convert Fineract [yyyy,mm,dd] date arrays to ISO strings for template */
+function normalizeOfficeTemplate(raw: any): OfficeTemplate {
+  return {
+    ...raw,
+    openingDate: Array.isArray(raw.openingDate)
+      ? new Date(raw.openingDate[0], raw.openingDate[1] - 1, raw.openingDate[2]).toISOString().split("T")[0]
+      : (raw.openingDate ?? ""),
+    allowedParents: Array.isArray(raw.allowedParents) ? raw.allowedParents.map(normalizeOffice) : [],
   };
 }
