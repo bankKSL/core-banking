@@ -298,6 +298,14 @@ export async function undoActivationFixedDeposit(accountId: number) {
   return fixedDepositCommand(accountId, "undoActivation");
 }
 
+export async function calculateInterestFixedDeposit(accountId: number) {
+  return fixedDepositCommand(accountId, "calculateInterest");
+}
+
+export async function postInterestFixedDeposit(accountId: number) {
+  return fixedDepositCommand(accountId, "postInterest");
+}
+
 export async function calculatePrematureAmount(accountId: number, closedOnDate?: string) {
   return fixedDepositCommand(accountId, "calculatePrematureAmount", closedOnDate ? { closedOnDate } : {});
 }

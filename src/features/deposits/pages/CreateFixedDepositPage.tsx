@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
-import { useClients } from "@/features/clients";
+import { ClientSearch } from "@/components/shared/ClientSearch";
 import {
   createFixedDepositAccount,
   updateFixedDepositAccount,
@@ -68,7 +68,7 @@ const PRE_CLOSURE_PENALTY_ON_OPTIONS = [
 
 const fixedDepositSchema = z.object({
   officeId: z.string().min(1, "Office is required"),
-  clientId: z.string().min(1, "Client is required"),
+  clientId: z.number().min(1, "Client is required"),
   productId: z.string().min(1, "Product is required"),
   externalId: z.string().optional(),
   depositAmount: z.string().min(1, "Deposit amount is required"),
@@ -112,7 +112,7 @@ const CreateFixedDepositPage: React.FC = () => {
     resolver: zodResolver(fixedDepositSchema) as any,
     defaultValues: {
       officeId: "",
-      clientId: clientIdParam || "",
+      clientId: clientIdParam ? Number(clientIdParam) : 0,
       productId: "",
       externalId: "",
       depositAmount: "",
@@ -141,18 +141,13 @@ const CreateFixedDepositPage: React.FC = () => {
   const maturityInstructionId = watch("maturityInstructionId");
   const transferInterestToSavings = watch("transferInterestToSavings");
 
-  const clientsQuery = useMemo(
-    () => (officeId && officeId !== "all" ? { officeId: Number(officeId) } : {}),
-    [officeId],
-  );
-  const { data: clientsData, isLoading: clientsLoading } = useClients(clientsQuery);
   const { data: products = [], isLoading: productsLoading } = useFixedDepositProducts();
 
   const { data: template, isLoading: templateLoading } = useQuery({
     queryKey: ["fixeddepositaccounts", "template", clientId, productId, isEdit],
     queryFn: () =>
       fetchFixedDepositAccountTemplate(
-        clientId ? Number(clientId) : undefined,
+        clientId || undefined,
         productId ? Number(productId) : undefined,
       ),
     enabled: !!clientId && !!productId,
@@ -164,7 +159,7 @@ const CreateFixedDepositPage: React.FC = () => {
     const a = existingAccount as any;
     reset({
       officeId: String(a.clientOfficeId ?? ""),
-      clientId: String(a.clientId ?? ""),
+      clientId: a.clientId ?? 0,
       productId: String(a.depositProductId ?? ""),
       externalId: a.externalId ?? "",
       depositAmount: String(a.depositAmount ?? ""),
@@ -188,12 +183,11 @@ const CreateFixedDepositPage: React.FC = () => {
     });
   }, [existingAccount, reset]);
 
-  const isLoading = clientsLoading || productsLoading || (isEdit && accountLoading);
-  const clients = clientsData?.pageItems ?? [];
+  const isLoading = productsLoading || (isEdit && accountLoading);
 
   const onSubmit = async (values: FixedDepositFormValues) => {
     const payload: Record<string, unknown> = {
-      clientId: Number(values.clientId),
+      clientId: values.clientId,
       productId: Number(values.productId),
       submittedOnDate: values.submittedOnDate,
       depositAmount: Number(values.depositAmount),
@@ -248,7 +242,9 @@ const CreateFixedDepositPage: React.FC = () => {
     <div className="max-w-6xl m-auto space-y-6 p-6">
       <PageHeader
         title={isEdit ? t("Edit Fixed Deposit") : t("New Fixed Deposit")}
-        description={isEdit ? `${t("Editing account")} #${existingAccount?.accountNo ?? id}` : t("Open a fixed deposit account")}
+        description={
+          isEdit ? `${t("Editing account")} #${existingAccount?.accountNo ?? id}` : t("Open a fixed deposit account")
+        }
         actions={
           <Button variant="outline" onClick={() => navigate("/deposits/fixed")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -271,30 +267,18 @@ const CreateFixedDepositPage: React.FC = () => {
               value={officeId}
               onChange={(v) => {
                 setValue("officeId", v, { shouldValidate: true });
-                setValue("clientId", "");
+                setValue("clientId", 0);
               }}
               error={errors.officeId?.message}
+              label={t("Office")}
             />
-            <div>
-              <label className="block text-sm font-medium">{t("Client")} *</label>
-              <Select
-                value={clientId}
-                onValueChange={(v) => setValue("clientId", v, { shouldValidate: true })}
-                disabled={!officeId || officeId === "all"}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!officeId ? t("Select office first") : t("Select client")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>
-                      {c.displayName ?? `#${c.id}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.clientId && <p className="text-sm text-red-500 mt-1">{errors.clientId.message}</p>}
-            </div>
+            <ClientSearch
+              value={clientId}
+              onChange={(v) => setValue("clientId", v, { shouldValidate: true })}
+              disabled={!officeId || officeId === "all"}
+              placeholder={!officeId ? t("Select office first") : t("Search client by name") + "…"}
+              error={errors.clientId?.message}
+            />
           </CardContent>
         </Card>
 

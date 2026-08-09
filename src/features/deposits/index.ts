@@ -85,6 +85,8 @@ export {
   undoApprovalFixedDeposit,
   undoActivationFixedDeposit,
   calculatePrematureAmount,
+  calculateInterestFixedDeposit,
+  postInterestFixedDeposit,
   fixedDepositCommand,
   fetchFixedDepositProducts,
   fetchFixedDepositProduct,
@@ -142,6 +144,7 @@ export {
   useFixedDepositAccount,
   useDeleteFixedDepositAccount,
   useUpdateFixedDepositAccount,
+  useFixedDepositCommand,
 } from "./hooks/useFixedDeposits";
 
 export {
@@ -329,6 +332,10 @@ export {
 // Hooks — Savings Permissions
 export { useSavingsPermissions, SAVINGS_ACTION_PERMISSIONS } from "./hooks/useSavingsPermissions";
 export type { SavingsAction } from "./hooks/useSavingsPermissions";
+
+// Hooks — Fixed Deposit Permissions
+export { useFixedDepositPermissions, FIXED_DEPOSIT_ACTION_PERMISSIONS } from "./hooks/useFixedDepositPermissions";
+export type { FixedDepositAction } from "./hooks/useFixedDepositPermissions";
 
 // Hooks — Savings Transaction Undo
 export {

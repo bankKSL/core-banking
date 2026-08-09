@@ -249,10 +249,13 @@ export interface SavingsAccountCreateRequest {
 export interface SavingsCommandResponse {
   officeId: number;
   clientId: number;
+  groupId?: number;
   savingsId: number;
   resourceId?: number;
   changes?: Record<string, unknown>;
   transactionId?: string;
+  commandId?: number;
+  rollbackTransaction?: boolean;
 }
 
 // ─── Deposit/Withdrawal ──────────────────────────────────────────

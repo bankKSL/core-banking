@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { fetchFixedDepositAccounts, fetchFixedDepositAccount, deleteFixedDepositAccount, updateFixedDepositAccount } from "../api/deposit";
+import { fetchFixedDepositAccounts, fetchFixedDepositAccount, deleteFixedDepositAccount, updateFixedDepositAccount, fixedDepositCommand } from "../api/deposit";
 import type { FixedDepositListParams } from "../types/deposit";
 import { depositKeys } from "./useSavingsAccounts";
 
@@ -40,5 +40,24 @@ export function useFixedDepositAccount(accountId: number | string | undefined) {
     queryFn: () => fetchFixedDepositAccount(accountId!),
     enabled: !!accountId,
     staleTime: 60_000,
+  });
+}
+
+export function useFixedDepositCommand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      accountId,
+      command,
+      data = {},
+    }: {
+      accountId: number;
+      command: string;
+      data?: Record<string, unknown>;
+    }) => fixedDepositCommand(accountId, command, data),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: [...depositKeys.all, "fixed"] });
+      qc.invalidateQueries({ queryKey: depositKeys.fixedDetail(variables.accountId) });
+    },
   });
 }

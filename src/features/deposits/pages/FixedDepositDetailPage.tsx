@@ -1,4 +1,4 @@
-import { type FC, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -28,13 +28,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useToast } from "@/components/ui/toast";
 import {
   useFixedDepositAccount,
   useDeleteFixedDepositAccount,
+  useFixedDepositPermissions,
   FIXED_DEPOSIT_STATUS_CONFIG,
   approveFixedDeposit,
   activateFixedDeposit,
@@ -44,7 +46,8 @@ import {
   withdrawFixedDeposit,
   undoApprovalFixedDeposit,
   calculatePrematureAmount,
-  fixedDepositCommand,
+  calculateInterestFixedDeposit,
+  postInterestFixedDeposit,
 } from "@/features/deposits";
 import FixedDepositTransactions from "@/features/deposits/components/FixedDepositTransactions";
 import FixedDepositCharges from "@/features/deposits/components/FixedDepositCharges";
@@ -105,8 +108,13 @@ const FixedDepositDetailPage: React.FC = () => {
   const { data: fd, isLoading, isError, error, refetch } = useFixedDepositAccount(id);
   const makeTxnMutation = useMakeFixedDepositTransaction();
   const deleteMutation = useDeleteFixedDepositAccount();
+  const { hasPermission } = useFixedDepositPermissions();
+  const { success: toastSuccess } = useToast();
   const [actionLoading, setActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
+
+  const [calcInterestConfirmOpen, setCalcInterestConfirmOpen] = useState(false);
+  const [postInterestConfirmOpen, setPostInterestConfirmOpen] = useState(false);
 
   // Dialog states
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
@@ -121,20 +129,6 @@ const FixedDepositDetailPage: React.FC = () => {
   const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false);
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split("T")[0]);
-
-  const runCommand = useCallback(
-    async (cmd: string, extra: Record<string, unknown> = {}) => {
-      if (!fd) return;
-      setActionLoading(true);
-      try {
-        await fixedDepositCommand(fd.id, cmd, extra);
-        refetch();
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [fd, refetch],
-  );
 
   const handleApprove = useCallback(async () => {
     if (!fd) return;
@@ -173,12 +167,38 @@ const FixedDepositDetailPage: React.FC = () => {
   }, [fd, closeDate, onAccountClosureId, toSavingsAccountId, refetch]);
 
   const handleCalculateInterest = useCallback(async () => {
-    await runCommand("calculateInterest");
-  }, [runCommand]);
+    if (!fd) return;
+    setActionLoading(true);
+    try {
+      const result = await calculateInterestFixedDeposit(fd.id);
+      if (result?.rollbackTransaction) {
+        toastSuccess(t("Interest calculation submitted for approval"));
+      } else {
+        toastSuccess(t("Interest calculated successfully"));
+      }
+      refetch();
+    } finally {
+      setActionLoading(false);
+      setCalcInterestConfirmOpen(false);
+    }
+  }, [fd, refetch, t, toastSuccess]);
 
   const handlePostInterest = useCallback(async () => {
-    await runCommand("postInterest");
-  }, [runCommand]);
+    if (!fd) return;
+    setActionLoading(true);
+    try {
+      const result = await postInterestFixedDeposit(fd.id);
+      if (result?.rollbackTransaction) {
+        toastSuccess(t("Interest posting submitted for approval"));
+      } else {
+        toastSuccess(t("Interest posted successfully"));
+      }
+      refetch();
+    } finally {
+      setActionLoading(false);
+      setPostInterestConfirmOpen(false);
+    }
+  }, [fd, refetch, t, toastSuccess]);
 
   const handleCalculatePrematureAmount = useCallback(async () => {
     await calculatePrematureAmount(fd!.id, closeDate);
@@ -220,7 +240,9 @@ const FixedDepositDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-600">{t("Failed to load")}: {String(error)}</p>
+          <p className="text-red-600">
+            {t("Failed to load")}: {String(error)}
+          </p>
           <Button variant="outline" className="mt-2" onClick={() => refetch()}>
             {t("Retry")}
           </Button>
@@ -325,11 +347,21 @@ const FixedDepositDetailPage: React.FC = () => {
             )}
             {isActive && (
               <>
-                <Button variant="outline" size="sm" onClick={handleCalculateInterest} disabled={actionLoading}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCalcInterestConfirmOpen(true)}
+                  disabled={actionLoading || !hasPermission("CALCULATEINTEREST")}
+                >
                   <Calculator className="mr-1 h-4 w-4" />
                   {t("Calc Interest")}
                 </Button>
-                <Button variant="outline" size="sm" onClick={handlePostInterest} disabled={actionLoading}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPostInterestConfirmOpen(true)}
+                  disabled={actionLoading || !hasPermission("POSTINTEREST")}
+                >
                   <DollarSign className="mr-1 h-4 w-4" />
                   {t("Post Interest")}
                 </Button>
@@ -418,7 +450,11 @@ const FixedDepositDetailPage: React.FC = () => {
                   label={t("Client")}
                   value={fd.clientName ?? `#${fd.clientId}`}
                 />
-                <InfoRow icon={<Wallet className="h-4 w-4" />} label={t("Product")} value={fd.depositProductName ?? "—"} />
+                <InfoRow
+                  icon={<Wallet className="h-4 w-4" />}
+                  label={t("Product")}
+                  value={fd.depositProductName ?? "—"}
+                />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
                   label={t("Deposit Amount")}
@@ -530,7 +566,9 @@ const FixedDepositDetailPage: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{onAccountClosureId === "200" ? t("Premature Close") : t("Close at Maturity")}</DialogTitle>
-            <DialogDescription>{t("Enter closure details for FD")} {fd.accountNo}.</DialogDescription>
+            <DialogDescription>
+              {t("Enter closure details for FD")} {fd.accountNo}.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -594,7 +632,9 @@ const FixedDepositDetailPage: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Make Deposit")}</DialogTitle>
-            <DialogDescription>{t("Add funds to FD")} {fd.accountNo}.</DialogDescription>
+            <DialogDescription>
+              {t("Add funds to FD")} {fd.accountNo}.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -632,7 +672,9 @@ const FixedDepositDetailPage: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Make Withdrawal")}</DialogTitle>
-            <DialogDescription>{t("Withdraw funds from FD")} {fd.accountNo}.</DialogDescription>
+            <DialogDescription>
+              {t("Withdraw funds from FD")} {fd.accountNo}.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -668,6 +710,29 @@ const FixedDepositDetailPage: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={calcInterestConfirmOpen}
+        onOpenChange={setCalcInterestConfirmOpen}
+        onConfirm={handleCalculateInterest}
+        title={t("Calculate Interest")}
+        description={t("Recalculate accrued interest for this fixed deposit account? This will not post interest.")}
+        confirmLabel={t("Calculate")}
+        loading={actionLoading}
+      />
+
+      <ConfirmDialog
+        open={postInterestConfirmOpen}
+        onOpenChange={setPostInterestConfirmOpen}
+        onConfirm={handlePostInterest}
+        title={t("Post Interest")}
+        description={t(
+          "This will calculate and post interest to this fixed deposit account. The account balance will be updated and accounting entries will be created. This action cannot be easily undone. Continue?",
+        )}
+        confirmLabel={t("Post Interest")}
+        variant="destructive"
+        loading={actionLoading}
+      />
     </div>
   );
 };
