@@ -6,9 +6,11 @@ import { officeCreateSchema, type OfficeCreateFormData } from "@/lib/validations
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { OfficeSelect } from "@/components/shared/OfficeSelect";
+import type { Office } from "@/types";
 
 interface OfficeFormProps {
   defaultValues?: Partial<OfficeCreateFormData>;
+  allowedParents?: Office[];
   onSubmit: (data: OfficeCreateFormData) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
@@ -16,6 +18,7 @@ interface OfficeFormProps {
 
 const OfficeForm: React.FC<OfficeFormProps> = ({
   defaultValues,
+  allowedParents,
   onSubmit,
   onCancel,
   isSubmitting = false,
@@ -51,6 +54,7 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
       <OfficeSelect
         value={parentId?.toString() ?? ""}
         onChange={(v) => setValue("parentId", v ? Number(v) : undefined, { shouldValidate: true })}
+        allowedParents={allowedParents}
         includeNone={t("None (root office)")}
         label={t("Parent Office")}
         disabled={isSubmitting}

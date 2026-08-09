@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOffices, useCreateOffice, useUpdateOffice } from "@/hooks/useOffices";
+import { useOffice, useOfficeTemplate, useCreateOffice, useUpdateOffice } from "@/hooks/useOffices";
 import OfficeForm from "@/components/organization/OfficeForm";
 import type { OfficeCreateFormData } from "@/lib/validations/office";
 
@@ -17,14 +17,14 @@ const OfficeFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
 
-  const { data: offices = [], isLoading } = useOffices();
+  const { data: office, isLoading: isLoadingOffice } = useOffice(isEdit ? Number(id) : null);
+  const { data: template, isLoading: isLoadingTemplate } = useOfficeTemplate();
 
   const createMutation = useCreateOffice();
   const updateMutation = useUpdateOffice();
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
   const [mutationError, setMutationError] = React.useState<string | null>(null);
 
-  const existingOffice = isEdit ? offices.find((o) => o.id === Number(id)) : undefined;
+  const existingOffice = isEdit ? office : undefined;
 
   const defaultValues: Partial<OfficeCreateFormData> | undefined = existingOffice
     ? {
@@ -33,7 +33,18 @@ const OfficeFormPage: React.FC = () => {
         openingDate: existingOffice.openingDate,
         externalId: existingOffice.externalId || undefined,
       }
-    : undefined;
+    : template
+      ? {
+          name: "",
+          parentId: undefined,
+          openingDate: template.openingDate,
+          externalId: "",
+        }
+      : undefined;
+
+  const allowedParents = template?.allowedParents ?? [];
+
+  const isLoading = isEdit ? isLoadingOffice : isLoadingTemplate;
 
   const handleSubmit = useCallback(
     async (data: OfficeCreateFormData) => {
@@ -102,6 +113,7 @@ const OfficeFormPage: React.FC = () => {
         <CardContent className="pt-6">
           <OfficeForm
             defaultValues={defaultValues}
+            allowedParents={allowedParents}
             onSubmit={handleSubmit}
             onCancel={() => navigate("/offices")}
             isSubmitting={createMutation.isPending || updateMutation.isPending}

@@ -4,6 +4,7 @@ import { Search, X, BadgeCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOffices } from "@/hooks/useOffices";
+import type { Office } from "@/types";
 
 export interface OfficeSelectProps {
   value: string;
@@ -14,6 +15,7 @@ export interface OfficeSelectProps {
   disabled?: boolean;
   includeAll?: string;
   includeNone?: string;
+  allowedParents?: Office[];
 }
 
 export function OfficeSelect({
@@ -25,6 +27,7 @@ export function OfficeSelect({
   disabled,
   includeAll,
   includeNone,
+  allowedParents,
 }: OfficeSelectProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
@@ -32,13 +35,15 @@ export function OfficeSelect({
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const { data: offices, isLoading } = useOffices();
+  const { data: offices, isLoading: isLoadingOffices } = useOffices();
+  const isLoading = allowedParents ? false : isLoadingOffices;
+  const officeList = allowedParents ?? offices ?? [];
 
   const resolvedLabel = label ?? t("Office *");
   const resolvedPlaceholder = placeholder ?? t("Search office by name…");
 
-  const filtered = (offices ?? []).filter((o) => !query || o.name.toLowerCase().includes(query.toLowerCase()));
-  const selected = (offices ?? []).find((o) => String(o.id) === value);
+  const filtered = officeList.filter((o) => !query || o.name.toLowerCase().includes(query.toLowerCase()));
+  const selected = officeList.find((o) => String(o.id) === value);
 
   const isSpecialValue = (includeAll && value === "all") || (includeNone && value === "");
 
