@@ -1,6 +1,8 @@
-import { type FC, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   PiggyBank,
@@ -11,7 +13,6 @@ import {
   Building2,
   User,
   Info,
-  LayoutGrid,
   Receipt,
   ArrowLeftRight,
   ArrowDownCircle,
@@ -33,6 +34,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import {
   useSavingsAccount,
   useRejectSavingsAccount,
@@ -56,14 +59,14 @@ import {
   unblockCreditSavingsAccount,
   blockDebitSavingsAccount,
   unblockDebitSavingsAccount,
-  holdAmountSavings,
-  releaseAmountSavings,
-  fetchOnHoldTransactions,
   searchTransactions,
   useUndoSavingsTransaction,
   useReverseSavingsTransaction,
+  holdAmountSchema,
 } from "@/features/deposits";
-import { useMakeDeposit, useMakeWithdrawal } from "@/features/deposits";
+import type { HoldAmountFormValues } from "@/features/deposits";
+import { useHoldAmountSavings, useReleaseAmountSavings, useOnHoldTransactions } from "../hooks/useSavingsTransactions";
+import { useSavingsPermissions } from "../hooks/useSavingsPermissions";
 import { useStaffList } from "@/features/staff";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SavingsCharges from "@/features/deposits/components/SavingsCharges";
@@ -121,10 +124,7 @@ const DepositAccountDetailPage: React.FC = () => {
   const [txnDialog, setTxnDialog] = useState<"deposit" | "withdrawal" | null>(null);
   const [acting, setActing] = useState(false);
   const [holdDialogOpen, setHoldDialogOpen] = useState(false);
-  const [holdAmount, setHoldAmount] = useState("");
-  const [holdReason, setHoldReason] = useState("");
-  const [holdDate, setHoldDate] = useState(new Date().toISOString().split("T")[0]);
-  const [onHoldTxns, setOnHoldTxns] = useState<Array<{ id: number; amount: number; reasonForBlock?: string }>>([]);
+  const { data: onHoldData } = useOnHoldTransactions(id);
   const [showOnHold, setShowOnHold] = useState(false);
   const forceWithdrawalMutation = useForceWithdrawalSavings();
   const applyAnnualFeesMutation = useApplyAnnualFeesSavings();
@@ -145,6 +145,25 @@ const DepositAccountDetailPage: React.FC = () => {
   const [searching, setSearching] = useState(false);
   const [blockReasonDialog, setBlockReasonDialog] = useState<string | null>(null);
   const [blockReason, setBlockReason] = useState("");
+  const [releaseConfirmId, setReleaseConfirmId] = useState<number | null>(null);
+
+  const holdAmountMutation = useHoldAmountSavings();
+  const releaseAmountMutation = useReleaseAmountSavings();
+  const { hasPermission } = useSavingsPermissions();
+  const { success: toastSuccess } = useToast();
+
+  const holdForm = useForm<HoldAmountFormValues>({
+    resolver: zodResolver(holdAmountSchema),
+    defaultValues: {
+      transactionDate: new Date().toISOString().split("T")[0],
+      transactionAmount: 0,
+      reasonForBlock: "",
+      lienAllowed: false,
+      externalId: "",
+      locale: "en",
+      dateFormat: "yyyy-MM-dd",
+    },
+  });
 
   const summary = (account as any)?.summary ?? {};
 
@@ -242,33 +261,35 @@ const DepositAccountDetailPage: React.FC = () => {
   const isBlockedCredit = subStatus === "block_credit" || subStatus === "BLOCK_CREDIT";
   const isBlockedDebit = subStatus === "block_debit" || subStatus === "BLOCK_DEBIT";
 
-  const handleHoldAmount = async () => {
+  const handleHoldAmount = async (values: HoldAmountFormValues) => {
     if (!account) return;
-    const numAmount = parseFloat(holdAmount);
-    if (!numAmount || numAmount <= 0 || !holdReason) return;
-    await holdAmountSavings(account.id, {
-      transactionDate: holdDate,
-      transactionAmount: numAmount,
-      reasonForBlock: holdReason,
+    await holdAmountMutation.mutateAsync({
+      accountId: account.id,
+      payload: {
+        transactionDate: values.transactionDate,
+        transactionAmount: values.transactionAmount,
+        reasonForBlock: values.reasonForBlock,
+        lienAllowed: values.lienAllowed,
+        externalId: values.externalId || undefined,
+        locale: values.locale,
+        dateFormat: values.dateFormat,
+      },
     });
+    toastSuccess(t("Amount held successfully"));
     setHoldDialogOpen(false);
-    setHoldAmount("");
-    setHoldReason("");
+    holdForm.reset();
     refetch();
   };
 
   const handleReleaseHold = async (transactionId: number) => {
     if (!account) return;
-    await releaseAmountSavings(account.id, transactionId);
+    await releaseAmountMutation.mutateAsync({
+      accountId: account.id,
+      transactionId,
+    });
+    toastSuccess(t("Amount released successfully"));
+    setReleaseConfirmId(null);
     refetch();
-  };
-
-  const loadOnHoldTransactions = async () => {
-    if (!account) return;
-    const txns = await fetchOnHoldTransactions(account.id);
-
-    setOnHoldTxns(txns?.pageItems);
-    setShowOnHold(true);
   };
 
   const handleForceWithdrawal = async () => {
@@ -461,12 +482,22 @@ const DepositAccountDetailPage: React.FC = () => {
                  <Button variant="outline" size="sm" onClick={() => handleCommand("postInterest")} disabled={acting}>
                    {t("Post Interest")}
                  </Button>
-                 <Button variant="outline" size="sm" onClick={() => setHoldDialogOpen(true)}>
-                   {t("Hold Amount")}
-                 </Button>
-                 <Button variant="outline" size="sm" onClick={loadOnHoldTransactions}>
-                   {t("On-Hold Funds")}
-                 </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setHoldDialogOpen(true)}
+                    disabled={!hasPermission("HOLDAMOUNT")}
+                  >
+                    {t("Hold Amount")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowOnHold(true)}
+                    disabled={!hasPermission("RELEASEAMOUNT")}
+                  >
+                    {t("On-Hold Funds")}
+                  </Button>
                  <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
                    {t("Force Withdrawal")}
                  </Button>
@@ -749,7 +780,14 @@ const DepositAccountDetailPage: React.FC = () => {
           <SavingsCharges accountId={a.id} />
         </TabsContent>
         <TabsContent value="transactions" className="mt-0">
-          <SavingsTransactions transactions={a?.transactions ?? []} onUndo={handleUndoTransaction} onReverse={handleReverseTransaction} />
+          <SavingsTransactions
+            transactions={a?.transactions ?? []}
+            onUndo={handleUndoTransaction}
+            onReverse={handleReverseTransaction}
+            onRelease={(txnId) => setReleaseConfirmId(txnId)}
+            canRelease={hasPermission("RELEASEAMOUNT") && isActive}
+            currencyCode={a.currency?.code}
+          />
         </TabsContent>
       </Tabs>
 
@@ -764,47 +802,64 @@ const DepositAccountDetailPage: React.FC = () => {
       )}
 
       {/* Hold Amount Dialog */}
-      <Dialog open={holdDialogOpen} onOpenChange={setHoldDialogOpen}>
+      <Dialog
+        open={holdDialogOpen}
+        onOpenChange={(open) => {
+          setHoldDialogOpen(open);
+          if (!open) holdForm.reset();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Hold Amount")}</DialogTitle>
             <DialogDescription>{t("Freeze an amount on this account.")}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={holdForm.handleSubmit(handleHoldAmount)} className="space-y-4">
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium" htmlFor="holdAmount">
-                {t("Amount")} *
-              </label>
+              <Label htmlFor="holdAmount">{t("Amount")} *</Label>
               <Input
                 id="holdAmount"
                 type="number"
                 step="0.01"
-                value={holdAmount}
-                onChange={(e) => setHoldAmount(e.target.value)}
+                {...holdForm.register("transactionAmount", { valueAsNumber: true })}
               />
+              {holdForm.formState.errors.transactionAmount && (
+                <p className="text-xs text-red-500">{holdForm.formState.errors.transactionAmount.message}</p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium" htmlFor="holdDate">
-                {t("Date")} *
-              </label>
-              <Input id="holdDate" type="date" value={holdDate} onChange={(e) => setHoldDate(e.target.value)} />
+              <Label htmlFor="holdDate">{t("Date")} *</Label>
+              <Input id="holdDate" type="date" {...holdForm.register("transactionDate")} />
+              {holdForm.formState.errors.transactionDate && (
+                <p className="text-xs text-red-500">{holdForm.formState.errors.transactionDate.message}</p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="block text-sm font-medium" htmlFor="holdReason">
-                {t("Reason")} *
-              </label>
+              <Label htmlFor="holdReason">{t("Reason")} *</Label>
               <Input
                 id="holdReason"
-                value={holdReason}
-                onChange={(e) => setHoldReason(e.target.value)}
+                maxLength={100}
+                {...holdForm.register("reasonForBlock")}
                 placeholder={t("e.g. Court order hold")}
               />
+              {holdForm.formState.errors.reasonForBlock && (
+                <p className="text-xs text-red-500">{holdForm.formState.errors.reasonForBlock.message}</p>
+              )}
             </div>
-            <Button onClick={handleHoldAmount} disabled={!holdAmount || !holdReason}>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="holdExternalId">{t("External ID")}</Label>
+              <Input
+                id="holdExternalId"
+                maxLength={100}
+                {...holdForm.register("externalId")}
+                placeholder={t("Optional")}
+              />
+            </div>
+            <Button type="submit" disabled={!holdForm.formState.isValid || holdAmountMutation.isPending}>
+              {holdAmountMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t("Hold")}
             </Button>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -816,16 +871,21 @@ const DepositAccountDetailPage: React.FC = () => {
             <DialogDescription>{t("Currently held amounts on this account.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            {onHoldTxns?.length === 0 ? (
+            {!onHoldData?.pageItems?.length ? (
               <p className="text-sm text-gray-500">{t("No funds on hold.")}</p>
             ) : (
-              onHoldTxns?.map((txn) => (
+              onHoldData.pageItems.map((txn) => (
                 <div key={txn.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div>
                     <p className="text-sm font-medium">{formatCurrency(txn.amount, a.currency?.code)}</p>
                     {txn.reasonForBlock && <p className="text-xs text-gray-500">{txn.reasonForBlock}</p>}
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleReleaseHold(txn.id)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setReleaseConfirmId(txn.transactionId)}
+                    disabled={!hasPermission("RELEASEAMOUNT") || releaseAmountMutation.isPending}
+                  >
                     {t("Release")}
                   </Button>
                 </div>
@@ -834,6 +894,18 @@ const DepositAccountDetailPage: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={releaseConfirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setReleaseConfirmId(null);
+        }}
+        onConfirm={() => releaseConfirmId !== null && handleReleaseHold(releaseConfirmId)}
+        title={t("Release Held Amount")}
+        description={t("Are you sure you want to release this held amount?")}
+        confirmLabel={t("Release")}
+        loading={releaseAmountMutation.isPending}
+      />
 
       {/* Force Withdrawal Dialog */}
       <Dialog open={forceWithdrawalDialogOpen} onOpenChange={setForceWithdrawalDialogOpen}>

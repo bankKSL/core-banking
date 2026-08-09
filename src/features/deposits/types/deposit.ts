@@ -135,16 +135,48 @@ export interface SavingsSummary {
 
 export interface SavingsTransaction {
   id: number;
-  transactionType: { id: number; code: string; value: string };
+  transactionType: {
+    id: number;
+    code: string;
+    value: string;
+    deposit?: boolean;
+    dividendPayout?: boolean;
+    withdrawal?: boolean;
+    interestPosting?: boolean;
+    feeDeduction?: boolean;
+    initiateTransfer?: boolean;
+    approveTransfer?: boolean;
+    withdrawTransfer?: boolean;
+    rejectTransfer?: boolean;
+    overdraftInterest?: boolean;
+    writtenoff?: boolean;
+    withholdTax?: boolean;
+    escheat?: boolean;
+    amountHold?: boolean;
+    amountRelease?: boolean;
+    transactionTypeEnum?: string;
+    entryType?: "DEBIT" | "CREDIT";
+  };
+  entryType?: "DEBIT" | "CREDIT";
   accountId: number;
-  accountNo: string;
+  accountNo?: string;
+  externalId?: string;
   date: string;
-  currency: { code: string; name: string; displaySymbol: string };
+  transactionDate?: string;
+  currency: { code: string; name: string; displaySymbol: string; decimalPlaces?: number };
   amount: number;
   runningBalance: number;
   reversed: boolean;
   submittedOnDate: string;
+  submittedByUsername?: string;
+  note?: string;
   isManualTransaction?: boolean;
+  isReversal?: boolean;
+  originalTransactionId?: number;
+  lienTransaction?: boolean;
+  releaseTransactionId?: number;
+  reasonForBlock?: string;
+  paymentDetailData?: unknown;
 }
 
 // ─── Savings List ────────────────────────────────────────────────

@@ -47,6 +47,7 @@ export {
   createSavingsProductSchema,
   createRecurringDepositAccountSchema,
   createRecurringDepositProductSchema,
+  holdAmountSchema,
 } from "./schemas/deposit.schema";
 export type {
   CreateSavingsAccountFormValues,
@@ -54,6 +55,7 @@ export type {
   CreateSavingsProductFormValues,
   CreateRecurringDepositAccountFormValues,
   CreateRecurringDepositProductFormValues,
+  HoldAmountFormValues,
 } from "./schemas/deposit.schema";
 
 export {
@@ -315,7 +317,18 @@ export {
 } from "./hooks/useSavingsCommands";
 
 // Hooks — Savings Transactions
-export { savingsTransactionKeys } from "./hooks/useSavingsTransactions";
+export {
+  savingsTransactionKeys,
+  useSavingsTransactions,
+  useOnHoldTransactions,
+  useSearchSavingsTransactions,
+  useHoldAmountSavings,
+  useReleaseAmountSavings,
+} from "./hooks/useSavingsTransactions";
+
+// Hooks — Savings Permissions
+export { useSavingsPermissions, SAVINGS_ACTION_PERMISSIONS } from "./hooks/useSavingsPermissions";
+export type { SavingsAction } from "./hooks/useSavingsPermissions";
 
 // Hooks — Savings Transaction Undo
 export {

@@ -1407,11 +1407,13 @@ export async function holdAmountSavings(
     transactionDate: string;
     transactionAmount: number;
     reasonForBlock: string;
+    lienAllowed?: boolean;
+    externalId?: string;
     locale?: string;
     dateFormat?: string;
   },
-): Promise<{ savingsId: number; resourceId: number }> {
-  const { data } = await client.post(
+): Promise<{ officeId: number; clientId: number; savingsId: number; resourceId: number }> {
+  const { data } = await client.post<{ officeId: number; clientId: number; savingsId: number; resourceId: number }>(
     `/savingsaccounts/${savingsAccountId}/transactions`,
     { ...payload, locale: payload.locale ?? "en", dateFormat: payload.dateFormat ?? "yyyy-MM-dd" },
     { params: { command: "holdAmount" } },
@@ -1423,10 +1425,11 @@ export async function holdAmountSavings(
 export async function releaseAmountSavings(
   savingsAccountId: number | string,
   transactionId: number | string,
-): Promise<{ resourceId: number }> {
-  const { data } = await client.post(
+  payload?: { externalId?: string },
+): Promise<{ officeId: number; clientId: number; savingsId: number; resourceId: number }> {
+  const { data } = await client.post<{ officeId: number; clientId: number; savingsId: number; resourceId: number }>(
     `/savingsaccounts/${savingsAccountId}/transactions/${transactionId}`,
-    {},
+    payload ?? {},
     { params: { command: "releaseAmount" } },
   );
   return data;
@@ -1471,7 +1474,9 @@ export async function undoRejectSavingsAccount(savingsAccountId: number | string
 export interface SavingsTransaction {
   id: number;
   accountId: number;
+  accountNo?: string;
   officeId?: number;
+  externalId?: string;
   type?: { id: number; code: string; value: string };
   transactionType: {
     id: number;
@@ -1513,6 +1518,16 @@ export interface SavingsTransaction {
   currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
   reversed?: boolean;
   runningBalance?: number;
+  submittedOnDate?: string;
+  submittedByUsername?: string;
+  note?: string;
+  isManualTransaction?: boolean;
+  isReversal?: boolean;
+  originalTransactionId?: number;
+  lienTransaction?: boolean;
+  releaseTransactionId?: number;
+  reasonForBlock?: string;
+  paymentDetailData?: unknown;
   paymentTypeId?: number;
   paymentTypeName?: string;
 }
@@ -1626,16 +1641,29 @@ export async function adjustSavingsTransaction(
 export interface TransactionSearchParams {
   dateFrom?: string;
   dateTo?: string;
+  fromDate?: string;
+  toDate?: string;
+  fromSubmittedDate?: string;
+  toSubmittedDate?: string;
+  fromAmount?: number;
+  toAmount?: number;
+  types?: string;
+  credit?: boolean;
+  debit?: boolean;
   transactionType?: string;
   offset?: number;
   limit?: number;
+  orderBy?: string;
+  sortOrder?: "ASC" | "DESC";
+  locale?: string;
+  dateFormat?: string;
 }
 
 /** GET /savingsaccounts/{accountId}/transactions/search */
 export async function searchTransactions(
   accountId: number,
   params?: TransactionSearchParams,
-): Promise<{ pageItems?: any[] }> {
+): Promise<{ total?: number; pageItems?: SavingsTransaction[]; content?: SavingsTransaction[] }> {
   const { data } = await client.get(`/savingsaccounts/${accountId}/transactions/search`, { params });
   return data;
 }

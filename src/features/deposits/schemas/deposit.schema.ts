@@ -166,3 +166,20 @@ export const createRecurringDepositProductSchema = z.object({
 });
 
 export type CreateRecurringDepositProductFormValues = z.infer<typeof createRecurringDepositProductSchema>;
+
+export const holdAmountSchema = z.object({
+  transactionDate: z.string().min(1, i18n.t("Date is required")),
+  transactionAmount: z
+    .number({ message: i18n.t("Amount is required") })
+    .positive(i18n.t("Amount must be positive")),
+  reasonForBlock: z
+    .string()
+    .min(1, i18n.t("Reason is required"))
+    .max(100, i18n.t("Max 100 characters")),
+  lienAllowed: z.boolean(),
+  externalId: z.string().max(100, i18n.t("Max 100 characters")).optional(),
+  locale: z.string(),
+  dateFormat: z.string(),
+});
+
+export type HoldAmountFormValues = z.infer<typeof holdAmountSchema>;
