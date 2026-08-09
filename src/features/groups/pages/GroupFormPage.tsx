@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useGroup } from "../hooks/useGroup";
+import { useGroupTemplate } from "../hooks/useGroups";
 import { useCreateGroup } from "../hooks/useCreateGroup";
 import { useUpdateGroup } from "../hooks/useUpdateGroup";
 import { useActivateGroup } from "../hooks/useGroupCommands";
@@ -19,6 +20,7 @@ const GroupFormPage: FC = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
+  const { data: template, isLoading: templateLoading } = useGroupTemplate();
   const { data: group, isLoading: groupLoading } = useGroup(id);
   const createMutation = useCreateGroup();
   const updateMutation = useUpdateGroup();
@@ -29,7 +31,7 @@ const GroupFormPage: FC = () => {
   const [activatedInPlace, setActivatedInPlace] = useState(false);
   const originalActive = activatedInPlace || (group?.active ?? false);
 
-  const isLoading = isEditMode && groupLoading;
+  const isLoading = (!isEditMode && templateLoading) || (isEditMode && groupLoading);
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = useCallback(
@@ -45,6 +47,8 @@ const GroupFormPage: FC = () => {
           active: values.active,
           activationDate: values.active ? values.activationDate : undefined,
           externalId: values.externalId || undefined,
+          staffId: values.staffId || undefined,
+          clientMembers: values.clientMembers?.length ? values.clientMembers : undefined,
         });
         navigate("/groups");
       }
@@ -109,6 +113,7 @@ const GroupFormPage: FC = () => {
       )}
       <GroupForm
         group={group}
+        template={template}
         originalActive={originalActive}
         mode={isEditMode ? "edit" : "create"}
         onSubmit={handleSubmit}

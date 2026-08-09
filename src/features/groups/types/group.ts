@@ -180,3 +180,27 @@ export interface GroupCommandResponse {
   resourceId?: number;
   changes?: Record<string, unknown>;
 }
+
+/** Template data returned by GET /groups/template */
+export interface GroupTemplate {
+  officeId?: number;
+  officeOptions?: Array<{ id: number; name: string; nameDecorated?: string }>;
+  staffOptions?: Array<{ id: number; displayName: string }>;
+  centerOptions?: Array<{ id: number; name: string }>;
+  clientOptions?: Array<{ id: number; displayName: string; officeId?: number; officeName?: string }>;
+  availableRoles?: Array<{ id: number; name: string }>;
+  datatables?: Array<{
+    applicationTableName: string;
+    registeredTableName: string;
+    columnHeaderData?: Array<Record<string, unknown>>;
+  }>;
+}
+
+/** Query params for GET /groups/template */
+export interface GroupTemplateParams {
+  officeId?: number;
+  center?: boolean;
+  centerId?: number;
+  command?: string;
+  staffInSelectedOfficeOnly?: boolean;
+}

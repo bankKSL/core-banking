@@ -9,6 +9,8 @@ export const createGroupSchema = z
   .object({
     name: z.string({ message: i18n.t("Group name is required") }).min(1, i18n.t("Group name is required")).max(100),
     officeId: z.number({ message: i18n.t("Office is required") }).int().positive(i18n.t("Office is required")),
+    staffId: z.number().optional().or(z.literal("")),
+    clientMembers: z.array(z.number()).optional().default([]),
     externalId: z.string().max(100).optional().or(z.literal("")),
     active: z.boolean().default(true),
     activationDate: z.string().optional().or(z.literal("")),

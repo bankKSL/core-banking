@@ -15,6 +15,8 @@ import type {
   GroupAssignStaffPayload,
   GroupAssignRolePayload,
   GroupAccountSummary,
+  GroupTemplate,
+  GroupTemplateParams,
 } from "../types/group";
 
 // ─── Groups ──────────────────────────────────────────────────────
@@ -23,6 +25,14 @@ import type {
 export async function fetchGroups(params: GroupListParams = {}): Promise<GroupListResponse> {
   const { data } = await client.get<GroupListResponse>("/groups", {
     params: { paged: true, ...params },
+  });
+  return data;
+}
+
+/** Load group creation template (GET /groups/template) */
+export async function fetchGroupTemplate(params?: GroupTemplateParams): Promise<GroupTemplate> {
+  const { data } = await client.get<GroupTemplate>("/groups/template", {
+    params,
   });
   return data;
 }

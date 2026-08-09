@@ -17,6 +17,8 @@ export type {
   GroupAccountSummary,
   GroupRoleData,
   GroupClosureReason,
+  GroupTemplate,
+  GroupTemplateParams,
 } from "./types/group";
 
 export {
@@ -35,6 +37,7 @@ export type { CreateGroupFormValues, UpdateGroupFormValues, ActivateGroupFormVal
 export {
   fetchGroups,
   fetchGroup,
+  fetchGroupTemplate,
   createGroup,
   updateGroup,
   deleteGroup,
@@ -49,7 +52,7 @@ export {
   fetchGroupAccounts,
 } from "./api/group";
 
-export { useGroups, groupKeys } from "./hooks/useGroups";
+export { useGroups, useGroupTemplate, groupKeys } from "./hooks/useGroups";
 export { useGroup } from "./hooks/useGroup";
 export { useCreateGroup } from "./hooks/useCreateGroup";
 export { useUpdateGroup } from "./hooks/useUpdateGroup";
