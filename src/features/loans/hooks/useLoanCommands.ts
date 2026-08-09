@@ -7,6 +7,10 @@ import {
   closeLoan,
   undoApproval,
   undoDisbursal,
+  undoLastDisbursal,
+  assignLoanOfficer,
+  unassignLoanOfficer,
+  undoWaiveCharge,
   withdrawLoanApplication,
   makeTransaction,
   undoWriteOffLoan,
@@ -127,6 +131,66 @@ export function useUndoWriteOff() {
       undoWriteOffLoan(loanId, payload),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+export function useUndoLastDisbursal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, payload }: { loanId: number; payload?: LoanCommandRequest }) =>
+      undoLastDisbursal(loanId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.schedule(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+export function useAssignLoanOfficer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      loanId,
+      payload,
+    }: {
+      loanId: number;
+      payload: { toLoanOfficerId: number; assignmentDate: string; locale?: string; dateFormat?: string; note?: string };
+    }) => assignLoanOfficer(loanId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+export function useUnassignLoanOfficer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      loanId,
+      payload,
+    }: {
+      loanId: number;
+      payload: { unassignedDate: string; locale?: string; dateFormat?: string; note?: string };
+    }) => unassignLoanOfficer(loanId, payload),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.all });
+    },
+  });
+}
+
+export function useUndoWaiveCharge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ loanId, transactionId }: { loanId: number; transactionId: number }) =>
+      undoWaiveCharge(loanId, transactionId),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: loanKeys.detail(vars.loanId) });
+      qc.invalidateQueries({ queryKey: loanKeys.charges(vars.loanId) });
       qc.invalidateQueries({ queryKey: loanKeys.all });
     },
   });

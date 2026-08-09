@@ -195,6 +195,48 @@ export async function undoDisbursal(loanId: number): Promise<LoanCommandResponse
   return data;
 }
 
+export async function undoLastDisbursal(
+  loanId: number,
+  payload: LoanCommandRequest = {},
+): Promise<LoanCommandResponse> {
+  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+    params: { command: "undolastdisbursal" },
+  });
+  return data;
+}
+
+export async function assignLoanOfficer(
+  loanId: number,
+  payload: { toLoanOfficerId: number; assignmentDate: string; locale?: string; dateFormat?: string; note?: string },
+): Promise<LoanCommandResponse> {
+  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+    params: { command: "assignloanofficer" },
+  });
+  return data;
+}
+
+export async function unassignLoanOfficer(
+  loanId: number,
+  payload: { unassignedDate: string; locale?: string; dateFormat?: string; note?: string },
+): Promise<LoanCommandResponse> {
+  const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}`, payload, {
+    params: { command: "unassignloanofficer" },
+  });
+  return data;
+}
+
+export async function undoWaiveCharge(
+  loanId: number,
+  transactionId: number,
+  payload: { id?: number; loanId?: number } = {},
+): Promise<LoanCommandResponse> {
+  const { data } = await client.put<LoanCommandResponse>(
+    `/loans/${loanId}/transactions/${transactionId}`,
+    { id: transactionId, loanId, ...payload },
+  );
+  return data;
+}
+
 // ─── Repayments ──────────────────────────────────────────────────
 
 export async function fetchRepaymentTemplate(loanId: number): Promise<RepaymentTemplate> {
