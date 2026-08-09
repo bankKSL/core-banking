@@ -106,6 +106,7 @@ const CreateDepositAccountPage: React.FC = () => {
     reset,
     formState: { errors },
   } = useForm<SavingsAccountFormValues>({
+    resolver: zodResolver(savingsAccountSchema),
     defaultValues: {
       officeId: "",
       clientId: clientIdParam ? Number(clientIdParam) : 0,
