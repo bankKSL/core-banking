@@ -61,7 +61,7 @@ const CreateClientPage: FC = () => {
     <div className="p-6 max-w-6xl m-auto">
       <PageHeader
         title={t("Create Client")}
-        description={t("Register a new client in Finfact")}
+        description={t("Register a new client")}
         actions={
           <Button variant="outline" onClick={() => navigate("/clients")}>
             <ArrowLeft className="mr-2 h-4 w-4" />

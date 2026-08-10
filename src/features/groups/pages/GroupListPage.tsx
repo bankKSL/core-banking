@@ -49,7 +49,7 @@ const GroupListPage: FC = () => {
       <div className="space-y-6">
         <PageHeader
           title={t("Groups")}
-          description={t("Manage self-help groups in Fineract")}
+          description={t("Manage self-help groups")}
           actions={
             <Button onClick={() => navigate("/groups/create")} className="bg-[#D32F2F] hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" /> {t("Create Group")}
@@ -71,7 +71,7 @@ const GroupListPage: FC = () => {
     <div className="space-y-6">
       <PageHeader
         title={t("Groups")}
-        description={t("Manage self-help groups in Fineract")}
+        description={t("Manage self-help groups")}
         actions={
           <Button onClick={() => navigate("/groups/create")} className="bg-[#D32F2F] hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" /> {t("Create Group")}

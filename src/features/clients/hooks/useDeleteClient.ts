@@ -4,7 +4,7 @@ import { clientKeys } from "./useClients";
 
 /**
  * Mutation hook for deleting a client.
- * Finfact may or may not support this — handle gracefully.
+ * Fineract may or may not support this — handle gracefully.
  */
 export function useDeleteClient() {
   const queryClient = useQueryClient();

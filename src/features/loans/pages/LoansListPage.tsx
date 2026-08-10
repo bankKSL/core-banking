@@ -152,7 +152,7 @@ const LoansListPage: FC = () => {
       <div className="space-y-6">
         <PageHeader
           title={t("Loans")}
-          description={t("Manage loan accounts in Finfact")}
+          description={t("Manage loan accounts")}
           actions={
             <Button onClick={() => navigate("/loans/create")} className="bg-[#D32F2F] hover:bg-red-700">
               <Plus className="mr-2 h-4 w-4" /> {t("Create Loan")}
@@ -174,7 +174,7 @@ const LoansListPage: FC = () => {
     <div className="space-y-6">
       <PageHeader
         title={t("Loans")}
-        description={t("Manage loan accounts in Finfact")}
+        description={t("Manage loan accounts")}
         actions={
           <Button onClick={() => navigate("/loans/create")} className="bg-[#D32F2F] hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" /> {t("Create Loan")}

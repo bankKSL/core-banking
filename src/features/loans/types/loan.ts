@@ -1,4 +1,4 @@
-// ─── Apache Finfact Loan Types ────────────────────────────────
+// ─── Apache Fineract Loan Types ────────────────────────────────
 
 import type { LoanOriginator } from "@/features/loan-originators/types/loanOriginator";
 import type { LoanApplicationOriginator } from "@/features/loan-originators/types/loanOriginator";

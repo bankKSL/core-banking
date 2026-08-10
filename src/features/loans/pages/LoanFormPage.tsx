@@ -187,7 +187,7 @@ const LoanFormPage: FC = () => {
       <PageHeader
         title={isEditMode ? t("Edit Loan") : t("Create Loan")}
         description={
-          isEditMode ? `${t("Editing loan")} ${loan?.accountNo ?? `#${id}`}` : t("Register a new loan application in Finfact")
+          isEditMode ? `${t("Editing loan")} ${loan?.accountNo ?? `#${id}`}` : t("Register a new loan application")
         }
         actions={
           <Button variant="outline" onClick={() => navigate(isEditMode ? `/loans/view/${id}` : "/loans")}>

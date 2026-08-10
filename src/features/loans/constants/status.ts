@@ -34,7 +34,7 @@ export const LOAN_STATUS_CONFIG: Record<
   Withdrawn: { variant: "warning", label: i18n.t("Withdrawn") },
 };
 
-/** Finfact numeric loan status to string mapping (doc §17.1) */
+/** Fineract numeric loan status to string mapping (doc §17.1) */
 export const LOAN_STATUS_ID_MAP: Record<number, string> = {
   100: "Submitted and pending approval",
   200: "Approved",

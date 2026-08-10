@@ -27,7 +27,7 @@ const getTransactionStatus = (tx: LoanTransaction): string => {
   return "completed";
 };
 
-/** Format date from Finfact (can be array [y,m,d] or string) */
+/** Format date from Fineract (can be array [y,m,d] or string) */
 const formatTxDate = (tx: LoanTransaction): string => {
   const raw = tx.date ?? tx.submittedOnDate;
   if (!raw) return "—";

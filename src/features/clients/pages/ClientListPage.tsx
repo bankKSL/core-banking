@@ -100,7 +100,7 @@ const ClientListPage: FC = () => {
     <div className="p-6">
       <PageHeader
         title={t("Clients")}
-        description={t("Manage clients registered in Finfact")}
+        description={t("Manage clients registered")}
         actions={
           <div className="flex items-center gap-2">
             <ClientBulkImport />

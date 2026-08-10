@@ -1,5 +1,5 @@
 /**
- * Finfact authentication types.
+ * Fineract authentication types.
  *
  * These types mirror the Fineract POST /api/v1/authentication response
  * and the normalized user object stored in the application.

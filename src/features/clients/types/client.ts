@@ -1,4 +1,4 @@
-// ─── Finfact Client Types ─────────────────────────────
+// ─── Fineract Client Types ─────────────────────────────
 
 /** Fineract client status codes */
 export type ClientStatus =

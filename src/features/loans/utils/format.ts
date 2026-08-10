@@ -1,9 +1,9 @@
 /**
- * Formatting helpers for Finfact/Fineract payloads.
+ * Formatting helpers for Fineract/Fineract payloads.
  * Dates are returned either as ISO strings or [yyyy, mm, dd] arrays.
  */
 
-/** Convert a Finfact date (array or string) to ISO yyyy-MM-dd, or null */
+/** Convert a Fineract date (array or string) to ISO yyyy-MM-dd, or null */
 export function toIsoDate(raw: unknown): string | null {
   if (raw == null) return null;
   if (Array.isArray(raw) && raw.length >= 3) {
@@ -18,7 +18,7 @@ export function toIsoDate(raw: unknown): string | null {
   return null;
 }
 
-/** Human-readable date (locale) from a Finfact date value */
+/** Human-readable date (locale) from a Fineract date value */
 export function formatFineractDate(raw: unknown): string {
   const iso = toIsoDate(raw);
   if (!iso) return "—";

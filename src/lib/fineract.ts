@@ -1,4 +1,4 @@
-// ─── Finfact Error Response Shape ─────────────────────
+// ─── Fineract Error Response Shape ─────────────────────
 // Typical 403/400 body from Fineract REST API:
 // { developerMessage, httpStatusCode, defaultUserMessage,
 //   userMessageGlobalisationCode, errors: [{ developerMessage,

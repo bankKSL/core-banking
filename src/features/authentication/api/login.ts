@@ -7,7 +7,7 @@ export interface LoginCredentials {
 }
 
 /**
- * Authenticate against Finfact.
+ * Authenticate against Fineract.
  *
  * Endpoint: POST /api/v1/authentication?tenantIdentifier=default
  * The request body contains the plaintext credentials; Fineract returns

@@ -90,7 +90,7 @@ const GroupFormPage: FC = () => {
       <PageHeader
         title={isEditMode ? t("Edit Group") : t("Create Group")}
         description={
-          isEditMode ? t("Editing group {{name}}", { name: group?.name ?? `#${id}` }) : t("Register a new self-help group in Fineract")
+          isEditMode ? t("Editing group {{name}}", { name: group?.name ?? `#${id}` }) : t("Register a new self-help group")
         }
         actions={
           <Button variant="outline" onClick={() => navigate("/groups")}>

@@ -125,7 +125,7 @@ export interface ClientSummary {
 
 // ─── Date Helpers ───────────────────────────────────────────────
 
-/** Parse Finfact date arrays [yyyy, mm, dd] into a Date */
+/** Parse Fineract date arrays [yyyy, mm, dd] into a Date */
 export function parseDate(transferDate: unknown): Date | null {
   if (transferDate == null) return null;
   if (Array.isArray(transferDate) && transferDate.length >= 3) {
