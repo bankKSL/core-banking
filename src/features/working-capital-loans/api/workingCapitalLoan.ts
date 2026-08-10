@@ -21,7 +21,7 @@ import type {
 } from "../types/workingCapitalLoan";
 
 export async function fetchDelinquencyBuckets(): Promise<DelinquencyBucket[]> {
-  const { data } = await client.get<DelinquencyBucket[]>("/delinquencybuckets");
+  const { data } = await client.get<DelinquencyBucket[]>("/delinquency/buckets");
   return Array.isArray(data) ? data : [];
 }
 
@@ -30,7 +30,7 @@ export async function createDelinquencyBucket(payload: {
   bucketType: string;
   ranges: Array<{ classification: string; minimumAgeDays: number; maximumAgeDays: number }>;
 }): Promise<{ resourceId: number }> {
-  const { data } = await client.post<{ resourceId: number }>("/delinquencybuckets", payload);
+  const { data } = await client.post<{ resourceId: number }>("/delinquency/buckets", payload);
   return data;
 }
 

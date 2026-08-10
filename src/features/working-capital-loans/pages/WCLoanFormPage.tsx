@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { ClientSearch } from "@/components/shared/ClientSearch";
 import { useToast } from "@/components/ui/toast";
 import { createWCLoanSchema, type CreateWCLoanFormValues } from "../schemas/workingCapitalLoan.schema";
 import { useCreateWCLoan, useWCLoanProducts, useDelinquencyBuckets } from "../hooks/useWCLoanQueries";
@@ -95,8 +96,11 @@ const WCLoanFormPage: FC = () => {
           <CardHeader><CardTitle className="text-base">{t("Loan Details")}</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Client ID")} *</label>
-              <Input type="number" {...register("clientId", { valueAsNumber: true })} error={errors.clientId?.message} />
+              <ClientSearch
+                value={watch("clientId") ?? 0}
+                onChange={(id) => setValue("clientId", id, { shouldValidate: true })}
+                error={errors.clientId?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Product")} *</label>

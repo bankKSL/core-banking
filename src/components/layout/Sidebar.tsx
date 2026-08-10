@@ -81,7 +81,7 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     items: [
       { label: t("Loans"), path: "/loans", icon: Banknote, exact: true, translationKey: "Loans" },
       { label: t("Loan Products"), path: "/lending/products", icon: Briefcase, translationKey: "Loan Products" },
-      { label: t("Working Capital Loans"), path: "/working-capital-loans", icon: TrendingUp, translationKey: "Working Capital Loans" },
+      { label: t("Working Capital Loans"), path: "/working-capital-loans", icon: TrendingUp, exact: true, translationKey: "Working Capital Loans" },
       { label: t("WC Loan Products"), path: "/working-capital-loans/products", icon: TrendingUp, translationKey: "WC Loan Products" },
       { label: t("Loan Originators"), path: "/loan-originators", icon: Handshake, translationKey: "Loan Originators" },
       { label: t("Collateral Products"), path: "/collateral-products", icon: Gem, translationKey: "Collateral Products" },
