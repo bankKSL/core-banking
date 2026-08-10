@@ -18,7 +18,7 @@ export {
   activateHoliday,
   buildCreateRequest,
   buildUpdateRequest,
-  parseFineractDate,
+  parseDate,
 } from "./api/holidays";
 
 export {

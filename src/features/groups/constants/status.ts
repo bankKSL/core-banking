@@ -18,7 +18,7 @@ export const GROUP_STATUS_CONFIG: Record<
   closed: { variant: "default", label: i18n.t("Closed") },
 };
 
-/** Fineract numeric group status → label mapping */
+/** numeric group status → label mapping */
 export const GROUP_STATUS_ID_MAP: Record<number, string> = {
   100: i18n.t("Pending"),
   300: i18n.t("Active"),

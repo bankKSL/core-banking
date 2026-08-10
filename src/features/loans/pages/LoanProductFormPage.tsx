@@ -24,7 +24,7 @@ import {
 import type { LoanProductCreateRequest } from "@/features/loans";
 import { CurrencySelect } from "@/components/shared/CurrencySelect";
 
-/** Extract string value from Fineract enum objects {id,code,value} or primitive */
+/** Extract string value from service enum objects {id,code,value} or primitive */
 function enumVal(v: any, fallback = ""): string {
   if (v == null) return fallback;
   if (typeof v === "object") return v.code ?? v.value ?? String(v.id) ?? fallback;

@@ -1,8 +1,8 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
- * Returns undefined if empty or already in Fineract format.
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Service format).
+ * Returns undefined if empty or already in Service format.
  */
 
 import type {
@@ -68,11 +68,7 @@ export async function fetchLoans(params: LoanListParams = {}): Promise<LoanListR
   return data;
 }
 
-export async function fetchLoan(
-  loanId: number | string,
-  associations = "all",
-  template = false,
-): Promise<Loan> {
+export async function fetchLoan(loanId: number | string, associations = "all", template = false): Promise<Loan> {
   const { data } = await client.get<Loan>(`/loans/${loanId}`, {
     params: { associations, ...(template ? { template: "true" } : {}) },
   });
@@ -230,10 +226,11 @@ export async function undoWaiveCharge(
   transactionId: number,
   payload: { id?: number; loanId?: number } = {},
 ): Promise<LoanCommandResponse> {
-  const { data } = await client.put<LoanCommandResponse>(
-    `/loans/${loanId}/transactions/${transactionId}`,
-    { id: transactionId, loanId, ...payload },
-  );
+  const { data } = await client.put<LoanCommandResponse>(`/loans/${loanId}/transactions/${transactionId}`, {
+    id: transactionId,
+    loanId,
+    ...payload,
+  });
   return data;
 }
 

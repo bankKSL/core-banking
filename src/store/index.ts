@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import i18n from "@/i18n";
 import { login } from "@/features/authentication/api/login";
-import type { AuthUser, FineractLoginResponse } from "@/features/authentication/types/auth";
+import type { AuthUser, LoginResponse } from "@/features/authentication/types/auth";
 
 export type { AuthUser } from "@/features/authentication/types/auth";
 
@@ -26,7 +26,7 @@ function persistAuth(state: PersistedAuth) {
   }
 }
 
-function mapLoginResponseToAuthUser(response: FineractLoginResponse): AuthUser {
+function mapLoginResponseToAuthUser(response: LoginResponse): AuthUser {
   return {
     userId: response.userId,
     username: response.username,
@@ -63,7 +63,7 @@ function mapLoginError(error: unknown): string {
 interface AuthState {
   isAuthenticated: boolean;
   user: AuthUser | null;
-  /** Base64-encoded authentication key returned by Fineract. */
+  /** Base64-encoded authentication key returned by service. */
   basicAuth: string | null;
   loginError: string | null;
   isLoggingIn: boolean;

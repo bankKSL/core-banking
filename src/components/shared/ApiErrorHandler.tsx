@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/toast";
-import { getFineractErrorMessage } from "@/lib/fineract";
+import { getErrorMessage } from "@/lib/error";
 
 /**
  * Global API error listener.
  *
  * Subscribes to every mutation that just failed via the React Query
- * mutation cache and shows a toast with the Fineract error message.
+ * mutation cache and shows a toast with the error message.
  *
  * Rendering this component once at the app root is sufficient.
  */
@@ -32,7 +32,7 @@ export default function ApiErrorHandler() {
     const last = failedMutations[failedMutations.length - 1];
 
     if (last?.error) {
-      const message = getFineractErrorMessage(last.error);
+      const message = getErrorMessage(last.error);
       toastError("Request failed", message);
     }
     // We intentionally depend on `isMutating` falling to 0 so the

@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Validation schema for the login form.
  *
- * Both fields are required. Fineract uses usernames (not emails)
+ * Both fields are required. Uses usernames (not emails)
  * for authentication, so no email format validation is applied.
  */
 export const loginSchema = z.object({

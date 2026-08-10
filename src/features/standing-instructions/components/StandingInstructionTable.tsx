@@ -3,10 +3,10 @@ import { useTranslation } from "react-i18next";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { StandingInstructionStatusBadge } from "./StandingInstructionStatusBadge";
 import type { StandingInstruction } from "../types/standing-instruction.types";
-import { parseFineractDate } from "../api/standing-instructions";
+import { parseDate } from "../api/standing-instructions";
 
 function formatDate(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "—";
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }

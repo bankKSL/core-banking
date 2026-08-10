@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useLoanNotes, useCreateLoanNote, useUpdateLoanNote, useDeleteLoanNote } from "../hooks/useLoanNotes";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 import type { LoanNote } from "../api/loanNotes";
 
 interface LoanNotesCardProps {
@@ -85,8 +85,8 @@ const LoanNotesCard: FC<LoanNotesCardProps> = ({ loanId }) => {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm whitespace-pre-wrap wrap-break-word">{note.note}</p>
                       <p className="mt-1 text-xs text-gray-500">
-                        {note.createdByUsername} &middot; {formatFineractDate(note.createdOnDate)}
-                        {note.updatedByUsername && <> (edited &middot; {formatFineractDate(note.updatedOnDate)})</>}
+                        {note.createdByUsername} &middot; {formatDate(note.createdOnDate)}
+                        {note.updatedByUsername && <> (edited &middot; {formatDate(note.updatedOnDate)})</>}
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-1">

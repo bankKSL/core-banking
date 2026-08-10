@@ -21,7 +21,7 @@ import {
   useDeleteLoanCharge,
   useLoanChargeCommand,
 } from "../hooks/useLoanCharges";
-import { formatFineractDate, formatMoney } from "../utils/format";
+import { formatDate, formatMoney } from "../utils/format";
 
 interface LoanChargesCardProps {
   loanId: number;
@@ -128,7 +128,7 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                           {charge.penalty ? t("Penalty") : t("Fee")}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm">{formatFineractDate(charge.dueDate)}</TableCell>
+                      <TableCell className="text-sm">{formatDate(charge.dueDate)}</TableCell>
                       <TableCell className="text-right font-mono text-sm">
                         {formatMoney(charge.amount, currencyCode)}
                       </TableCell>
@@ -148,11 +148,23 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => {
-                            setEditTarget(charge);
-                            setEditAmount(String(charge.amount ?? 0));
-                            setEditDueDate(charge.dueDate ? (Array.isArray(charge.dueDate) ? new Date(charge.dueDate[0], charge.dueDate[1] - 1, charge.dueDate[2]).toISOString().split("T")[0] : charge.dueDate) : "");
-                          }}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditTarget(charge);
+                              setEditAmount(String(charge.amount ?? 0));
+                              setEditDueDate(
+                                charge.dueDate
+                                  ? Array.isArray(charge.dueDate)
+                                    ? new Date(charge.dueDate[0], charge.dueDate[1] - 1, charge.dueDate[2])
+                                        .toISOString()
+                                        .split("T")[0]
+                                    : charge.dueDate
+                                  : "",
+                              );
+                            }}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           {!isPaid && !isWaived && (
@@ -186,13 +198,16 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
             <DialogTitle>{t("Add Charge")}</DialogTitle>
             <DialogDescription>{t("Apply a new fee or penalty to this loan.")}</DialogDescription>
           </DialogHeader>
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-              {t("This charge will be added to the loan balance.")}
-            </div>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+            {t("This charge will be added to the loan balance.")}
+          </div>
           <form onSubmit={onAddSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Charge")} *</label>
-              <Select value={selectedChargeId ? String(selectedChargeId) : ""} onValueChange={(v) => handleChargeSelect(Number(v))}>
+              <Select
+                value={selectedChargeId ? String(selectedChargeId) : ""}
+                onValueChange={(v) => handleChargeSelect(Number(v))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={t("Select charge")} />
                 </SelectTrigger>
@@ -238,7 +253,9 @@ const LoanChargesCard: FC<LoanChargesCardProps> = ({ loanId, currencyCode = "USD
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Edit Charge")}</DialogTitle>
-            <DialogDescription>{t("Update amount for")} {editTarget?.name}.</DialogDescription>
+            <DialogDescription>
+              {t("Update amount for")} {editTarget?.name}.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">

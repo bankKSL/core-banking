@@ -145,9 +145,3 @@ export const exchangeRateApi = {
     update<Partial<ExchangeRate>, ExchangeRate>(EXCHANGE_RATES, id, payload),
   delete: (id: string) => remove(EXCHANGE_RATES, id),
 };
-
-// ─── Health Check ─────────────────────────────────────────────
-export const healthApi = {
-  check: (): Promise<{ status: string }> =>
-    api.get("", { baseURL: "/fineract-provider/actuator/health" }).then((r) => r.data),
-};

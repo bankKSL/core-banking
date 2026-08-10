@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Repeat } from "lucide-react";
 import type { Loan } from "../types/loan";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 
 interface LoanTermVariationsCardProps {
   loan: Loan;
@@ -40,7 +40,7 @@ const LoanTermVariationsCard: FC<LoanTermVariationsCardProps> = ({ loan }) => {
                 {variations.map((v: any, i: number) => (
                   <TableRow key={i}>
                     <TableCell>{v.termType?.value ?? v.termType?.code ?? "—"}</TableCell>
-                    <TableCell>{formatFineractDate(v.termVariationApplicableFrom)}</TableCell>
+                    <TableCell>{formatDate(v.termVariationApplicableFrom)}</TableCell>
                     <TableCell className="font-mono">{v.decimalValue ?? v.dateValue ?? "—"}</TableCell>
                     <TableCell>{v.isProcessed ? t("Yes") : t("No")}</TableCell>
                   </TableRow>

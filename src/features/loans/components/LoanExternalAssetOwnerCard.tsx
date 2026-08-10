@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building } from "lucide-react";
 import { useActiveTransfer } from "@/features/external-asset-owners";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 
 interface LoanExternalAssetOwnerCardProps {
   loanId: number;
@@ -36,18 +36,20 @@ const LoanExternalAssetOwnerCard: FC<LoanExternalAssetOwnerCardProps> = ({ loanI
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">{t("Status")}</span>
-              <Badge variant="info" size="sm">{(transfer as any).status ?? "—"}</Badge>
+              <Badge variant="info" size="sm">
+                {(transfer as any).status ?? "—"}
+              </Badge>
             </div>
             {(transfer as any).effectiveDate && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">{t("Effective Date")}</span>
-                <span>{formatFineractDate((transfer as any).effectiveDate)}</span>
+                <span>{formatDate((transfer as any).effectiveDate)}</span>
               </div>
             )}
             {(transfer as any).settlementDate && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">{t("Settlement Date")}</span>
-                <span>{formatFineractDate((transfer as any).settlementDate)}</span>
+                <span>{formatDate((transfer as any).settlementDate)}</span>
               </div>
             )}
             {(transfer as any).transferExternalId && (

@@ -1,12 +1,12 @@
 /**
- * Fineract authentication types.
+ * authentication types.
  *
- * These types mirror the Fineract POST /api/v1/authentication response
+ * These types mirror the POST /api/v1/authentication response
  * and the normalized user object stored in the application.
  */
 
-/** Role object returned by Fineract in the login response. */
-export interface FineractRole {
+/** Role object returned by in the login response. */
+export interface Role {
   id: number;
   name: string;
   description?: string;
@@ -14,14 +14,14 @@ export interface FineractRole {
 }
 
 /** Raw response body from POST /api/v1/authentication?tenantIdentifier=default */
-export interface FineractLoginResponse {
+export interface LoginResponse {
   username: string;
   userId: number;
   base64EncodedAuthenticationKey: string;
   authenticated: boolean;
   officeId: number;
   officeName: string;
-  roles: FineractRole[];
+  roles: Role[];
   permissions: string[];
   shouldRenewPassword?: boolean;
   isTwoFactorAuthenticationRequired?: boolean;

@@ -2,8 +2,14 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { StandingInstructionForm } from "../components/StandingInstructionForm";
-import { useStandingInstruction, useTemplate, useCreateStandingInstruction, useUpdateStandingInstruction, standingInstructionKeys } from "../hooks/useStandingInstructions";
-import { fetchTemplate, parseFineractDate } from "../api/standing-instructions";
+import {
+  useStandingInstruction,
+  useTemplate,
+  useCreateStandingInstruction,
+  useUpdateStandingInstruction,
+  standingInstructionKeys,
+} from "../hooks/useStandingInstructions";
+import { fetchTemplate, parseDate } from "../api/standing-instructions";
 import type { OfficeOption, ClientOption, AccountOption } from "../types/standing-instruction.types";
 
 interface SideState {
@@ -14,7 +20,7 @@ interface SideState {
 }
 
 function formatDateInput(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "";
   return d.toISOString().split("T")[0];
 }
@@ -35,7 +41,9 @@ const StandingInstructionFormPage: React.FC = () => {
   const [mutationError, setMutationError] = useState<string | null>(null);
 
   const { data: template, isLoading: isTemplateLoading } = useTemplate();
-  const { data: existingInstruction, isLoading: isInstructionLoading } = useStandingInstruction(id ? Number(id) : undefined);
+  const { data: existingInstruction, isLoading: isInstructionLoading } = useStandingInstruction(
+    id ? Number(id) : undefined,
+  );
 
   const fromClientQuery = useQuery({
     queryKey: standingInstructionKeys.template({ fromOfficeId: from.officeId! }),
@@ -77,26 +85,23 @@ const StandingInstructionFormPage: React.FC = () => {
     ? (toAccountQuery.data?.toAccountOptions ?? [])
     : (template?.toAccountOptions ?? []);
 
-  const updateSide = useCallback(
-    (side: "from" | "to", field: keyof SideState, value: number | null) => {
-      const updater = side === "from" ? setFrom : setTo;
-      updater((prev) => {
-        const next = { ...prev, [field]: value };
-        if (field === "officeId") {
-          next.clientId = null;
-          next.accountType = null;
-          next.accountId = null;
-        } else if (field === "clientId") {
-          next.accountType = null;
-          next.accountId = null;
-        } else if (field === "accountType") {
-          next.accountId = null;
-        }
-        return next;
-      });
-    },
-    [],
-  );
+  const updateSide = useCallback((side: "from" | "to", field: keyof SideState, value: number | null) => {
+    const updater = side === "from" ? setFrom : setTo;
+    updater((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "officeId") {
+        next.clientId = null;
+        next.accountType = null;
+        next.accountId = null;
+      } else if (field === "clientId") {
+        next.accountType = null;
+        next.accountId = null;
+      } else if (field === "accountType") {
+        next.accountId = null;
+      }
+      return next;
+    });
+  }, []);
 
   const offices: OfficeOption[] = (template?.fromOfficeOptions ?? []) as OfficeOption[];
 
@@ -196,13 +201,25 @@ const StandingInstructionFormPage: React.FC = () => {
         navigate("/transfers/standing-instructions");
       } catch (err: unknown) {
         const error = err as { response?: { data?: { errors?: Array<{ defaultUserMessage: string }> } } };
-        const msg =
-          error?.response?.data?.errors?.[0]?.defaultUserMessage ??
-          "Failed to save standing instruction.";
+        const msg = error?.response?.data?.errors?.[0]?.defaultUserMessage ?? "Failed to save standing instruction.";
         setMutationError(msg);
       }
     },
-    [fromVal, toVal, transferTypeVal, instructionTypeVal, priorityVal, recurrenceTypeVal, recurrenceFrequencyVal, statusVal, isEdit, id, createMutation, updateMutation, navigate],
+    [
+      fromVal,
+      toVal,
+      transferTypeVal,
+      instructionTypeVal,
+      priorityVal,
+      recurrenceTypeVal,
+      recurrenceFrequencyVal,
+      statusVal,
+      isEdit,
+      id,
+      createMutation,
+      updateMutation,
+      navigate,
+    ],
   );
 
   if (isInstructionLoading) {
@@ -242,12 +259,24 @@ const StandingInstructionFormPage: React.FC = () => {
         if (isExistingLoaded) return;
         updateSide("to", field, value);
       }}
-      onTransferTypeChange={(v) => { if (!isExistingLoaded) setTransferType(v); }}
-      onInstructionTypeChange={(v) => { if (!isExistingLoaded) setInstructionType(v); }}
-      onPriorityChange={(v) => { if (!isExistingLoaded) setPriority(v); }}
-      onRecurrenceTypeChange={(v) => { if (!isExistingLoaded) setRecurrenceType(v); }}
-      onRecurrenceFrequencyChange={(v) => { if (!isExistingLoaded) setRecurrenceFrequency(v); }}
-      onStatusChange={(v) => { if (!isExistingLoaded) setStatus(v); }}
+      onTransferTypeChange={(v) => {
+        if (!isExistingLoaded) setTransferType(v);
+      }}
+      onInstructionTypeChange={(v) => {
+        if (!isExistingLoaded) setInstructionType(v);
+      }}
+      onPriorityChange={(v) => {
+        if (!isExistingLoaded) setPriority(v);
+      }}
+      onRecurrenceTypeChange={(v) => {
+        if (!isExistingLoaded) setRecurrenceType(v);
+      }}
+      onRecurrenceFrequencyChange={(v) => {
+        if (!isExistingLoaded) setRecurrenceFrequency(v);
+      }}
+      onStatusChange={(v) => {
+        if (!isExistingLoaded) setStatus(v);
+      }}
       transferType={transferTypeVal}
       instructionType={instructionTypeVal}
       priority={priorityVal}

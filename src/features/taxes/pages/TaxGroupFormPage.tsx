@@ -19,10 +19,10 @@ import {
   useUpdateTaxGroup,
   useTaxComponents,
 } from "../hooks/useTaxes";
-import { parseFineractDate } from "../api/taxes";
+import { parseDate } from "../api/taxes";
 
 function formatDateInput(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "";
   return d.toISOString().split("T")[0];
 }

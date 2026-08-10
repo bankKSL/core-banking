@@ -49,27 +49,19 @@ export async function updateStandingInstruction(
   id: number,
   payload: StandingInstructionUpdateRequest,
 ): Promise<{ resourceId: number }> {
-  const { data } = await client.put<{ resourceId: number }>(
-    `/standinginstructions/${id}?command=update`,
-    payload,
-  );
+  const { data } = await client.put<{ resourceId: number }>(`/standinginstructions/${id}?command=update`, payload);
   return data;
 }
 
 export async function deleteStandingInstruction(id: number): Promise<{ resourceId: number }> {
-  const { data } = await client.put<{ resourceId: number }>(
-    `/standinginstructions/${id}?command=delete`,
-  );
+  const { data } = await client.put<{ resourceId: number }>(`/standinginstructions/${id}?command=delete`);
   return data;
 }
 
 export async function fetchHistory(
   params?: StandingInstructionHistoryParams,
 ): Promise<StandingInstructionHistoryResponse> {
-  const { data } = await client.get<StandingInstructionHistoryResponse>(
-    "/standinginstructionrunhistory",
-    { params },
-  );
+  const { data } = await client.get<StandingInstructionHistoryResponse>("/standinginstructionrunhistory", { params });
   return data;
 }
 
@@ -89,9 +81,7 @@ export function buildCreateRequest(values: Record<string, unknown>): StandingIns
     priority: values.priority as number,
     status: values.status as number,
     validFrom: currentDate(values.validFrom as string) ?? (values.validFrom as string),
-    validTill: values.validTill
-      ? (currentDate(values.validTill as string) ?? (values.validTill as string))
-      : undefined,
+    validTill: values.validTill ? (currentDate(values.validTill as string) ?? (values.validTill as string)) : undefined,
     amount: values.amount != null && values.amount !== "" ? Number(values.amount) : undefined,
     recurrenceType: values.recurrenceType as number,
     recurrenceFrequency: values.recurrenceFrequency != null ? (values.recurrenceFrequency as number) : undefined,
@@ -122,7 +112,7 @@ export function buildUpdateRequest(values: Record<string, unknown>): StandingIns
   return request;
 }
 
-export function parseFineractDate(dateVal: number[] | null | undefined): Date | null {
+export function parseDate(dateVal: number[] | null | undefined): Date | null {
   if (dateVal == null) return null;
   if (Array.isArray(dateVal) && dateVal.length >= 3) {
     return new Date(dateVal[0], dateVal[1] - 1, dateVal[2]);

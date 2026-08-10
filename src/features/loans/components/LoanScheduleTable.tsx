@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { LoanRepaymentPeriod } from "../types/loan";
-import { formatFineractDate, formatMoney, toIsoDate } from "../utils/format";
+import { formatDate, formatMoney, toIsoDate } from "../utils/format";
 
 interface LoanScheduleTableProps {
   periods: LoanRepaymentPeriod[];
@@ -101,7 +101,7 @@ const LoanScheduleTable: FC<LoanScheduleTableProps> = ({ periods, currencyCode =
               return (
                 <TableRow key={p.period} className={status === "overdue" ? "bg-red-50/50 dark:bg-red-950/20" : ""}>
                   <TableCell className="font-mono text-xs">{p.period}</TableCell>
-                  <TableCell className="text-sm">{formatFineractDate(p.dueDate)}</TableCell>
+                  <TableCell className="text-sm">{formatDate(p.dueDate)}</TableCell>
                   <TableCell className="text-right font-mono text-sm">
                     {formatMoney(p.principalDue ?? p.principalOriginalDue, currencyCode)}
                   </TableCell>

@@ -1,11 +1,11 @@
-// ─── Fineract Error Response Shape ─────────────────────
-// Typical 403/400 body from Fineract REST API:
+// ─── Error Response Shape ─────────────────────
+// Typical 403/400 body from REST API:
 // { developerMessage, httpStatusCode, defaultUserMessage,
 //   userMessageGlobalisationCode, errors: [{ developerMessage,
 //   defaultUserMessage, userMessageGlobalisationCode,
 //   parameterName, args }] }
 
-export interface FineractErrorDetail {
+export interface ErrorDetail {
   developerMessage?: string;
   defaultUserMessage?: string;
   userMessageGlobalisationCode?: string;
@@ -13,24 +13,24 @@ export interface FineractErrorDetail {
   args?: unknown[];
 }
 
-export interface FineractErrorResponse {
+export interface ErrorResponse {
   developerMessage?: string;
   httpStatusCode?: string;
   defaultUserMessage?: string;
   userMessageGlobalisationCode?: string;
-  errors?: FineractErrorDetail[];
+  errors?: ErrorDetail[];
 }
 
 /**
- * Extract the first `errors[].defaultUserMessage` from a Fineract
+ * Extract the first `errors[].defaultUserMessage`
  * API error response. Falls back to the top-level defaultUserMessage,
  * then to `error.message`, then to a generic message.
  */
 import i18n from "@/i18n";
 
-export function getFineractErrorMessage(error: unknown): string {
-  // 1. Try Axios response body shaped like FineractErrorResponse
-  const axiosErr = error as { response?: { data?: FineractErrorResponse } };
+export function getErrorMessage(error: unknown): string {
+  // 1. Try Axios response body shaped like ErrorResponse
+  const axiosErr = error as { response?: { data?: ErrorResponse } };
   if (axiosErr.response?.data) {
     const body = axiosErr.response.data;
     // First array item

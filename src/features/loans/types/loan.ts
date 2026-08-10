@@ -1,4 +1,4 @@
-// ─── Apache Fineract Loan Types ────────────────────────────────
+// ─── Loan Types ────────────────────────────────
 
 import type { LoanOriginator } from "@/features/loan-originators/types/loanOriginator";
 import type { LoanApplicationOriginator } from "@/features/loan-originators/types/loanOriginator";
@@ -124,7 +124,18 @@ export interface Loan {
   id: number;
   accountNo?: string;
   externalId?: string;
-  status: { id: number; code: string; value: string; pendingApproval?: boolean; waitingForDisbursal?: boolean; active?: boolean; closedObligationsMet?: boolean; closedWrittenOff?: boolean; closedRescheduled?: boolean; overpaid?: boolean };
+  status: {
+    id: number;
+    code: string;
+    value: string;
+    pendingApproval?: boolean;
+    waitingForDisbursal?: boolean;
+    active?: boolean;
+    closedObligationsMet?: boolean;
+    closedWrittenOff?: boolean;
+    closedRescheduled?: boolean;
+    overpaid?: boolean;
+  };
   subStatus?: { id: number; code: string; value: string };
   loanProductId: number;
   loanProductName: string;

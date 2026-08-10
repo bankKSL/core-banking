@@ -8,7 +8,7 @@ export const officeService = {
   /** List all offices */
   list: async (): Promise<Office[]> => {
     const { data } = await api.get<Office[]>(OFFICES);
-    // Normalize Fineract date arrays [yyyy,mm,dd] to ISO strings
+    // Normalize date arrays [yyyy,mm,dd] to ISO strings
     return (Array.isArray(data) ? data : []).map(normalizeOffice);
   },
 
@@ -47,7 +47,7 @@ export const officeService = {
   },
 };
 
-/** Convert Fineract [yyyy,mm,dd] date arrays to ISO strings */
+/** Convert [yyyy,mm,dd] date arrays to ISO strings */
 function normalizeOffice(raw: any): Office {
   return {
     ...raw,
@@ -57,7 +57,7 @@ function normalizeOffice(raw: any): Office {
   };
 }
 
-/** Convert Fineract [yyyy,mm,dd] date arrays to ISO strings for template */
+/** Convert [yyyy,mm,dd] date arrays to ISO strings for template */
 function normalizeOfficeTemplate(raw: any): OfficeTemplate {
   return {
     ...raw,

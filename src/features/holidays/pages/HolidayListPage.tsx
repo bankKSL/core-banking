@@ -8,12 +8,8 @@ import { Button } from "@/components/ui/button";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ErrorState } from "@/components/shared/ErrorState";
-import {
-  useHolidays,
-  useActivateHoliday,
-  useHolidayTemplate,
-} from "../hooks/useHolidays";
-import { parseFineractDate } from "../api/holidays";
+import { useHolidays, useActivateHoliday, useHolidayTemplate } from "../hooks/useHolidays";
+import { parseDate } from "../api/holidays";
 import type { Holiday } from "../types/holiday.types";
 
 const HOLIDAY_STATUS_MAP: Record<number, string> = {
@@ -23,7 +19,7 @@ const HOLIDAY_STATUS_MAP: Record<number, string> = {
 };
 
 function formatDate(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "—";
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
@@ -69,10 +65,7 @@ const HolidayListPage: React.FC = () => {
     [activateMutation],
   );
 
-  const reschedulingTypeOptions = useMemo(
-    () => template?.reschedulingTypeOptions ?? [],
-    [template],
-  );
+  const reschedulingTypeOptions = useMemo(() => template?.reschedulingTypeOptions ?? [], [template]);
 
   const columns: ColumnDef<Holiday>[] = useMemo(
     () => [

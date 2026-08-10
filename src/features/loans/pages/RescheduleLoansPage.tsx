@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRescheduleRequests, useRescheduleRequestCommand } from "../hooks/useRescheduleLoans";
 import { RESCHEDULE_STATUS_CONFIG, RESCHEDULE_STATUS_ID_MAP } from "../constants/transactions";
 import type { LoanRescheduleRequest } from "../types/loan";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 
 const today = () => new Date().toISOString().split("T")[0];
 
@@ -44,9 +44,13 @@ const RescheduleLoansPage: FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const apiCommand = statusFilter === "rejected" ? undefined : statusFilter === "all" ? undefined : statusFilter;
-  const { data: requests = [], isLoading, isError, error, refetch } = useRescheduleRequests(
-    apiCommand ? { command: apiCommand } : undefined,
-  );
+  const {
+    data: requests = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useRescheduleRequests(apiCommand ? { command: apiCommand } : undefined);
 
   const filteredRequests = useMemo(() => {
     if (statusFilter !== "rejected") return requests;
@@ -71,7 +75,8 @@ const RescheduleLoansPage: FC = () => {
     await commandMutation.mutateAsync({
       scheduleId: action.req.id,
       command: action.command,
-      payload: action.command === "approve" ? { approvedOnDate: values.actionDate } : { rejectedOnDate: values.actionDate },
+      payload:
+        action.command === "approve" ? { approvedOnDate: values.actionDate } : { rejectedOnDate: values.actionDate },
     });
     setAction(null);
   });
@@ -119,12 +124,12 @@ const RescheduleLoansPage: FC = () => {
     {
       key: "fromDate",
       header: t("Reschedule From"),
-      cell: (r) => <span className="text-sm">{formatFineractDate(r.rescheduleFromDate)}</span>,
+      cell: (r) => <span className="text-sm">{formatDate(r.rescheduleFromDate)}</span>,
     },
     {
       key: "submitted",
       header: t("Submitted On"),
-      cell: (r) => <span className="text-sm">{formatFineractDate(r.submittedOnDate)}</span>,
+      cell: (r) => <span className="text-sm">{formatDate(r.submittedOnDate)}</span>,
     },
     {
       key: "status",
@@ -204,7 +209,7 @@ const RescheduleLoansPage: FC = () => {
               {t("Requests")} ({filteredRequests.length})
             </CardTitle>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue placeholder={t("Filter by status")} />
               </SelectTrigger>
               <SelectContent>
@@ -225,7 +230,11 @@ const RescheduleLoansPage: FC = () => {
               ))}
             </div>
           ) : (
-            <DataTable columns={columns} data={filteredRequests} emptyState={{ message: t("No reschedule requests found.") }} />
+            <DataTable
+              columns={columns}
+              data={filteredRequests}
+              emptyState={{ message: t("No reschedule requests found.") }}
+            />
           )}
         </CardContent>
       </Card>
@@ -233,7 +242,9 @@ const RescheduleLoansPage: FC = () => {
       <Dialog open={!!action} onOpenChange={(open) => !open && setAction(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{action?.command === "approve" ? t("Approve Reschedule") : t("Reject Reschedule")}</DialogTitle>
+            <DialogTitle>
+              {action?.command === "approve" ? t("Approve Reschedule") : t("Reject Reschedule")}
+            </DialogTitle>
             <DialogDescription>
               {action?.command === "approve"
                 ? `${t("Approving will recalculate the repayment schedule of loan")} ${action?.req.loanAccountNo ?? `#${action?.req.loanId}`}.`
@@ -242,7 +253,9 @@ const RescheduleLoansPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleAction} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{action?.command === "approve" ? t("Approved On") : t("Rejected On")}</label>
+              <label className="block text-sm font-medium">
+                {action?.command === "approve" ? t("Approved On") : t("Rejected On")}
+              </label>
               <Input type="date" {...register("actionDate")} />
             </div>
 
@@ -250,14 +263,21 @@ const RescheduleLoansPage: FC = () => {
               <ErrorState
                 title={t("Failed to process request")}
                 message={
-                  commandMutation.error instanceof Error ? commandMutation.error.message : t("An unexpected error occurred.")
+                  commandMutation.error instanceof Error
+                    ? commandMutation.error.message
+                    : t("An unexpected error occurred.")
                 }
                 onRetry={() => commandMutation.reset()}
               />
             )}
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" type="button" onClick={() => setAction(null)} disabled={commandMutation.isPending}>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setAction(null)}
+                disabled={commandMutation.isPending}
+              >
                 {t("Cancel")}
               </Button>
               <Button
@@ -265,7 +285,11 @@ const RescheduleLoansPage: FC = () => {
                 variant={action?.command === "reject" ? "destructive" : "default"}
                 disabled={commandMutation.isPending}
               >
-                {commandMutation.isPending ? t("Processing...") : action?.command === "approve" ? t("Approve") : t("Reject")}
+                {commandMutation.isPending
+                  ? t("Processing...")
+                  : action?.command === "approve"
+                    ? t("Approve")
+                    : t("Reject")}
               </Button>
             </div>
           </form>

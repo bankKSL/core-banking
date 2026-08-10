@@ -1,8 +1,8 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
- * Returns undefined if empty or already in Fineract format.
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Service format).
+ * Returns undefined if empty or already in Service format.
  */
 
 import type {
@@ -446,7 +446,11 @@ export async function activateRecurringDeposit(accountId: number, activatedOnDat
 }
 
 export async function closeRecurringDeposit(accountId: number, payload?: Record<string, unknown>) {
-  return recurringDepositCommand(accountId, "close", payload ?? { closedOnDate: new Date().toISOString().split("T")[0] });
+  return recurringDepositCommand(
+    accountId,
+    "close",
+    payload ?? { closedOnDate: new Date().toISOString().split("T")[0] },
+  );
 }
 
 export interface RecurringDepositClosureTemplate {
@@ -728,11 +732,9 @@ export async function payRecurringDepositCharge(
   chargeId: number | string,
   payload: { amount?: number; dueDate?: string; dateFormat?: string; locale?: string } = {},
 ): Promise<{ savingsAccountId: number; resourceId: number }> {
-  const { data } = await client.post(
-    `/savingsaccounts/${accountId}/charges/${chargeId}`,
-    payload,
-    { params: { command: "paycharge" } },
-  );
+  const { data } = await client.post(`/savingsaccounts/${accountId}/charges/${chargeId}`, payload, {
+    params: { command: "paycharge" },
+  });
   return data;
 }
 
@@ -759,9 +761,7 @@ export async function deleteRecurringDepositCharge(
 }
 
 /** GET /charges/{chargeId}?template=true */
-export async function fetchChargeDefinition(
-  chargeId: number | string,
-): Promise<Record<string, unknown>> {
+export async function fetchChargeDefinition(chargeId: number | string): Promise<Record<string, unknown>> {
   const { data } = await client.get(`/charges/${chargeId}`, { params: { template: true } });
   return data;
 }
@@ -822,9 +822,13 @@ export interface StandingInstructionTemplate {
 }
 
 /** GET /standinginstructions?clientId=X&fromAccountId=Y&fromAccountType=2 */
-export async function fetchStandingInstructions(
-  params: { clientId?: number; fromAccountId?: number; fromAccountType?: number; offset?: number; limit?: number },
-): Promise<StandingInstructionListResponse> {
+export async function fetchStandingInstructions(params: {
+  clientId?: number;
+  fromAccountId?: number;
+  fromAccountType?: number;
+  offset?: number;
+  limit?: number;
+}): Promise<StandingInstructionListResponse> {
   const { data } = await client.get<StandingInstructionListResponse>("/standinginstructions", { params });
   return data;
 }
@@ -836,9 +840,7 @@ export async function fetchStandingInstructionTemplate(): Promise<StandingInstru
 }
 
 /** POST /standinginstructions */
-export async function createStandingInstruction(
-  payload: Record<string, unknown>,
-): Promise<{ resourceId: number }> {
+export async function createStandingInstruction(payload: Record<string, unknown>): Promise<{ resourceId: number }> {
   const { data } = await client.post<{ resourceId: number }>("/standinginstructions", payload);
   return data;
 }
@@ -853,10 +855,9 @@ export async function fetchStandingInstruction(id: number | string): Promise<Sta
 export async function fetchStandingInstructionForEdit(
   id: number | string,
 ): Promise<StandingInstruction & StandingInstructionTemplate> {
-  const { data } = await client.get<StandingInstruction & StandingInstructionTemplate>(
-    `/standinginstructions/${id}`,
-    { params: { associations: "template" } },
-  );
+  const { data } = await client.get<StandingInstruction & StandingInstructionTemplate>(`/standinginstructions/${id}`, {
+    params: { associations: "template" },
+  });
   return data;
 }
 
@@ -901,17 +902,16 @@ export interface AccountTransferTemplate {
 }
 
 /** GET /accounttransfers/template?fromAccountId=X&fromAccountType=2 */
-export async function fetchAccountTransferTemplate(
-  params: { fromAccountId?: number; fromAccountType?: number },
-): Promise<AccountTransferTemplate> {
+export async function fetchAccountTransferTemplate(params: {
+  fromAccountId?: number;
+  fromAccountType?: number;
+}): Promise<AccountTransferTemplate> {
   const { data } = await client.get<AccountTransferTemplate>("/accounttransfers/template", { params });
   return data;
 }
 
 /** POST /accounttransfers */
-export async function createAccountTransfer(
-  payload: Record<string, unknown>,
-): Promise<{ resourceId: number }> {
+export async function createAccountTransfer(payload: Record<string, unknown>): Promise<{ resourceId: number }> {
   const { data } = await client.post<{ resourceId: number }>("/accounttransfers", payload);
   return data;
 }
@@ -924,9 +924,13 @@ export async function fetchAccountTransfer(id: number | string): Promise<Record<
 
 /** POST /accounttransfers/{id}?command=undo */
 export async function undoAccountTransfer(id: number | string): Promise<{ resourceId: number }> {
-  const { data } = await client.post<{ resourceId: number }>(`/accounttransfers/${id}`, {}, {
-    params: { command: "undo" },
-  });
+  const { data } = await client.post<{ resourceId: number }>(
+    `/accounttransfers/${id}`,
+    {},
+    {
+      params: { command: "undo" },
+    },
+  );
   return data;
 }
 
@@ -1298,11 +1302,9 @@ export async function paySavingsCharge(
   chargeId: number | string,
   payload: { amount?: number; dueDate?: string; dateFormat?: string; locale?: string } = {},
 ): Promise<{ savingsAccountId: number; resourceId: number }> {
-  const { data } = await client.post(
-    `/savingsaccounts/${savingsAccountId}/charges/${chargeId}`,
-    payload,
-    { params: { command: "paycharge" } },
-  );
+  const { data } = await client.post(`/savingsaccounts/${savingsAccountId}/charges/${chargeId}`, payload, {
+    params: { command: "paycharge" },
+  });
   return data;
 }
 
@@ -1581,10 +1583,7 @@ export async function applyAnnualFeesSavings(accountId: number): Promise<void> {
 }
 
 /** PUT /savingsaccounts/{accountId}?command=updateWithHoldTax */
-export async function updateWithHoldTax(
-  accountId: number,
-  withHoldTax: boolean,
-): Promise<{ resourceId: number }> {
+export async function updateWithHoldTax(accountId: number, withHoldTax: boolean): Promise<{ resourceId: number }> {
   const { data } = await client.put<{ resourceId: number }>(
     `/savingsaccounts/${accountId}`,
     { withHoldTax },
@@ -1614,7 +1613,12 @@ export async function assignSavingsOfficer(
 ): Promise<void> {
   await client.post(
     `/savingsaccounts/${accountId}`,
-    { toSavingsOfficerId: officerId, assignmentDate: assignmentDate ?? new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" },
+    {
+      toSavingsOfficerId: officerId,
+      assignmentDate: assignmentDate ?? new Date().toISOString().split("T")[0],
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+    },
     { params: { command: "assignSavingsOfficer" } },
   );
 }
@@ -1623,7 +1627,11 @@ export async function assignSavingsOfficer(
 export async function unassignSavingsOfficer(accountId: number, unassignedDate?: string): Promise<void> {
   await client.post(
     `/savingsaccounts/${accountId}`,
-    { unassignedDate: unassignedDate ?? new Date().toISOString().split("T")[0], dateFormat: "yyyy-MM-dd", locale: "en" },
+    {
+      unassignedDate: unassignedDate ?? new Date().toISOString().split("T")[0],
+      dateFormat: "yyyy-MM-dd",
+      locale: "en",
+    },
     { params: { command: "unassignSavingsOfficer" } },
   );
 }

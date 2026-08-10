@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Repeat } from "lucide-react";
 import { useRescheduleRequests } from "../hooks/useRescheduleLoans";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 
 interface LoanReschedulesCardProps {
   loanId: number;
@@ -46,12 +46,15 @@ const LoanReschedulesCard: FC<LoanReschedulesCardProps> = ({ loanId }) => {
                   <TableRow key={r.id}>
                     <TableCell className="font-mono">{r.id}</TableCell>
                     <TableCell>
-                      <Badge variant={r.status?.id === 200 ? "success" : r.status?.id === 300 ? "error" : "info"} size="sm">
+                      <Badge
+                        variant={r.status?.id === 200 ? "success" : r.status?.id === 300 ? "error" : "info"}
+                        size="sm"
+                      >
                         {r.status?.value ?? "—"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatFineractDate(r.rescheduleFromDate)}</TableCell>
-                    <TableCell>{formatFineractDate(r.submittedOnDate)}</TableCell>
+                    <TableCell>{formatDate(r.rescheduleFromDate)}</TableCell>
+                    <TableCell>{formatDate(r.submittedOnDate)}</TableCell>
                     <TableCell>{r.rescheduleReasonName ?? r.rescheduleReasonComment ?? "—"}</TableCell>
                   </TableRow>
                 ))}

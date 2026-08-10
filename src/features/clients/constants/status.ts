@@ -1,7 +1,7 @@
 import i18n from "@/i18n";
 import type { ClientStatus } from "../types/client";
 
-/** Map Fineract client status codes to display labels */
+/** Map client status codes to display labels */
 export const CLIENT_STATUS_LABELS: Record<string, string> = {
   pending: i18n.t("Pending"),
   active: i18n.t("Active"),
@@ -11,7 +11,7 @@ export const CLIENT_STATUS_LABELS: Record<string, string> = {
   "transfer on hold": i18n.t("Transfer On Hold"),
 };
 
-/** Map Fineract numeric status IDs to status strings */
+/** Map numeric status IDs to status strings */
 export const STATUS_ID_MAP: Record<number, ClientStatus> = {
   100: "pending",
   300: "active",
@@ -21,7 +21,7 @@ export const STATUS_ID_MAP: Record<number, ClientStatus> = {
   900: "transfer on hold",
 };
 
-/** Badge variant config per Fineract client status */
+/** Badge variant config per client status */
 export const CLIENT_STATUS_CONFIG: Record<
   string,
   {

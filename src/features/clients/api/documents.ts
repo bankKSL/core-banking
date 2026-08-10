@@ -31,7 +31,7 @@ export interface ClientDocumentCommandResponse {
 
 /**
  * Build a multipart FormData payload for document upload/update.
- * Note: The Fineract API expects the 'file' field as the actual file,
+ * Note: The API expects the 'file' field as the actual file,
  * and additional fields as part of the multipart request.
  */
 function buildDocumentFormData(payload: ClientDocumentRequest, includeFile: boolean): FormData {

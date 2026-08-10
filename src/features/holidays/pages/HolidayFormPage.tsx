@@ -15,17 +15,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOffices } from "@/hooks/useOffices";
-import {
-  useHoliday,
-  useHolidayTemplate,
-  useCreateHoliday,
-  useUpdateHoliday,
-} from "../hooks/useHolidays";
-import { parseFineractDate } from "../api/holidays";
+import { useHoliday, useHolidayTemplate, useCreateHoliday, useUpdateHoliday } from "../hooks/useHolidays";
+import { parseDate } from "../api/holidays";
 import type { EnumOption } from "../types/holiday.types";
 
 function formatDateInput(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "";
   return d.toISOString().split("T")[0];
 }
@@ -49,9 +44,7 @@ const HolidayFormPage: FC = () => {
   const isEdit = !!id;
 
   const { data: template, isLoading: isTemplateLoading } = useHolidayTemplate();
-  const { data: existingHoliday, isLoading: isHolidayLoading } = useHoliday(
-    id ? Number(id) : undefined,
-  );
+  const { data: existingHoliday, isLoading: isHolidayLoading } = useHoliday(id ? Number(id) : undefined);
   const { data: offices = [], isLoading: officesLoading } = useOffices();
 
   const createMutation = useCreateHoliday();
@@ -90,10 +83,7 @@ const HolidayFormPage: FC = () => {
     }
   }, [existingHoliday, setValue]);
 
-  const reschedulingTypeOptions: EnumOption[] = useMemo(
-    () => template?.reschedulingTypeOptions ?? [],
-    [template],
-  );
+  const reschedulingTypeOptions: EnumOption[] = useMemo(() => template?.reschedulingTypeOptions ?? [], [template]);
 
   const reschedulingType = watch("reschedulingType");
 
@@ -104,9 +94,7 @@ const HolidayFormPage: FC = () => {
 
   const isSpecificDate = useMemo(() => {
     if (!selectedReschedulingTypeOption) return false;
-    const val = (
-      selectedReschedulingTypeOption.value ?? selectedReschedulingTypeOption.code ?? ""
-    ).toLowerCase();
+    const val = (selectedReschedulingTypeOption.value ?? selectedReschedulingTypeOption.code ?? "").toLowerCase();
     return val.includes("specific") || val.includes("date");
   }, [selectedReschedulingTypeOption]);
 
@@ -189,37 +177,22 @@ const HolidayFormPage: FC = () => {
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Name")} *</label>
-              <Input
-                {...register("name")}
-                placeholder={t("e.g. New Year's Day")}
-                error={errors.name?.message}
-              />
+              <Input {...register("name")} placeholder={t("e.g. New Year's Day")} error={errors.name?.message} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Description")}</label>
-              <Textarea
-                {...register("description")}
-                placeholder={t("Optional description")}
-              />
+              <Textarea {...register("description")} placeholder={t("Optional description")} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">{t("From Date")} *</label>
-                <Input
-                  type="date"
-                  {...register("fromDate")}
-                  error={errors.fromDate?.message}
-                />
+                <Input type="date" {...register("fromDate")} error={errors.fromDate?.message} />
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">{t("To Date")} *</label>
-                <Input
-                  type="date"
-                  {...register("toDate")}
-                  error={errors.toDate?.message}
-                />
+                <Input type="date" {...register("toDate")} error={errors.toDate?.message} />
               </div>
             </div>
 
@@ -251,13 +224,8 @@ const HolidayFormPage: FC = () => {
 
             {isSpecificDate && (
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium">
-                  {t("Repayments Rescheduled To")}
-                </label>
-                <Input
-                  type="date"
-                  {...register("repaymentsRescheduledTo")}
-                />
+                <label className="block text-sm font-medium">{t("Repayments Rescheduled To")}</label>
+                <Input type="date" {...register("repaymentsRescheduledTo")} />
               </div>
             )}
 
@@ -294,9 +262,7 @@ const HolidayFormPage: FC = () => {
                         );
                       })}
                       {offices.length === 0 && (
-                        <p className="text-sm text-gray-500 col-span-full">
-                          {t("No offices available.")}
-                        </p>
+                        <p className="text-sm text-gray-500 col-span-full">{t("No offices available.")}</p>
                       )}
                     </div>
                     {errors.selectedOfficeIds && (
@@ -320,8 +286,7 @@ const HolidayFormPage: FC = () => {
               </>
             ) : (
               <>
-                <Save className="mr-2 h-4 w-4" />{" "}
-                {isEdit ? t("Update Holiday") : t("Create Holiday")}
+                <Save className="mr-2 h-4 w-4" /> {isEdit ? t("Update Holiday") : t("Create Holiday")}
               </>
             )}
           </Button>

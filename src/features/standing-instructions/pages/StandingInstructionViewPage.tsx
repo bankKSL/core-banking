@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { StandingInstructionStatusBadge } from "../components/StandingInstructionStatusBadge";
 import { useStandingInstruction, useDeleteStandingInstruction } from "../hooks/useStandingInstructions";
-import { parseFineractDate } from "../api/standing-instructions";
+import { parseDate } from "../api/standing-instructions";
 import {
   INSTRUCTION_TYPE_LABELS,
   RECURRENCE_TYPE_LABELS,
@@ -20,7 +20,7 @@ import {
 } from "../constants/status";
 
 function formatDate(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "—";
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
@@ -185,7 +185,9 @@ const StandingInstructionViewPage: React.FC = () => {
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title={t("Delete Standing Instruction")}
-        description={t("Are you sure you want to delete this standing instruction? This action soft-deletes the instruction.")}
+        description={t(
+          "Are you sure you want to delete this standing instruction? This action soft-deletes the instruction.",
+        )}
         confirmLabel={t("Delete")}
         onConfirm={handleDelete}
         variant="destructive"

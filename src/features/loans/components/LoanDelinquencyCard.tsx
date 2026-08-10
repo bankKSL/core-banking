@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import type { Loan } from "../types/loan";
 import { useDelinquencyTags } from "../hooks/useDelinquencyTags";
-import { formatFineractDate, formatMoney } from "../utils/format";
+import { formatDate, formatMoney } from "../utils/format";
 
 interface LoanDelinquencyCardProps {
   loan: Loan;
@@ -49,7 +49,9 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">{t("Delinquent Amount")}</span>
-            <span className="font-mono text-red-600">{formatMoney(delinquent?.delinquentAmount ?? 0, currencyCode)}</span>
+            <span className="font-mono text-red-600">
+              {formatMoney(delinquent?.delinquentAmount ?? 0, currencyCode)}
+            </span>
           </div>
           {range && (
             <div className="flex items-center justify-between text-sm">
@@ -61,7 +63,7 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
           )}
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">{t("Last Repayment")}</span>
-            <span>{formatFineractDate(delinquent?.lastRepaymentDate ?? loan.summary?.lastRepaymentDate)}</span>
+            <span>{formatDate(delinquent?.lastRepaymentDate ?? loan.summary?.lastRepaymentDate)}</span>
           </div>
         </CardContent>
       </Card>
@@ -99,8 +101,8 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
                         {tag.classification ?? `#${tag.tagId ?? tag.id}`}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{formatFineractDate(tag.addedOnDate)}</TableCell>
-                    <TableCell className="text-sm">{tag.liftedOnDate ? formatFineractDate(tag.liftedOnDate) : "—"}</TableCell>
+                    <TableCell className="text-sm">{formatDate(tag.addedOnDate)}</TableCell>
+                    <TableCell className="text-sm">{tag.liftedOnDate ? formatDate(tag.liftedOnDate) : "—"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

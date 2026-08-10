@@ -14,8 +14,16 @@ export type {
   EnumOption,
 } from "./types/standing-instruction.types";
 
-export { standingInstructionFormSchema, createStandingInstructionSchema, updateStandingInstructionSchema } from "./schemas/standing-instruction.schema";
-export type { StandingInstructionFormValues, CreateStandingInstructionFormValues, UpdateStandingInstructionFormValues } from "./schemas/standing-instruction.schema";
+export {
+  standingInstructionFormSchema,
+  createStandingInstructionSchema,
+  updateStandingInstructionSchema,
+} from "./schemas/standing-instruction.schema";
+export type {
+  StandingInstructionFormValues,
+  CreateStandingInstructionFormValues,
+  UpdateStandingInstructionFormValues,
+} from "./schemas/standing-instruction.schema";
 
 export {
   fetchTemplate,
@@ -28,7 +36,7 @@ export {
   fetchHistory,
   buildCreateRequest,
   buildUpdateRequest,
-  parseFineractDate,
+  parseDate,
 } from "./api/standing-instructions";
 
 export {

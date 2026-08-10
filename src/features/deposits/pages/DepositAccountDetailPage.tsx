@@ -73,7 +73,7 @@ import SavingsCharges from "@/features/deposits/components/SavingsCharges";
 import DepositWithdrawDialog from "@/features/deposits/components/DepositWithdrawDialog";
 import SavingsTransactions from "@/features/deposits/components/SavingsTransactions";
 
-/** Normalize a date value from Fineract (string or number[]) to display string */
+/** Normalize a date value from service (string or number[]) to display string */
 function fmtDate(v: unknown): string {
   if (!v) return "—";
   if (Array.isArray(v) && v.length >= 3) {
@@ -241,7 +241,9 @@ const DepositAccountDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-red-600">{t("Failed to load:")}: {String(error)}</p>
+          <p className="text-red-600">
+            {t("Failed to load:")}: {String(error)}
+          </p>
           <Button variant="outline" className="mt-2" onClick={() => refetch()}>
             {t("Retry")}
           </Button>
@@ -387,28 +389,28 @@ const DepositAccountDetailPage: React.FC = () => {
                   className="text-emerald-600 border-emerald-200"
                 >
                   {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                   {t("Approve")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCommand("reject")}
-                   disabled={acting}
-                   className="text-red-600"
-                 >
-                   <XCircle className="mr-1 h-4 w-4" />
-                   {t("Reject")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCommand("withdraw")}
-                   disabled={acting}
-                   className="text-amber-600"
-                 >
-                   {t("Withdraw")}
-                 </Button>
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                  {t("Approve")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("reject")}
+                  disabled={acting}
+                  className="text-red-600"
+                >
+                  <XCircle className="mr-1 h-4 w-4" />
+                  {t("Reject")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("withdraw")}
+                  disabled={acting}
+                  className="text-amber-600"
+                >
+                  {t("Withdraw")}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -421,7 +423,7 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={acting}
                   className="text-red-600"
                 >
-                   <Trash2 className="mr-1 h-4 w-4" /> {t("Delete")}
+                  <Trash2 className="mr-1 h-4 w-4" /> {t("Delete")}
                 </Button>
               </>
             )}
@@ -435,18 +437,18 @@ const DepositAccountDetailPage: React.FC = () => {
                   className="text-emerald-600"
                 >
                   {acting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
-                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                   {t("Activate")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCommand("undoapproval")}
-                   disabled={acting}
-                   className="text-amber-600"
-                 >
-                   {t("Undo Approval")}
-                 </Button>
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                  {t("Activate")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("undoapproval")}
+                  disabled={acting}
+                  className="text-amber-600"
+                >
+                  {t("Undo Approval")}
+                </Button>
               </>
             )}
             {isActive && (
@@ -458,126 +460,135 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={isBlocked || isBlockedDebit}
                   className="text-emerald-600"
                 >
-                   <ArrowDownCircle className="mr-1 h-4 w-4" />
-                   {t("Deposit")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => setTxnDialog("withdrawal")}
-                   disabled={isBlocked || isBlockedCredit}
-                   className="text-amber-600"
-                 >
-                   <ArrowUpCircle className="mr-1 h-4 w-4" />
-                   {t("Withdraw")}
-                 </Button>
+                  <ArrowDownCircle className="mr-1 h-4 w-4" />
+                  {t("Deposit")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTxnDialog("withdrawal")}
+                  disabled={isBlocked || isBlockedCredit}
+                  className="text-amber-600"
+                >
+                  <ArrowUpCircle className="mr-1 h-4 w-4" />
+                  {t("Withdraw")}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleCommand("calculateInterest")}
                   disabled={acting}
                 >
-                 {t("Calc Interest")}
-                 </Button>
-                 <Button variant="outline" size="sm" onClick={() => handleCommand("postInterest")} disabled={acting}>
-                   {t("Post Interest")}
-                 </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setHoldDialogOpen(true)}
-                    disabled={!hasPermission("HOLDAMOUNT")}
-                  >
-                    {t("Hold Amount")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowOnHold(true)}
-                    disabled={!hasPermission("RELEASEAMOUNT")}
-                  >
-                    {t("On-Hold Funds")}
-                  </Button>
-                 <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
-                   {t("Force Withdrawal")}
-                 </Button>
+                  {t("Calc Interest")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleCommand("postInterest")} disabled={acting}>
+                  {t("Post Interest")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setHoldDialogOpen(true)}
+                  disabled={!hasPermission("HOLDAMOUNT")}
+                >
+                  {t("Hold Amount")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowOnHold(true)}
+                  disabled={!hasPermission("RELEASEAMOUNT")}
+                >
+                  {t("On-Hold Funds")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setForceWithdrawalDialogOpen(true)}>
+                  {t("Force Withdrawal")}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleApplyAnnualFees}
                   disabled={applyAnnualFeesMutation.isPending}
                 >
-                 {t("Apply Annual Fees")}
-                 </Button>
-                 <Button variant="outline" size="sm" onClick={() => setAssignOfficerDialogOpen(true)}>
-                   {t("Assign Officer")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={handleUnassignOfficer}
-                   disabled={unassignOfficerMutation.isPending}
-                 >
-                   {t("Unassign Officer")}
-                 </Button>
-                 <Button variant="outline" size="sm" onClick={() => setSearchDialogOpen(true)}>
-                   <Search className="mr-1 h-4 w-4" />
-                   {t("Search Transactions")}
+                  {t("Apply Annual Fees")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setAssignOfficerDialogOpen(true)}>
+                  {t("Assign Officer")}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setBlockReason(""); setBlockReasonDialog("block"); }}
+                  onClick={handleUnassignOfficer}
+                  disabled={unassignOfficerMutation.isPending}
+                >
+                  {t("Unassign Officer")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setSearchDialogOpen(true)}>
+                  <Search className="mr-1 h-4 w-4" />
+                  {t("Search Transactions")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBlockReason("");
+                    setBlockReasonDialog("block");
+                  }}
                   disabled={acting}
                   className="text-red-600"
                 >
-                 {t("Block")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => { setBlockReason(""); setBlockReasonDialog("blockCredit"); }}
-                   disabled={acting}
-                   className="text-amber-600"
-                 >
-                   {t("Block Credit")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => { setBlockReason(""); setBlockReasonDialog("blockDebit"); }}
-                   disabled={acting}
-                   className="text-amber-600"
-                 >
-                   {t("Block Debit")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCommand("unblock")}
-                   disabled={acting}
-                   className="text-emerald-600"
-                 >
-                   {t("Unblock")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCommand("unblockCredit")}
-                   disabled={acting}
-                   className="text-emerald-600"
-                 >
-                   {t("Unblock Credit")}
-                 </Button>
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCommand("unblockDebit")}
-                   disabled={acting}
-                   className="text-emerald-600"
-                 >
-                   {t("Unblock Debit")}
-                 </Button>
+                  {t("Block")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBlockReason("");
+                    setBlockReasonDialog("blockCredit");
+                  }}
+                  disabled={acting}
+                  className="text-amber-600"
+                >
+                  {t("Block Credit")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBlockReason("");
+                    setBlockReasonDialog("blockDebit");
+                  }}
+                  disabled={acting}
+                  className="text-amber-600"
+                >
+                  {t("Block Debit")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("unblock")}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
+                  {t("Unblock")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("unblockCredit")}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
+                  {t("Unblock Credit")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCommand("unblockDebit")}
+                  disabled={acting}
+                  className="text-emerald-600"
+                >
+                  {t("Unblock Debit")}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -585,8 +596,8 @@ const DepositAccountDetailPage: React.FC = () => {
                   disabled={acting}
                   className="text-gray-600"
                 >
-                   <XCircle className="mr-1 h-4 w-4" />
-                   {t("Close")}
+                  <XCircle className="mr-1 h-4 w-4" />
+                  {t("Close")}
                 </Button>
               </>
             )}
@@ -640,7 +651,11 @@ const DepositAccountDetailPage: React.FC = () => {
                   label={t("Product")}
                   value={a.savingsProductName ?? a.savingsProductId}
                 />
-                <InfoRow icon={<User className="h-4 w-4" />} label={t("Client")} value={a.clientName ?? `#${a.clientId}`} />
+                <InfoRow
+                  icon={<User className="h-4 w-4" />}
+                  label={t("Client")}
+                  value={a.clientName ?? `#${a.clientId}`}
+                />
                 <InfoRow
                   icon={<User className="h-4 w-4" />}
                   label={t("Field Officer ID")}
@@ -727,32 +742,32 @@ const DepositAccountDetailPage: React.FC = () => {
               <CardHeader>
                 <CardTitle className="text-base">
                   <Percent className="inline mr-2 h-4 w-4" />
-                   {t("Interest Rate & Configuration")}
+                  {t("Interest Rate & Configuration")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                                     <span className="text-gray-500">{t("Interest Rate:")}</span>{" "}
+                  <span className="text-gray-500">{t("Interest Rate:")}</span>{" "}
                   <span className="font-medium">{a.nominalAnnualInterestRate ?? 0}%</span>
                 </div>
                 <div>
-                                     <span className="text-gray-500">{t("Compounding:")}</span>{" "}
+                  <span className="text-gray-500">{t("Compounding:")}</span>{" "}
                   <span className="font-medium">{a.interestCompoundingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                                     <span className="text-gray-500">{t("Posting:")}</span>{" "}
+                  <span className="text-gray-500">{t("Posting:")}</span>{" "}
                   <span className="font-medium">{a.interestPostingPeriodType?.value ?? "—"}</span>
                 </div>
                 <div>
-                                     <span className="text-gray-500">{t("Calculation:")}</span>{" "}
+                  <span className="text-gray-500">{t("Calculation:")}</span>{" "}
                   <span className="font-medium">{a.interestCalculationType?.value ?? "—"}</span>
                 </div>
                 <div>
-                                     <span className="text-gray-500">{t("Days/Year:")}</span>{" "}
+                  <span className="text-gray-500">{t("Days/Year:")}</span>{" "}
                   <span className="font-medium">{a.interestCalculationDaysInYearType?.value ?? "—"}</span>
                 </div>
                 <div>
-                                     <span className="text-gray-500">{t("Min Opening Balance:")}</span>{" "}
+                  <span className="text-gray-500">{t("Min Opening Balance:")}</span>{" "}
                   <span className="font-medium">
                     {a.minRequiredOpeningBalance != null
                       ? formatCurrency(a.minRequiredOpeningBalance, a.currency?.code)

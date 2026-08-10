@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useHistory } from "../hooks/useStandingInstructions";
-import { parseFineractDate } from "../api/standing-instructions";
+import { parseDate } from "../api/standing-instructions";
 import type { StandingInstructionHistoryItem } from "../types/standing-instruction.types";
 
 function formatDate(dateVal: number[] | null | undefined): string {
-  const d = parseFineractDate(dateVal);
+  const d = parseDate(dateVal);
   if (!d) return "—";
   return d.toLocaleDateString("en-US", {
     year: "numeric",

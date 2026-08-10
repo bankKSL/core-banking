@@ -34,7 +34,7 @@ export const LOAN_STATUS_CONFIG: Record<
   Withdrawn: { variant: "warning", label: i18n.t("Withdrawn") },
 };
 
-/** Fineract numeric loan status to string mapping (doc §17.1) */
+/** numeric loan status to string mapping (doc §17.1) */
 export const LOAN_STATUS_ID_MAP: Record<number, string> = {
   100: "Submitted and pending approval",
   200: "Approved",
@@ -59,7 +59,7 @@ export const STATUS_NAME_TO_ID: Record<string, number> = Object.entries(LOAN_STA
   {} as Record<string, number>,
 );
 
-/** Map raw Fineract status codes to config keys used by LOAN_STATUS_CONFIG */
+/** Map raw status codes to config keys used by LOAN_STATUS_CONFIG */
 export const LOAN_CODE_TO_KEY: Record<string, string> = {
   "loanStatusType.submitted.and.pending.approval": "Submitted and pending approval",
   "loanStatusType.approved": "Approved",
@@ -100,11 +100,9 @@ export const LOAN_SEARCH_DEBOUNCE_MS = 400;
 /**
  * Resolve a `Loan.status` payload to the canonical i18n string used by
  * `LOAN_STATUS_CONFIG` / `STATUS_NAME_TO_ID`. Accepts both the raw
- * `{id, code, value}` payload from Fineract and the numeric-only form.
+ * `{id, code, value}` payload from and the numeric-only form.
  */
-export function resolveStatusCode(loan: {
-  status?: { id?: number; code?: string; value?: string };
-}): string {
+export function resolveStatusCode(loan: { status?: { id?: number; code?: string; value?: string } }): string {
   const s = loan.status;
   if (!s) return "Unknown";
   if (s.code && s.code in LOAN_CODE_TO_KEY) return LOAN_CODE_TO_KEY[s.code];

@@ -184,12 +184,7 @@ export {
 export { adjustTransaction, undoTransaction, modifyTransaction } from "./api/transactionAdjustment";
 export type { AdjustmentCommand, AdjustmentPayload } from "./api/transactionAdjustment";
 
-export {
-  fetchLoanGuarantors,
-  addLoanGuarantor,
-  updateLoanGuarantor,
-  deleteLoanGuarantor,
-} from "./api/loanGuarantors";
+export { fetchLoanGuarantors, addLoanGuarantor, updateLoanGuarantor, deleteLoanGuarantor } from "./api/loanGuarantors";
 
 export {
   fetchRescheduleTemplate,
@@ -199,7 +194,7 @@ export {
   rescheduleRequestCommand,
 } from "./api/rescheduleLoans";
 
-export { toIsoDate, formatFineractDate, formatMoney } from "./utils/format";
+export { toIsoDate, formatDate, formatMoney } from "./utils/format";
 
 export { useLoans, loanKeys } from "./hooks/useLoans";
 

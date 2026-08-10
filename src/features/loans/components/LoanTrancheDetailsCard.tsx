@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
 import type { Loan } from "../types/loan";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 
 interface LoanTrancheDetailsCardProps {
   loan: Loan;
@@ -55,8 +55,8 @@ const LoanTrancheDetailsCard: FC<LoanTrancheDetailsCardProps> = ({ loan }) => {
                 <tbody className="divide-y dark:divide-gray-700">
                   {disbursementData.map((tranche: any, i: number) => (
                     <tr key={i}>
-                      <td className="px-4 py-2">{formatFineractDate(tranche.expectedDisbursementDate)}</td>
-                      <td className="px-4 py-2">{formatFineractDate(tranche.actualDisbursementDate)}</td>
+                      <td className="px-4 py-2">{formatDate(tranche.expectedDisbursementDate)}</td>
+                      <td className="px-4 py-2">{formatDate(tranche.actualDisbursementDate)}</td>
                       <td className="px-4 py-2 text-right font-mono">{tranche.principal?.toLocaleString()}</td>
                     </tr>
                   ))}

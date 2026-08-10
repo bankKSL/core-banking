@@ -1,10 +1,4 @@
-export type {
-  TaxComponent,
-  TaxComponentTemplate,
-  TaxGroup,
-  TaxGroupComponent,
-  TaxGroupTemplate,
-} from "./api/taxes";
+export type { TaxComponent, TaxComponentTemplate, TaxGroup, TaxGroupComponent, TaxGroupTemplate } from "./api/taxes";
 
 export {
   fetchTaxComponents,
@@ -17,7 +11,7 @@ export {
   fetchTaxGroupTemplate,
   createTaxGroup,
   updateTaxGroup,
-  parseFineractDate,
+  parseDate,
 } from "./api/taxes";
 
 export {

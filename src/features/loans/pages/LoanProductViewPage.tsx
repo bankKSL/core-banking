@@ -1,14 +1,26 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil, Landmark, DollarSign, Repeat, Percent, CalendarClock, FileText, Shield, Settings, AlertCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Pencil,
+  Landmark,
+  DollarSign,
+  Repeat,
+  Percent,
+  CalendarClock,
+  FileText,
+  Shield,
+  Settings,
+  AlertCircle,
+} from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useLoanProduct, formatFineractDate } from "@/features/loans";
+import { useLoanProduct, formatDate } from "@/features/loans";
 
 function enumVal(v: any, fallback = ""): string {
   if (v == null) return fallback;
@@ -141,9 +153,21 @@ const LoanProductViewPage: React.FC = () => {
               label={t("In Multiples Of")}
               value={p.currency?.inMultiplesOf ?? 0}
             />
-            <InfoRow icon={<Landmark className="h-4 w-4" />} label={t("Fund")} value={p.fund?.name ?? p.fundName ?? "—"} />
-            <InfoRow icon={<CalendarClock className="h-4 w-4" />} label={t("Start Date")} value={formatFineractDate(p.startDate)} />
-            <InfoRow icon={<CalendarClock className="h-4 w-4" />} label={t("Close Date")} value={formatFineractDate(p.closeDate)} />
+            <InfoRow
+              icon={<Landmark className="h-4 w-4" />}
+              label={t("Fund")}
+              value={p.fund?.name ?? p.fundName ?? "—"}
+            />
+            <InfoRow
+              icon={<CalendarClock className="h-4 w-4" />}
+              label={t("Start Date")}
+              value={formatDate(p.startDate)}
+            />
+            <InfoRow
+              icon={<CalendarClock className="h-4 w-4" />}
+              label={t("Close Date")}
+              value={formatDate(p.closeDate)}
+            />
             <InfoRow
               icon={
                 <Badge variant={isProgressive ? "info" : "default"} size="sm" rounded>
@@ -205,7 +229,11 @@ const LoanProductViewPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<Repeat className="h-4 w-4" />} label={t("Number of Repayments")} value={p.numberOfRepayments} />
+            <InfoRow
+              icon={<Repeat className="h-4 w-4" />}
+              label={t("Number of Repayments")}
+              value={p.numberOfRepayments}
+            />
             <InfoRow
               icon={<Repeat className="h-4 w-4" />}
               label={t("Repayment Every")}
@@ -341,19 +369,33 @@ const LoanProductViewPage: React.FC = () => {
             icon={<Shield className="h-4 w-4" />}
             label={t("Accounting Rule")}
             value={
-              <Badge variant={enumVal(p.accountingRule) === "CASH" ? "info" : enumVal(p.accountingRule) === "ACCRUAL" ? "default" : "warning"}>
+              <Badge
+                variant={
+                  enumVal(p.accountingRule) === "CASH"
+                    ? "info"
+                    : enumVal(p.accountingRule) === "ACCRUAL"
+                      ? "default"
+                      : "warning"
+                }
+              >
                 {enumVal(p.accountingRule, "NONE")}
               </Badge>
             }
           />
-          {p.accountingMappings && typeof p.accountingMappings === "object" && Object.entries(p.accountingMappings as Record<string, unknown>).map(([key, val]) => (
-            <InfoRow
-              key={key}
-              icon={<FileText className="h-4 w-4" />}
-              label={key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
-              value={typeof val === "object" && val !== null ? (val as any).name ?? JSON.stringify(val) : String(val ?? "—")}
-            />
-          ))}
+          {p.accountingMappings &&
+            typeof p.accountingMappings === "object" &&
+            Object.entries(p.accountingMappings as Record<string, unknown>).map(([key, val]) => (
+              <InfoRow
+                key={key}
+                icon={<FileText className="h-4 w-4" />}
+                label={key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
+                value={
+                  typeof val === "object" && val !== null
+                    ? ((val as any).name ?? JSON.stringify(val))
+                    : String(val ?? "—")
+                }
+              />
+            ))}
         </CardContent>
       </Card>
 
@@ -377,8 +419,16 @@ const LoanProductViewPage: React.FC = () => {
           />
           {p.multiDisburseLoan && (
             <>
-              <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Max Tranche Count")} value={p.maxTrancheCount ?? "—"} />
-              <InfoRow icon={<DollarSign className="h-4 w-4" />} label={t("Max Outstanding Balance")} value={p.outstandingLoanBalance?.toLocaleString() ?? "—"} />
+              <InfoRow
+                icon={<FileText className="h-4 w-4" />}
+                label={t("Max Tranche Count")}
+                value={p.maxTrancheCount ?? "—"}
+              />
+              <InfoRow
+                icon={<DollarSign className="h-4 w-4" />}
+                label={t("Max Outstanding Balance")}
+                value={p.outstandingLoanBalance?.toLocaleString() ?? "—"}
+              />
               <InfoRow
                 icon={<FileText className="h-4 w-4" />}
                 label={t("Can Define Installment Amount")}
@@ -418,11 +468,31 @@ const LoanProductViewPage: React.FC = () => {
             label={t("Allow Partial Period Interest")}
             value={p.allowPartialPeriodInterestCalculation ? t("Yes") : t("No")}
           />
-          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Days In Month")} value={getLabel("daysInMonthType", enumId(p.daysInMonthType))} />
-          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Days In Year")} value={getLabel("daysInYearType", enumId(p.daysInYearType))} />
-          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Grace on Principal")} value={p.graceOnPrincipalPayment ?? 0} />
-          <InfoRow icon={<FileText className="h-4 w-4" />} label={t("Grace on Interest")} value={p.graceOnInterestPayment ?? 0} />
-          <InfoRow icon={<DollarSign className="h-4 w-4" />} label={t("Arrears Tolerance")} value={p.inArrearsTolerance?.toLocaleString() ?? "0"} />
+          <InfoRow
+            icon={<FileText className="h-4 w-4" />}
+            label={t("Days In Month")}
+            value={getLabel("daysInMonthType", enumId(p.daysInMonthType))}
+          />
+          <InfoRow
+            icon={<FileText className="h-4 w-4" />}
+            label={t("Days In Year")}
+            value={getLabel("daysInYearType", enumId(p.daysInYearType))}
+          />
+          <InfoRow
+            icon={<FileText className="h-4 w-4" />}
+            label={t("Grace on Principal")}
+            value={p.graceOnPrincipalPayment ?? 0}
+          />
+          <InfoRow
+            icon={<FileText className="h-4 w-4" />}
+            label={t("Grace on Interest")}
+            value={p.graceOnInterestPayment ?? 0}
+          />
+          <InfoRow
+            icon={<DollarSign className="h-4 w-4" />}
+            label={t("Arrears Tolerance")}
+            value={p.inArrearsTolerance?.toLocaleString() ?? "0"}
+          />
         </CardContent>
       </Card>
 

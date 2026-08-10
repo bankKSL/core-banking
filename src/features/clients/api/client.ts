@@ -1,8 +1,8 @@
 import client from "@/api/client";
 
 /**
- * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (Fineract format).
- * Returns undefined if the input is empty or already in Fineract format.
+ * Convert yyyy-MM-dd (HTML date input) → yyyy-MM-dd (format).
+ * Returns undefined if the input is empty or already in format.
  */
 import type {
   Client,
@@ -206,7 +206,10 @@ export async function assignStaff(
  * POST /clients/{clientId}?command=unassignStaff
  * Removes the currently assigned staff from this client.
  */
-export async function unassignStaff(clientId: number | string, payload: { staffId: number }): Promise<ClientCommandResponse> {
+export async function unassignStaff(
+  clientId: number | string,
+  payload: { staffId: number },
+): Promise<ClientCommandResponse> {
   const { data } = await client.post<ClientCommandResponse>(`/clients/${clientId}`, payload, {
     params: { command: "unassignStaff" },
   });

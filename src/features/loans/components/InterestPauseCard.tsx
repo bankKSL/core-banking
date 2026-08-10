@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useInterestPauses, useCreateInterestPause, useDeleteInterestPause } from "../hooks/useInterestPauses";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 import type { InterestPause } from "../api/interestPauses";
 
 interface InterestPauseCardProps {
@@ -78,8 +78,8 @@ const InterestPauseCard: FC<InterestPauseCardProps> = ({ loanId }) => {
               <TableBody>
                 {pauses.map((p) => (
                   <TableRow key={p.id}>
-                    <TableCell className="text-sm">{formatFineractDate(p.startDate)}</TableCell>
-                    <TableCell className="text-sm">{formatFineractDate(p.endDate)}</TableCell>
+                    <TableCell className="text-sm">{formatDate(p.startDate)}</TableCell>
+                    <TableCell className="text-sm">{formatDate(p.endDate)}</TableCell>
                     <TableCell className="text-sm text-gray-500">{p.createdBy}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(p)}>

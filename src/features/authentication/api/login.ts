@@ -1,5 +1,5 @@
 import api from "@/api/client";
-import type { FineractLoginResponse } from "../types/auth";
+import type { LoginResponse } from "../types/auth";
 
 export interface LoginCredentials {
   username: string;
@@ -7,14 +7,14 @@ export interface LoginCredentials {
 }
 
 /**
- * Authenticate against Fineract.
+ * Authenticate against.
  *
  * Endpoint: POST /api/v1/authentication?tenantIdentifier=default
- * The request body contains the plaintext credentials; Fineract returns
+ * The request body contains the plaintext credentials; returns
  * a base64EncodedAuthenticationKey that must be used as the Basic Auth
  * token for every subsequent request.
  */
-export async function login(credentials: LoginCredentials): Promise<FineractLoginResponse> {
-  const { data } = await api.post<FineractLoginResponse>("/authentication?tenantIdentifier=default", credentials);
+export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
+  const { data } = await api.post<LoginResponse>("/authentication?tenantIdentifier=default", credentials);
   return data;
 }

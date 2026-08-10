@@ -12,13 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  useRescheduleRequest,
-  useReschedulePreview,
-  useRescheduleRequestCommand,
-} from "../hooks/useRescheduleLoans";
+import { useRescheduleRequest, useReschedulePreview, useRescheduleRequestCommand } from "../hooks/useRescheduleLoans";
 import { RESCHEDULE_STATUS_CONFIG, RESCHEDULE_STATUS_ID_MAP } from "../constants/transactions";
-import { formatFineractDate } from "../utils/format";
+import { formatDate } from "../utils/format";
 import LoanScheduleTable from "../components/LoanScheduleTable";
 import type { LoanRescheduleRequest } from "../types/loan";
 
@@ -163,7 +159,7 @@ const RescheduleRequestDetailPage: FC = () => {
             </div>
             <div>
               <span className="text-xs text-gray-500">{t("Reschedule From Date")}</span>
-              <p className="text-sm font-medium">{formatFineractDate(req.rescheduleFromDate)}</p>
+              <p className="text-sm font-medium">{formatDate(req.rescheduleFromDate)}</p>
             </div>
             <div>
               <span className="text-xs text-gray-500">{t("Reschedule From Installment")}</span>
@@ -202,7 +198,7 @@ const RescheduleRequestDetailPage: FC = () => {
                   <div className="h-2 w-2 rounded-full bg-blue-500" />
                   <div>
                     <p className="text-sm font-medium">
-                      {t("Submitted on")} {formatFineractDate(timeline.submittedOnDate)}
+                      {t("Submitted on")} {formatDate(timeline.submittedOnDate)}
                     </p>
                     <p className="text-xs text-gray-500">
                       {t("by")} {timeline.submittedByFirstname} {timeline.submittedByLastname} (
@@ -216,7 +212,7 @@ const RescheduleRequestDetailPage: FC = () => {
                   <div className="h-2 w-2 rounded-full bg-emerald-500" />
                   <div>
                     <p className="text-sm font-medium">
-                      {t("Approved on")} {formatFineractDate(timeline.approvedOnDate)}
+                      {t("Approved on")} {formatDate(timeline.approvedOnDate)}
                     </p>
                     <p className="text-xs text-gray-500">
                       {t("by")} {timeline.approvedByFirstname} {timeline.approvedByLastname} (
@@ -230,7 +226,7 @@ const RescheduleRequestDetailPage: FC = () => {
                   <div className="h-2 w-2 rounded-full bg-red-500" />
                   <div>
                     <p className="text-sm font-medium">
-                      {t("Rejected on")} {formatFineractDate(timeline.rejectedOnDate)}
+                      {t("Rejected on")} {formatDate(timeline.rejectedOnDate)}
                     </p>
                     <p className="text-xs text-gray-500">
                       {t("by")} {timeline.rejectedByFirstname} {timeline.rejectedByLastname} (
@@ -266,9 +262,9 @@ const RescheduleRequestDetailPage: FC = () => {
                     <TableCell className="text-sm font-medium">
                       {v.termType?.value ?? v.termType?.code ?? "—"}
                     </TableCell>
-                    <TableCell className="text-sm">{formatFineractDate(v.termVariationApplicableFrom)}</TableCell>
+                    <TableCell className="text-sm">{formatDate(v.termVariationApplicableFrom)}</TableCell>
                     <TableCell className="text-sm">
-                      {v.dateValue ? formatFineractDate(v.dateValue) : v.decimalValue ?? "—"}
+                      {v.dateValue ? formatDate(v.dateValue) : (v.decimalValue ?? "—")}
                     </TableCell>
                     <TableCell className="text-sm">
                       <StatusBadge
@@ -298,7 +294,9 @@ const RescheduleRequestDetailPage: FC = () => {
           </DialogHeader>
           <form onSubmit={handleAction} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{action === "approve" ? t("Approved On") : t("Rejected On")}</label>
+              <label className="block text-sm font-medium">
+                {action === "approve" ? t("Approved On") : t("Rejected On")}
+              </label>
               <Input type="date" {...register("actionDate")} />
             </div>
 
@@ -306,14 +304,21 @@ const RescheduleRequestDetailPage: FC = () => {
               <ErrorState
                 title={t("Failed to process request")}
                 message={
-                  commandMutation.error instanceof Error ? commandMutation.error.message : t("An unexpected error occurred.")
+                  commandMutation.error instanceof Error
+                    ? commandMutation.error.message
+                    : t("An unexpected error occurred.")
                 }
                 onRetry={() => commandMutation.reset()}
               />
             )}
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" type="button" onClick={() => setAction(null)} disabled={commandMutation.isPending}>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setAction(null)}
+                disabled={commandMutation.isPending}
+              >
                 {t("Cancel")}
               </Button>
               <Button

@@ -7,7 +7,6 @@ import { useNetworkStore } from "@/store/network";
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
-    "Fineract-Platform-TenantId": "default",
     "Content-Type": "application/json",
   },
   timeout: 30_000,
@@ -25,8 +24,7 @@ client.interceptors.request.use(
     } else {
       delete config.headers.Authorization;
     }
-    // Fineract requires this header for tenant identification
-    config.headers["Fineract-Platform-TenantId"] = "default";
+
     return config;
   },
   (error: AxiosError) => Promise.reject(error),
@@ -47,12 +45,14 @@ client.interceptors.response.use(
     const isNetworkError = code === "ERR_NETWORK";
     const isTimeout = code === "ECONNABORTED" || (error.message ?? "").toLowerCase().includes("timeout");
     if (!error.response && (isNetworkError || isTimeout)) {
-      useNetworkStore.getState().reportNetworkError(
-        isTimeout ? "timeout" : "connection",
-        isTimeout
-          ? i18n.t("The request timed out. Please check your connection and try again.")
-          : i18n.t("Unable to connect to the server. Please check your connection and try again."),
-      );
+      useNetworkStore
+        .getState()
+        .reportNetworkError(
+          isTimeout ? "timeout" : "connection",
+          isTimeout
+            ? i18n.t("The request timed out. Please check your connection and try again.")
+            : i18n.t("Unable to connect to the server. Please check your connection and try again."),
+        );
     }
     return Promise.reject(error);
   },

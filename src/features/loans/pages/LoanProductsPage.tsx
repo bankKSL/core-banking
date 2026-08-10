@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { useLoanProducts, useDeleteLoanProduct, formatFineractDate } from "@/features/loans";
+import { useLoanProducts, useDeleteLoanProduct, formatDate } from "@/features/loans";
 import type { LoanProduct } from "@/features/loans";
 
 const LoanProductsPage: React.FC = () => {
@@ -57,12 +57,12 @@ const LoanProductsPage: React.FC = () => {
     {
       key: "startDate",
       header: t("Start Date"),
-      accessorFn: (r) => <span>{formatFineractDate(r.startDate)}</span>,
+      accessorFn: (r) => <span>{formatDate(r.startDate)}</span>,
     },
     {
       key: "closeDate",
       header: t("Close Date"),
-      accessorFn: (r) => <span>{formatFineractDate(r.closeDate)}</span>,
+      accessorFn: (r) => <span>{formatDate(r.closeDate)}</span>,
     },
     {
       key: "status",

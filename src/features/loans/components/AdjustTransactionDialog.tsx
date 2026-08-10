@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { undoTransaction, modifyTransaction } from "../api/transactionAdjustment";
-import { formatFineractDate, formatMoney } from "../utils/format";
+import { formatDate, formatMoney } from "../utils/format";
 
 interface AdjustmentTransaction {
   id: number;
@@ -77,7 +77,7 @@ const AdjustTransactionDialog: FC<AdjustTransactionDialogProps> = ({
             <DialogTitle>{t("Adjust Transaction")}</DialogTitle>
             <DialogDescription>
               {transaction
-                ? `${transaction.type?.value ?? t("Transaction")} — ${formatMoney(transaction.amount)} on ${formatFineractDate(transaction.date)}`
+                ? `${transaction.type?.value ?? t("Transaction")} — ${formatMoney(transaction.amount)} on ${formatDate(transaction.date)}`
                 : t("Select an adjustment option.")}
             </DialogDescription>
           </DialogHeader>

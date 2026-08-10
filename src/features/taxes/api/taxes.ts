@@ -56,7 +56,10 @@ export async function createTaxComponent(payload: Record<string, unknown>): Prom
   return data;
 }
 
-export async function updateTaxComponent(id: number, payload: Record<string, unknown>): Promise<{ resourceId: number }> {
+export async function updateTaxComponent(
+  id: number,
+  payload: Record<string, unknown>,
+): Promise<{ resourceId: number }> {
   const { data } = await client.put<{ resourceId: number }>(`/taxes/component/${id}`, payload);
   return data;
 }
@@ -89,7 +92,7 @@ export async function updateTaxGroup(id: number, payload: Record<string, unknown
   return data;
 }
 
-export function parseFineractDate(dateVal: number[] | null | undefined): Date | null {
+export function parseDate(dateVal: number[] | null | undefined): Date | null {
   if (dateVal == null) return null;
   if (Array.isArray(dateVal) && dateVal.length >= 3) {
     return new Date(dateVal[0], dateVal[1] - 1, dateVal[2]);

@@ -1,4 +1,4 @@
-// ─── Apache Fineract Savings / Deposit Types ────────────────────
+// ─── Savings / Deposit Types ────────────────────
 
 export type SavingsAccountStatus =
   | "Submitted and pending approval"

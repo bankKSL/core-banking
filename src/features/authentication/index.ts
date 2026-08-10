@@ -1,7 +1,7 @@
 // ─── Authentication Feature ───────────────────────────────────
 
 // Types
-export type { AuthUser, FineractLoginResponse, FineractRole } from "./types/auth";
+export type { AuthUser, LoginResponse, Role } from "./types/auth";
 
 // Schemas
 export { loginSchema } from "./schemas/login.schema";

@@ -1,6 +1,6 @@
-// ─── Apache Fineract Group Types ───────────────────────────────
+// ─── Group Types ───────────────────────────────
 
-/** Status of a group as returned by the Fineract API */
+/** Status of a group as returned by the API */
 export interface GroupStatus {
   id?: number;
   code?: string;
@@ -88,7 +88,7 @@ export interface GroupListParams {
 // ─── Group Create/Update/Command Requests ───────────────────────
 
 /**
- * Create body (POST /groups). The generated Fineract model only types
+ * Create body (POST /groups). The generated model only types
  * { active?, name?, officeId? } — activationDate/dateFormat/locale are
  * required by the server when active = true and are added at runtime.
  */
@@ -167,13 +167,13 @@ export interface GroupRoleData {
   role?: { id: number; name?: string };
 }
 
-/** A closure reason returned by the Fineract template */
+/** A closure reason returned by the template */
 export interface GroupClosureReason {
   id: number;
   name: string;
 }
 
-/** Fineract command/mutation response */
+/** command/mutation response */
 export interface GroupCommandResponse {
   officeId?: number;
   groupId?: number;

@@ -29,10 +29,7 @@ export async function createHoliday(payload: HolidayCreateRequest): Promise<{ re
   return data;
 }
 
-export async function updateHoliday(
-  id: number,
-  payload: HolidayUpdateRequest,
-): Promise<{ resourceId: number }> {
+export async function updateHoliday(id: number, payload: HolidayUpdateRequest): Promise<{ resourceId: number }> {
   const { data } = await client.put<{ resourceId: number }>(`/holidays/${id}`, payload);
   return data;
 }
@@ -71,10 +68,8 @@ export function buildUpdateRequest(values: Record<string, unknown>): HolidayUpda
 
   if (values.name != null) request.name = values.name as string;
   if (values.description != null) request.description = (values.description as string) || undefined;
-  if (values.fromDate != null)
-    request.fromDate = currentDate(values.fromDate as string) ?? (values.fromDate as string);
-  if (values.toDate != null)
-    request.toDate = currentDate(values.toDate as string) ?? (values.toDate as string);
+  if (values.fromDate != null) request.fromDate = currentDate(values.fromDate as string) ?? (values.fromDate as string);
+  if (values.toDate != null) request.toDate = currentDate(values.toDate as string) ?? (values.toDate as string);
   if (values.repaymentsRescheduledTo)
     request.repaymentsRescheduledTo =
       currentDate(values.repaymentsRescheduledTo as string) ?? (values.repaymentsRescheduledTo as string);
@@ -84,7 +79,7 @@ export function buildUpdateRequest(values: Record<string, unknown>): HolidayUpda
   return request;
 }
 
-export function parseFineractDate(dateVal: number[] | null | undefined): Date | null {
+export function parseDate(dateVal: number[] | null | undefined): Date | null {
   if (dateVal == null) return null;
   if (Array.isArray(dateVal) && dateVal.length >= 3) {
     return new Date(dateVal[0], dateVal[1] - 1, dateVal[2]);

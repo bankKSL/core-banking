@@ -27,7 +27,7 @@ const getTransactionStatus = (tx: LoanTransaction): string => {
   return "completed";
 };
 
-/** Format date from Fineract (can be array [y,m,d] or string) */
+/** Format date from service (can be array [y,m,d] or string) */
 const formatTxDate = (tx: LoanTransaction): string => {
   const raw = tx.date ?? tx.submittedOnDate;
   if (!raw) return "—";
@@ -159,7 +159,9 @@ const LoanTransactionsTable: FC<LoanTransactionsTableProps> = ({ transactions, l
           loanId={loanId}
           transaction={adjustTarget}
           open={!!adjustTarget}
-          onOpenChange={(open) => { if (!open) setAdjustTarget(null); }}
+          onOpenChange={(open) => {
+            if (!open) setAdjustTarget(null);
+          }}
           onSuccess={() => {
             setAdjustTarget(null);
             onSuccess?.();
