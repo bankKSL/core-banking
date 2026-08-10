@@ -51,6 +51,18 @@ export const createLoanSchema = z
     dateFormat: z.string().default("yyyy-MM-dd"),
     locale: z.string().default("en"),
     charges: z.array(z.object({ chargeId: z.number(), amount: z.number() })).optional(),
+    disbursementData: z
+      .array(
+        z.object({
+          expectedDisbursementDate: z.string(),
+          principal: z.number().positive(),
+        })
+      )
+      .optional(),
+    isTopup: z.boolean().optional(),
+    loanIdToClose: z.number().int().positive().optional(),
+    linkAccountId: z.number().int().positive().optional(),
+    createStandingInstructionAtDisbursement: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     // Cross-field rules (doc §8/§11): term & repayment frequency types must match
@@ -103,6 +115,14 @@ export const createLoanSchema = z
         code: "custom",
         path: ["graceOnInterestCharged"],
         message: "Grace on interest charged must be less than number of repayments",
+      });
+    }
+    // Topup loan validation
+    if (data.isTopup && !data.loanIdToClose) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["loanIdToClose"],
+        message: "Loan to close is required for topup loans",
       });
     }
   });
