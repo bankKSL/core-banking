@@ -61,7 +61,6 @@ export const createLoanSchema = z
       .optional(),
     isTopup: z.boolean().optional(),
     loanIdToClose: z.number().int().positive().optional(),
-    linkAccountId: z.number().int().positive().optional(),
     createStandingInstructionAtDisbursement: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
