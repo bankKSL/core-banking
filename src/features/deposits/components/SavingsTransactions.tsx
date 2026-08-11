@@ -129,7 +129,7 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({
       header: t("Reason"),
       accessorFn: (row) =>
         row.reasonForBlock ? (
-          <span className="text-xs text-gray-600 dark:text-gray-400 max-w-[200px] truncate" title={row.reasonForBlock}>
+          <span className="text-xs text-gray-600 dark:text-gray-400 max-w-50 truncate" title={row.reasonForBlock}>
             {row.reasonForBlock}
           </span>
         ) : (
@@ -230,7 +230,7 @@ const SavingsTransactions: FC<SavingsTransactionsProps> = ({
             setPage(1);
           }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-45">
             <SelectValue placeholder={t("All Types")} />
           </SelectTrigger>
           <SelectContent>

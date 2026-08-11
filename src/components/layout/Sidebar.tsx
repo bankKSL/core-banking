@@ -43,6 +43,7 @@ import {
   Handshake,
   Layers,
   CalendarRange,
+  TrendingUp,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -82,14 +83,62 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     items: [
       { label: t("Loans"), path: "/loans", icon: Banknote, exact: true, translationKey: "Loans" },
       { label: t("Loan Products"), path: "/lending/products", icon: Briefcase, translationKey: "Loan Products" },
+      {
+        label: t("Working Capital Loans"),
+        path: "/working-capital-loans",
+        icon: TrendingUp,
+        exact: true,
+        translationKey: "Working Capital Loans",
+      },
+      {
+        label: t("WC Loan Products"),
+        path: "/working-capital-loans/products",
+        icon: TrendingUp,
+        translationKey: "WC Loan Products",
+      },
       { label: t("Loan Originators"), path: "/loan-originators", icon: Handshake, translationKey: "Loan Originators" },
-      { label: t("Collateral Products"), path: "/collateral-products", icon: Gem, translationKey: "Collateral Products" },
-      { label: t("External Asset Owners"), path: "/external-asset-owners/owners", icon: UsersRound, translationKey: "External Asset Owners" },
-      { label: t("Transfers (Investor)"), path: "/external-asset-owners/transfers", icon: ArrowRightLeft, translationKey: "Transfers (Investor)" },
-      { label: t("Reschedule Requests"), path: "/rescheduling", icon: CalendarClock, translationKey: "Reschedule Requests" },
-      { label: t("Delinquency Buckets"), path: "/delinquency-buckets", icon: Layers, translationKey: "Delinquency Buckets" },
-      { label: t("Delinquency Ranges"), path: "/delinquency-ranges", icon: CalendarRange, translationKey: "Delinquency Ranges" },
-      { label: t("Bulk Reassignment"), path: "/loans/reassign", icon: ArrowRightLeft, translationKey: "Bulk Reassignment" },
+      {
+        label: t("Collateral Products"),
+        path: "/collateral-products",
+        icon: Gem,
+        translationKey: "Collateral Products",
+      },
+      {
+        label: t("External Asset Owners"),
+        path: "/external-asset-owners/owners",
+        icon: UsersRound,
+        translationKey: "External Asset Owners",
+      },
+      {
+        label: t("Transfers (Investor)"),
+        path: "/external-asset-owners/transfers",
+        icon: ArrowRightLeft,
+        translationKey: "Transfers (Investor)",
+      },
+      {
+        label: t("Reschedule Requests"),
+        path: "/rescheduling",
+        icon: CalendarClock,
+        translationKey: "Reschedule Requests",
+      },
+      {
+        label: t("Delinquency Buckets"),
+        path: "/delinquency-buckets",
+        icon: Layers,
+        translationKey: "Delinquency Buckets",
+      },
+      {
+        label: t("Delinquency Ranges"),
+        path: "/delinquency-ranges",
+        icon: CalendarRange,
+        translationKey: "Delinquency Ranges",
+      },
+      {
+        label: t("Bulk Reassignment"),
+        path: "/loans/reassign",
+        icon: ArrowRightLeft,
+        translationKey: "Bulk Reassignment",
+      },
     ],
   },
   {
@@ -98,13 +147,43 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     titleKey: "Deposits",
     defaultOpen: true,
     items: [
-      { label: t("Savings Accounts"), path: "/deposits/saving-accounts", icon: PiggyBank, translationKey: "Savings Accounts" },
+      {
+        label: t("Savings Accounts"),
+        path: "/deposits/saving-accounts",
+        icon: PiggyBank,
+        translationKey: "Savings Accounts",
+      },
       { label: t("Fixed Deposits"), path: "/deposits/fixed", icon: Wallet, translationKey: "Fixed Deposits" },
-      { label: t("Recurring Deposits"), path: "/deposits/recurring", icon: Calendar, translationKey: "Recurring Deposits" },
-      { label: t("Savings Accounts Products"), path: "/deposits/products", icon: LayoutGrid, translationKey: "Savings Accounts Products" },
-      { label: t("Fixed Deposits Products"), path: "/deposits/fixed-products", icon: Calendar, translationKey: "Fixed Deposits Products" },
-      { label: t("Recurring Deposit Products"), path: "/deposits/recurring-products", icon: LayoutGrid, translationKey: "Recurring Deposit Products" },
-      { label: t("Interest Rate Charts"), path: "/interest-rate-charts", icon: Percent, translationKey: "Interest Rate Charts" },
+      {
+        label: t("Recurring Deposits"),
+        path: "/deposits/recurring",
+        icon: Calendar,
+        translationKey: "Recurring Deposits",
+      },
+      {
+        label: t("Savings Accounts Products"),
+        path: "/deposits/products",
+        icon: LayoutGrid,
+        translationKey: "Savings Accounts Products",
+      },
+      {
+        label: t("Fixed Deposits Products"),
+        path: "/deposits/fixed-products",
+        icon: Calendar,
+        translationKey: "Fixed Deposits Products",
+      },
+      {
+        label: t("Recurring Deposit Products"),
+        path: "/deposits/recurring-products",
+        icon: LayoutGrid,
+        translationKey: "Recurring Deposit Products",
+      },
+      {
+        label: t("Interest Rate Charts"),
+        path: "/interest-rate-charts",
+        icon: Percent,
+        translationKey: "Interest Rate Charts",
+      },
     ],
   },
   {
@@ -124,15 +203,50 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     titleKey: "Accounting",
     defaultOpen: true,
     items: [
-      { label: t("Chart of Accounts"), path: "/accounting/gl-accounts", icon: BookOpen, translationKey: "Chart of Accounts" },
-      { label: t("Journal Entries"), path: "/accounting/journal-entries", icon: FileText, translationKey: "Journal Entries" },
+      {
+        label: t("Chart of Accounts"),
+        path: "/accounting/gl-accounts",
+        icon: BookOpen,
+        translationKey: "Chart of Accounts",
+      },
+      {
+        label: t("Journal Entries"),
+        path: "/accounting/journal-entries",
+        icon: FileText,
+        translationKey: "Journal Entries",
+      },
       { label: t("Accounting Rules"), path: "/accounting/rules", icon: Scale, translationKey: "Accounting Rules" },
-      { label: t("Activity Mappings"), path: "/accounting/financial-activity-mappings", icon: Link2, translationKey: "Activity Mappings" },
+      {
+        label: t("Activity Mappings"),
+        path: "/accounting/financial-activity-mappings",
+        icon: Link2,
+        translationKey: "Activity Mappings",
+      },
       { label: t("Closures"), path: "/accounting/closures", icon: Lock, translationKey: "Closures" },
-      { label: t("Periodic Accrual"), path: "/accounting/periodic-accrual", icon: CalendarClock, translationKey: "Periodic Accrual" },
-      { label: t("Provisioning"), path: "/accounting/provisioning-entries", icon: ShieldCheck, translationKey: "Provisioning" },
-      { label: t("Provisioning Categories"), path: "/provisioning-categories", icon: LayoutGrid, translationKey: "Provisioning Categories" },
-      { label: t("Provisioning Criteria"), path: "/provisioning-criteria", icon: ListOrdered, translationKey: "Provisioning Criteria" },
+      {
+        label: t("Periodic Accrual"),
+        path: "/accounting/periodic-accrual",
+        icon: CalendarClock,
+        translationKey: "Periodic Accrual",
+      },
+      {
+        label: t("Provisioning"),
+        path: "/accounting/provisioning-entries",
+        icon: ShieldCheck,
+        translationKey: "Provisioning",
+      },
+      {
+        label: t("Provisioning Categories"),
+        path: "/provisioning-categories",
+        icon: LayoutGrid,
+        translationKey: "Provisioning Categories",
+      },
+      {
+        label: t("Provisioning Criteria"),
+        path: "/provisioning-criteria",
+        icon: ListOrdered,
+        translationKey: "Provisioning Criteria",
+      },
       { label: t("Tax Components"), path: "/taxes/components", icon: Percent, translationKey: "Tax Components" },
       { label: t("Tax Groups"), path: "/taxes/groups", icon: LayoutGrid, translationKey: "Tax Groups" },
     ],
@@ -142,9 +256,7 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     title: t("Treasury"),
     titleKey: "Treasury",
     defaultOpen: true,
-    items: [
-      { label: t("Exchange Rates"), path: "/exchange-rates", icon: Globe, translationKey: "Exchange Rates" },
-    ],
+    items: [{ label: t("Exchange Rates"), path: "/exchange-rates", icon: Globe, translationKey: "Exchange Rates" }],
   },
   {
     id: "transfers",
@@ -152,9 +264,19 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     titleKey: "Transfers",
     defaultOpen: true,
     items: [
-      { label: t("Transfer History"), path: "/transfers/history", icon: ArrowRightLeft, translationKey: "Transfer History" },
+      {
+        label: t("Transfer History"),
+        path: "/transfers/history",
+        icon: ArrowRightLeft,
+        translationKey: "Transfer History",
+      },
       { label: t("New Transfer"), path: "/transfers/new", icon: ArrowRightLeft, translationKey: "New Transfer" },
-      { label: t("Standing Instructions"), path: "/transfers/standing-instructions", icon: FileText, translationKey: "Standing Instructions" },
+      {
+        label: t("Standing Instructions"),
+        path: "/transfers/standing-instructions",
+        icon: FileText,
+        translationKey: "Standing Instructions",
+      },
       { label: t("SI History"), path: "/standing-instruction-history", icon: Repeat, translationKey: "SI History" },
     ],
   },
@@ -178,7 +300,12 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     defaultOpen: true,
     items: [
       { label: t("Branches (Offices)"), path: "/offices", icon: Building2, translationKey: "Branches (Offices)" },
-      { label: t("Office Transactions"), path: "/office-transactions", icon: ArrowRightLeft, translationKey: "Office Transactions" },
+      {
+        label: t("Office Transactions"),
+        path: "/office-transactions",
+        icon: ArrowRightLeft,
+        translationKey: "Office Transactions",
+      },
       { label: t("Staff"), path: "/staff", icon: Users, translationKey: "Staff" },
       { label: t("Holidays"), path: "/holidays", icon: Calendar, translationKey: "Holidays" },
       { label: t("Currencies"), path: "/currencies", icon: Wallet, translationKey: "Currencies" },
@@ -194,9 +321,7 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     title: t("Marketing"),
     titleKey: "Marketing",
     defaultOpen: true,
-    items: [
-      { label: t("Campaigns"), path: "/campaigns", icon: Megaphone, translationKey: "Campaigns" },
-    ],
+    items: [{ label: t("Campaigns"), path: "/campaigns", icon: Megaphone, translationKey: "Campaigns" }],
   },
   {
     id: "configuration",
@@ -206,9 +331,24 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     items: [
       { label: t("Dashboard"), path: "/configuration", icon: Settings, translationKey: "Dashboard" },
       { label: t("Global Config"), path: "/configuration/global", icon: ToggleLeft, translationKey: "Global Config" },
-      { label: t("External Services"), path: "/configuration/external-services", icon: Globe, translationKey: "External Services" },
-      { label: t("Password Policy"), path: "/configuration/password-policy", icon: ShieldCheck, translationKey: "Password Policy" },
-      { label: t("Business Date"), path: "/configuration/business-date", icon: Calendar, translationKey: "Business Date" },
+      {
+        label: t("External Services"),
+        path: "/configuration/external-services",
+        icon: Globe,
+        translationKey: "External Services",
+      },
+      {
+        label: t("Password Policy"),
+        path: "/configuration/password-policy",
+        icon: ShieldCheck,
+        translationKey: "Password Policy",
+      },
+      {
+        label: t("Business Date"),
+        path: "/configuration/business-date",
+        icon: Calendar,
+        translationKey: "Business Date",
+      },
     ],
   },
   {
@@ -220,7 +360,12 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
       { label: t("Reports"), path: "/reports", icon: FileText, translationKey: "Reports" },
       { label: t("Adhoc Queries"), path: "/adhoc-queries", icon: Calculator, translationKey: "Adhoc Queries" },
       { label: t("Datatables"), path: "/datatables", icon: LayoutGrid, translationKey: "Datatables" },
-      { label: t("Entity Checks"), path: "/entity-datatable-checks", icon: ShieldCheck, translationKey: "Entity Checks" },
+      {
+        label: t("Entity Checks"),
+        path: "/entity-datatable-checks",
+        icon: ShieldCheck,
+        translationKey: "Entity Checks",
+      },
     ],
   },
   {
@@ -243,7 +388,12 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     items: [
       { label: t("Dashboard"), path: "/interop/dashboard", icon: Activity, translationKey: "Dashboard" },
       { label: t("Lookup Party"), path: "/interop/party/search", icon: Search, translationKey: "Lookup Party" },
-      { label: t("Register Identifier"), path: "/interop/party/register", icon: UserPlus, translationKey: "Register Identifier" },
+      {
+        label: t("Register Identifier"),
+        path: "/interop/party/register",
+        icon: UserPlus,
+        translationKey: "Register Identifier",
+      },
       { label: t("Transfers"), path: "/interop/transfers", icon: ArrowRightLeft, translationKey: "Transfers" },
       { label: t("Account Details"), path: "/interop/account", icon: Eye, translationKey: "Account Details" },
     ],
@@ -258,7 +408,12 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
       { label: t("Roles"), path: "/admin/roles", icon: ShieldCheck, translationKey: "Roles" },
       { label: t("Permissions"), path: "/admin/permissions", icon: KeyRound, translationKey: "Permissions" },
       { label: t("Tellers"), path: "/tellers", icon: Banknote, translationKey: "Tellers" },
-      { label: t("Batch Operations"), path: "/admin/batch-operations", icon: Terminal, translationKey: "Batch Operations" },
+      {
+        label: t("Batch Operations"),
+        path: "/admin/batch-operations",
+        icon: Terminal,
+        translationKey: "Batch Operations",
+      },
     ],
   },
   {
@@ -266,9 +421,7 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
     title: t("Logs"),
     titleKey: "Logs",
     defaultOpen: true,
-    items: [
-      { label: t("Audit Logs"), path: "/audit-logs", icon: ShieldCheck, translationKey: "Audit Logs" },
-    ],
+    items: [{ label: t("Audit Logs"), path: "/audit-logs", icon: ShieldCheck, translationKey: "Audit Logs" }],
   },
 ];
 

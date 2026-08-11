@@ -155,7 +155,19 @@ import ShareAccountFormPage from "@/features/shares/pages/ShareAccountFormPage";
 import ShareAccountDetailPage from "@/features/shares/pages/ShareAccountDetailPage";
 import DividendListPage from "@/features/shares/pages/DividendListPage";
 import LoanReassignmentPage from "@/features/loans/pages/LoanReassignmentPage";
-import { DelinquencyBucketListPage, DelinquencyBucketFormPage, DelinquencyRangeListPage, DelinquencyRangeFormPage } from "@/features/delinquency-buckets";
+import {
+  DelinquencyBucketListPage,
+  DelinquencyBucketFormPage,
+  DelinquencyRangeListPage,
+  DelinquencyRangeFormPage,
+} from "@/features/delinquency-buckets";
+import {
+  WCLoansListPage,
+  WCLoanFormPage,
+  WCLoanViewPage,
+  WCLoanProductsPage,
+  WCLoanProductFormPage,
+} from "@/features/working-capital-loans";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -266,6 +278,13 @@ function App() {
                   <Route path="/delinquency-ranges" element={<DelinquencyRangeListPage />} />
                   <Route path="/delinquency-ranges/new" element={<DelinquencyRangeFormPage />} />
                   <Route path="/delinquency-ranges/edit/:id" element={<DelinquencyRangeFormPage />} />
+                  {/* Working Capital Loans */}
+                  <Route path="/working-capital-loans/products" element={<WCLoanProductsPage />} />
+                  <Route path="/working-capital-loans/products/new" element={<WCLoanProductFormPage />} />
+                  <Route path="/working-capital-loans/products/view/:id" element={<WCLoanViewPage />} />
+                  <Route path="/working-capital-loans" element={<WCLoansListPage />} />
+                  <Route path="/working-capital-loans/new" element={<WCLoanFormPage />} />
+                  <Route path="/working-capital-loans/view/:id" element={<WCLoanViewPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
                   <Route path="/deposits/products/new" element={<SavingsProductFormPage />} />

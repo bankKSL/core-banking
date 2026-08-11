@@ -683,6 +683,79 @@ const LoanForm: FC<LoanFormProps> = ({
         </CardContent>
       </Card>
 
+      {/* Topup Loan Configuration */}
+      {mode === "create" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Topup Loan")}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer">
+              <Checkbox
+                id="isTopup"
+                checked={!!watch("isTopup")}
+                onCheckedChange={(v) => setValue("isTopup", v === true)}
+                disabled={isSubmitting}
+              />
+              <label htmlFor="isTopup" className="block text-sm font-medium">
+                {t("Is Topup Loan")}
+              </label>
+            </div>
+            {watch("isTopup") && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium">{t("Loan to Close")} *</label>
+                <Input
+                  type="number"
+                  {...register("loanIdToClose")}
+                  disabled={isSubmitting}
+                  error={t(errors.loanIdToClose?.message ?? "")}
+                  placeholder={t("Enter loan ID to close")}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Multi-Disbursement Configuration */}
+      {mode === "create" && products.find((p) => p.id === productIdVal)?.multiDisburseLoan && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Multi-Disbursement")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-500">
+              {t("Configure tranche details for multi-disbursement loans. Each tranche represents a separate disbursement.")}
+            </p>
+            <div className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-400 text-center">
+              {t("Tranche configuration editor — Custom child component (not yet implemented)")}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Standing Instructions */}
+      {mode === "create" && watch("linkAccountId") && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Standing Instructions")}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer">
+              <Checkbox
+                id="createStandingInstructionAtDisbursement"
+                checked={!!watch("createStandingInstructionAtDisbursement")}
+                onCheckedChange={(v) => setValue("createStandingInstructionAtDisbursement", v === true)}
+                disabled={isSubmitting}
+              />
+              <label htmlFor="createStandingInstructionAtDisbursement" className="block text-sm font-medium">
+                {t("Create Standing Instruction at Disbursement")}
+              </label>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Originators (create only) — attached at application time */}
       {mode === "create" && (
         <Card>

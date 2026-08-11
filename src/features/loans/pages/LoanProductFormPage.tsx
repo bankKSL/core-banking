@@ -83,6 +83,7 @@ const loanProductSchema = z
     recalculationRestFrequencyType: z.coerce.number().optional(),
     preClosureInterestCalculationStrategy: z.coerce.number().optional(),
     enableDownPayment: z.boolean().optional(),
+    disbursedAmountPercentageForDownPayment: z.coerce.number().min(1).max(100).optional(),
     enableAutoRepaymentForDownPayment: z.boolean().optional(),
     repaymentStartDateType: z.coerce.number().optional(),
     enableBuyDownFee: z.boolean().optional(),
@@ -116,6 +117,7 @@ const loanProductSchema = z
     overAppliedNumber: z.coerce.number().optional(),
     minimumGap: z.coerce.number().optional(),
     maximumGap: z.coerce.number().optional(),
+    allowVariableInstallments: z.boolean().optional(),
     delinquencyBucketId: z.coerce.number().optional(),
     compoundingFrequencyType: z.coerce.number().optional(),
     isArrearsBasedOnOriginalSchedule: z.boolean().optional(),
@@ -123,6 +125,31 @@ const loanProductSchema = z
     fundId: z.coerce.number().optional(),
     inMultiplesOf: z.coerce.number().optional(),
     accountingRule: z.coerce.number(),
+    fundSourceAccountId: z.coerce.number().optional(),
+    loanPortfolioAccountId: z.coerce.number().optional(),
+    receivableInterestAccountId: z.coerce.number().optional(),
+    receivableFeeAccountId: z.coerce.number().optional(),
+    receivablePenaltyAccountId: z.coerce.number().optional(),
+    interestOnLoanAccountId: z.coerce.number().optional(),
+    incomeFromFeeAccountId: z.coerce.number().optional(),
+    incomeFromPenaltyAccountId: z.coerce.number().optional(),
+    overpaymentLiabilityAccountId: z.coerce.number().optional(),
+    writeOffAccountId: z.coerce.number().optional(),
+    transfersInSuspenseAccountId: z.coerce.number().optional(),
+    incomeFromRecoveryAccountId: z.coerce.number().optional(),
+    goodwillCreditAccountId: z.coerce.number().optional(),
+    incomeFromChargeOffInterestAccountId: z.coerce.number().optional(),
+    incomeFromChargeOffFeesAccountId: z.coerce.number().optional(),
+    incomeFromChargeOffPenaltyAccountId: z.coerce.number().optional(),
+    chargeOffExpenseAccountId: z.coerce.number().optional(),
+    chargeOffFraudExpenseAccountId: z.coerce.number().optional(),
+    incomeFromGoodwillCreditInterestAccountId: z.coerce.number().optional(),
+    incomeFromGoodwillCreditFeesAccountId: z.coerce.number().optional(),
+    incomeFromGoodwillCreditPenaltyAccountId: z.coerce.number().optional(),
+    deferredIncomeLiabilityAccountId: z.coerce.number().optional(),
+    incomeFromCapitalizationAccountId: z.coerce.number().optional(),
+    buyDownExpenseAccountId: z.coerce.number().optional(),
+    incomeFromBuyDownAccountId: z.coerce.number().optional(),
     locale: z.string(),
     dateFormat: z.string(),
   })
@@ -180,6 +207,190 @@ const loanProductSchema = z
         message: "Number of Repayments must not be greater than Max Number of Repayments",
       });
     }
+
+    // Validation rule 3: multiDisburseLoan=true requires maxTrancheCount
+    if (data.multiDisburseLoan && (data.maxTrancheCount == null || data.maxTrancheCount <= 0)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxTrancheCount"],
+        message: "Max Tranche Count is required when Multi-Disburse Loan is enabled",
+      });
+    }
+
+    // Validation rule 4: enableDownPayment=true requires disbursedAmountPercentageForDownPayment (1-100)
+    if (data.enableDownPayment) {
+      if (data.disbursedAmountPercentageForDownPayment == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["disbursedAmountPercentageForDownPayment"],
+          message: "Disbursed Amount Percentage is required when Down Payment is enabled",
+        });
+      } else if (
+        data.disbursedAmountPercentageForDownPayment < 1 ||
+        data.disbursedAmountPercentageForDownPayment > 100
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["disbursedAmountPercentageForDownPayment"],
+          message: "Disbursed Amount Percentage must be between 1 and 100",
+        });
+      }
+    }
+
+    // Validation rule 1: isEqualAmortization=true is incompatible with several features
+    if (data.isEqualAmortization) {
+      if (data.isInterestRecalculationEnabled) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["isEqualAmortization"],
+          message: "Equal Amortization is incompatible with Interest Recalculation",
+        });
+      }
+      if (data.allowVariableInstallments) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["isEqualAmortization"],
+          message: "Equal Amortization is incompatible with Variable Installments",
+        });
+      }
+      if (data.multiDisburseLoan) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["isEqualAmortization"],
+          message: "Equal Amortization is incompatible with Multi-Disburse Loan",
+        });
+      }
+    }
+
+    // Validation rules 5 & 6: loanScheduleType and transactionProcessingStrategyCode
+    if (
+      data.loanScheduleType === "PROGRESSIVE" &&
+      data.transactionProcessingStrategyCode !== "advanced-payment-allocation-strategy"
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["transactionProcessingStrategyCode"],
+        message: "Progressive schedule type requires advanced-payment-allocation-strategy",
+      });
+    }
+    if (
+      data.loanScheduleType === "CUMULATIVE" &&
+      data.transactionProcessingStrategyCode === "advanced-payment-allocation-strategy"
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["transactionProcessingStrategyCode"],
+        message: "Cumulative schedule type cannot use advanced-payment-allocation-strategy",
+      });
+    }
+
+    // Validation rule 7: Grace periods must be less than numberOfRepayments
+    if (data.graceOnPrincipalPayment != null && data.graceOnPrincipalPayment >= data.numberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnPrincipalPayment"],
+        message: "Grace on Principal Payment must be less than Number of Repayments",
+      });
+    }
+    if (data.graceOnInterestPayment != null && data.graceOnInterestPayment >= data.numberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnInterestPayment"],
+        message: "Grace on Interest Payment must be less than Number of Repayments",
+      });
+    }
+    if (data.graceOnInterestCharged != null && data.graceOnInterestCharged >= data.numberOfRepayments) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["graceOnInterestCharged"],
+        message: "Grace on Interest Charged must be less than Number of Repayments",
+      });
+    }
+
+    // Accounting validation: CASH/ACCRUAL rules require certain accounts
+    if (data.accountingRule !== 1) {
+      if (!data.fundSourceAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["fundSourceAccountId"],
+          message: "Fund Source Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.loanPortfolioAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["loanPortfolioAccountId"],
+          message: "Loan Portfolio Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.interestOnLoanAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["interestOnLoanAccountId"],
+          message: "Interest on Loan Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.incomeFromFeeAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["incomeFromFeeAccountId"],
+          message: "Income from Fee Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.incomeFromPenaltyAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["incomeFromPenaltyAccountId"],
+          message: "Income from Penalty Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.writeOffAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["writeOffAccountId"],
+          message: "Write-off Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.overpaymentLiabilityAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["overpaymentLiabilityAccountId"],
+          message: "Overpayment Liability Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.transfersInSuspenseAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["transfersInSuspenseAccountId"],
+          message: "Transfers in Suspense Account is required for Cash/Accrual accounting",
+        });
+      }
+
+      // Accrual-specific accounts
+      if (data.accountingRule === 3 || data.accountingRule === 4) {
+        if (!data.receivableInterestAccountId) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["receivableInterestAccountId"],
+            message: "Receivable Interest Account is required for Accrual accounting",
+          });
+        }
+        if (!data.receivableFeeAccountId) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["receivableFeeAccountId"],
+            message: "Receivable Fee Account is required for Accrual accounting",
+          });
+        }
+        if (!data.receivablePenaltyAccountId) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["receivablePenaltyAccountId"],
+            message: "Receivable Penalty Account is required for Accrual accounting",
+          });
+        }
+      }
+    }
   });
 
 type LoanProductFormValues = z.infer<typeof loanProductSchema>;
@@ -191,7 +402,7 @@ const LoanProductFormPage: React.FC = () => {
   const isEdit = !!id;
   const queryClient = useQueryClient();
   const { data: existingProduct, isLoading: productLoading } = useLoanProduct(id ? Number(id) : undefined);
-  const { data: template } = useLoanProductTemplate();
+  const { data: template, isLoading: templateLoading } = useLoanProductTemplate();
   const { data: funds = [] } = useFunds();
 
   const createMutation = useMutation({
@@ -240,6 +451,31 @@ const LoanProductFormPage: React.FC = () => {
       daysInMonthType: 0,
       isInterestRecalculationEnabled: false,
       accountingRule: 1,
+      fundSourceAccountId: undefined,
+      loanPortfolioAccountId: undefined,
+      receivableInterestAccountId: undefined,
+      receivableFeeAccountId: undefined,
+      receivablePenaltyAccountId: undefined,
+      interestOnLoanAccountId: undefined,
+      incomeFromFeeAccountId: undefined,
+      incomeFromPenaltyAccountId: undefined,
+      overpaymentLiabilityAccountId: undefined,
+      writeOffAccountId: undefined,
+      transfersInSuspenseAccountId: undefined,
+      incomeFromRecoveryAccountId: undefined,
+      goodwillCreditAccountId: undefined,
+      incomeFromChargeOffInterestAccountId: undefined,
+      incomeFromChargeOffFeesAccountId: undefined,
+      incomeFromChargeOffPenaltyAccountId: undefined,
+      chargeOffExpenseAccountId: undefined,
+      chargeOffFraudExpenseAccountId: undefined,
+      incomeFromGoodwillCreditInterestAccountId: undefined,
+      incomeFromGoodwillCreditFeesAccountId: undefined,
+      incomeFromGoodwillCreditPenaltyAccountId: undefined,
+      deferredIncomeLiabilityAccountId: undefined,
+      incomeFromCapitalizationAccountId: undefined,
+      buyDownExpenseAccountId: undefined,
+      incomeFromBuyDownAccountId: undefined,
       locale: "en",
       dateFormat: "yyyy-MM-dd",
       minInterestRatePerPeriod: undefined,
@@ -295,6 +531,7 @@ const LoanProductFormPage: React.FC = () => {
       recalculationRestFrequencyType: p.recalculationRestFrequencyType?.id ?? undefined,
       preClosureInterestCalculationStrategy: p.preClosureInterestCalculationStrategy?.id ?? undefined,
       enableDownPayment: !!p.enableDownPayment,
+      disbursedAmountPercentageForDownPayment: p.disbursedAmountPercentageForDownPayment ?? undefined,
       enableAutoRepaymentForDownPayment: p.enableDownPayment ? p.enableAutoRepaymentForDownPayment : undefined,
       repaymentStartDateType: p.repaymentStartDateType?.id ?? undefined,
       enableBuyDownFee: !!p.enableBuyDownFee,
@@ -328,6 +565,7 @@ const LoanProductFormPage: React.FC = () => {
       overAppliedNumber: p.allowApprovedDisbursedAmountsOverApplied ? p.overAppliedNumber : undefined,
       minimumGap: p.minimumGap > 0 ? p.minimumGap : undefined,
       maximumGap: p.maximumGap > 0 ? p.maximumGap : undefined,
+      allowVariableInstallments: !!p.allowVariableInstallments,
       delinquencyBucketId: p.delinquencyBucketId ?? undefined,
       compoundingFrequencyType: p.interestRecalculationData?.compoundingFrequencyType?.id ?? undefined,
       isArrearsBasedOnOriginalSchedule: !!p.interestRecalculationData?.isArrearsBasedOnOriginalSchedule,
@@ -336,6 +574,33 @@ const LoanProductFormPage: React.FC = () => {
       digitsAfterDecimal: p.currency?.decimalPlaces ?? 2,
       inMultiplesOf: p.currency?.inMultiplesOf ?? 0,
       accountingRule: p.accountingRule?.id ?? 1,
+      fundSourceAccountId: p.accountingMappings?.fundSourceAccount?.id ?? undefined,
+      loanPortfolioAccountId: p.accountingMappings?.loanPortfolioAccount?.id ?? undefined,
+      receivableInterestAccountId: p.accountingMappings?.receivableInterestAccount?.id ?? undefined,
+      receivableFeeAccountId: p.accountingMappings?.receivableFeeAccount?.id ?? undefined,
+      receivablePenaltyAccountId: p.accountingMappings?.receivablePenaltyAccount?.id ?? undefined,
+      interestOnLoanAccountId: p.accountingMappings?.interestOnLoanAccount?.id ?? undefined,
+      incomeFromFeeAccountId: p.accountingMappings?.incomeFromFeeAccount?.id ?? undefined,
+      incomeFromPenaltyAccountId: p.accountingMappings?.incomeFromPenaltyAccount?.id ?? undefined,
+      overpaymentLiabilityAccountId: p.accountingMappings?.overpaymentLiabilityAccount?.id ?? undefined,
+      writeOffAccountId: p.accountingMappings?.writeOffAccount?.id ?? undefined,
+      transfersInSuspenseAccountId: p.accountingMappings?.transfersInSuspenseAccount?.id ?? undefined,
+      incomeFromRecoveryAccountId: p.accountingMappings?.incomeFromRecoveryAccount?.id ?? undefined,
+      goodwillCreditAccountId: p.accountingMappings?.goodwillCreditAccount?.id ?? undefined,
+      incomeFromChargeOffInterestAccountId: p.accountingMappings?.incomeFromChargeOffInterestAccount?.id ?? undefined,
+      incomeFromChargeOffFeesAccountId: p.accountingMappings?.incomeFromChargeOffFeesAccount?.id ?? undefined,
+      incomeFromChargeOffPenaltyAccountId: p.accountingMappings?.incomeFromChargeOffPenaltyAccount?.id ?? undefined,
+      chargeOffExpenseAccountId: p.accountingMappings?.chargeOffExpenseAccount?.id ?? undefined,
+      chargeOffFraudExpenseAccountId: p.accountingMappings?.chargeOffFraudExpenseAccount?.id ?? undefined,
+      incomeFromGoodwillCreditInterestAccountId:
+        p.accountingMappings?.incomeFromGoodwillCreditInterestAccount?.id ?? undefined,
+      incomeFromGoodwillCreditFeesAccountId: p.accountingMappings?.incomeFromGoodwillCreditFeesAccount?.id ?? undefined,
+      incomeFromGoodwillCreditPenaltyAccountId:
+        p.accountingMappings?.incomeFromGoodwillCreditPenaltyAccount?.id ?? undefined,
+      deferredIncomeLiabilityAccountId: p.accountingMappings?.deferredIncomeLiabilityAccount?.id ?? undefined,
+      incomeFromCapitalizationAccountId: p.accountingMappings?.incomeFromCapitalizationAccount?.id ?? undefined,
+      buyDownExpenseAccountId: p.accountingMappings?.buyDownExpenseAccount?.id ?? undefined,
+      incomeFromBuyDownAccountId: p.accountingMappings?.incomeFromBuyDownAccount?.id ?? undefined,
       locale: "en",
       dateFormat: "yyyy-MM-dd",
     });
@@ -359,7 +624,7 @@ const LoanProductFormPage: React.FC = () => {
     }
   };
 
-  if (isEdit && productLoading) {
+  if (isEdit && productLoading && templateLoading) {
     return (
       <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
@@ -729,6 +994,200 @@ const LoanProductFormPage: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* ── Accounting ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Accounting")}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Accounting Rule")} *</label>
+              <Select
+                value={String(watch("accountingRule") ?? 1)}
+                onValueChange={(v) => setValue("accountingRule", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(template?.accountingRuleOptions ?? []).map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {watch("accountingRule") !== 1 && (
+              <>
+                <div className="col-span-2 mt-4 mb-2">
+                  <h4 className="text-sm font-semibold text-gray-700">{t("Asset Accounts")}</h4>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Fund Source")}</label>
+                  <Input type="number" {...register("fundSourceAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Loan Portfolio")}</label>
+                  <Input type="number" {...register("loanPortfolioAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Transfers in Suspense")}</label>
+                  <Input type="number" {...register("transfersInSuspenseAccountId")} placeholder={t("Account ID")} />
+                </div>
+
+                <div className="col-span-2 mt-4 mb-2">
+                  <h4 className="text-sm font-semibold text-gray-700">{t("Income Accounts")}</h4>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Interest on Loans")}</label>
+                  <Input type="number" {...register("interestOnLoanAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Fees")}</label>
+                  <Input type="number" {...register("incomeFromFeeAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Penalties")}</label>
+                  <Input type="number" {...register("incomeFromPenaltyAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Recovery")}</label>
+                  <Input type="number" {...register("incomeFromRecoveryAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Charge-off Interest")}</label>
+                  <Input
+                    type="number"
+                    {...register("incomeFromChargeOffInterestAccountId")}
+                    placeholder={t("Account ID")}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Charge-off Fees")}</label>
+                  <Input
+                    type="number"
+                    {...register("incomeFromChargeOffFeesAccountId")}
+                    placeholder={t("Account ID")}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Charge-off Penalty")}</label>
+                  <Input
+                    type="number"
+                    {...register("incomeFromChargeOffPenaltyAccountId")}
+                    placeholder={t("Account ID")}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Goodwill Credit Interest")}</label>
+                  <Input
+                    type="number"
+                    {...register("incomeFromGoodwillCreditInterestAccountId")}
+                    placeholder={t("Account ID")}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Goodwill Credit Fees")}</label>
+                  <Input
+                    type="number"
+                    {...register("incomeFromGoodwillCreditFeesAccountId")}
+                    placeholder={t("Account ID")}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Income from Goodwill Credit Penalty")}</label>
+                  <Input
+                    type="number"
+                    {...register("incomeFromGoodwillCreditPenaltyAccountId")}
+                    placeholder={t("Account ID")}
+                  />
+                </div>
+                {watch("accountingRule") === 3 || watch("accountingRule") === 4 ? (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Deferred Income Liability")}</label>
+                      <Input
+                        type="number"
+                        {...register("deferredIncomeLiabilityAccountId")}
+                        placeholder={t("Account ID")}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Income from Capitalization")}</label>
+                      <Input
+                        type="number"
+                        {...register("incomeFromCapitalizationAccountId")}
+                        placeholder={t("Account ID")}
+                      />
+                    </div>
+                  </>
+                ) : null}
+
+                <div className="col-span-2 mt-4 mb-2">
+                  <h4 className="text-sm font-semibold text-gray-700">{t("Expense Accounts")}</h4>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Write-off")}</label>
+                  <Input type="number" {...register("writeOffAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Charge-off Expense")}</label>
+                  <Input type="number" {...register("chargeOffExpenseAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Charge-off Fraud Expense")}</label>
+                  <Input type="number" {...register("chargeOffFraudExpenseAccountId")} placeholder={t("Account ID")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Goodwill Credit")}</label>
+                  <Input type="number" {...register("goodwillCreditAccountId")} placeholder={t("Account ID")} />
+                </div>
+                {watch("enableBuyDownFee") && (
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">{t("Buy Down Expense")}</label>
+                    <Input type="number" {...register("buyDownExpenseAccountId")} placeholder={t("Account ID")} />
+                  </div>
+                )}
+                {watch("enableBuyDownFee") && (
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium">{t("Income from Buy Down")}</label>
+                    <Input type="number" {...register("incomeFromBuyDownAccountId")} placeholder={t("Account ID")} />
+                  </div>
+                )}
+
+                <div className="col-span-2 mt-4 mb-2">
+                  <h4 className="text-sm font-semibold text-gray-700">{t("Liability Accounts")}</h4>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Overpayment Liability")}</label>
+                  <Input type="number" {...register("overpaymentLiabilityAccountId")} placeholder={t("Account ID")} />
+                </div>
+
+                {(watch("accountingRule") === 3 || watch("accountingRule") === 4) && (
+                  <>
+                    <div className="col-span-2 mt-4 mb-2">
+                      <h4 className="text-sm font-semibold text-gray-700">{t("Receivable Accounts (Accrual)")}</h4>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Receivable Interest")}</label>
+                      <Input type="number" {...register("receivableInterestAccountId")} placeholder={t("Account ID")} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Receivable Fees")}</label>
+                      <Input type="number" {...register("receivableFeeAccountId")} placeholder={t("Account ID")} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Receivable Penalties")}</label>
+                      <Input type="number" {...register("receivablePenaltyAccountId")} placeholder={t("Account ID")} />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* ── Interest Recalculation ── */}
         <Card>
           <CardHeader>
@@ -890,6 +1349,40 @@ const LoanProductFormPage: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* ── Variable Installments ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Variable Installments")}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("allowVariableInstallments", !watch("allowVariableInstallments"))}
+            >
+              <Checkbox
+                id="allowVariableInstallments"
+                checked={!!watch("allowVariableInstallments")}
+                onCheckedChange={(v) => setValue("allowVariableInstallments", v === true)}
+              />
+              <label htmlFor="allowVariableInstallments" className="block text-sm font-medium">
+                {t("Allow Variable Installments")}
+              </label>
+            </div>
+            {watch("allowVariableInstallments") && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Minimum Gap Between Installments")}</label>
+                  <Input type="number" {...register("minimumGap")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Maximum Gap Between Installments")}</label>
+                  <Input type="number" {...register("maximumGap")} />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* ── Down Payment ── */}
         <Card>
           <CardHeader>
@@ -911,6 +1404,19 @@ const LoanProductFormPage: React.FC = () => {
             </div>
             {watch("enableDownPayment") && (
               <>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">
+                    {t("Disbursed Amount Percentage for Down Payment")} *
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    max="100"
+                    {...register("disbursedAmountPercentageForDownPayment")}
+                    error={errors.disbursedAmountPercentageForDownPayment?.message}
+                  />
+                </div>
                 <div
                   className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
                   onClick={() =>
