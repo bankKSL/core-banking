@@ -1,9 +1,4 @@
-export type WCLoanStatus =
-  | "Submitted and pending approval"
-  | "Approved"
-  | "Active"
-  | "Closed"
-  | "Rejected";
+export type WCLoanStatus = "Submitted and pending approval" | "Approved" | "Active" | "Closed" | "Rejected";
 
 export interface CodeName {
   id: number;
@@ -74,6 +69,10 @@ export interface WCLoanProductCreateRequest {
   delinquencyGraceDays?: number;
   delinquencyStartType?: string;
   accountingRule?: string;
+  paymentAllocation?: Array<{
+    transactionType: string;
+    paymentAllocationOrder: Array<{ paymentAllocationRule: string; order: number }>;
+  }>;
   locale?: string;
   dateFormat?: string;
 }
@@ -87,7 +86,10 @@ export interface WCLoanProductTemplate {
   }>;
   repaymentFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
   delinquencyBucketOptions?: Array<{ id: number; name: string }>;
-  accountingRuleOptions?: Array<{ id: number; code: string; value: string }>;
+  accountingRuleOptions?: Array<{ id: string; code: string; value: string }>;
+  advancedPaymentAllocationTransactionTypes?: Array<{ id: number; code: string; value: string }>;
+  advancedPaymentAllocationTypes?: Array<{ id: number; code: string; value: string }>;
+  advancedPaymentAllocationFutureInstallmentAllocationRules?: Array<{ id: number; code: string; value: string }>;
 }
 
 export interface WCLoan {

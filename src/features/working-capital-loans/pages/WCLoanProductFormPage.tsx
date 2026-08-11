@@ -1,9 +1,9 @@
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,16 @@ import { useToast } from "@/components/ui/toast";
 import { createWCLoanProductSchema, type CreateWCLoanProductFormValues } from "../schemas/workingCapitalLoan.schema";
 import { useCreateWCLoanProduct, useWCLoanProductTemplate, useDelinquencyBuckets } from "../hooks/useWCLoanQueries";
 import { FREQUENCY_TYPE_OPTIONS, DELINQUENCY_START_TYPE_OPTIONS } from "../constants/status";
+
+interface PaymentAllocationOrderItem {
+  paymentAllocationRule: string;
+  order: number;
+}
+
+interface PaymentAllocationItem {
+  transactionType: string;
+  paymentAllocationOrder: PaymentAllocationOrderItem[];
+}
 
 const WCLoanProductFormPage: FC = () => {
   const { t } = useTranslation();
@@ -60,7 +70,23 @@ const WCLoanProductFormPage: FC = () => {
 
   const onSubmit = async (values: CreateWCLoanProductFormValues) => {
     try {
-      await createMutation.mutateAsync(values);
+      const payload = {
+        ...values,
+        paymentAllocation: [
+          {
+            transactionType: "DEFAULT",
+            paymentAllocationOrder: [
+              { paymentAllocationRule: "DUE_PENALTY", order: 1 },
+              { paymentAllocationRule: "DUE_FEE", order: 2 },
+              { paymentAllocationRule: "DUE_PRINCIPAL", order: 3 },
+              { paymentAllocationRule: "IN_ADVANCE_PENALTY", order: 4 },
+              { paymentAllocationRule: "IN_ADVANCE_FEE", order: 5 },
+              { paymentAllocationRule: "IN_ADVANCE_PRINCIPAL", order: 6 },
+            ],
+          },
+        ],
+      };
+      await createMutation.mutateAsync(payload);
       toastSuccess(t("Product created successfully"));
       navigate("/working-capital-loans/products");
     } catch {
@@ -78,7 +104,9 @@ const WCLoanProductFormPage: FC = () => {
   }
 
   const currencyOptions = template?.currencyOptions ?? [];
-  const freqOptions = template?.repaymentFrequencyTypeOptions ?? FREQUENCY_TYPE_OPTIONS.map((o, i) => ({ id: i, code: o.value, value: o.label }));
+  const freqOptions =
+    template?.repaymentFrequencyTypeOptions ??
+    FREQUENCY_TYPE_OPTIONS.map((o, i) => ({ id: i, code: o.value, value: o.label }));
   const bucketOptions = template?.delinquencyBucketOptions ?? buckets.map((b) => ({ id: b.id, name: b.name }));
 
   return (
@@ -103,14 +131,16 @@ const WCLoanProductFormPage: FC = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
-          <CardHeader><CardTitle className="text-base">{t("Product Details")}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Product Details")}</CardTitle>
+          </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Name")} *</label>
               <Input {...register("name")} error={errors.name?.message} />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Short Name")}</label>
+              <label className="block text-sm font-medium">{t("Short Name")} *</label>
               <Input {...register("shortName")} error={errors.shortName?.message} />
             </div>
             <div className="space-y-1.5 col-span-2">
@@ -119,11 +149,18 @@ const WCLoanProductFormPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Currency")} *</label>
-              <Select value={watch("currencyCode")} onValueChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}>
-                <SelectTrigger><SelectValue placeholder={t("Select currency")} /></SelectTrigger>
+              <Select
+                value={watch("currencyCode")}
+                onValueChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select currency")} />
+                </SelectTrigger>
                 <SelectContent>
                   {currencyOptions.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>{c.code} ({c.name})</SelectItem>
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.code} ({c.name})
+                    </SelectItem>
                   ))}
                   {currencyOptions.length === 0 && <SelectItem value="USD">USD</SelectItem>}
                 </SelectContent>
@@ -131,13 +168,19 @@ const WCLoanProductFormPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Decimal Places")}</label>
-              <Input type="number" {...register("digitsAfterDecimal", { valueAsNumber: true })} error={errors.digitsAfterDecimal?.message} />
+              <Input
+                type="number"
+                {...register("digitsAfterDecimal", { valueAsNumber: true })}
+                error={errors.digitsAfterDecimal?.message}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">{t("EIR & Amortization")}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">{t("EIR & Amortization")}</CardTitle>
+          </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Amortization Type")} *</label>
@@ -145,49 +188,96 @@ const WCLoanProductFormPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("NPV Day Count")} *</label>
-              <Input type="number" {...register("npvDayCount", { valueAsNumber: true })} error={errors.npvDayCount?.message} />
+              <Input
+                type="number"
+                {...register("npvDayCount", { valueAsNumber: true })}
+                error={errors.npvDayCount?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Period Payment Rate (%)")} *</label>
-              <Input type="number" step="0.01" {...register("periodPaymentRate", { valueAsNumber: true })} error={errors.periodPaymentRate?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("periodPaymentRate", { valueAsNumber: true })}
+                error={errors.periodPaymentRate?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Min Rate (%)")}</label>
-              <Input type="number" step="0.01" {...register("minPeriodPaymentRate", { valueAsNumber: true })} error={errors.minPeriodPaymentRate?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("minPeriodPaymentRate", { valueAsNumber: true })}
+                error={errors.minPeriodPaymentRate?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Max Rate (%)")}</label>
-              <Input type="number" step="0.01" {...register("maxPeriodPaymentRate", { valueAsNumber: true })} error={errors.maxPeriodPaymentRate?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("maxPeriodPaymentRate", { valueAsNumber: true })}
+                error={errors.maxPeriodPaymentRate?.message}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">{t("Principal & Repayment")}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Principal & Repayment")}</CardTitle>
+          </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Principal")} *</label>
-              <Input type="number" step="0.01" {...register("principal", { valueAsNumber: true })} error={errors.principal?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("principal", { valueAsNumber: true })}
+                error={errors.principal?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Min Principal")}</label>
-              <Input type="number" step="0.01" {...register("minPrincipal", { valueAsNumber: true })} error={errors.minPrincipal?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("minPrincipal", { valueAsNumber: true })}
+                error={errors.minPrincipal?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Max Principal")}</label>
-              <Input type="number" step="0.01" {...register("maxPrincipal", { valueAsNumber: true })} error={errors.maxPrincipal?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("maxPrincipal", { valueAsNumber: true })}
+                error={errors.maxPrincipal?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Repayment Every")} *</label>
-              <Input type="number" {...register("repaymentEvery", { valueAsNumber: true })} error={errors.repaymentEvery?.message} />
+              <Input
+                type="number"
+                {...register("repaymentEvery", { valueAsNumber: true })}
+                error={errors.repaymentEvery?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Repayment Frequency")} *</label>
-              <Select value={watch("repaymentFrequencyType")} onValueChange={(v) => setValue("repaymentFrequencyType", v, { shouldValidate: true })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={watch("repaymentFrequencyType")}
+                onValueChange={(v) => setValue("repaymentFrequencyType", v, { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {freqOptions.map((o) => (
-                    <SelectItem key={o.id} value={o.code}>{o.value}</SelectItem>
+                    <SelectItem key={o.id} value={o.code}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -196,31 +286,53 @@ const WCLoanProductFormPage: FC = () => {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">{t("Delinquency Settings")}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Delinquency Settings")}</CardTitle>
+          </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Delinquency Bucket")} *</label>
-              <Select value={watch("delinquencyBucketId") ? String(watch("delinquencyBucketId")) : ""} onValueChange={(v) => setValue("delinquencyBucketId", Number(v), { shouldValidate: true })}>
-                <SelectTrigger><SelectValue placeholder={t("Select bucket")} /></SelectTrigger>
+              <Select
+                value={watch("delinquencyBucketId") ? String(watch("delinquencyBucketId")) : ""}
+                onValueChange={(v) => setValue("delinquencyBucketId", Number(v), { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select bucket")} />
+                </SelectTrigger>
                 <SelectContent>
                   {bucketOptions.map((b) => (
-                    <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                    <SelectItem key={b.id} value={String(b.id)}>
+                      {b.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.delinquencyBucketId && <p className="text-sm text-red-500">{errors.delinquencyBucketId.message}</p>}
+              {errors.delinquencyBucketId && (
+                <p className="text-sm text-red-500">{errors.delinquencyBucketId.message}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Grace Days")}</label>
-              <Input type="number" {...register("delinquencyGraceDays", { valueAsNumber: true })} error={errors.delinquencyGraceDays?.message} />
+              <Input
+                type="number"
+                {...register("delinquencyGraceDays", { valueAsNumber: true })}
+                error={errors.delinquencyGraceDays?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Delinquency Start Type")}</label>
-              <Select value={watch("delinquencyStartType") ?? "DISBURSEMENT"} onValueChange={(v) => setValue("delinquencyStartType", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={watch("delinquencyStartType") ?? "DISBURSEMENT"}
+                onValueChange={(v) => setValue("delinquencyStartType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {DELINQUENCY_START_TYPE_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -228,10 +340,14 @@ const WCLoanProductFormPage: FC = () => {
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Accounting Rule")}</label>
               <Select value={watch("accountingRule") ?? "NONE"} onValueChange={(v) => setValue("accountingRule", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {(template?.accountingRuleOptions ?? [{ id: 1, code: "NONE", value: "None" }]).map((o) => (
-                    <SelectItem key={o.id} value={o.code}>{o.value}</SelectItem>
+                  {(template?.accountingRuleOptions ?? []).map((o) => (
+                    <SelectItem key={o?.id} value={o?.id}>
+                      {o.value}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
