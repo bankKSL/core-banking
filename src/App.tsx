@@ -155,6 +155,7 @@ import ShareAccountFormPage from "@/features/shares/pages/ShareAccountFormPage";
 import ShareAccountDetailPage from "@/features/shares/pages/ShareAccountDetailPage";
 import DividendListPage from "@/features/shares/pages/DividendListPage";
 import LoanReassignmentPage from "@/features/loans/pages/LoanReassignmentPage";
+import { DelinquencyBucketListPage, DelinquencyBucketFormPage, DelinquencyRangeListPage, DelinquencyRangeFormPage } from "@/features/delinquency-buckets";
 
 /** Redirect authenticated users away from /login to dashboard */
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
@@ -257,6 +258,14 @@ function App() {
                   <Route path="/rescheduling/:id" element={<RescheduleRequestDetailPage />} />
                   <Route path="/loans/reassign" element={<LoanReassignmentPage />} />
                   <Route path="/loans/:loanId/transactions/:transactionType" element={<LoanTransactionFormPage />} />
+                  {/* Delinquency Buckets */}
+                  <Route path="/delinquency-buckets" element={<DelinquencyBucketListPage />} />
+                  <Route path="/delinquency-buckets/new" element={<DelinquencyBucketFormPage />} />
+                  <Route path="/delinquency-buckets/edit/:id" element={<DelinquencyBucketFormPage />} />
+                  {/* Delinquency Ranges */}
+                  <Route path="/delinquency-ranges" element={<DelinquencyRangeListPage />} />
+                  <Route path="/delinquency-ranges/new" element={<DelinquencyRangeFormPage />} />
+                  <Route path="/delinquency-ranges/edit/:id" element={<DelinquencyRangeFormPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
                   <Route path="/deposits/products/new" element={<SavingsProductFormPage />} />

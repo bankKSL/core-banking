@@ -41,6 +41,8 @@ import {
   Repeat,
   Percent,
   Handshake,
+  Layers,
+  CalendarRange,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -85,6 +87,8 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
       { label: t("External Asset Owners"), path: "/external-asset-owners/owners", icon: UsersRound, translationKey: "External Asset Owners" },
       { label: t("Transfers (Investor)"), path: "/external-asset-owners/transfers", icon: ArrowRightLeft, translationKey: "Transfers (Investor)" },
       { label: t("Reschedule Requests"), path: "/rescheduling", icon: CalendarClock, translationKey: "Reschedule Requests" },
+      { label: t("Delinquency Buckets"), path: "/delinquency-buckets", icon: Layers, translationKey: "Delinquency Buckets" },
+      { label: t("Delinquency Ranges"), path: "/delinquency-ranges", icon: CalendarRange, translationKey: "Delinquency Ranges" },
       { label: t("Bulk Reassignment"), path: "/loans/reassign", icon: ArrowRightLeft, translationKey: "Bulk Reassignment" },
     ],
   },
