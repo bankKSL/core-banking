@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useLoanProducts, useUpdateLoanProduct, formatDate } from "@/features/loans";
 import type { LoanProduct } from "@/features/loans";
+import { currentDate } from "@/lib/utils";
 
 const LoanProductsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ const LoanProductsPage: React.FC = () => {
     try {
       await updateMutation.mutateAsync({
         productId: deactivateTarget.id,
-        payload: { status: "inactive", locale: "en", dateFormat: "yyyy-MM-dd" },
+        payload: { closeDate: currentDate(), locale: "en", dateFormat: "yyyy-MM-dd" },
       });
     } catch {
       // handled

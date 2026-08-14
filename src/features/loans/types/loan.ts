@@ -632,8 +632,6 @@ export interface LoanProductCreateRequest {
   externalId?: string;
   fundId?: number;
   delinquencyBucketId?: number;
-  /** Set to `inactive` to deactivate a product (no DELETE endpoint exists). */
-  status?: string;
   currencyCode: string;
   digitsAfterDecimal?: number;
   inMultiplesOf?: number;
