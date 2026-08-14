@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   rejectSavingsAccount,
   withdrawSavingsAccount,
-  undoRejectSavingsAccount,
   approveSavingsAccount,
   activateSavingsAccount,
   closeSavingsAccount,
@@ -32,17 +31,6 @@ export function useWithdrawSavingsAccount() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (accountId: number | string) => withdrawSavingsAccount(accountId),
-    onSuccess: (_data, accountId) => {
-      qc.invalidateQueries({ queryKey: depositKeys.all });
-      qc.invalidateQueries({ queryKey: depositKeys.savingsDetail(accountId) });
-    },
-  });
-}
-
-export function useUndoRejectSavingsAccount() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (accountId: number | string) => undoRejectSavingsAccount(accountId),
     onSuccess: (_data, accountId) => {
       qc.invalidateQueries({ queryKey: depositKeys.all });
       qc.invalidateQueries({ queryKey: depositKeys.savingsDetail(accountId) });

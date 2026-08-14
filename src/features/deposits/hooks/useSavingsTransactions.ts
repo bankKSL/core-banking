@@ -3,7 +3,6 @@ import {
   holdAmountSavings,
   releaseAmountSavings,
   fetchOnHoldTransactions,
-  fetchSavingsTransactions,
   searchTransactions,
 } from "../api/deposit";
 import type { TransactionSearchParams } from "../api/deposit";
@@ -11,20 +10,10 @@ import { depositKeys } from "./useSavingsAccounts";
 
 export const savingsTransactionKeys = {
   all: (accountId: number | string) => [...depositKeys.savingsDetail(accountId), "transactions"] as const,
-  list: (accountId: number | string) => [...savingsTransactionKeys.all(accountId), "list"] as const,
   onHold: (accountId: number | string) => [...savingsTransactionKeys.all(accountId), "onHold"] as const,
   search: (accountId: number | string, params: TransactionSearchParams) =>
     [...savingsTransactionKeys.all(accountId), "search", params] as const,
 };
-
-export function useSavingsTransactions(accountId: number | string | undefined) {
-  return useQuery({
-    queryKey: savingsTransactionKeys.list(accountId!),
-    queryFn: () => fetchSavingsTransactions(accountId!),
-    enabled: !!accountId,
-    staleTime: 30_000,
-  });
-}
 
 export function useOnHoldTransactions(accountId: number | string | undefined) {
   return useQuery({

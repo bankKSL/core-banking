@@ -242,7 +242,6 @@ export type {
 export {
   rejectSavingsAccount,
   withdrawSavingsAccount,
-  undoRejectSavingsAccount,
   calculateInterestSavings,
   postInterestSavings,
   blockSavingsAccount,
@@ -263,7 +262,7 @@ export {
 export type { OnHoldTransaction } from "./api/deposit";
 
 // API — Savings Transactions
-export { fetchSavingsTransactions, adjustSavingsTransaction, searchTransactions } from "./api/deposit";
+export { adjustSavingsTransaction, searchTransactions } from "./api/deposit";
 export type { TransactionSearchParams } from "./api/deposit";
 
 // API — Fixed Deposit Transactions
@@ -305,7 +304,6 @@ export {
 export {
   useRejectSavingsAccount,
   useWithdrawSavingsAccount,
-  useUndoRejectSavingsAccount,
   useApproveSavingsAccount,
   useActivateSavingsAccount,
   useCloseSavingsAccount,
@@ -322,7 +320,6 @@ export {
 // Hooks — Savings Transactions
 export {
   savingsTransactionKeys,
-  useSavingsTransactions,
   useOnHoldTransactions,
   useSearchSavingsTransactions,
   useHoldAmountSavings,

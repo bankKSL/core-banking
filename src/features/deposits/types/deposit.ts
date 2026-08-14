@@ -79,7 +79,18 @@ export interface SavingsAccount {
   savingsProductName?: string;
   productId?: number;
   status: { id: number; code: string; value: string };
-  subStatus?: { id: number; code: string; value: string };
+  subStatus?: {
+    id: number;
+    code: string;
+    value: string;
+    none?: boolean;
+    inactive?: boolean;
+    dormant?: boolean;
+    escheat?: boolean;
+    block?: boolean;
+    blockCredit?: boolean;
+    blockDebit?: boolean;
+  };
   currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
   accountBalance: number;
   totalDeposits?: number;
@@ -280,7 +291,6 @@ export interface SavingsTransactionTemplate {
   amount?: number;
   date?: string;
   paymentTypeOptions: Array<{ id: number; name: string; isCashPayment: boolean }>;
-  reverseTransferPossible?: boolean;
 }
 
 // ─── Fixed Deposit ───────────────────────────────────────────────

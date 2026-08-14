@@ -1397,11 +1397,14 @@ export async function unblockDebitSavingsAccount(savingsAccountId: number | stri
 
 export interface OnHoldTransaction {
   id: number;
-  transactionId: number;
   accountId: number;
   amount: number;
-  reasonForBlock?: string;
   transactionDate?: string;
+  transactionType?: { id: number; code: string; value: string };
+  reversed?: boolean;
+  savingsId?: number;
+  savingsAccountNo?: string;
+  savingsClientName?: string;
   createdDate?: string;
 }
 
@@ -1469,16 +1472,6 @@ export async function withdrawSavingsAccount(savingsAccountId: number | string):
   return data;
 }
 
-/** POST /savingsaccounts/{savingsAccountId}?command=undoRejection */
-export async function undoRejectSavingsAccount(savingsAccountId: number | string): Promise<{ resourceId: number }> {
-  const { data } = await client.post(
-    `/savingsaccounts/${savingsAccountId}`,
-    {},
-    { params: { command: "undoRejection" } },
-  );
-  return data;
-}
-
 // ─── Savings Transactions (Section 4) ────────────────────────────
 
 export interface SavingsTransaction {
@@ -1540,16 +1533,6 @@ export interface SavingsTransaction {
   paymentDetailData?: unknown;
   paymentTypeId?: number;
   paymentTypeName?: string;
-}
-
-/** GET /savingsaccounts/{savingsAccountId}/transactions?offset=0&limit=100 */
-export async function fetchSavingsTransactions(
-  savingsAccountId: number | string,
-): Promise<{ totalFilteredRecords?: number; pageItems?: SavingsTransaction[] }> {
-  const { data } = await client.get(`/savingsaccounts/${savingsAccountId}/transactions`, {
-    params: { offset: 0, limit: 100 },
-  });
-  return data;
 }
 
 // ─── Additional Savings Operations ────────────────────────────────
@@ -1655,8 +1638,6 @@ export async function adjustSavingsTransaction(
 }
 
 export interface TransactionSearchParams {
-  dateFrom?: string;
-  dateTo?: string;
   fromDate?: string;
   toDate?: string;
   fromSubmittedDate?: string;

@@ -40,7 +40,6 @@ import {
   useSavingsAccount,
   useRejectSavingsAccount,
   useWithdrawSavingsAccount,
-  useUndoRejectSavingsAccount,
   useApproveSavingsAccount,
   useActivateSavingsAccount,
   useCloseSavingsAccount,
@@ -114,7 +113,6 @@ const DepositAccountDetailPage: React.FC = () => {
   const { data: account, isLoading, isError, error, refetch } = useSavingsAccount(id);
   const rejectMutation = useRejectSavingsAccount();
   const withdrawMutation = useWithdrawSavingsAccount();
-  const undoRejectMutation = useUndoRejectSavingsAccount();
   const approveMutation = useApproveSavingsAccount();
   const activateMutation = useActivateSavingsAccount();
   const closeMutation = useCloseSavingsAccount();
@@ -195,7 +193,6 @@ const DepositAccountDetailPage: React.FC = () => {
           });
         else if (cmd === "reject") await rejectMutation.mutateAsync(account.id);
         else if (cmd === "withdraw") await withdrawMutation.mutateAsync(account.id);
-        else if (cmd === "undoreject") await undoRejectMutation.mutateAsync(account.id);
         else if (cmd === "undoapproval") await undoApproveMutation.mutateAsync(account.id);
         else if (cmd === "calculateInterest") await calculateInterestSavings(account.id);
         else if (cmd === "postInterest") await postInterestSavings(account.id);
@@ -219,7 +216,6 @@ const DepositAccountDetailPage: React.FC = () => {
       closeMutation,
       rejectMutation,
       withdrawMutation,
-      undoRejectMutation,
       undoApproveMutation,
       refetch,
     ],
@@ -257,11 +253,10 @@ const DepositAccountDetailPage: React.FC = () => {
   const isPending = a.status?.submittedAndPendingApproval === true;
   const isActive = a.status?.active === true;
   const isApproved = a.status?.approved === true && !isActive;
-  const isRejected = a.status?.rejected === true;
-  const subStatus = a.subStatus?.code ?? "";
-  const isBlocked = subStatus === "block" || subStatus === "BLOCK";
-  const isBlockedCredit = subStatus === "block_credit" || subStatus === "BLOCK_CREDIT";
-  const isBlockedDebit = subStatus === "block_debit" || subStatus === "BLOCK_DEBIT";
+  const subStatus = a.subStatus;
+  const isBlocked = !!subStatus?.block;
+  const isBlockedCredit = !!subStatus?.blockCredit;
+  const isBlockedDebit = !!subStatus?.blockDebit;
 
   const handleHoldAmount = async (values: HoldAmountFormValues) => {
     if (!account) return;
@@ -335,8 +330,8 @@ const DepositAccountDetailPage: React.FC = () => {
     setSearching(true);
     try {
       const result = await searchTransactions(account.id, {
-        dateFrom: searchFrom || undefined,
-        dateTo: searchTo || undefined,
+        fromDate: searchFrom || undefined,
+        toDate: searchTo || undefined,
       });
       setSearchResults(result?.pageItems ?? []);
     } finally {
@@ -453,26 +448,28 @@ const DepositAccountDetailPage: React.FC = () => {
             )}
             {isActive && (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTxnDialog("deposit")}
-                  disabled={isBlocked || isBlockedDebit}
-                  className="text-emerald-600"
-                >
-                  <ArrowDownCircle className="mr-1 h-4 w-4" />
-                  {t("Deposit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTxnDialog("withdrawal")}
-                  disabled={isBlocked || isBlockedCredit}
-                  className="text-amber-600"
-                >
-                  <ArrowUpCircle className="mr-1 h-4 w-4" />
-                  {t("Withdraw")}
-                </Button>
+                {!isBlocked && !isBlockedDebit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTxnDialog("deposit")}
+                    className="text-emerald-600"
+                  >
+                    <ArrowDownCircle className="mr-1 h-4 w-4" />
+                    {t("Deposit")}
+                  </Button>
+                )}
+                {!isBlocked && !isBlockedCredit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTxnDialog("withdrawal")}
+                    className="text-amber-600"
+                  >
+                    <ArrowUpCircle className="mr-1 h-4 w-4" />
+                    {t("Withdraw")}
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -526,69 +523,81 @@ const DepositAccountDetailPage: React.FC = () => {
                   <Search className="mr-1 h-4 w-4" />
                   {t("Search Transactions")}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setBlockReason("");
-                    setBlockReasonDialog("block");
-                  }}
-                  disabled={acting}
-                  className="text-red-600"
-                >
-                  {t("Block")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setBlockReason("");
-                    setBlockReasonDialog("blockCredit");
-                  }}
-                  disabled={acting}
-                  className="text-amber-600"
-                >
-                  {t("Block Credit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setBlockReason("");
-                    setBlockReasonDialog("blockDebit");
-                  }}
-                  disabled={acting}
-                  className="text-amber-600"
-                >
-                  {t("Block Debit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("unblock")}
-                  disabled={acting}
-                  className="text-emerald-600"
-                >
-                  {t("Unblock")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("unblockCredit")}
-                  disabled={acting}
-                  className="text-emerald-600"
-                >
-                  {t("Unblock Credit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCommand("unblockDebit")}
-                  disabled={acting}
-                  className="text-emerald-600"
-                >
-                  {t("Unblock Debit")}
-                </Button>
+                {!isBlocked && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setBlockReason("");
+                      setBlockReasonDialog("block");
+                    }}
+                    disabled={acting}
+                    className="text-red-600"
+                  >
+                    {t("Block")}
+                  </Button>
+                )}
+                {!isBlockedCredit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setBlockReason("");
+                      setBlockReasonDialog("blockCredit");
+                    }}
+                    disabled={acting}
+                    className="text-amber-600"
+                  >
+                    {t("Block Credit")}
+                  </Button>
+                )}
+                {!isBlockedDebit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setBlockReason("");
+                      setBlockReasonDialog("blockDebit");
+                    }}
+                    disabled={acting}
+                    className="text-amber-600"
+                  >
+                    {t("Block Debit")}
+                  </Button>
+                )}
+                {isBlocked && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCommand("unblock")}
+                    disabled={acting}
+                    className="text-emerald-600"
+                  >
+                    {t("Unblock")}
+                  </Button>
+                )}
+                {isBlockedCredit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCommand("unblockCredit")}
+                    disabled={acting}
+                    className="text-emerald-600"
+                  >
+                    {t("Unblock Credit")}
+                  </Button>
+                )}
+                {isBlockedDebit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCommand("unblockDebit")}
+                    disabled={acting}
+                    className="text-emerald-600"
+                  >
+                    {t("Unblock Debit")}
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -600,11 +609,6 @@ const DepositAccountDetailPage: React.FC = () => {
                   {t("Close")}
                 </Button>
               </>
-            )}
-            {isRejected && (
-              <Button variant="outline" size="sm" onClick={() => handleCommand("undoreject")} disabled={acting}>
-                {t("Undo Reject")}
-              </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate("/deposits/saving-accounts")}>
               <ArrowLeft className="mr-1 h-4 w-4" />
@@ -893,12 +897,15 @@ const DepositAccountDetailPage: React.FC = () => {
                 <div key={txn.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div>
                     <p className="text-sm font-medium">{formatCurrency(txn.amount, a.currency?.code)}</p>
-                    {txn.reasonForBlock && <p className="text-xs text-gray-500">{txn.reasonForBlock}</p>}
+                    <p className="text-xs text-gray-500">
+                      {txn.transactionType?.value ??
+                        (txn.transactionDate ? fmtDate(txn.transactionDate) : "—")}
+                    </p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setReleaseConfirmId(txn.transactionId)}
+                    onClick={() => setReleaseConfirmId(txn.id)}
                     disabled={!hasPermission("RELEASEAMOUNT") || releaseAmountMutation.isPending}
                   >
                     {t("Release")}

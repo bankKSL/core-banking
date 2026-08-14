@@ -45,8 +45,15 @@ export function useCreateSavingsCharge() {
 export function usePaySavingsCharge() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ accountId, chargeId }: { accountId: number | string; chargeId: number | string }) =>
-      paySavingsCharge(accountId, chargeId),
+    mutationFn: ({
+      accountId,
+      chargeId,
+      payload,
+    }: {
+      accountId: number | string;
+      chargeId: number | string;
+      payload: { amount: number; dueDate: string; dateFormat?: string; locale?: string };
+    }) => paySavingsCharge(accountId, chargeId, payload),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: savingsChargeKeys.all(variables.accountId) });
     },

@@ -1,4 +1,4 @@
-import { type FC, useState, useCallback } from "react";
+import { type FC, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Ban, Trash2, Receipt, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   useDeleteSavingsCharge,
 } from "../hooks/useSavingsCharges";
 import type { SavingsCharge } from "../api/deposit";
+import { currentDate } from "@/lib/utils";
 
 const chargeSchema = z.object({
   chargeId: z.number({ message: "Charge is required" }),
@@ -51,7 +52,7 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
   const [waiveId, setWaiveId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const charges = chargesData?.pageItems ?? [];
+  const charges = useMemo(() => chargesData?.pageItems ?? [], [chargesData]);
 
   const {
     register,
@@ -87,9 +88,20 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
 
   const handlePay = useCallback(async () => {
     if (!payId) return;
-    await payMutation.mutateAsync({ accountId, chargeId: payId });
+    const charge = charges.find((c) => c.id === payId);
+    if (!charge) return;
+    await payMutation.mutateAsync({
+      accountId,
+      chargeId: payId,
+      payload: {
+        amount: charge.amountOutstanding ?? charge.amount,
+        dueDate: currentDate(),
+        dateFormat: "yyyy-MM-dd",
+        locale: "en",
+      },
+    });
     setPayId(null);
-  }, [accountId, payId, payMutation]);
+  }, [accountId, payId, payMutation, charges]);
 
   const handleWaive = useCallback(async () => {
     if (!waiveId) return;
@@ -121,7 +133,11 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
         <span className="text-sm font-mono">{formatCurrency(row.amountOutstanding, row.currency?.code)}</span>
       ),
     },
-    { key: "dueDate", header: t("Due Date"), accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span> },
+    {
+      key: "dueDate",
+      header: t("Due Date"),
+      accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span>,
+    },
     {
       key: "isPaid",
       header: t("Status"),
@@ -237,14 +253,20 @@ const SavingsCharges: FC<SavingsChargesProps> = ({ accountId }) => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Amount")} *</label>
-              <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} error={errors.amount?.message} />
+              <Input
+                type="number"
+                step="0.01"
+                {...register("amount", { valueAsNumber: true })}
+                error={errors.amount?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Due Date")}</label>
               <Input type="date" {...register("dueDate")} />
             </div>
             <Button type="submit" disabled={createMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
-              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Apply")}
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("Apply")}
             </Button>
           </form>
         </DialogContent>
