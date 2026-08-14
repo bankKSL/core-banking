@@ -301,6 +301,7 @@ export interface FixedDepositAccount {
   externalId?: string;
   clientId: number;
   clientName?: string;
+  clientOfficeId?: number;
   depositProductId: number;
   depositProductName?: string;
   status: { id: number; code: string; value: string };
@@ -310,7 +311,10 @@ export interface FixedDepositAccount {
   accountBalance: number;
   preClosurePenalApplicable: boolean;
   depositPeriod: number;
+  depositPeriodFrequency?: { id: number; code: string; value: string };
   depositPeriodFrequencyType: { id: number; code: string; value: string };
+  onAccountClosure?: { id: number; code: string; value: string };
+  transferToSavingsId?: number;
   interestRate: number;
   interestCompoundingPeriodType: { id: number; code: string; value: string };
   interestPostingPeriodType: { id: number; code: string; value: string };
@@ -717,8 +721,8 @@ export interface FixedDepositProduct {
   currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string; inMultiplesOf?: number };
   minDepositTerm: number;
   maxDepositTerm?: number;
-  minDepositTermType: { id: number; code: string; description: string };
-  maxDepositTermType?: { id: number; code: string; description: string };
+  minDepositTermType: { id: number; code: string; description?: string; value?: string };
+  maxDepositTermType?: { id: number; code: string; description?: string; value?: string };
   preClosurePenalApplicable: boolean;
   preClosurePenalInterest?: number;
   preClosurePenalInterestOnType?: { id: number; code: string; description: string };

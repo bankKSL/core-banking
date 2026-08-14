@@ -66,7 +66,8 @@ const FixedDepositsPage: React.FC = () => {
     {
       key: "depositPeriod",
       header: t("Period"),
-      cell: (r) => `${r.depositPeriod} ${r.depositPeriodFrequencyType?.value?.toLowerCase() ?? "mo"}`,
+      cell: (r) =>
+        `${r.depositPeriod} ${(r.depositPeriodFrequency?.value ?? r.depositPeriodFrequencyType?.value)?.toLowerCase() ?? "mo"}`,
     },
     {
       key: "maturityDate",

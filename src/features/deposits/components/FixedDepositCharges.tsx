@@ -17,6 +17,7 @@ import type { ColumnDef } from "@/components/shared/DataTable";
 import type { FixedDepositCharge } from "../api/deposit";
 import {
   fetchFixedDepositCharges,
+  fetchFixedDepositChargesTemplate,
   createFixedDepositCharge,
   waiveFixedDepositCharge,
   deleteFixedDepositCharge,
@@ -48,6 +49,11 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
   const { data: chargesData, isLoading } = useQuery({
     queryKey: fdChargeKeys.all(accountId),
     queryFn: () => fetchFixedDepositCharges(accountId),
+  });
+
+  const { data: chargesTemplate } = useQuery({
+    queryKey: [...fdChargeKeys.all(accountId), "template"],
+    queryFn: () => fetchFixedDepositChargesTemplate(accountId),
   });
 
   const createMutation = useMutation({
@@ -82,7 +88,7 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
   const [waiveId, setWaiveId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const charges = chargesData?.pageItems ?? [];
+  const charges = chargesData ?? [];
 
   const {
     register,
@@ -141,7 +147,11 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
         <span className="text-sm font-mono">{formatCurrency(row.amountOutstanding, row.currency?.code)}</span>
       ),
     },
-    { key: "dueDate", header: t("Due Date"), accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span> },
+    {
+      key: "dueDate",
+      header: t("Due Date"),
+      accessorFn: (row) => <span className="text-sm">{row.dueDate ?? "—"}</span>,
+    },
     {
       key: "isPaid",
       header: t("Status"),
@@ -171,7 +181,7 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                setWaiveId(row.id);
+                setWaiveId(row.savingsAccountChargeId ?? row.id);
               }}
               title={t("Waive")}
             >
@@ -184,7 +194,7 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                setDeleteId(row.id);
+                setDeleteId(row.savingsAccountChargeId ?? row.id);
               }}
             >
               <Trash2 className="h-4 w-4 text-red-500" />
@@ -233,8 +243,11 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
                   <SelectValue placeholder={t("Select charge")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Charge options would come from template API */}
-                  <SelectItem value="0">{t("Placeholder Charge")}</SelectItem>
+                  {chargesTemplate?.chargeOptions?.map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.name} ({formatCurrency(o.amount, o.currency?.code)})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {errors.chargeId && <p className="text-xs text-red-500">{errors.chargeId.message}</p>}
@@ -253,7 +266,8 @@ const FixedDepositCharges: FC<FixedDepositChargesProps> = ({ accountId }) => {
               <Input type="date" {...register("dueDate")} />
             </div>
             <Button type="submit" disabled={createMutation.isPending} className="bg-[#D32F2F] hover:bg-red-700">
-              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Apply")}
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("Apply")}
             </Button>
           </form>
         </DialogContent>

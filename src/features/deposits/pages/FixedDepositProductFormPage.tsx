@@ -106,6 +106,7 @@ const fdProductSchema = z.object({
   preClosurePenalInterest: z.coerce.number().min(0).optional().or(z.literal("")),
   preClosurePenalInterestOnTypeId: z.coerce.number().optional().or(z.literal("")),
   withHoldTax: z.boolean().optional(),
+  taxGroupId: z.coerce.number().int().positive().optional().or(z.literal("")),
   accountingRule: z.coerce.number(),
 });
 
@@ -171,12 +172,14 @@ const FixedDepositProductFormPage: React.FC = () => {
       preClosurePenalInterest: "" as any,
       preClosurePenalInterestOnTypeId: "" as any,
       withHoldTax: false,
+      taxGroupId: "" as any,
       accountingRule: 1,
     },
   });
 
   const preClosurePenalApplicable = watch("preClosurePenalApplicable");
   const withHoldTax = watch("withHoldTax");
+  const taxGroupOpts = template?.taxGroupOptions ?? [];
 
   // Apply template defaults on create (not edit)
   useEffect(() => {
@@ -212,6 +215,7 @@ const FixedDepositProductFormPage: React.FC = () => {
       preClosurePenalInterest: p.preClosurePenalInterest ?? ("" as any),
       preClosurePenalInterestOnTypeId: enumId(p.preClosurePenalInterestOnType, undefined) ?? ("" as any),
       withHoldTax: !!p.withHoldTax,
+      taxGroupId: p.taxGroupId ?? ("" as any),
       accountingRule: enumId(p.accountingRule, 1) ?? 1,
     });
     if (p.activeChart?.chartSlabs?.length) {
@@ -265,6 +269,7 @@ const FixedDepositProductFormPage: React.FC = () => {
         ? Number(values.preClosurePenalInterestOnTypeId)
         : undefined,
       withHoldTax: !!values.withHoldTax,
+      taxGroupId: values.taxGroupId ? Number(values.taxGroupId) : undefined,
       locale: "en",
       charts: [
         {
@@ -582,6 +587,27 @@ const FixedDepositProductFormPage: React.FC = () => {
                 {t("Withhold Tax")}
               </label>
             </div>
+            {withHoldTax && (
+              <div className="col-span-2 space-y-1.5">
+                <label className="block text-sm font-medium">{t("Tax Group")} *</label>
+                <Select
+                  value={watch("taxGroupId") ? String(watch("taxGroupId")) : ""}
+                  onValueChange={(v) => setValue("taxGroupId", v ? Number(v) : ("" as any))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("Select tax group")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taxGroupOpts.map((o: any) => (
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.taxGroupId && <p className="text-sm text-red-500">{errors.taxGroupId.message as string}</p>}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -623,7 +649,9 @@ const FixedDepositProductFormPage: React.FC = () => {
             {slabs.map((slab, i) => (
               <div key={i} className="rounded-lg border border-gray-200 p-4 space-y-3 dark:border-gray-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("Slab")} #{i + 1}</span>
+                  <span className="text-sm font-medium">
+                    {t("Slab")} #{i + 1}
+                  </span>
                   {slabs.length > 1 && (
                     <button type="button" onClick={() => removeSlab(i)} className="text-gray-400 hover:text-red-500">
                       <Trash2 className="h-4 w-4" />

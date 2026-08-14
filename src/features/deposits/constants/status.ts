@@ -73,14 +73,13 @@ export const FIXED_DEPOSIT_STATUS_CONFIG: Record<
   string,
   { variant: "success" | "warning" | "error" | "info" | "default"; label: string }
 > = {
-  "Fixed deposit account status - submitted and pending approval": { variant: "info", label: i18n.t("Pending") },
-  "Fixed deposit account status - approved": { variant: "success", label: i18n.t("Approved") },
-  "Fixed deposit account status - active": { variant: "success", label: i18n.t("Active") },
-  "Fixed deposit account status - closed": { variant: "default", label: i18n.t("Closed") },
-  "Fixed deposit account status - rejected": { variant: "error", label: i18n.t("Rejected") },
-  "Fixed deposit account status - withdrawn by applicant": { variant: "warning", label: i18n.t("Withdrawn") },
-  "Fixed deposit account status - matured": { variant: "info", label: i18n.t("Matured") },
-  "Fixed deposit account status - premature closed": { variant: "warning", label: i18n.t("Premature Closed") },
+  "savingsAccountStatusType.submitted.and.pending.approval": { variant: "info", label: i18n.t("Pending") },
+  "savingsAccountStatusType.approved": { variant: "success", label: i18n.t("Approved") },
+  "savingsAccountStatusType.active": { variant: "success", label: i18n.t("Active") },
+  "savingsAccountStatusType.closed": { variant: "default", label: i18n.t("Closed") },
+  "savingsAccountStatusType.rejected": { variant: "error", label: i18n.t("Rejected") },
+  "savingsAccountStatusType.withdrawn.by.applicant": { variant: "warning", label: i18n.t("Withdrawn") },
+  "savingsAccountStatusType.matured": { variant: "info", label: i18n.t("Matured") },
 };
 
 /** Section 7: Recurring deposit status display labels */

@@ -36,11 +36,6 @@ const FixedDepositProductsPage: React.FC = () => {
     () => ({
       total: products.length,
       activeTerms: products.filter((p) => p.minDepositTerm > 0).length,
-      avgRate:
-        products.length > 0
-          ? products.reduce((s, p) => s + (p.activeChart?.chartSlabs?.[0]?.annualInterestRate ?? 0), 0) /
-            products.length
-          : 0,
       uniqueCurrencies: new Set(products.map((p) => p.currency.code)).size,
     }),
     [products],
@@ -59,17 +54,9 @@ const FixedDepositProductsPage: React.FC = () => {
       header: t("Min Term"),
       cell: (r) => (
         <span className="font-mono text-sm">
-          {r.minDepositTerm} {r.minDepositTermType?.description ?? ""}
+          {r.minDepositTerm} {r.minDepositTermType?.value ?? ""}
         </span>
       ),
-    },
-    {
-      key: "interestRate",
-      header: t("Rate"),
-      cell: (r) => {
-        const rate = r.activeChart?.chartSlabs?.[0]?.annualInterestRate;
-        return <span className="font-mono font-semibold">{rate != null ? `${rate}%` : "—"}</span>;
-      },
     },
     {
       key: "actions",
@@ -103,7 +90,9 @@ const FixedDepositProductsPage: React.FC = () => {
           }
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
-          <span className="text-sm">{t("Failed to load")}: {error?.message ?? t("Unknown error")}</span>
+          <span className="text-sm">
+            {t("Failed to load")}: {error?.message ?? t("Unknown error")}
+          </span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             {t("Retry")}
           </Button>
@@ -133,7 +122,6 @@ const FixedDepositProductsPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard title={t("Total Products")} value={stats.total} icon={Building2} />
-          <StatCard title={t("Avg Interest Rate")} value={`${stats.avgRate.toFixed(2)}%`} variant="success" />
           <StatCard title={t("Currencies")} value={stats.uniqueCurrencies} variant="default" />
           <StatCard title={t("Active Terms")} value={stats.activeTerms} variant="warning" />
         </div>

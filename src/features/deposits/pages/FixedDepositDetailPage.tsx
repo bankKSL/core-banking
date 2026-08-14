@@ -82,6 +82,11 @@ const MATURITY_INSTRUCTION_OPTIONS = [
   { id: 400, label: "Reinvest Principal Only" },
 ];
 
+const PREMATURE_CLOSE_OPTIONS = [
+  { id: 100, label: "Withdraw Deposit" },
+  { id: 200, label: "Transfer to Savings" },
+];
+
 const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 2 }).format(n);
 
@@ -118,6 +123,7 @@ const FixedDepositDetailPage: React.FC = () => {
 
   // Dialog states
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [closeMode, setCloseMode] = useState<"maturity" | "premature">("maturity");
   const [closeDate, setCloseDate] = useState(new Date().toISOString().split("T")[0]);
   const [onAccountClosureId, setOnAccountClosureId] = useState("100");
   const [toSavingsAccountId, setToSavingsAccountId] = useState("");
@@ -253,10 +259,11 @@ const FixedDepositDetailPage: React.FC = () => {
 
   const statusCode = fd.status?.code ?? "";
   const statusConfig = FIXED_DEPOSIT_STATUS_CONFIG[statusCode];
-  const isPending = statusCode.includes("pending") || statusCode.includes("submitted");
-  const isApproved = statusCode.includes("approved") && !statusCode.includes("active");
-  const isActive = statusCode.includes("active");
-  const isRejectedOrWithdrawn = statusCode.includes("rejected") || statusCode.includes("withdrawn");
+  const statusId = fd.status?.id;
+  const isPending = statusId === 100;
+  const isApproved = statusId === 200;
+  const isActive = statusId === 300;
+  const isRejectedOrWithdrawn = statusId === 400 || statusId === 500;
 
   return (
     <div className="max-w-6xl m-auto space-y-6">
@@ -377,6 +384,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => {
+                    setCloseMode("premature");
                     setCloseDialogOpen(true);
                     setOnAccountClosureId("200");
                   }}
@@ -389,6 +397,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => {
+                    setCloseMode("maturity");
                     setCloseDialogOpen(true);
                     setOnAccountClosureId("100");
                   }}
@@ -473,7 +482,7 @@ const FixedDepositDetailPage: React.FC = () => {
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
                   label={t("Period")}
-                  value={`${fd.depositPeriod ?? "—"} ${fd.depositPeriodFrequencyType?.value?.toLowerCase() ?? ""}`}
+                  value={`${fd.depositPeriod ?? "—"} ${(fd.depositPeriodFrequency?.value ?? fd.depositPeriodFrequencyType?.value ?? "")?.toLowerCase()}`}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
@@ -565,7 +574,7 @@ const FixedDepositDetailPage: React.FC = () => {
       <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{onAccountClosureId === "200" ? t("Premature Close") : t("Close at Maturity")}</DialogTitle>
+            <DialogTitle>{closeMode === "premature" ? t("Premature Close") : t("Close at Maturity")}</DialogTitle>
             <DialogDescription>
               {t("Enter closure details for FD")} {fd.accountNo}.
             </DialogDescription>
@@ -584,7 +593,7 @@ const FixedDepositDetailPage: React.FC = () => {
                   <SelectValue placeholder={t("Select action")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {MATURITY_INSTRUCTION_OPTIONS.map((o) => (
+                  {(closeMode === "premature" ? PREMATURE_CLOSE_OPTIONS : MATURITY_INSTRUCTION_OPTIONS).map((o) => (
                     <SelectItem key={o.id} value={String(o.id)}>
                       {o.label}
                     </SelectItem>
@@ -615,12 +624,12 @@ const FixedDepositDetailPage: React.FC = () => {
                 </Button>
               )}
               <Button
-                onClick={onAccountClosureId === "200" ? handlePrematureClose : handleClose}
+                onClick={closeMode === "premature" ? handlePrematureClose : handleClose}
                 disabled={actionLoading}
                 variant="destructive"
               >
                 {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {onAccountClosureId === "200" ? t("Premature Close") : t("Close")}
+                {closeMode === "premature" ? t("Premature Close") : t("Close")}
               </Button>
             </div>
           </div>

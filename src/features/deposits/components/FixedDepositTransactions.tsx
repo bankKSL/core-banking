@@ -22,7 +22,7 @@ const FixedDepositTransactions: FC<FixedDepositTransactionsProps> = ({ accountId
   const undoMutation = useUndoFixedDepositTransaction();
   const [undoingId, setUndoingId] = useState<number | null>(null);
 
-  const transactions = txnsData?.pageItems ?? [];
+  const transactions = txnsData ?? [];
 
   const handleUndo = useCallback(
     async (transactionId: number) => {

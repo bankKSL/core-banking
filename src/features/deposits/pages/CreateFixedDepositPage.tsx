@@ -85,7 +85,7 @@ const fixedDepositSchema = z.object({
   preClosurePenalInterest: z.string().optional(),
   preClosurePenalInterestOnTypeId: z.string().optional(),
   transferInterestToSavings: z.boolean().optional(),
-  linkedAccount: z.string().optional(),
+  linkAccountId: z.string().optional(),
   withHoldTax: z.boolean().optional(),
 });
 
@@ -129,7 +129,7 @@ const CreateFixedDepositPage: React.FC = () => {
       preClosurePenalInterest: "",
       preClosurePenalInterestOnTypeId: "",
       transferInterestToSavings: false,
-      linkedAccount: "",
+      linkAccountId: "",
       withHoldTax: false,
     },
   });
@@ -145,11 +145,7 @@ const CreateFixedDepositPage: React.FC = () => {
 
   const { data: template, isLoading: templateLoading } = useQuery({
     queryKey: ["fixeddepositaccounts", "template", clientId, productId, isEdit],
-    queryFn: () =>
-      fetchFixedDepositAccountTemplate(
-        clientId || undefined,
-        productId ? Number(productId) : undefined,
-      ),
+    queryFn: () => fetchFixedDepositAccountTemplate(clientId || undefined, productId ? Number(productId) : undefined),
     enabled: !!clientId && !!productId,
     staleTime: 60_000,
   });
@@ -164,7 +160,7 @@ const CreateFixedDepositPage: React.FC = () => {
       externalId: a.externalId ?? "",
       depositAmount: String(a.depositAmount ?? ""),
       depositPeriod: String(a.depositPeriod ?? "12"),
-      depositPeriodFrequencyId: String(a.depositPeriodFrequencyType?.id ?? "2"),
+      depositPeriodFrequencyId: String(a.depositPeriodFrequency?.id ?? a.depositPeriodFrequencyType?.id ?? "2"),
       submittedOnDate: Array.isArray(a.timeline?.submittedOnDate)
         ? `${a.timeline.submittedOnDate[0]}-${String(a.timeline.submittedOnDate[1]).padStart(2, "0")}-${String(a.timeline.submittedOnDate[2]).padStart(2, "0")}`
         : (a.timeline?.submittedOnDate?.split("T")[0] ?? new Date().toISOString().split("T")[0]),
@@ -173,12 +169,12 @@ const CreateFixedDepositPage: React.FC = () => {
       interestPostingPeriodType: String(a.interestPostingPeriodType?.id ?? ""),
       interestCalculationType: String(a.interestCalculationType?.id ?? ""),
       interestCalculationDaysInYearType: String(a.interestCalculationDaysInYearType?.id ?? ""),
-      maturityInstructionId: String(a.maturityInstructionId ?? ""),
+      maturityInstructionId: String(a.onAccountClosure?.id ?? a.maturityInstructionId ?? ""),
       preClosurePenalApplicable: !!a.preClosurePenalApplicable,
       preClosurePenalInterest: String(a.preClosurePenalInterest ?? ""),
       preClosurePenalInterestOnTypeId: String(a.preClosurePenalInterestOnType?.id ?? ""),
       transferInterestToSavings: !!a.transferInterestToSavings,
-      linkedAccount: String(a.savingsAccountId ?? ""),
+      linkAccountId: String(a.transferToSavingsId ?? a.savingsAccountId ?? ""),
       withHoldTax: !!a.withHoldTax,
     });
   }, [existingAccount, reset]);
@@ -194,7 +190,7 @@ const CreateFixedDepositPage: React.FC = () => {
       depositPeriod: Number(values.depositPeriod),
       depositPeriodFrequencyId: Number(values.depositPeriodFrequencyId),
       locale: "en",
-      dateFormat: "dd MMMM yyyy",
+      dateFormat: "yyyy-MM-dd",
       externalId: values.externalId || undefined,
     };
 
@@ -206,8 +202,10 @@ const CreateFixedDepositPage: React.FC = () => {
     if (values.interestCalculationDaysInYearType)
       payload.interestCalculationDaysInYearType = Number(values.interestCalculationDaysInYearType);
     if (values.maturityInstructionId) payload.maturityInstructionId = Number(values.maturityInstructionId);
-    if (values.transferInterestToSavings) payload.transferInterestToSavings = true;
-    if (values.linkedAccount) payload.linkedAccount = Number(values.linkedAccount);
+    if (values.transferInterestToSavings) {
+      payload.transferInterestToSavings = true;
+      if (values.linkAccountId) payload.linkAccountId = Number(values.linkAccountId);
+    }
     if (values.withHoldTax) payload.withHoldTax = true;
 
     if (values.preClosurePenalApplicable) {
@@ -218,7 +216,7 @@ const CreateFixedDepositPage: React.FC = () => {
     }
 
     if (values.maturityInstructionId === "200") {
-      payload.transferToSavingsId = Number(values.linkedAccount);
+      payload.transferToSavingsId = Number(values.linkAccountId);
     }
 
     if (isEdit) {
@@ -484,9 +482,9 @@ const CreateFixedDepositPage: React.FC = () => {
                 <label className="block text-sm font-medium">{t("Transfer to Savings Account ID")}</label>
                 <Input
                   type="number"
-                  {...register("linkedAccount")}
+                  {...register("linkAccountId")}
                   placeholder={t("Savings account ID")}
-                  error={errors.linkedAccount?.message}
+                  error={errors.linkAccountId?.message}
                 />
               </div>
             )}
@@ -550,9 +548,9 @@ const CreateFixedDepositPage: React.FC = () => {
                 <label className="block text-sm font-medium">{t("Linked Savings Account ID")}</label>
                 <Input
                   type="number"
-                  {...register("linkedAccount")}
+                  {...register("linkAccountId")}
                   placeholder={t("Linked account ID")}
-                  error={errors.linkedAccount?.message}
+                  error={errors.linkAccountId?.message}
                 />
               </div>
             )}

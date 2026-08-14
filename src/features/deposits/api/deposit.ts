@@ -236,7 +236,12 @@ export async function fixedDepositCommand(
 ): Promise<SavingsCommandResponse> {
   // Convert any date fields from yyyy-MM-dd to yyyy-MM-dd
   const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
-  const converted: Record<string, unknown> = { locale: "en", dateFormat: "yyyy-MM-dd" };
+  // undoApproval/undoActivation have no date field; the backend validator only accepts an
+  // empty body (locale/dateFormat trigger an UnsupportedParameterException).
+  const bodylessCommands = ["undoApproval", "undoActivation"];
+  const converted: Record<string, unknown> = bodylessCommands.includes(command)
+    ? {}
+    : { locale: "en", dateFormat: "yyyy-MM-dd" };
   for (const [k, v] of Object.entries(data)) {
     converted[k] = dateFields.includes(k) ? currentDate(v as string | undefined) : v;
   }
@@ -952,13 +957,11 @@ export interface FixedDepositTransaction {
 }
 
 /** GET /fixeddepositaccounts/{accountId}/transactions */
-export async function fetchFixedDepositTransactions(
-  accountId: number | string,
-): Promise<{ totalFilteredRecords?: number; pageItems?: FixedDepositTransaction[] }> {
+export async function fetchFixedDepositTransactions(accountId: number | string): Promise<FixedDepositTransaction[]> {
   const { data } = await client.get(`/fixeddepositaccounts/${accountId}/transactions`, {
     params: { offset: 0, limit: 100 },
   });
-  return data;
+  return Array.isArray(data) ? data : (data?.pageItems ?? []);
 }
 
 /** POST /fixeddepositaccounts/{accountId}/transactions/{transactionId}?command=undo */
@@ -1050,6 +1053,7 @@ export async function makeFixedDepositTransaction(
 
 export interface FixedDepositCharge {
   id: number;
+  savingsAccountChargeId?: number;
   chargeId: number;
   name?: string;
   amount: number;
@@ -1067,10 +1071,13 @@ export interface FixedDepositCharge {
   currency?: { code: string; name: string; decimalPlaces: number; displaySymbol?: string };
 }
 
-export async function fetchFixedDepositCharges(
-  accountId: number | string,
-): Promise<{ totalFilteredRecords?: number; pageItems?: FixedDepositCharge[] }> {
-  const { data } = await client.get(`/fixeddepositaccounts/${accountId}/charges`);
+export async function fetchFixedDepositCharges(accountId: number | string): Promise<FixedDepositCharge[]> {
+  const { data } = await client.get(`/savingsaccounts/${accountId}/charges`);
+  return Array.isArray(data) ? data : (data?.pageItems ?? []);
+}
+
+export async function fetchFixedDepositChargesTemplate(accountId: number | string): Promise<SavingsChargesTemplate> {
+  const { data } = await client.get<SavingsChargesTemplate>(`/savingsaccounts/${accountId}/charges/template`);
   return data;
 }
 
@@ -1078,7 +1085,7 @@ export async function createFixedDepositCharge(
   accountId: number | string,
   payload: PostSavingsChargeRequest,
 ): Promise<{ savingsAccountId: number; resourceId: number }> {
-  const { data } = await client.post(`/fixeddepositaccounts/${accountId}/charges`, payload);
+  const { data } = await client.post(`/savingsaccounts/${accountId}/charges`, payload);
   return data;
 }
 
@@ -1087,7 +1094,7 @@ export async function waiveFixedDepositCharge(
   chargeId: number | string,
 ): Promise<{ resourceId: number }> {
   const { data } = await client.post(
-    `/fixeddepositaccounts/${accountId}/charges/${chargeId}`,
+    `/savingsaccounts/${accountId}/charges/${chargeId}`,
     {},
     { params: { command: "waive" } },
   );
@@ -1098,7 +1105,7 @@ export async function deleteFixedDepositCharge(
   accountId: number | string,
   chargeId: number | string,
 ): Promise<{ resourceId: number }> {
-  const { data } = await client.delete(`/fixeddepositaccounts/${accountId}/charges/${chargeId}`);
+  const { data } = await client.delete(`/savingsaccounts/${accountId}/charges/${chargeId}`);
   return data;
 }
 

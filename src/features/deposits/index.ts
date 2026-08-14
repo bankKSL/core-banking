@@ -275,6 +275,7 @@ export {
   fetchFixedDepositClosureTemplate,
   calculateFixedDepositInterest,
   fetchFixedDepositCharges,
+  fetchFixedDepositChargesTemplate,
   createFixedDepositCharge,
   waiveFixedDepositCharge,
   deleteFixedDepositCharge,
