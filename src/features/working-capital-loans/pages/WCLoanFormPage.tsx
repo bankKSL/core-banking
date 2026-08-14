@@ -34,6 +34,13 @@ const WCLoanFormPage: FC = () => {
 
   const { data: template } = useWCLoanTemplate(selectedClientId, selectedProductId);
 
+  const isDelinquencyBucketClassification =
+    selectedProduct?.allowAttributeOverrides?.delinquencyBucketClassification ??
+    template?.isDelinquencyBucketClassification ??
+    false;
+
+  const isDiscountOverrideAllowed = selectedProduct?.allowAttributeOverrides?.discountDefault !== false;
+
   const {
     register,
     handleSubmit,
@@ -67,18 +74,18 @@ const WCLoanFormPage: FC = () => {
       if (ld.principalAmount != null) setValue("principalAmount", ld.principalAmount);
       if (ld.delinquencyGraceDays != null) setValue("delinquencyGraceDays", ld.delinquencyGraceDays);
       if (ld.delinquencyStartType != null) setValue("delinquencyStartType", ld.delinquencyStartType);
-      if (template.isDelinquencyBucketClassification && ld.delinquencyBucketId != null) {
+      if (isDelinquencyBucketClassification && ld.delinquencyBucketId != null) {
         setValue("delinquencyBucketId", ld.delinquencyBucketId);
       }
     }
-  }, [template, setValue]);
+  }, [template, setValue, isDelinquencyBucketClassification]);
 
   const onSubmit = async (values: CreateWCLoanFormValues) => {
     try {
-      const payload = { ...values };
-      if (!template?.isDelinquencyBucketClassification) {
-        delete payload.delinquencyBucketId;
-      }
+      const { discount, delinquencyBucketId, ...rest } = values;
+      const payload = { ...rest } as CreateWCLoanFormValues;
+      if (isDiscountOverrideAllowed) payload.discount = discount;
+      if (isDelinquencyBucketClassification && delinquencyBucketId != null) payload.delinquencyBucketId = delinquencyBucketId;
       const result = await createMutation.mutateAsync(payload as never);
       toastSuccess(t("Loan application submitted successfully"));
       navigate(`/working-capital-loans/view/${result.resourceId ?? result.loanId}`);
@@ -205,7 +212,7 @@ const WCLoanFormPage: FC = () => {
           </CardContent>
         </Card>
 
-        {template?.isDelinquencyBucketClassification && (
+        {isDelinquencyBucketClassification && (
           <Card>
             <CardHeader><CardTitle className="text-base">{t("Delinquency Configuration")}</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
@@ -217,7 +224,7 @@ const WCLoanFormPage: FC = () => {
                 >
                   <SelectTrigger><SelectValue placeholder={t("Select bucket")} /></SelectTrigger>
                   <SelectContent>
-                    {(template.delinquencyBucketOptions ?? buckets).map((b) => (
+                    {(template?.delinquencyBucketOptions ?? buckets).map((b) => (
                       <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
                     ))}
                   </SelectContent>

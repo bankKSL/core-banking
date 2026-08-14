@@ -19,6 +19,13 @@ export interface DelinquencyBucket {
   ranges?: DelinquencyRange[];
 }
 
+export interface WCLoanProductAllowAttributeOverrides {
+  discountDefault?: boolean;
+  discountFee?: boolean;
+  delinquencyBucketClassification?: boolean;
+  [key: string]: unknown;
+}
+
 export interface WCLoanProduct {
   id: number;
   name: string;
@@ -41,10 +48,12 @@ export interface WCLoanProduct {
   maxPeriodPaymentRate: number;
   repaymentEvery: number;
   repaymentFrequencyType: CodeName;
-  delinquencyBucketId: number;
+  delinquencyBucketId?: number;
+  delinquencyBucket?: { id: number; name?: string; bucketType?: unknown; ranges?: unknown[] };
   delinquencyGraceDays: number;
   delinquencyStartType: string;
   accountingRule: CodeName;
+  allowAttributeOverrides?: WCLoanProductAllowAttributeOverrides;
   externalId?: string;
 }
 
@@ -85,6 +94,7 @@ export interface WCLoanProductTemplate {
     displaySymbol?: string;
   }>;
   repaymentFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
+  periodFrequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
   delinquencyBucketOptions?: Array<{ id: number; name: string }>;
   accountingRuleOptions?: Array<{ id: string; code: string; value: string }>;
   advancedPaymentAllocationTransactionTypes?: Array<{ id: number; code: string; value: string }>;
@@ -114,26 +124,48 @@ export interface WCLoan {
   totalOutstanding?: number;
   totalPrincipalPaid?: number;
   summary?: WCLoanSummary;
+  balance?: WCLoanBalance;
   timeline: WCLoanTimeline;
   delinquencyBucketId?: number;
+  delinquencyBucket?: { id: number; name?: string; bucketType?: unknown; ranges?: unknown[] };
   delinquencyGraceDays?: number;
   delinquencyStartType?: string;
   delinquent?: {
     delinquentDays?: number;
     delinquentAmount?: number;
     lastPaymentDate?: string | number[];
+    installmentLevelDelinquency?: WCLoanInstallmentLevelDelinquency[];
   };
   delinquencyRange?: { id: number; classification: string; minimumAgeDays: number; maximumAgeDays: number };
   transactions?: WCLoanTransaction[];
 }
 
+export interface WCLoanInstallmentLevelDelinquency {
+  rangeId?: number;
+  classification?: string;
+  minimumAgeDays?: number;
+  maximumAgeDays?: number;
+  delinquentAmount?: number;
+}
+
+export interface WCLoanBalance {
+  totalOutstanding?: number;
+  totalRepayment?: number;
+  totalPrincipalOutstanding?: number;
+  totalPrincipalDue?: number;
+  totalInterestOutstanding?: number;
+  totalInterestDue?: number;
+  totalOverdue?: number;
+}
+
 export interface WCLoanSummary {
   currency: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
-  principalDisbursed: number;
+  principalDisbursed?: number;
+  totalDisbursement?: number;
   principalPaid: number;
   principalOutstanding: number;
-  interestOutstanding: number;
-  interestPaid: number;
+  interestOutstanding?: number;
+  interestPaid?: number;
   totalOutstanding: number;
   totalRepayment: number;
 }
@@ -149,10 +181,15 @@ export interface WCLoanTimeline {
 export interface WCLoanTransaction {
   id: number;
   type: { id: number; code: string; value: string };
-  date: string | number[];
+  date?: string | number[];
+  transactionDate?: string | number[];
   currency: { code: string; displaySymbol: string };
-  amount: number;
+  amount?: number;
+  transactionAmount?: number;
   principalPortion?: number;
+  feeChargesPortion?: number;
+  penaltyChargesPortion?: number;
+  overpaymentPortion?: number;
   interestPortion?: number;
   outstandingLoanBalance?: number;
   paymentDetailData?: {
@@ -255,11 +292,11 @@ export interface AmortizationScheduleEntry {
 
 export interface DelinquencyRangeScheduleEntry {
   period: number;
-  fromDate: string | number[];
-  toDate: string | number[];
-  expectedAmount: number;
-  paidAmount: number;
-  outstandingAmount: number;
+  fromDate?: string | number[];
+  toDate?: string | number[];
+  expectedAmount?: number;
+  paidAmount?: number;
+  outstandingAmount?: number;
   minPaymentCriteriaMet?: boolean;
   delinquencyStatus?: string;
 }
@@ -284,9 +321,13 @@ export interface RateChangeRequest {
 
 export interface RateChangeHistoryEntry {
   id: number;
-  periodPaymentRate: number;
-  fromDate: string | number[];
+  periodPaymentRate?: number;
+  newRate?: number;
+  previousRate?: number;
+  fromDate?: string | number[];
+  effectiveDate?: string | number[];
   createdOnDate?: string | number[];
+  createdDate?: string | number[];
   note?: string;
 }
 

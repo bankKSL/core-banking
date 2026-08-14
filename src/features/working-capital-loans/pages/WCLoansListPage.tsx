@@ -21,6 +21,14 @@ import {
 import type { WCLoan } from "../types/workingCapitalLoan";
 import { formatMoney } from "../utils/format";
 
+const WC_LOAN_STATUS_ENUM_MAP: Record<string, string> = {
+  "Submitted and pending approval": "SUBMITTED_AND_PENDING_APPROVAL",
+  Approved: "APPROVED",
+  Active: "ACTIVE",
+  Closed: "CLOSED_OBLIGATIONS_MET",
+  Rejected: "REJECTED",
+};
+
 const WCLoansListPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -38,7 +46,7 @@ const WCLoansListPage: FC = () => {
   const queryParams = useMemo(() => {
     const params: Record<string, unknown> = { page: page - 1, size: pageSize };
     if (search) params.accountNo = search;
-    if (statusFilter !== "all") params.status = statusFilter;
+    if (statusFilter !== "all") params.status = WC_LOAN_STATUS_ENUM_MAP[statusFilter] ?? statusFilter;
     return params;
   }, [page, pageSize, search, statusFilter]);
 

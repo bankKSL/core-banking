@@ -86,6 +86,12 @@ const WCLoanProductFormPage: FC = () => {
           },
         ],
       };
+      const minMaxFields = ["minPrincipal", "maxPrincipal", "minPeriodPaymentRate", "maxPeriodPaymentRate"];
+      for (const field of minMaxFields) {
+        if (!(payload[field as keyof typeof payload] as number | undefined) || (payload[field as keyof typeof payload] as number) <= 0) {
+          delete payload[field as keyof typeof payload];
+        }
+      }
       await createMutation.mutateAsync(payload);
       toastSuccess(t("Product created successfully"));
       navigate("/working-capital-loans/products");

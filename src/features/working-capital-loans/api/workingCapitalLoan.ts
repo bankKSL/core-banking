@@ -36,18 +36,29 @@ export async function createDelinquencyBucket(payload: {
 
 export async function fetchWCLoanProducts(): Promise<WCLoanProduct[]> {
   const { data } = await client.get<WCLoanProduct[] | { pageItems?: WCLoanProduct[] }>("/working-capital-loan-products");
-  if (Array.isArray(data)) return data;
-  return data?.pageItems ?? [];
+  const list = Array.isArray(data) ? data : data?.pageItems ?? [];
+  return list.map(mapWCLoanProduct);
 }
 
 export async function fetchWCLoanProduct(productId: number): Promise<WCLoanProduct> {
   const { data } = await client.get<WCLoanProduct>(`/working-capital-loan-products/${productId}`);
-  return data;
+  return mapWCLoanProduct(data);
+}
+
+function mapWCLoanProduct(product: WCLoanProduct): WCLoanProduct {
+  if (!product) return product;
+  return {
+    ...product,
+    delinquencyBucketId: product.delinquencyBucketId ?? product.delinquencyBucket?.id,
+  };
 }
 
 export async function fetchWCLoanProductTemplate(): Promise<WCLoanProductTemplate> {
   const { data } = await client.get<WCLoanProductTemplate>("/working-capital-loan-products/template");
-  return data;
+  return {
+    ...data,
+    repaymentFrequencyTypeOptions: data?.repaymentFrequencyTypeOptions ?? data?.periodFrequencyTypeOptions,
+  };
 }
 
 export async function createWCLoanProduct(payload: WCLoanProductCreateRequest): Promise<{ resourceId: number }> {
@@ -105,34 +116,100 @@ export async function makeWCRepayment(loanId: number, payload: RepaymentRequest)
 }
 
 export async function fetchAmortizationSchedule(loanId: number): Promise<AmortizationScheduleEntry[]> {
-  const { data } = await client.get<AmortizationScheduleEntry[]>(
-    `/working-capital-loans/${loanId}/amortization-schedule`,
-  );
-  return Array.isArray(data) ? data : [];
+  const { data } = await client.get<{
+    effectiveInterestRate?: number;
+    payments?: Array<{
+      paymentNo: number;
+      paymentDate: string | number[];
+      expectedPaymentAmount: number;
+      expectedBalance: number;
+      actualBalance?: number;
+      actualPaymentAmount?: number;
+      expectedAmortizationAmount: number;
+      actualAmortizationAmount?: number;
+      expectedDiscountFeeBalance: number;
+      actualDiscountFeeBalance?: number;
+    }>;
+  }>(`/working-capital-loans/${loanId}/amortization-schedule`);
+  const payments = data?.payments ?? [];
+  return payments.map((p) => ({
+    period: p.paymentNo,
+    fromDate: p.paymentDate,
+    dueDate: p.paymentDate,
+    expectedAmount: p.expectedPaymentAmount,
+    paidAmount: p.actualPaymentAmount ?? 0,
+    outstandingAmount: p.expectedBalance,
+    eir: data?.effectiveInterestRate,
+  }));
 }
 
 export async function fetchDelinquencyRangeSchedule(loanId: number): Promise<DelinquencyRangeScheduleEntry[]> {
-  const { data } = await client.get<DelinquencyRangeScheduleEntry[]>(
-    `/working-capital-loans/${loanId}/delinquency-range-schedule`,
-  );
-  return Array.isArray(data) ? data : [];
+  const { data } = await client.get<
+    Array<{
+      periodNumber?: number;
+      fromDate?: string | number[];
+      toDate?: string | number[];
+      expectedAmount?: number;
+      paidAmount?: number;
+      outstandingAmount?: number;
+      minPaymentCriteriaMet?: boolean;
+      delinquentDays?: number;
+      delinquentAmount?: number;
+    }>
+  >(`/working-capital-loans/${loanId}/delinquency-range-schedule`);
+  const list = Array.isArray(data) ? data : [];
+  return list.map((e, index) => ({
+    period: e.periodNumber ?? index + 1,
+    fromDate: e.fromDate,
+    toDate: e.toDate,
+    expectedAmount: e.expectedAmount,
+    paidAmount: e.paidAmount,
+    outstandingAmount: e.outstandingAmount,
+    minPaymentCriteriaMet: e.minPaymentCriteriaMet,
+    delinquencyStatus:
+      e.delinquentDays && e.delinquentDays > 0 ? `Delinquent ${e.delinquentDays} days` : undefined,
+  }));
 }
 
 export async function fetchDelinquencyTags(loanId: number): Promise<Array<{
   id: number;
   tagId?: number;
+  rangeId?: number;
   classification?: string;
+  delinquencyRange?: { id: number; classification?: string; minimumAgeDays?: number; maximumAgeDays?: number };
   addedOnDate?: string | number[];
   liftedOnDate?: string | number[] | null;
   outstandingAmount?: number;
 }>> {
   const { data } = await client.get(`/working-capital-loans/${loanId}/delinquencyrangetags`);
-  return Array.isArray(data) ? data : [];
+  const list = Array.isArray(data) ? data : [];
+  return list.map((tag: {
+    id: number;
+    rangeId?: number;
+    delinquencyRange?: { id?: number; classification?: string };
+    addedOnDate?: string | number[];
+    liftedOnDate?: string | number[] | null;
+    outstandingAmount?: number;
+  }) => ({
+    id: tag.id,
+    tagId: tag.rangeId ?? tag.delinquencyRange?.id,
+    classification: tag.delinquencyRange?.classification,
+    addedOnDate: tag.addedOnDate,
+    liftedOnDate: tag.liftedOnDate,
+    outstandingAmount: tag.outstandingAmount,
+  }));
 }
 
 export async function fetchWCLoanTransactions(loanId: number): Promise<WCLoanTransaction[]> {
-  const { data } = await client.get<WCLoanTransaction[]>(`/working-capital-loans/${loanId}/transactions`);
-  return Array.isArray(data) ? data : [];
+  const { data } = await client.get<WCLoanTransaction[] | { content?: WCLoanTransaction[] }>(
+    `/working-capital-loans/${loanId}/transactions`,
+  );
+  const list = Array.isArray(data) ? data : data?.content ?? [];
+  return list.map((tx) => ({
+    ...tx,
+    date: tx.transactionDate ?? tx.date,
+    amount: tx.transactionAmount ?? tx.amount,
+  }));
 }
 
 export async function createDelinquencyAction(
@@ -158,6 +235,14 @@ export async function updatePaymentRate(
 }
 
 export async function fetchRateChangeHistory(loanId: number): Promise<RateChangeHistoryEntry[]> {
-  const { data } = await client.get<RateChangeHistoryEntry[]>(`/working-capital-loans/${loanId}/rate-changes`);
-  return Array.isArray(data) ? data : [];
+  const { data } = await client.get<RateChangeHistoryEntry[]>(
+    `/working-capital-loans/${loanId}/rate-changes`,
+  );
+  const list = Array.isArray(data) ? data : [];
+  return list.map((rc) => ({
+    ...rc,
+    periodPaymentRate: rc.newRate ?? rc.periodPaymentRate,
+    fromDate: rc.effectiveDate ?? rc.fromDate,
+    createdOnDate: rc.createdDate ?? rc.createdOnDate,
+  }));
 }

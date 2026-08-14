@@ -30,7 +30,7 @@ const WCLoanProductsPage: FC = () => {
     { key: "principal", header: t("Principal"), cell: (r) => <span className="font-mono">{formatMoney(r.principal, r.currency?.code)}</span> },
     { key: "periodPaymentRate", header: t("Period Rate (%)"), cell: (r) => <span className="font-mono">{r.periodPaymentRate}%</span> },
     { key: "repaymentEvery", header: t("Repayment"), cell: (r) => <span>{t("Every")} {r.repaymentEvery} {r.repaymentFrequencyType?.value ?? ""}</span> },
-    { key: "delinquencyBucketId", header: t("Delinquency Bucket"), cell: (r) => <span>#{r.delinquencyBucketId}</span> },
+    { key: "delinquencyBucket", header: t("Delinquency Bucket"), cell: (r) => <span>{r.delinquencyBucket?.name ?? (r.delinquencyBucketId != null ? `#${r.delinquencyBucketId}` : "—")}</span> },
     {
       key: "actions",
       header: "",
