@@ -164,6 +164,9 @@ export interface WCLoanCreateRequest {
   clientId: number;
   productId: number;
   principalAmount: number;
+  totalPaymentVolume: number;
+  periodPaymentRate: number;
+  discount: number;
   submittedOnDate: string;
   expectedDisbursementDate: string;
   delinquencyBucketId?: number;
@@ -217,9 +220,23 @@ export interface WCLoanTemplate {
   clientName?: string;
   productId?: number;
   productOptions?: Array<{ id: number; name: string }>;
+  fundOptions?: Array<{ id: number; name: string }>;
   delinquencyBucketOptions?: Array<{ id: number; name: string }>;
   frequencyTypeOptions?: Array<{ id: number; code: string; value: string }>;
   currency?: { code: string; name: string; decimalPlaces: number; displaySymbol: string };
+  loanData?: {
+    principalAmount?: number;
+    periodPaymentRate?: number;
+    totalPaymentVolume?: number;
+    discount?: number;
+    submittedOnDate?: string;
+    expectedDisbursementDate?: string;
+    delinquencyBucketId?: number;
+    delinquencyGraceDays?: number;
+    delinquencyStartType?: string;
+    [key: string]: unknown;
+  };
+  isDelinquencyBucketClassification?: boolean;
 }
 
 export interface AmortizationScheduleEntry {
