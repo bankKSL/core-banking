@@ -81,7 +81,8 @@ export function useLoanChargeCommand() {
       payload,
     }: {
       loanId: number;
-      chargeId: number;
+      /** Not used for collection commands such as `deactivateOverdue`. */
+      chargeId?: number;
       command: "pay" | "waive" | "adjustment" | "deactivateOverdue";
       payload?: LoanChargeCommandRequest;
     }) => loanChargeCommand(loanId, chargeId, command, payload),

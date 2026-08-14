@@ -9,7 +9,8 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useToast } from "@/components/ui/toast";
 import { useLoan } from "../hooks/useLoan";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { makeTransaction, approveLoan, disburseLoan, disburseLoanToSavings, undoDisbursal } from "../api/loan";
+import { makeTransaction, approveLoan, disburseLoan, disburseLoanToSavings, undoDisbursal, refundLoanByTransfer } from "../api/loan";
+import { adjustTransaction } from "../api/transactionAdjustment";
 import { useTransactionTemplate } from "../hooks/useTransactionTemplate";
 import { loanKeys } from "../hooks/useLoans";
 import { TRANSACTION_COMMAND_LABELS, TRANSACTION_NO_DATE_COMMANDS, TRANSACTION_DESTRUCTIVE_COMMANDS, TRANSACTION_AMOUNT_COMMANDS } from "../constants/transactions";
@@ -69,6 +70,33 @@ const LoanTransactionFormPage: FC = () => {
       }
       if (transactionType === "undoDisbursal") {
         return undoDisbursal(id);
+      }
+
+      // Refund by transfer is not a transaction command — route it to the
+      // account-transfers endpoint (fix_doc/loans-comparison.md Problem 4).
+      if (transactionType === "refundbytransfer") {
+        if (!loan) throw new Error("Loan data is not available");
+        if (!values.transactionAmount) throw new Error("Transfer amount is required");
+        return refundLoanByTransfer(id, loan, {
+          transferDate: values.transactionDate ?? "",
+          transferAmount: values.transactionAmount,
+          transferDescription: values.note,
+        });
+      }
+
+      // Interest refund is only handled on the adjust-transaction endpoint
+      // (`POST /loans/{id}/transactions/{transactionId}?command=interest-refund`),
+      // targeting the disbursement transaction (Problem 5).
+      if (transactionType === "interest-refund") {
+        const disbursement = loan?.transactions?.find((tx) =>
+          /disburs/i.test(tx.type?.code ?? "") || /disburs/i.test(tx.type?.value ?? ""),
+        );
+        if (!disbursement) throw new Error("No disbursement transaction found for interest refund");
+        return adjustTransaction(id, disbursement.id, "interest-refund", {
+          transactionDate: values.transactionDate,
+          transactionAmount: values.transactionAmount,
+          note: values.note,
+        });
       }
 
       // Transaction sub-resource commands (POST /loans/{id}/transactions?command=...)

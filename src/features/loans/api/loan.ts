@@ -54,10 +54,6 @@ export async function updateLoanProduct(
   return data;
 }
 
-export async function deleteLoanProduct(productId: number): Promise<void> {
-  await client.delete(`/loanproducts/${productId}`);
-}
-
 // ─── Loans ───────────────────────────────────────────────────────
 
 export async function fetchLoans(params: LoanListParams = {}): Promise<LoanListResponse> {
@@ -264,6 +260,39 @@ export async function makeTransaction(
     { ...payload, locale: "en", dateFormat: "yyyy-MM-dd" },
     { params: { command } },
   );
+  return data;
+}
+
+/**
+ * Refund by transfer — `refundbytransfer` is NOT a supported command on
+ * `POST /loans/{id}/transactions`. The backend performs refund-by-transfer via
+ * `POST /accounttransfers/refundByTransfer` (see fix_doc/loans-comparison.md).
+ * Account types: 1 = loan, 2 = savings.
+ */
+export async function refundLoanByTransfer(
+  loanId: number,
+  loan: { clientId: number; officeId?: number; linkAccountId?: number },
+  payload: { transferDate: string; transferAmount: number; transferDescription?: string },
+): Promise<LoanCommandResponse> {
+  const toAccountId = loan.linkAccountId;
+  if (!toAccountId) {
+    throw new Error("No linked savings account found for refund by transfer");
+  }
+  const { data } = await client.post<LoanCommandResponse>("/accounttransfers/refundByTransfer", {
+    fromAccountId: loanId,
+    fromClientId: loan.clientId,
+    fromOfficeId: loan.officeId,
+    fromAccountType: 1,
+    toAccountId,
+    toClientId: loan.clientId,
+    toOfficeId: loan.officeId,
+    toAccountType: 2,
+    transferDate: currentDate(payload.transferDate),
+    transferAmount: payload.transferAmount,
+    transferDescription: payload.transferDescription,
+    dateFormat: "yyyy-MM-dd",
+    locale: "en",
+  });
   return data;
 }
 

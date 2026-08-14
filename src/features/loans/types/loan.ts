@@ -632,6 +632,8 @@ export interface LoanProductCreateRequest {
   externalId?: string;
   fundId?: number;
   delinquencyBucketId?: number;
+  /** Set to `inactive` to deactivate a product (no DELETE endpoint exists). */
+  status?: string;
   currencyCode: string;
   digitsAfterDecimal?: number;
   inMultiplesOf?: number;
@@ -844,14 +846,21 @@ export interface LoanDelinquentData {
   delinquentAmount?: number;
   lastRepaymentDate?: string | number[];
   lastPaymentDate?: string | number[];
+  /** Available disbursement amount — only present on approved multi-disbursal loans. */
+  availableDisbursementAmount?: number;
+  availableDisbursementAmountWithOverApplied?: number;
 }
 
 export interface LoanDelinquencyTag {
   id: number;
-  tagId?: number;
-  classification?: string;
-  minimumAgeDays?: number;
-  maximumAgeDays?: number;
+  loanId?: number;
+  /** Backend nests the range fields under `delinquencyRange` (see fix_doc/loans-comparison.md). */
+  delinquencyRange?: {
+    id: number;
+    classification: string;
+    minimumAgeDays: number;
+    maximumAgeDays: number;
+  };
   addedOnDate?: string | number[];
   liftedOnDate?: string | number[] | null;
 }

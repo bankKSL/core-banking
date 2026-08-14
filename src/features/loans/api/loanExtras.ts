@@ -5,15 +5,18 @@ import client from "@/api/client";
 // follows the contract documented in `docs/loan.md` §7.x.
 
 // ─── Approved amount history (doc §7.9) ────────────────────────────
+//
+// Backend (`GET /loans/{id}/approved-amount`) returns
+// `List<LoanApprovedAmountHistoryData>` with fields:
+//   loanId, externalLoanId, newApprovedAmount, oldApprovedAmount, dateOfChange
+// and the `PUT /loans/{id}/approved-amount` body is `{ amount, locale }`.
 
 export interface LoanApprovedAmountHistoryEntry {
-  id: number;
-  approvedLoanAmount: number;
-  netDisbursalAmount?: number;
-  approvedOnDate: string | number[];
-  approvedByUsername?: string;
-  modifiedOnDate?: string | number[];
-  modifiedByUsername?: string;
+  loanId: number;
+  externalLoanId?: string;
+  newApprovedAmount: number;
+  oldApprovedAmount: number;
+  dateOfChange: string | number[];
 }
 
 export async function fetchApprovedAmountHistory(
@@ -26,9 +29,7 @@ export async function fetchApprovedAmountHistory(
 }
 
 export interface UpdateApprovedAmountPayload {
-  approvedLoanAmount: number;
-  netDisbursalAmount?: number;
-  dateFormat?: string;
+  amount: number;
   locale?: string;
 }
 
@@ -37,24 +38,34 @@ export async function updateApprovedAmount(
   payload: UpdateApprovedAmountPayload,
 ): Promise<void> {
   await client.put(`/loans/${loanId}/approved-amount`, {
-    ...payload,
-    dateFormat: payload.dateFormat ?? "yyyy-MM-dd",
+    amount: payload.amount,
     locale: payload.locale ?? "en",
   });
 }
 
 // ─── Available disbursement amount (doc §7.10) ─────────────────────
+//
+// There is no `GET /loans/{id}/available-disbursement-amount` endpoint in
+// the backend — the values are exposed on the loan detail payload
+// (`loan.delinquent.availableDisbursementAmount(WithOverApplied)`). Only the
+// `PUT /loans/{id}/available-disbursement-amount` endpoint exists and its
+// body is `{ amount, locale }`.
+
+export interface AvailableDisbursementAmountData {
+  availableDisbursementAmount?: number;
+  availableDisbursementAmountWithOverApplied?: number;
+}
 
 export async function fetchAvailableDisbursementAmount(loanId: number): Promise<number> {
-  const { data } = await client.get<{ availableDisbursementAmountWithOverApplied?: number; amount?: number }>(
-    `/loans/${loanId}/available-disbursement-amount`,
-  );
-  return data.availableDisbursementAmountWithOverApplied ?? data.amount ?? 0;
+  const { data } = await client.get<{
+    delinquent?: AvailableDisbursementAmountData;
+  }>(`/loans/${loanId}`, { params: { associations: "all" } });
+  const d = data?.delinquent;
+  return d?.availableDisbursementAmountWithOverApplied ?? d?.availableDisbursementAmount ?? 0;
 }
 
 export interface UpdateAvailableDisbursementAmountPayload {
-  availableDisbursementAmount: number;
-  dateFormat?: string;
+  amount: number;
   locale?: string;
 }
 
@@ -63,8 +74,7 @@ export async function updateAvailableDisbursementAmount(
   payload: UpdateAvailableDisbursementAmountPayload,
 ): Promise<void> {
   await client.put(`/loans/${loanId}/available-disbursement-amount`, {
-    ...payload,
-    dateFormat: payload.dateFormat ?? "yyyy-MM-dd",
+    amount: payload.amount,
     locale: payload.locale ?? "en",
   });
 }
@@ -104,14 +114,22 @@ export async function fetchReAmortizationPreview(
 }
 
 // ─── Delinquency actions (doc §7.26) ───────────────────────────────
+//
+// Backend `GET /loans/{id}/delinquency-actions` returns
+// `LoanDelinquencyActionData`: `{ id, action, startDate, endDate,
+// createdById, createdOn, updatedById, lastModifiedOn }`. The POST body must
+// be `{ action: "pause"|"resume", startDate, endDate?, dateFormat, locale }`
+// — `note` is not supported.
 
 export interface DelinquencyAction {
   id: number;
-  loanId: number;
   action: string;
-  actionDate: string | number[];
-  createdByUsername?: string;
-  note?: string;
+  startDate: string | number[];
+  endDate?: string | number[] | null;
+  createdById?: number;
+  createdOn?: string | number[];
+  updatedById?: number;
+  lastModifiedOn?: string | number[];
   [key: string]: unknown;
 }
 
@@ -124,9 +142,10 @@ export async function fetchDelinquencyActions(loanId: number): Promise<Delinquen
 }
 
 export interface CreateDelinquencyActionPayload {
-  action: string;
-  actionDate?: string;
-  note?: string;
+  action: "pause" | "resume";
+  startDate: string;
+  /** Required when `action === "pause"`; must NOT be set for `resume`. */
+  endDate?: string;
   dateFormat?: string;
   locale?: string;
   [key: string]: unknown;

@@ -43,7 +43,10 @@ const RescheduleLoansPage: FC = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const apiCommand = statusFilter === "rejected" ? undefined : statusFilter === "all" ? undefined : statusFilter;
+  // Backend whitelists `{all, approve, pending, reject}` — map the UI
+  // "approved" filter to `approve` and omit the param for all/rejected.
+  const apiCommand =
+    statusFilter === "approved" ? "approve" : statusFilter === "pending" ? "pending" : undefined;
   const {
     data: requests = [],
     isLoading,

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchLoanProducts, fetchLoanProduct, fetchLoanProductTemplate, deleteLoanProduct } from "../api/loan";
+import { fetchLoanProducts, fetchLoanProduct, fetchLoanProductTemplate, updateLoanProduct } from "../api/loan";
+import type { LoanProductCreateRequest } from "../types/loan";
 import { loanKeys } from "./useLoans";
 
 export function useLoanProducts() {
@@ -10,10 +11,15 @@ export function useLoanProducts() {
   });
 }
 
-export function useDeleteLoanProduct() {
+/**
+ * Loan products are never deleted by the backend (`DELETE /loanproducts/{id}`
+ * does not exist) — deactivate them instead via `PUT /loanproducts/{id}`.
+ */
+export function useUpdateLoanProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (productId: number) => deleteLoanProduct(productId),
+    mutationFn: ({ productId, payload }: { productId: number; payload: Partial<LoanProductCreateRequest> }) =>
+      updateLoanProduct(productId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: loanKeys.products });
     },

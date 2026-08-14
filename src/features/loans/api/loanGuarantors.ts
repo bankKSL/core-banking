@@ -12,8 +12,10 @@ export async function addLoanGuarantor(
   loanId: number,
   payload: LoanGuarantorCreateRequest,
 ): Promise<LoanCommandResponse> {
+  const { clientId, ...rest } = payload;
   const { data } = await client.post<LoanCommandResponse>(`/loans/${loanId}/guarantors`, {
-    ...payload,
+    ...rest,
+    entityId: clientId,
     dateFormat: "yyyy-MM-dd",
     locale: "en",
   });
@@ -25,8 +27,10 @@ export async function updateLoanGuarantor(
   guarantorId: number,
   payload: Partial<LoanGuarantorCreateRequest>,
 ): Promise<LoanCommandResponse> {
+  const { clientId, ...rest } = payload;
   const { data } = await client.put<LoanCommandResponse>(`/loans/${loanId}/guarantors/${guarantorId}`, {
-    ...payload,
+    ...rest,
+    ...(clientId != null ? { entityId: clientId } : {}),
     dateFormat: "yyyy-MM-dd",
     locale: "en",
   });

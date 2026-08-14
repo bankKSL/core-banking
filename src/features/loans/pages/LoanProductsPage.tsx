@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Pencil, Ban, Eye } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { useLoanProducts, useDeleteLoanProduct, formatDate } from "@/features/loans";
+import { useLoanProducts, useUpdateLoanProduct, formatDate } from "@/features/loans";
 import type { LoanProduct } from "@/features/loans";
 
 const LoanProductsPage: React.FC = () => {
@@ -18,22 +18,28 @@ const LoanProductsPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: products = [], isLoading } = useLoanProducts();
   const [search, setSearch] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<LoanProduct | null>(null);
-  const deleteMutation = useDeleteLoanProduct();
+  const [deactivateTarget, setDeactivateTarget] = useState<LoanProduct | null>(null);
+  const updateMutation = useUpdateLoanProduct();
+
+  const isInactive = (p: LoanProduct) =>
+    p.status === "inactive" || p.status === "closed" || !!p.closeDate;
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return products.filter((p) => p.name.toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q));
   }, [products, search]);
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
+  const handleDeactivate = async () => {
+    if (!deactivateTarget) return;
     try {
-      await deleteMutation.mutateAsync(deleteTarget.id);
+      await updateMutation.mutateAsync({
+        productId: deactivateTarget.id,
+        payload: { status: "inactive", locale: "en", dateFormat: "yyyy-MM-dd" },
+      });
     } catch {
       // handled
     }
-    setDeleteTarget(null);
+    setDeactivateTarget(null);
   };
 
   const columns: ColumnDef<any>[] = [
@@ -70,7 +76,7 @@ const LoanProductsPage: React.FC = () => {
       accessorFn: (r) => {
         const s = r.status ?? (r.closeDate ? "closed" : "active");
         return (
-          <Badge variant={s === "active" ? "success" : "default"} size="sm">
+          <Badge variant={s === "active" ? "success" : s === "inactive" || s === "closed" ? "default" : "default"} size="sm">
             {s}
           </Badge>
         );
@@ -87,9 +93,11 @@ const LoanProductsPage: React.FC = () => {
           <Button variant="ghost" size="sm" onClick={() => navigate(`/lending/products/edit/${r.id}`)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(r)}>
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
+          {!isInactive(r) && (
+            <Button variant="ghost" size="sm" onClick={() => setDeactivateTarget(r)}>
+              <Ban className="h-4 w-4 text-amber-500" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -143,14 +151,16 @@ const LoanProductsPage: React.FC = () => {
       </Card>
 
       <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-        title={t("Delete Loan Product")}
-        description={t('Delete "{{name}}"?', { name: deleteTarget?.name })}
-        confirmLabel={t("Delete")}
+        open={!!deactivateTarget}
+        onOpenChange={() => setDeactivateTarget(null)}
+        onConfirm={handleDeactivate}
+        title={t("Deactivate Loan Product")}
+        description={t('Deactivate "{{name}}"? Deactivated products cannot be used for new loans.', {
+          name: deactivateTarget?.name,
+        })}
+        confirmLabel={t("Deactivate")}
         variant="destructive"
-        loading={deleteMutation.isPending}
+        loading={updateMutation.isPending}
       />
     </div>
   );

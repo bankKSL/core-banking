@@ -126,6 +126,7 @@ export {
   updateLoanProduct,
   fetchTransactionTemplate,
   makeTransaction,
+  refundLoanByTransfer,
   waiveInterest,
   forecloseLoan,
   writeOffLoan,
@@ -200,7 +201,7 @@ export { useLoans, loanKeys } from "./hooks/useLoans";
 
 export { useLoan, useLoanByExternalId } from "./hooks/useLoan";
 
-export { useLoanProducts, useLoanProduct, useLoanProductTemplate, useDeleteLoanProduct } from "./hooks/useLoanProducts";
+export { useLoanProducts, useLoanProduct, useLoanProductTemplate, useUpdateLoanProduct } from "./hooks/useLoanProducts";
 
 export { useLoanTemplate } from "./hooks/useLoanTemplate";
 

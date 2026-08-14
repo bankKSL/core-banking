@@ -52,15 +52,23 @@ export async function deleteLoanCharge(loanId: number, chargeId: number): Promis
   return data;
 }
 
-/** Charge commands: pay | waive | adjustment | deactivateOverdue */
+/**
+ * Charge commands: pay | waive | adjustment | deactivateOverdue.
+ *
+ * `deactivateOverdue` is only supported on the *collection* endpoint
+ * (`POST /loans/{loanId}/charges?command=deactivateOverdue`), without a charge
+ * id — posting it with a charge id throws `UnrecognizedQueryParamException`.
+ */
 export async function loanChargeCommand(
   loanId: number,
-  chargeId: number,
+  chargeId: number | undefined,
   command: "pay" | "waive" | "adjustment" | "deactivateOverdue",
   payload: LoanChargeCommandRequest = {},
 ): Promise<LoanCommandResponse> {
+  const isCollectionCommand = command === "deactivateOverdue";
+  const url = isCollectionCommand ? `/loans/${loanId}/charges` : `/loans/${loanId}/charges/${chargeId}`;
   const { data } = await client.post<LoanCommandResponse>(
-    `/loans/${loanId}/charges/${chargeId}`,
+    url,
     { ...payload, dateFormat: "yyyy-MM-dd", locale: "en" },
     { params: { command } },
   );

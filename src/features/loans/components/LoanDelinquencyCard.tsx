@@ -98,7 +98,7 @@ const LoanDelinquencyCard: FC<LoanDelinquencyCardProps> = ({ loan }) => {
                   <TableRow key={tag.id}>
                     <TableCell>
                       <Badge variant="warning" size="sm">
-                        {tag.classification ?? `#${tag.tagId ?? tag.id}`}
+                        {tag.delinquencyRange?.classification ?? `#${tag.delinquencyRange?.id ?? tag.id}`}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{formatDate(tag.addedOnDate)}</TableCell>
