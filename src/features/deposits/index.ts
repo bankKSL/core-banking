@@ -155,13 +155,14 @@ export {
   useDeleteFixedDepositProduct,
 } from "./hooks/useFixedDepositProducts";
 
-export { useRecurringDepositAccounts, useRecurringDepositAccount } from "./hooks/useRecurringDeposits";
-
 export {
+  useRecurringDepositAccounts,
+  useRecurringDepositAccount,
   useCreateRecurringDepositAccount,
   useUpdateRecurringDepositAccount,
   useDeleteRecurringDepositAccount,
   useRecurringDepositCommand,
+  useRecurringDepositClosureTemplate,
 } from "./hooks/useRecurringDeposits";
 
 export {

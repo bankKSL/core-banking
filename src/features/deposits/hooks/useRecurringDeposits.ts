@@ -6,6 +6,7 @@ import {
   updateRecurringDepositAccount,
   deleteRecurringDepositAccount,
   recurringDepositCommand,
+  fetchRecurringDepositClosureTemplate,
 } from "../api/deposit";
 import type { RecurringDepositListParams } from "../types/deposit";
 import { depositKeys } from "./useSavingsAccounts";
@@ -76,5 +77,14 @@ export function useRecurringDepositCommand() {
       qc.invalidateQueries({ queryKey: [...depositKeys.all, "recurring"] });
       qc.invalidateQueries({ queryKey: depositKeys.recurringDetail(variables.accountId) });
     },
+  });
+}
+
+export function useRecurringDepositClosureTemplate(accountId: number | string | undefined) {
+  return useQuery({
+    queryKey: [...depositKeys.recurringDetail(accountId!), "closureTemplate"],
+    queryFn: () => fetchRecurringDepositClosureTemplate(accountId!),
+    enabled: !!accountId,
+    staleTime: 60_000,
   });
 }

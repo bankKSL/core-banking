@@ -409,7 +409,6 @@ export interface RecurringDepositAccount {
   totalDeposits?: number;
   totalInterestEarned?: number;
   mandatoryRecommendedDepositAmount?: number;
-  recurringDepositAmount?: number;
   recurringDepositFrequency?: number;
   recurringDepositFrequencyType?: { id: number; code: string; value: string };
   depositPeriod: number;
@@ -422,9 +421,13 @@ export interface RecurringDepositAccount {
   interestCalculationType?: { id: number; code: string; value: string };
   interestCalculationDaysInYearType?: { id: number; code: string; value: string };
   expectedFirstDepositOnDate?: string | number[];
-  expectedMaturityDate?: string;
   recurringFrequency?: number;
   recurringFrequencyType?: { id: number; code: string; value: string };
+  groupId?: number;
+  onAccountClosureId?: number;
+  onAccountClosure?: { id: number; code: string; value: string };
+  officeId?: number;
+  clientOfficeId?: number;
   submittedOnDate?: string | number[];
   approvedOnDate?: string | number[];
   activatedOnDate?: string | number[];
@@ -451,8 +454,6 @@ export interface RecurringDepositAccount {
   isMandatoryDeposit?: boolean;
   allowWithdrawal?: boolean;
   adjustAdvanceTowardsFuturePayments?: boolean;
-  transferInterestToSavings?: boolean;
-  linkAccountId?: number;
   maturityInstructionId?: number;
   transferToSavingsId?: number;
   transactions?: unknown[];
@@ -468,6 +469,12 @@ export interface RecurringDepositListParams {
   sortOrder?: "ASC" | "DESC";
   clientId?: number;
   status?: number;
+  paged?: boolean;
+}
+
+export interface RecurringDepositAccountListResponse {
+  totalFilteredRecords?: number;
+  pageItems?: RecurringDepositAccount[];
 }
 
 // ─── Recurring Deposit Product ────────────────────────────────────
@@ -640,8 +647,6 @@ export interface RecurringDepositAccountCreateRequest {
   isMandatoryDeposit?: boolean;
   allowWithdrawal?: boolean;
   adjustAdvanceTowardsFuturePayments?: boolean;
-  transferInterestToSavings?: boolean;
-  linkAccountId?: number;
   maturityInstructionId?: number;
   transferToSavingsId?: number;
   preClosurePenalApplicable?: boolean;

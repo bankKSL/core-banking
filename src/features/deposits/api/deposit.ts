@@ -19,6 +19,7 @@ import type {
   FixedDepositAccount,
   FixedDepositListParams,
   RecurringDepositAccount,
+  RecurringDepositAccountListResponse,
   RecurringDepositListParams,
   RecurringDepositProduct,
   RecurringDepositProductCreateRequest,
@@ -353,10 +354,10 @@ export async function fetchFixedDepositAccount(accountId: number | string): Prom
 // ─── Recurring Deposits ──────────────────────────────────────────
 
 export async function fetchRecurringDepositAccounts(
-  params: FixedDepositListParams = {},
-): Promise<RecurringDepositAccount[]> {
-  const { data } = await client.get("/recurringdepositaccounts", { params });
-  return data;
+  params: RecurringDepositListParams = {},
+): Promise<RecurringDepositAccountListResponse> {
+  const { data } = await client.get("/recurringdepositaccounts", { params: { paged: true, ...params } });
+  return Array.isArray(data) ? { pageItems: data, totalFilteredRecords: data.length } : data;
 }
 
 export async function fetchRecurringDepositAccount(accountId: number | string): Promise<RecurringDepositAccount> {
@@ -422,7 +423,12 @@ export async function recurringDepositCommand(
   data: Record<string, unknown> = {},
 ): Promise<SavingsCommandResponse> {
   const dateFields = ["approvedOnDate", "activatedOnDate", "closedOnDate", "rejectedOnDate", "withdrawnOnDate"];
-  const converted: Record<string, unknown> = { locale: "en", dateFormat: "yyyy-MM-dd" };
+  // `undoapproval` only permits an empty body — locale/dateFormat trigger an
+  // UnsupportedParameterException on the backend. Other commands accept them.
+  const bodylessCommands = ["undoapproval"];
+  const converted: Record<string, unknown> = bodylessCommands.includes(command)
+    ? {}
+    : { locale: "en", dateFormat: "yyyy-MM-dd" };
   for (const [k, v] of Object.entries(data)) {
     converted[k] = dateFields.includes(k) ? currentDate(v as string | undefined) : v;
   }
@@ -618,14 +624,46 @@ export interface RecurringDepositTransaction {
   paymentTypeName?: string;
 }
 
+function normalizeTransactionDate(d: unknown): string | undefined {
+  if (d == null) return undefined;
+  if (Array.isArray(d) && d.length >= 3) {
+    return `${d[0]}-${String(d[1]).padStart(2, "0")}-${String(d[2]).padStart(2, "0")}`;
+  }
+  return String(d);
+}
+
+interface RdTransactionSource {
+  id?: number;
+  accountId?: number;
+  amount?: number;
+  date?: unknown;
+  transactionDate?: unknown;
+  [key: string]: unknown;
+}
+
+function normalizeRdTransaction(tx: unknown): RecurringDepositTransaction {
+  const t = tx as RdTransactionSource;
+  const date = normalizeTransactionDate(t.date ?? t.transactionDate);
+  return { ...t, date, transactionDate: date } as RecurringDepositTransaction;
+}
+
 /** GET /recurringdepositaccounts/{accountId}/transactions */
 export async function fetchRecurringDepositTransactions(
   accountId: number | string,
 ): Promise<{ totalFilteredRecords?: number; pageItems?: RecurringDepositTransaction[] }> {
-  const { data } = await client.get(`/recurringdepositaccounts/${accountId}/transactions`, {
-    params: { offset: 0, limit: 100 },
-  });
-  return data;
+  try {
+    const { data } = await client.get(`/recurringdepositaccounts/${accountId}/transactions`, {
+      params: { offset: 0, limit: 100 },
+    });
+    return Array.isArray(data) ? { pageItems: data } : data;
+  } catch {
+    // The backend has no list GET for RD transactions (404), so fall back to the
+    // embedded `transactions` collection returned by the account detail endpoint.
+    const { data } = await client.get<RecurringDepositAccount>(`/recurringdepositaccounts/${accountId}`, {
+      params: { associations: "all" },
+    });
+    return { pageItems: (data.transactions ?? []).map(normalizeRdTransaction) };
+  }
 }
 
 /** POST /recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=undo */

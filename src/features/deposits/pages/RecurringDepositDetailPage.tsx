@@ -39,6 +39,7 @@ import {
   useRecurringDepositAccount,
   RECURRING_DEPOSIT_STATUS_CONFIG,
   useRecurringDepositCommand,
+  useRecurringDepositClosureTemplate,
   calculateInterestRecurringDeposit,
   postInterestRecurringDeposit,
   rejectRecurringDeposit,
@@ -48,6 +49,8 @@ import {
   useMakeRecurringDepositTransaction,
   recurringDepositCommand,
 } from "@/features/deposits";
+import { useToast } from "@/components/ui/toast";
+import { getErrorMessage } from "@/lib/error";
 import RecurringDepositTransactions from "@/features/deposits/components/RecurringDepositTransactions";
 
 function Hash(props: React.SVGProps<SVGSVGElement>) {
@@ -108,11 +111,15 @@ const RecurringDepositDetailPage: React.FC = () => {
   const { data: rd, isLoading, isError, error, refetch } = useRecurringDepositAccount(id);
   const commandMutation = useRecurringDepositCommand();
   const makeTxnMutation = useMakeRecurringDepositTransaction();
+  const { data: closureTemplate } = useRecurringDepositClosureTemplate(id);
+  const { error: toastError } = useToast();
   const [activeTab, setActiveTab] = useState("general");
 
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [closeDate, setCloseDate] = useState(new Date().toISOString().split("T")[0]);
   const [isPremature, setIsPremature] = useState(false);
+  const [onAccountClosureId, setOnAccountClosureId] = useState("100");
+  const [toSavingsAccountId, setToSavingsAccountId] = useState("");
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [depositDate, setDepositDate] = useState(new Date().toISOString().split("T")[0]);
@@ -125,56 +132,83 @@ const RecurringDepositDetailPage: React.FC = () => {
   const [prematureResult, setPrematureResult] = useState<Record<string, unknown> | null>(null);
   const [prematureDialogOpen, setPrematureDialogOpen] = useState(false);
 
+  const notifyError = useCallback((e: unknown) => toastError(t("Action failed"), getErrorMessage(e)), [toastError, t]);
+
   const runCommand = useCallback(
     async (command: string, data: Record<string, unknown> = {}) => {
       if (!rd) return;
-      await commandMutation.mutateAsync({ accountId: rd.id, command, data });
-      refetch();
+      try {
+        await commandMutation.mutateAsync({ accountId: rd.id, command, data });
+        refetch();
+      } catch (e) {
+        toastError(t("Action failed"), getErrorMessage(e));
+      }
     },
-    [rd, commandMutation, refetch],
+    [rd, commandMutation, refetch, toastError, t],
   );
 
   const handleClose = useCallback(async () => {
     if (!rd) return;
     const cmd = isPremature ? "prematureClose" : "close";
-    await recurringDepositCommand(rd.id, cmd, { closedOnDate: closeDate, locale: "en", dateFormat: "yyyy-MM-dd" });
-    setCloseDialogOpen(false);
-    refetch();
-  }, [rd, isPremature, closeDate, refetch]);
+    const payload: Record<string, unknown> = {
+      closedOnDate: closeDate,
+      onAccountClosureId: Number(onAccountClosureId),
+    };
+    if (onAccountClosureId === "200") payload.toSavingsAccountId = Number(toSavingsAccountId);
+    try {
+      await recurringDepositCommand(rd.id, cmd, payload);
+      setCloseDialogOpen(false);
+      refetch();
+    } catch (e) {
+      toastError(t("Close failed"), getErrorMessage(e));
+    }
+  }, [rd, isPremature, closeDate, onAccountClosureId, toSavingsAccountId, refetch, toastError, t]);
 
   const handleDeposit = useCallback(async () => {
     if (!rd) return;
-    await makeTxnMutation.mutateAsync({
-      accountId: rd.id,
-      command: "deposit",
-      payload: { transactionDate: depositDate, transactionAmount: Number(depositAmount) },
-    });
-    setDepositDialogOpen(false);
-    refetch();
-  }, [rd, depositDate, depositAmount, makeTxnMutation, refetch]);
+    try {
+      await makeTxnMutation.mutateAsync({
+        accountId: rd.id,
+        command: "deposit",
+        payload: { transactionDate: depositDate, transactionAmount: Number(depositAmount) },
+      });
+      setDepositDialogOpen(false);
+      refetch();
+    } catch (e) {
+      toastError(t("Deposit failed"), getErrorMessage(e));
+    }
+  }, [rd, depositDate, depositAmount, makeTxnMutation, refetch, toastError, t]);
 
   const handleWithdrawal = useCallback(async () => {
     if (!rd) return;
-    await makeTxnMutation.mutateAsync({
-      accountId: rd.id,
-      command: "withdrawal",
-      payload: { transactionDate: withdrawalDate, transactionAmount: Number(withdrawalAmount) },
-    });
-    setWithdrawalDialogOpen(false);
-    refetch();
-  }, [rd, withdrawalDate, withdrawalAmount, makeTxnMutation, refetch]);
+    try {
+      await makeTxnMutation.mutateAsync({
+        accountId: rd.id,
+        command: "withdrawal",
+        payload: { transactionDate: withdrawalDate, transactionAmount: Number(withdrawalAmount) },
+      });
+      setWithdrawalDialogOpen(false);
+      refetch();
+    } catch (e) {
+      toastError(t("Withdrawal failed"), getErrorMessage(e));
+    }
+  }, [rd, withdrawalDate, withdrawalAmount, makeTxnMutation, refetch, toastError, t]);
 
   const handleUpdateAmount = useCallback(async () => {
     if (!rd || !newRecurringAmount) return;
-    await updateDepositAmountRecurringDeposit(rd.id, {
-      mandatoryRecommendedDepositAmount: Number(newRecurringAmount),
-      effectiveDate,
-      locale: "en",
-      dateFormat: "yyyy-MM-dd",
-    });
-    setUpdateAmountDialogOpen(false);
-    refetch();
-  }, [rd, newRecurringAmount, effectiveDate, refetch]);
+    try {
+      await updateDepositAmountRecurringDeposit(rd.id, {
+        mandatoryRecommendedDepositAmount: Number(newRecurringAmount),
+        effectiveDate,
+        locale: "en",
+        dateFormat: "yyyy-MM-dd",
+      });
+      setUpdateAmountDialogOpen(false);
+      refetch();
+    } catch (e) {
+      toastError(t("Update amount failed"), getErrorMessage(e));
+    }
+  }, [rd, newRecurringAmount, effectiveDate, refetch, toastError, t]);
 
   if (isLoading)
     return (
@@ -235,7 +269,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => rejectRecurringDeposit(rd.id).then(() => refetch())}
+                  onClick={() => rejectRecurringDeposit(rd.id).then(() => refetch()).catch(notifyError)}
                   disabled={acting}
                   className="text-red-600"
                 >
@@ -245,7 +279,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => withdrawRecurringDeposit(rd.id).then(() => refetch())}
+                  onClick={() => withdrawRecurringDeposit(rd.id).then(() => refetch()).catch(notifyError)}
                   disabled={acting}
                   className="text-amber-600"
                 >
@@ -277,7 +311,11 @@ const RecurringDepositDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => calculateInterestRecurringDeposit(rd.id).then(() => refetch())}
+                  onClick={() =>
+                    calculateInterestRecurringDeposit(rd.id)
+                      .then(() => refetch())
+                      .catch(notifyError)
+                  }
                   disabled={acting}
                 >
                   <Calculator className="mr-1 h-4 w-4" />
@@ -288,12 +326,16 @@ const RecurringDepositDetailPage: React.FC = () => {
                   size="sm"
                   onClick={async () => {
                     if (!rd) return;
-                    const result = await calculatePrematureAmountRecurringDeposit(
-                      rd.id,
-                      new Date().toISOString().split("T")[0],
-                    );
-                    setPrematureResult(result as unknown as Record<string, unknown>);
-                    setPrematureDialogOpen(true);
+                    try {
+                      const result = await calculatePrematureAmountRecurringDeposit(
+                        rd.id,
+                        new Date().toISOString().split("T")[0],
+                      );
+                      setPrematureResult(result as unknown as Record<string, unknown>);
+                      setPrematureDialogOpen(true);
+                    } catch (e) {
+                      notifyError(e);
+                    }
                   }}
                   disabled={acting}
                 >
@@ -303,7 +345,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => postInterestRecurringDeposit(rd.id).then(() => refetch())}
+                  onClick={() => postInterestRecurringDeposit(rd.id).then(() => refetch()).catch(notifyError)}
                   disabled={acting}
                 >
                   <DollarSign className="mr-1 h-4 w-4" />
@@ -404,12 +446,12 @@ const RecurringDepositDetailPage: React.FC = () => {
                 <InfoRow
                   icon={<Repeat className="h-4 w-4" />}
                   label={t("Recurring Amount")}
-                  value={formatCurrency(rd.recurringDepositAmount ?? 0, rd.currency?.code)}
+                  value={formatCurrency(rd.mandatoryRecommendedDepositAmount ?? 0, rd.currency?.code)}
                 />
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
                   label={t("Frequency")}
-                  value={`${t("Every")} ${rd.recurringDepositFrequency ?? 1} ${rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? ""}`}
+                  value={`${t("Every")} ${rd.recurringFrequency ?? rd.recurringDepositFrequency ?? 1} ${(rd.recurringFrequencyType?.value ?? rd.recurringDepositFrequencyType?.value ?? "").toLowerCase()}`}
                 />
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
@@ -464,7 +506,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                 <InfoRow
                   icon={<DollarSign className="h-4 w-4" />}
                   label={t("Expected Maturity")}
-                  value={formatDate(rd.expectedMaturityDate)}
+                  value={formatDate(rd.maturityDate)}
                 />
                 <InfoRow
                   icon={<Calendar className="h-4 w-4" />}
@@ -514,10 +556,9 @@ const RecurringDepositDetailPage: React.FC = () => {
             </CardHeader>
             <CardContent className="p-0">
               {(() => {
-                const amount = rd.recurringDepositAmount ?? 0;
+                const amount = rd.mandatoryRecommendedDepositAmount ?? 0;
                 const period = rd.depositPeriod ?? 0;
-                const freqType = rd.recurringDepositFrequencyType?.value?.toLowerCase() ?? "month";
-                const freq = rd.recurringDepositFrequency ?? 1;
+                const freq = rd.recurringFrequency ?? rd.recurringDepositFrequency ?? 1;
                 const installments = period > 0 && freq > 0 ? Math.floor(period / freq) : 0;
                 if (installments === 0)
                   return <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No installment data available.")}</p>;
@@ -607,7 +648,7 @@ const RecurringDepositDetailPage: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{isPremature ? t("Premature Close") : t("Close at Maturity")}</DialogTitle>
-            <DialogDescription>{t("Enter closure date for RD")} {rd.accountNo}.</DialogDescription>
+            <DialogDescription>{t("Enter closure details for RD")} {rd.accountNo}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -616,7 +657,53 @@ const RecurringDepositDetailPage: React.FC = () => {
               </label>
               <Input id="closeDate" type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} />
             </div>
-            <Button onClick={handleClose} disabled={acting} variant="destructive">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium">{t("Closure Action")}</label>
+              <Select value={onAccountClosureId} onValueChange={setOnAccountClosureId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select action")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(closureTemplate?.onAccountClosureOptions?.length
+                    ? closureTemplate.onAccountClosureOptions
+                    : [
+                        { id: 100, value: "Withdraw Deposit" },
+                        { id: 200, value: "Transfer to Savings" },
+                        { id: 300, value: "Reinvest Principal + Interest" },
+                        { id: 400, value: "Reinvest Principal Only" },
+                      ]
+                  ).map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {onAccountClosureId === "200" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="block text-sm font-medium" htmlFor="toSavingsAccountId">
+                  {t("Transfer to Savings Account")}
+                </label>
+                <Select value={toSavingsAccountId} onValueChange={setToSavingsAccountId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("Select savings account")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(closureTemplate?.savingsAccounts ?? []).map((sa) => (
+                      <SelectItem key={sa.id} value={String(sa.id)}>
+                        {sa.accountNo} {sa.productName ? `— ${sa.productName}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <Button
+              onClick={handleClose}
+              disabled={acting || onAccountClosureId === "200" && !toSavingsAccountId}
+              variant="destructive"
+            >
               {acting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isPremature ? t("Premature Close") : t("Close")}
             </Button>
@@ -690,7 +777,7 @@ const RecurringDepositDetailPage: React.FC = () => {
                 type="number"
                 value={newRecurringAmount}
                 onChange={(e) => setNewRecurringAmount(e.target.value)}
-                placeholder={String(rd.recurringDepositAmount ?? 0)}
+                placeholder={String(rd.mandatoryRecommendedDepositAmount ?? 0)}
               />
             </div>
             <div className="flex flex-col gap-1.5">

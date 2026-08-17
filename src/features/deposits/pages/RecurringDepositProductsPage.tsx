@@ -10,8 +10,15 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRecurringDepositProducts, useDeleteRecurringDepositProduct } from "@/features/deposits";
+import { useRecurringDepositProducts, useDeleteRecurringDepositProduct, useRecurringDepositProduct } from "@/features/deposits";
 import type { RecurringDepositProduct } from "@/features/deposits";
+
+const ProductRateCell: React.FC<{ productId: number }> = ({ productId }) => {
+  const { data: detail, isLoading } = useRecurringDepositProduct(productId);
+  if (isLoading) return <Skeleton className="h-4 w-12" />;
+  const rate = detail?.activeChart?.chartSlabs?.[0]?.annualInterestRate;
+  return <span className="font-mono font-semibold">{rate != null ? `${rate}%` : "—"}</span>;
+};
 
 const RecurringDepositProductsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -59,10 +66,7 @@ const RecurringDepositProductsPage: React.FC = () => {
     {
       key: "interestRate",
       header: t("Rate"),
-      cell: (r) => {
-        const rate = r.activeChart?.chartSlabs?.[0]?.annualInterestRate;
-        return <span className="font-mono font-semibold">{rate != null ? `${rate}%` : "—"}</span>;
-      },
+      cell: (r) => <ProductRateCell productId={r.id} />,
     },
     {
       key: "actions",

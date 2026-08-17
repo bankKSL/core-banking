@@ -237,11 +237,11 @@ const RecurringDepositProductDetailPage: React.FC = () => {
             <InfoRow
               icon={<RefreshCw className="h-4 w-4" />}
               label={t("Recurring Frequency")}
-              value={
-                p.recurringDepositFrequency != null
-                  ? `${t("Every")} ${p.recurringDepositFrequency} ${p.recurringDepositFrequencyType?.description ?? ""}`
-                  : "—"
-              }
+              value={(() => {
+                const freq = p.recurringFrequency ?? p.recurringDepositFrequency;
+                const type = p.recurringFrequencyType?.description ?? p.recurringDepositFrequencyType?.description;
+                return freq != null ? `${t("Every")} ${freq} ${type ?? ""}` : "—";
+              })()}
             />
           </CardContent>
         </Card>

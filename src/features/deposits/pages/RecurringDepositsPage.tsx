@@ -19,6 +19,17 @@ const PAGE_SIZE = 15;
 const formatCurrency = (n: number, code = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(n);
 
+const formatDate = (d?: string | number[]) => {
+  if (!d) return "—";
+  let iso: string;
+  if (Array.isArray(d) && d.length >= 3) {
+    iso = `${d[0]}-${String(d[1]).padStart(2, "0")}-${String(d[2]).padStart(2, "0")}`;
+  } else {
+    iso = String(d);
+  }
+  return new Date(iso).toLocaleDateString();
+};
+
 const RecurringDepositsPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -32,8 +43,8 @@ const RecurringDepositsPage: React.FC = () => {
     isError: rdError,
   } = useRecurringDepositAccounts({ limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
 
-  const rds = rdData ?? [];
-  const totalRecords = rdData?.length ?? 0;
+  const rds = rdData?.pageItems ?? [];
+  const totalRecords = rdData?.totalFilteredRecords ?? 0;
 
   const filtered = useMemo(() => {
     let result = rds;
@@ -62,9 +73,9 @@ const RecurringDepositsPage: React.FC = () => {
       cell: (r) => `${r.depositPeriod} ${r.depositPeriodFrequencyType?.value?.toLowerCase() ?? "mo"}`,
     },
     {
-      key: "expectedMaturityDate",
+      key: "maturityDate",
       header: t("Matures"),
-      cell: (r) => (r.expectedMaturityDate ? new Date(r.expectedMaturityDate).toLocaleDateString() : "—"),
+      cell: (r) => formatDate(r.maturityDate),
     },
     {
       key: "status",
