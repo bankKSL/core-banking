@@ -221,17 +221,38 @@ export async function executePeriodicAccrual(payload: ExecutePeriodicAccrualRequ
 
 // ─── Provisioning Entries ────────────────────────────────────────
 
+type RawProvisioningEntryData = {
+  id: number;
+  journalEntry?: boolean;
+  createdById?: number;
+  createdUser?: string;
+  createdDate?: string;
+};
+
+function toProvisioningEntryData(raw: RawProvisioningEntryData): ProvisioningEntryData {
+  return {
+    id: raw.id,
+    date: raw.createdDate ?? "",
+    createdBy: (raw.createdUser ?? raw.createdById?.toString()) ?? "",
+    createdDate: raw.createdDate ?? "",
+    journalEntriesCreated: !!raw.journalEntry,
+  };
+}
+
 export async function fetchProvisioningEntries(params: {
   offset?: number;
   limit?: number;
 } = {}): Promise<Page<ProvisioningEntryData>> {
-  const { data } = await client.get<Page<ProvisioningEntryData>>("/provisioningentries", { params });
-  return data;
+  const { data } = await client.get<Page<RawProvisioningEntryData>>("/provisioningentries", { params });
+  return {
+    totalFilteredRecords: data?.totalFilteredRecords ?? 0,
+    pageItems: (data?.pageItems ?? []).map(toProvisioningEntryData),
+  };
 }
 
 export async function fetchProvisioningEntry(id: number | string): Promise<ProvisioningEntryData> {
-  const { data } = await client.get<ProvisioningEntryData>(`/provisioningentries/${id}`);
-  return data;
+  const { data } = await client.get<RawProvisioningEntryData>(`/provisioningentries/${id}`);
+  return toProvisioningEntryData(data);
 }
 
 export async function createProvisioningEntry(

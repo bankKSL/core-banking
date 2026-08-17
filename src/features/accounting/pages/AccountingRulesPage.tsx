@@ -36,8 +36,7 @@ const AccountingRulesPage: React.FC = () => {
       header: t("Debit"),
       cell: (r) => {
         const accounts = r.debitAccounts?.map((a) => a.name).join(", ");
-        const tags = r.debitTags?.map((t) => t.tag?.name).join(", ");
-        return <span className="text-sm">{accounts || (tags ? `${t("Tags:")} ${tags}` : "—")}</span>;
+        return <span className="text-sm">{accounts || "—"}</span>;
       },
     },
     {
@@ -45,8 +44,7 @@ const AccountingRulesPage: React.FC = () => {
       header: t("Credit"),
       cell: (r) => {
         const accounts = r.creditAccounts?.map((a) => a.name).join(", ");
-        const tags = r.creditTags?.map((t) => t.tag?.name).join(", ");
-        return <span className="text-sm">{accounts || (tags ? `${t("Tags:")} ${tags}` : "—")}</span>;
+        return <span className="text-sm">{accounts || "—"}</span>;
       },
     },
     {

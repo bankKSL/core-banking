@@ -258,14 +258,14 @@ export interface FinancialActivityData {
 
 export interface FinancialActivityAccountData {
   id: number;
-  financialActivityId: number;
+  financialActivityId?: number;
   financialActivityData: FinancialActivityData;
-  glAccountId: number;
+  glAccountId?: number;
   glAccountData: GLAccountData;
 
   // template fields
   financialActivityOptions?: FinancialActivityData[];
-  glAccountOptions?: GLAccountData[];
+  glAccountOptions?: Record<string, GLAccountData[]>;
 }
 
 export interface CreateFinancialActivityMappingRequest {

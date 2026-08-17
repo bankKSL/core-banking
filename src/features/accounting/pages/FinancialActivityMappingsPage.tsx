@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -31,7 +30,7 @@ const FinancialActivityMappingsPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<FinancialActivityAccountData | null>(null);
 
   const activityOptions = template?.financialActivityOptions ?? [];
-  const glAccountOptions = template?.glAccountOptions ?? [];
+  const glAccountOptions = Object.values(template?.glAccountOptions ?? {}).flat();
 
   const handleCreate = async () => {
     if (!financialActivityId || !glAccountId) {
@@ -55,7 +54,9 @@ const FinancialActivityMappingsPage: React.FC = () => {
     {
       key: "financialActivity",
       header: t("Financial Activity"),
-      cell: (r) => <span className="font-medium">{r.financialActivityData?.name ?? `#${r.financialActivityId}`}</span>,
+      cell: (r) => (
+        <span className="font-medium">{r.financialActivityData?.name ?? `#${r.financialActivityData?.id}`}</span>
+      ),
     },
     {
       key: "glAccount",
@@ -66,11 +67,6 @@ const FinancialActivityMappingsPage: React.FC = () => {
           <code className="text-xs text-gray-400">({r.glAccountData?.glCode ?? ""})</code>
         </span>
       ),
-    },
-    {
-      key: "type",
-      header: t("Account Type"),
-      cell: (r) => <span className="text-sm">{r.glAccountData?.type?.value ?? "—"}</span>,
     },
     {
       key: "actions",

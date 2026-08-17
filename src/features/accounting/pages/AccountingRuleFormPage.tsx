@@ -26,7 +26,7 @@ const AccountingRuleFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
 
-  const { data: existing, isLoading: ruleLoading } = useAccountingRule(id, isEdit);
+  const { data: existing, isLoading: ruleLoading } = useAccountingRule(id);
   const { data: template, isLoading: templateLoading } = useAccountingRuleTemplate();
   const createMutation = useCreateAccountingRule();
   const updateMutation = useUpdateAccountingRule();
