@@ -391,6 +391,45 @@ const loanProductSchema = z
         }
       }
     }
+
+    // Income Capitalization: enabling it requires the capitalization config and accounts
+    if (data.enableIncomeCapitalization) {
+      if (!data.capitalizedIncomeCalculationType) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["capitalizedIncomeCalculationType"],
+          message: "Capitalized Income Calculation Type is required when Income Capitalization is enabled",
+        });
+      }
+      if (!data.capitalizedIncomeStrategy) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["capitalizedIncomeStrategy"],
+          message: "Capitalized Income Strategy is required when Income Capitalization is enabled",
+        });
+      }
+      if (!data.capitalizedIncomeType) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["capitalizedIncomeType"],
+          message: "Capitalized Income Type is required when Income Capitalization is enabled",
+        });
+      }
+      if (!data.deferredIncomeLiabilityAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deferredIncomeLiabilityAccountId"],
+          message: "Deferred Income Liability Account is required when Income Capitalization is enabled",
+        });
+      }
+      if (!data.incomeFromCapitalizationAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["incomeFromCapitalizationAccountId"],
+          message: "Income from Capitalization Account is required when Income Capitalization is enabled",
+        });
+      }
+    }
   });
 
 type LoanProductFormValues = z.infer<typeof loanProductSchema>;
