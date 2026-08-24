@@ -31,6 +31,33 @@ function enumVal(v: any, fallback = ""): string {
   return String(v);
 }
 
+/** Transaction processing strategy required for Buy Down Fee support */
+export const ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advance-payment-allocation-strategy";
+
+/** Buy Down Fee only supports a single calculation mode, amortization strategy and income types (doc §BuyDownFee) */
+export const BUYDOWN_CALCULATION_TYPE_FLAT = "FLAT";
+export const BUYDOWN_STRATEGY_EQUAL_AMORTIZATION = "EQUAL_AMORTIZATION";
+export const BUYDOWN_INCOME_TYPE_FEE = "FEE";
+export const BUYDOWN_INCOME_TYPE_INTEREST = "INTEREST";
+
+/** Canonical option lists (only these values are currently supported) */
+const BUYDOWN_CALCULATION_TYPE_OPTIONS = [{ id: BUYDOWN_CALCULATION_TYPE_FLAT, code: BUYDOWN_CALCULATION_TYPE_FLAT, value: "Flat" }];
+const BUYDOWN_STRATEGY_OPTIONS = [{ id: BUYDOWN_STRATEGY_EQUAL_AMORTIZATION, code: BUYDOWN_STRATEGY_EQUAL_AMORTIZATION, value: "Equal Amortization" }];
+const BUYDOWN_INCOME_TYPE_OPTIONS = [
+  { id: BUYDOWN_INCOME_TYPE_FEE, code: BUYDOWN_INCOME_TYPE_FEE, value: "Fee" },
+  { id: BUYDOWN_INCOME_TYPE_INTEREST, code: BUYDOWN_INCOME_TYPE_INTEREST, value: "Interest" },
+];
+
+/** Resolve template options for a Buy Down Fee enum, restricted to the allowed codes, with a canonical fallback */
+function buyDownOptions(
+  templateOptions: Array<{ id: string; code: string; value: string }> | undefined,
+  allowedCodes: string[],
+  fallback: Array<{ id: string; code: string; value: string }>,
+): Array<{ id: string; code: string; value: string }> {
+  const matched = (templateOptions ?? []).filter((o) => allowedCodes.includes(o.code));
+  return matched.length ? matched : fallback;
+}
+
 const loanProductSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
@@ -265,23 +292,66 @@ const loanProductSchema = z
     // Validation rules 5 & 6: loanScheduleType and transactionProcessingStrategyCode
     if (
       data.loanScheduleType === "PROGRESSIVE" &&
-      data.transactionProcessingStrategyCode !== "advanced-payment-allocation-strategy"
+      data.transactionProcessingStrategyCode !== ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     ) {
       ctx.addIssue({
         code: "custom",
         path: ["transactionProcessingStrategyCode"],
-        message: "Progressive schedule type requires advanced-payment-allocation-strategy",
+        message: "Progressive schedule type requires advance-payment-allocation-strategy",
       });
     }
     if (
       data.loanScheduleType === "CUMULATIVE" &&
-      data.transactionProcessingStrategyCode === "advanced-payment-allocation-strategy"
+      data.transactionProcessingStrategyCode === ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     ) {
       ctx.addIssue({
         code: "custom",
         path: ["transactionProcessingStrategyCode"],
-        message: "Cumulative schedule type cannot use advanced-payment-allocation-strategy",
+        message: "Cumulative schedule type cannot use advance-payment-allocation-strategy",
       });
+    }
+
+    // Buy Down Fee: only supported for Advanced Payment Allocation Strategy + Progressive schedule.
+    // When enabled, only Flat calculation, Equal Amortization strategy and Fee/Interest income type are allowed.
+    if (data.enableBuyDownFee) {
+      if (enumVal(data.loanScheduleType) !== "PROGRESSIVE") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["enableBuyDownFee"],
+          message: "Buy Down Fee is only supported for Progressive Loan Schedule",
+        });
+      }
+      if (data.transactionProcessingStrategyCode !== ADVANCED_PAYMENT_ALLOCATION_STRATEGY) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["enableBuyDownFee"],
+          message: "Buy Down Fee is only supported for Advanced Payment Allocation Strategy",
+        });
+      }
+      if (data.buyDownFeeCalculationType !== BUYDOWN_CALCULATION_TYPE_FLAT) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["buyDownFeeCalculationType"],
+          message: "Only Flat calculation mode is supported",
+        });
+      }
+      if (data.buyDownFeeStrategy !== BUYDOWN_STRATEGY_EQUAL_AMORTIZATION) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["buyDownFeeStrategy"],
+          message: "Only Equal Amortization strategy is supported",
+        });
+      }
+      if (
+        data.buyDownFeeIncomeType !== BUYDOWN_INCOME_TYPE_FEE &&
+        data.buyDownFeeIncomeType !== BUYDOWN_INCOME_TYPE_INTEREST
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["buyDownFeeIncomeType"],
+          message: "Income Type must be Fee or Interest",
+        });
+      }
     }
 
     // Validation rule 7: Grace periods must be less than numberOfRepayments
@@ -524,6 +594,8 @@ const LoanProductFormPage: React.FC = () => {
 
   const loanScheduleType = watch("loanScheduleType");
   const isProgressive = enumVal(loanScheduleType) === "PROGRESSIVE";
+  const isAdvancedStrategy = watch("transactionProcessingStrategyCode") === ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
+  const buyDownFeeSupported = isProgressive && isAdvancedStrategy;
 
   // Populate form in edit mode
   useEffect(() => {
@@ -575,9 +647,9 @@ const LoanProductFormPage: React.FC = () => {
       repaymentStartDateType: p.repaymentStartDateType?.id ?? undefined,
       enableBuyDownFee: !!p.enableBuyDownFee,
       merchantBuyDownFee: !!p.merchantBuyDownFee,
-      buyDownFeeCalculationType: p.buyDownFeeCalculationType?.id ?? undefined,
-      buyDownFeeStrategy: p.buyDownFeeStrategy?.id ?? undefined,
-      buyDownFeeIncomeType: p.buyDownFeeIncomeType?.id ?? undefined,
+      buyDownFeeCalculationType: p.buyDownFeeCalculationType?.code ?? undefined,
+      buyDownFeeStrategy: p.buyDownFeeStrategy?.code ?? undefined,
+      buyDownFeeIncomeType: p.buyDownFeeIncomeType?.code ?? undefined,
       enableIncomeCapitalization: !!p.enableIncomeCapitalization,
       capitalizedIncomeCalculationType: p.capitalizedIncomeCalculationType?.id ?? undefined,
       capitalizedIncomeStrategy: p.capitalizedIncomeStrategy?.id ?? undefined,
@@ -1487,90 +1559,126 @@ const LoanProductFormPage: React.FC = () => {
               <CardTitle className="text-base">{t("Progressive Settings")}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
-              {/* Buydown Fee */}
-              <div
-                className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-                onClick={() => setValue("enableBuyDownFee", !watch("enableBuyDownFee"))}
-              >
-                <Checkbox
-                  id="enableBuyDownFee"
-                  checked={!!watch("enableBuyDownFee")}
-                  onCheckedChange={(v) => setValue("enableBuyDownFee", v === true)}
-                />
-                <label htmlFor="enableBuyDownFee" className="block text-sm font-medium">
-                  {t("Enable Buy Down Fee")}
-                </label>
-              </div>
-              {watch("enableBuyDownFee") && (
+              {/* Buydown Fee — only supported for Advanced Payment Allocation Strategy + Progressive schedule */}
+              {buyDownFeeSupported ? (
                 <>
                   <div
                     className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
-                    onClick={() => setValue("merchantBuyDownFee", !watch("merchantBuyDownFee"))}
+                    onClick={() => {
+                      const next = !watch("enableBuyDownFee");
+                      setValue("enableBuyDownFee", next, { shouldValidate: true });
+                      if (next) {
+                        setValue("buyDownFeeCalculationType", BUYDOWN_CALCULATION_TYPE_FLAT);
+                        setValue("buyDownFeeStrategy", BUYDOWN_STRATEGY_EQUAL_AMORTIZATION);
+                        if (!watch("buyDownFeeIncomeType")) {
+                          setValue("buyDownFeeIncomeType", BUYDOWN_INCOME_TYPE_FEE);
+                        }
+                      } else {
+                        setValue("buyDownFeeCalculationType", undefined);
+                        setValue("buyDownFeeStrategy", undefined);
+                        setValue("buyDownFeeIncomeType", undefined);
+                      }
+                    }}
                   >
                     <Checkbox
-                      id="merchantBuyDownFee"
-                      checked={!!watch("merchantBuyDownFee")}
-                      onCheckedChange={(v) => setValue("merchantBuyDownFee", v === true)}
+                      id="enableBuyDownFee"
+                      checked={!!watch("enableBuyDownFee")}
+                      onCheckedChange={(v) => setValue("enableBuyDownFee", v === true, { shouldValidate: true })}
                     />
-                    <label htmlFor="merchantBuyDownFee" className="block text-sm font-medium">
-                      {t("Merchant Buy Down Fee")}
+                    <label htmlFor="enableBuyDownFee" className="block text-sm font-medium">
+                      {t("Enable Buy Down Fee")}
                     </label>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">{t("Buy Down Fee Calculation Type")}</label>
-                    <Select
-                      value={watch("buyDownFeeCalculationType") ?? ""}
-                      onValueChange={(v) => setValue("buyDownFeeCalculationType", v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(template?.buyDownFeeCalculationTypeOptions ?? []).map((o) => (
-                          <SelectItem key={o.id} value={o.id}>
-                            {o.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">{t("Buy Down Fee Strategy")}</label>
-                    <Select
-                      value={watch("buyDownFeeStrategy") ?? ""}
-                      onValueChange={(v) => setValue("buyDownFeeStrategy", v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(template?.buyDownFeeStrategyOptions ?? []).map((o) => (
-                          <SelectItem key={o.id} value={o.id}>
-                            {o.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-sm font-medium">{t("Buy Down Fee Income Type")}</label>
-                    <Select
-                      value={watch("buyDownFeeIncomeType") ?? ""}
-                      onValueChange={(v) => setValue("buyDownFeeIncomeType", v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("Select")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(template?.buyDownFeeIncomeTypeOptions ?? []).map((o) => (
-                          <SelectItem key={o.id} value={o.id}>
-                            {o.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {watch("enableBuyDownFee") && (
+                    <>
+                      <div
+                        className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                        onClick={() => setValue("merchantBuyDownFee", !watch("merchantBuyDownFee"))}
+                      >
+                        <Checkbox
+                          id="merchantBuyDownFee"
+                          checked={!!watch("merchantBuyDownFee")}
+                          onCheckedChange={(v) => setValue("merchantBuyDownFee", v === true)}
+                        />
+                        <label htmlFor="merchantBuyDownFee" className="block text-sm font-medium">
+                          {t("Merchant Buy Down Fee")}
+                        </label>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-medium">{t("Buy Down Fee Calculation Type")}</label>
+                        <Select
+                          value={watch("buyDownFeeCalculationType") ?? ""}
+                          onValueChange={(v) => setValue("buyDownFeeCalculationType", v, { shouldValidate: true })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {buyDownOptions(
+                              template?.buyDownFeeCalculationTypeOptions,
+                              [BUYDOWN_CALCULATION_TYPE_FLAT],
+                              BUYDOWN_CALCULATION_TYPE_OPTIONS,
+                            ).map((o) => (
+                              <SelectItem key={o.code} value={o.code}>
+                                {o.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-medium">{t("Buy Down Fee Strategy")}</label>
+                        <Select
+                          value={watch("buyDownFeeStrategy") ?? ""}
+                          onValueChange={(v) => setValue("buyDownFeeStrategy", v, { shouldValidate: true })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {buyDownOptions(
+                              template?.buyDownFeeStrategyOptions,
+                              [BUYDOWN_STRATEGY_EQUAL_AMORTIZATION],
+                              BUYDOWN_STRATEGY_OPTIONS,
+                            ).map((o) => (
+                              <SelectItem key={o.code} value={o.code}>
+                                {o.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-sm font-medium">{t("Buy Down Fee Income Type")}</label>
+                        <Select
+                          value={watch("buyDownFeeIncomeType") ?? ""}
+                          onValueChange={(v) => setValue("buyDownFeeIncomeType", v, { shouldValidate: true })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {buyDownOptions(
+                              template?.buyDownFeeIncomeTypeOptions,
+                              [BUYDOWN_INCOME_TYPE_FEE, BUYDOWN_INCOME_TYPE_INTEREST],
+                              BUYDOWN_INCOME_TYPE_OPTIONS,
+                            ).map((o) => (
+                              <SelectItem key={o.code} value={o.code}>
+                                {o.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
                 </>
+              ) : (
+                <div className="col-span-2 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-400 text-center">
+                  {t(
+                    "Buy Down Fee is only supported for loans using the Advanced Payment Allocation Strategy and a Progressive Loan Schedule.",
+                  )}
+                </div>
               )}
 
               {/* Income Capitalization */}

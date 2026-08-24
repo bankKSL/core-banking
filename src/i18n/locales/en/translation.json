@@ -1591,6 +1591,7 @@
   "Email Campaigns": "Email Campaigns",
   "Email Configuration": "Email Configuration",
   "Enable Buy Down Fee": "Enable Buy Down Fee",
+  "Buy Down Fee is only supported for loans using the Advanced Payment Allocation Strategy and a Progressive Loan Schedule.": "Buy Down Fee is only supported for loans using the Advanced Payment Allocation Strategy and a Progressive Loan Schedule.",
   "Enable Dormancy Tracking": "Enable Dormancy Tracking",
   "Enable Down Payment": "Enable Down Payment",
   "Enable Free Withdrawal": "Enable Free Withdrawal",
