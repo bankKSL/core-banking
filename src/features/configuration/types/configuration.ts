@@ -1,3 +1,7 @@
+export interface GlobalConfigurations {
+  globalConfiguration: GlobalConfiguration[];
+}
+
 export interface GlobalConfiguration {
   id: number;
   name: string;

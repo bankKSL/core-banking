@@ -10,10 +10,11 @@ import type {
   UpdateBusinessDateRequest,
   CacheType,
   UpdateCacheRequest,
+  GlobalConfigurations,
 } from "../types/configuration";
 
-export async function fetchConfigurations(): Promise<GlobalConfiguration[]> {
-  const { data } = await api.get<GlobalConfiguration[]>("/configurations");
+export async function fetchConfigurations(): Promise<GlobalConfigurations> {
+  const { data } = await api.get<GlobalConfigurations>("/configurations");
   return data;
 }
 
@@ -27,44 +28,29 @@ export async function fetchConfigurationByName(name: string): Promise<GlobalConf
   return data;
 }
 
-export async function updateConfiguration(
-  id: number,
-  payload: UpdateConfigRequest,
-): Promise<void> {
+export async function updateConfiguration(id: number, payload: UpdateConfigRequest): Promise<void> {
   await api.put(`/configurations/${id}`, payload);
 }
 
-export async function updateConfigurationByName(
-  name: string,
-  payload: UpdateConfigRequest,
-): Promise<void> {
+export async function updateConfigurationByName(name: string, payload: UpdateConfigRequest): Promise<void> {
   await api.put(`/configurations/name/${name}`, payload);
 }
 
-export async function fetchExternalService(
-  serviceName: string,
-): Promise<ExternalService> {
+export async function fetchExternalService(serviceName: string): Promise<ExternalService> {
   const { data } = await api.get<ExternalService>(`/externalservice/${serviceName}`);
   return data;
 }
 
-export async function updateExternalService(
-  serviceName: string,
-  payload: Record<string, string>,
-): Promise<void> {
+export async function updateExternalService(serviceName: string, payload: Record<string, string>): Promise<void> {
   await api.put(`/externalservice/${serviceName}`, payload);
 }
 
 export async function fetchExternalEvents(): Promise<ExternalEventConfiguration[]> {
-  const { data } = await api.get<ExternalEventConfiguration[]>(
-    "/externalevents/configuration",
-  );
+  const { data } = await api.get<ExternalEventConfiguration[]>("/externalevents/configuration");
   return data;
 }
 
-export async function updateExternalEvents(
-  payload: UpdateExternalEventRequest[],
-): Promise<void> {
+export async function updateExternalEvents(payload: UpdateExternalEventRequest[]): Promise<void> {
   await api.put("/externalevents/configuration", payload);
 }
 
@@ -87,9 +73,7 @@ export async function fetchBusinessDates(): Promise<BusinessDate[]> {
   return data;
 }
 
-export async function updateBusinessDate(
-  payload: UpdateBusinessDateRequest,
-): Promise<void> {
+export async function updateBusinessDate(payload: UpdateBusinessDateRequest): Promise<void> {
   await api.post("/businessdate", payload);
 }
 

@@ -30,28 +30,25 @@ type EditConfigFormValues = z.infer<typeof editConfigSchema>;
 const GlobalConfigPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: configs = [], isLoading } = useConfigurations();
+  const { data: configs, isLoading } = useConfigurations();
   const updateMutation = useUpdateConfiguration();
   const [search, setSearch] = useState("");
   const [editConfig, setEditConfig] = useState<GlobalConfiguration | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-  } = useForm<EditConfigFormValues>({
+  const { register, handleSubmit, control, reset } = useForm<EditConfigFormValues>({
     resolver: zodResolver(editConfigSchema),
     defaultValues: { enabled: false, value: "", stringValue: "", dateValue: "" },
   });
 
+  const configurations = configs?.globalConfiguration ?? [];
+
   const filtered = search
-    ? configs.filter(
+    ? configurations.filter(
         (c) =>
           c.name.toLowerCase().includes(search.toLowerCase()) ||
           c.description?.toLowerCase().includes(search.toLowerCase()),
       )
-    : configs;
+    : configurations;
 
   const openEdit = (config: GlobalConfiguration) => {
     setEditConfig(config);
@@ -123,7 +120,7 @@ const GlobalConfigPage: FC = () => {
       header: t("String Value"),
       cell: (r) =>
         r.stringValue ? (
-          <span className="text-xs max-w-[200px] truncate block">{r.stringValue}</span>
+          <span className="text-xs max-w-50 truncate block">{r.stringValue}</span>
         ) : (
           <span className="text-gray-400">—</span>
         ),
@@ -216,9 +213,7 @@ const GlobalConfigPage: FC = () => {
                 <Controller
                   control={control}
                   name="enabled"
-                  render={({ field }) => (
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  )}
+                  render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
                 />
                 <label className="block text-sm font-medium">{t("Enabled")}</label>
               </div>
