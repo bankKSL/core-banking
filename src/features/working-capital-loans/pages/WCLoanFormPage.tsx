@@ -14,7 +14,12 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import { useToast } from "@/components/ui/toast";
 import { createWCLoanSchema, type CreateWCLoanFormValues } from "../schemas/workingCapitalLoan.schema";
-import { useCreateWCLoan, useWCLoanProducts, useDelinquencyBuckets, useWCLoanTemplate } from "../hooks/useWCLoanQueries";
+import {
+  useCreateWCLoan,
+  useWCLoanProducts,
+  useDelinquencyBuckets,
+  useWCLoanTemplate,
+} from "../hooks/useWCLoanQueries";
 import { DELINQUENCY_START_TYPE_OPTIONS } from "../constants/status";
 
 const WCLoanFormPage: FC = () => {
@@ -59,9 +64,7 @@ const WCLoanFormPage: FC = () => {
       discount: 0,
       submittedOnDate: new Date().toISOString().split("T")[0],
       expectedDisbursementDate: "",
-      delinquencyBucketId: undefined,
       delinquencyGraceDays: 3,
-      delinquencyStartType: "DISBURSEMENT",
     },
   });
 
@@ -73,7 +76,7 @@ const WCLoanFormPage: FC = () => {
       if (ld.discount != null) setValue("discount", ld.discount);
       if (ld.principalAmount != null) setValue("principalAmount", ld.principalAmount);
       if (ld.delinquencyGraceDays != null) setValue("delinquencyGraceDays", ld.delinquencyGraceDays);
-      if (ld.delinquencyStartType != null) setValue("delinquencyStartType", ld.delinquencyStartType);
+      if (ld.delinquencyStartType != null) setValue("delinquencyStartType", ld.delinquencyStartType?.code);
       if (isDelinquencyBucketClassification && ld.delinquencyBucketId != null) {
         setValue("delinquencyBucketId", ld.delinquencyBucketId);
       }
@@ -85,7 +88,8 @@ const WCLoanFormPage: FC = () => {
       const { discount, delinquencyBucketId, ...rest } = values;
       const payload = { ...rest } as CreateWCLoanFormValues;
       if (isDiscountOverrideAllowed) payload.discount = discount;
-      if (isDelinquencyBucketClassification && delinquencyBucketId != null) payload.delinquencyBucketId = delinquencyBucketId;
+      if (isDelinquencyBucketClassification && delinquencyBucketId != null)
+        payload.delinquencyBucketId = delinquencyBucketId;
       const result = await createMutation.mutateAsync(payload as never);
       toastSuccess(t("Loan application submitted successfully"));
       navigate(`/working-capital-loans/view/${result.resourceId ?? result.loanId}`);
@@ -125,7 +129,9 @@ const WCLoanFormPage: FC = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
-          <CardHeader><CardTitle className="text-base">{t("Loan Details")}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Loan Details")}</CardTitle>
+          </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <ClientSearch
@@ -148,14 +154,18 @@ const WCLoanFormPage: FC = () => {
                   const product = products.find((p) => p.id === pid);
                   if (product) {
                     setValue("delinquencyGraceDays", product.delinquencyGraceDays);
-                    setValue("delinquencyStartType", product.delinquencyStartType);
+                    setValue("delinquencyStartType", product.delinquencyStartType?.code);
                   }
                 }}
               >
-                <SelectTrigger><SelectValue placeholder={t("Select product")} /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select product")} />
+                </SelectTrigger>
                 <SelectContent>
                   {products.map((p) => (
-                    <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                    <SelectItem key={p.id} value={String(p.id)}>
+                      {p.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -207,14 +217,20 @@ const WCLoanFormPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Expected Disbursement")} *</label>
-              <Input type="date" {...register("expectedDisbursementDate")} error={errors.expectedDisbursementDate?.message} />
+              <Input
+                type="date"
+                {...register("expectedDisbursementDate")}
+                error={errors.expectedDisbursementDate?.message}
+              />
             </div>
           </CardContent>
         </Card>
 
         {isDelinquencyBucketClassification && (
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("Delinquency Configuration")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("Delinquency Configuration")}</CardTitle>
+            </CardHeader>
             <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">{t("Delinquency Bucket")}</label>
@@ -222,10 +238,14 @@ const WCLoanFormPage: FC = () => {
                   value={watch("delinquencyBucketId") ? String(watch("delinquencyBucketId")) : ""}
                   onValueChange={(v) => setValue("delinquencyBucketId", Number(v))}
                 >
-                  <SelectTrigger><SelectValue placeholder={t("Select bucket")} /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("Select bucket")} />
+                  </SelectTrigger>
                   <SelectContent>
                     {(template?.delinquencyBucketOptions ?? buckets).map((b) => (
-                      <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                      <SelectItem key={b.id} value={String(b.id)}>
+                        {b.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -236,11 +256,18 @@ const WCLoanFormPage: FC = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium">{t("Start Type")}</label>
-                <Select value={watch("delinquencyStartType") ?? "DISBURSEMENT"} onValueChange={(v) => setValue("delinquencyStartType", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={watch("delinquencyStartType") ?? "DISBURSEMENT"}
+                  onValueChange={(v) => setValue("delinquencyStartType", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {DELINQUENCY_START_TYPE_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

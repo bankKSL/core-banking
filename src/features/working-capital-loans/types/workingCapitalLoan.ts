@@ -51,7 +51,11 @@ export interface WCLoanProduct {
   delinquencyBucketId?: number;
   delinquencyBucket?: { id: number; name?: string; bucketType?: unknown; ranges?: unknown[] };
   delinquencyGraceDays: number;
-  delinquencyStartType: string;
+  delinquencyStartType: {
+    id: string;
+    value: string;
+    code?: string;
+  };
   accountingRule: CodeName;
   allowAttributeOverrides?: WCLoanProductAllowAttributeOverrides;
   externalId?: string;
@@ -129,7 +133,11 @@ export interface WCLoan {
   delinquencyBucketId?: number;
   delinquencyBucket?: { id: number; name?: string; bucketType?: unknown; ranges?: unknown[] };
   delinquencyGraceDays?: number;
-  delinquencyStartType?: string;
+  delinquencyStartType?: {
+    id: string;
+    value: string;
+    code?: string;
+  };
   delinquent?: {
     delinquentDays?: number;
     delinquentAmount?: number;
@@ -270,7 +278,11 @@ export interface WCLoanTemplate {
     expectedDisbursementDate?: string;
     delinquencyBucketId?: number;
     delinquencyGraceDays?: number;
-    delinquencyStartType?: string;
+    delinquencyStartType?: {
+      id: string;
+      code: string;
+      value: string;
+    };
     [key: string]: unknown;
   };
   isDelinquencyBucketClassification?: boolean;

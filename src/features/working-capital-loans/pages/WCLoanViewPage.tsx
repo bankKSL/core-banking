@@ -1,7 +1,16 @@
 import { type FC, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, RefreshCw, CheckCircle2, DollarSign, Pause, CalendarClock, TrendingUp, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  RefreshCw,
+  CheckCircle2,
+  DollarSign,
+  Pause,
+  CalendarClock,
+  TrendingUp,
+  Loader2,
+} from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -76,14 +85,18 @@ const WCLoanViewPage: FC = () => {
   const [newRate, setNewRate] = useState("");
   const [rateNote, setRateNote] = useState("");
 
-  const handleSuccess = useCallback(() => { refetch(); }, [refetch]);
+  const handleSuccess = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   if (isLoading) {
     return (
       <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-40 rounded-xl" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-40 rounded-xl" />
+          ))}
         </div>
       </div>
     );
@@ -92,13 +105,18 @@ const WCLoanViewPage: FC = () => {
   if (isError || !loan) {
     return (
       <div className="p-6">
-        <ErrorState title={t("Failed to load loan")} message={t("Could not load loan details.")} onRetry={() => refetch()} />
+        <ErrorState
+          title={t("Failed to load loan")}
+          message={t("Could not load loan details.")}
+          onRetry={() => refetch()}
+        />
       </div>
     );
   }
 
   const rawCode = loan.status?.code;
-  const statusCode = (rawCode && WC_LOAN_CODE_TO_KEY[rawCode]) ?? rawCode ?? WC_LOAN_STATUS_ID_MAP[loan.status?.id ?? -1] ?? "";
+  const statusCode =
+    (rawCode && WC_LOAN_CODE_TO_KEY[rawCode]) ?? rawCode ?? WC_LOAN_STATUS_ID_MAP[loan.status?.id ?? -1] ?? "";
   const statusCfg = WC_LOAN_STATUS_CONFIG[statusCode];
   const currencyCode = loan.summary?.currency?.code ?? "USD";
   const statusId = loan.status?.id;
@@ -107,34 +125,67 @@ const WCLoanViewPage: FC = () => {
   const isActive = statusId === 300;
 
   const delinquencyClassification =
-    loan.delinquent?.installmentLevelDelinquency?.[0]?.classification ??
-    loan.delinquencyRange?.classification;
+    loan.delinquent?.installmentLevelDelinquency?.[0]?.classification ?? loan.delinquencyRange?.classification;
 
-  const isMutating = approveMut.isPending || disburseMut.isPending || repaymentMut.isPending || pauseMut.isPending || rescheduleMut.isPending || rateChangeMut.isPending;
+  const isMutating =
+    approveMut.isPending ||
+    disburseMut.isPending ||
+    repaymentMut.isPending ||
+    pauseMut.isPending ||
+    rescheduleMut.isPending ||
+    rateChangeMut.isPending;
 
   const handleApprove = async () => {
-    await approveMut.mutateAsync({ loanId: Number(id), payload: { approvedOnDate: approveDate, approvedLoanAmount: approveAmount ? Number(approveAmount) : loan.principal, expectedDisbursementDate: approveDate, dateFormat: "yyyy-MM-dd", locale: "en" } });
+    await approveMut.mutateAsync({
+      loanId: Number(id),
+      payload: {
+        approvedOnDate: approveDate,
+        approvedLoanAmount: approveAmount ? Number(approveAmount) : loan.principal,
+        expectedDisbursementDate: approveDate,
+        dateFormat: "yyyy-MM-dd",
+        locale: "en",
+      },
+    });
     toastSuccess(t("Loan approved"));
     setApproveOpen(false);
     handleSuccess();
   };
 
   const handleDisburse = async () => {
-    await disburseMut.mutateAsync({ loanId: Number(id), payload: { actualDisbursementDate: disburseDate, transactionAmount: disburseAmount ? Number(disburseAmount) : loan.approvedPrincipal ?? loan.principal, dateFormat: "yyyy-MM-dd", locale: "en" } });
+    await disburseMut.mutateAsync({
+      loanId: Number(id),
+      payload: {
+        actualDisbursementDate: disburseDate,
+        transactionAmount: disburseAmount ? Number(disburseAmount) : (loan.approvedPrincipal ?? loan.principal),
+        dateFormat: "yyyy-MM-dd",
+        locale: "en",
+      },
+    });
     toastSuccess(t("Loan disbursed"));
     setDisburseOpen(false);
     handleSuccess();
   };
 
   const handleRepay = async () => {
-    await repaymentMut.mutateAsync({ loanId: Number(id), payload: { transactionDate: repayDate, transactionAmount: Number(repayAmount), dateFormat: "yyyy-MM-dd", locale: "en" } });
+    await repaymentMut.mutateAsync({
+      loanId: Number(id),
+      payload: {
+        transactionDate: repayDate,
+        transactionAmount: Number(repayAmount),
+        dateFormat: "yyyy-MM-dd",
+        locale: "en",
+      },
+    });
     toastSuccess(t("Repayment recorded"));
     setRepayOpen(false);
     handleSuccess();
   };
 
   const handlePause = async () => {
-    await pauseMut.mutateAsync({ loanId: Number(id), payload: { action: "pause", startDate: pauseStart, endDate: pauseEnd, dateFormat: "yyyy-MM-dd", locale: "en" } });
+    await pauseMut.mutateAsync({
+      loanId: Number(id),
+      payload: { action: "pause", startDate: pauseStart, endDate: pauseEnd, dateFormat: "yyyy-MM-dd", locale: "en" },
+    });
     toastSuccess(t("Delinquency tracking paused"));
     setPauseOpen(false);
     handleSuccess();
@@ -156,7 +207,10 @@ const WCLoanViewPage: FC = () => {
   };
 
   const handleRateChange = async () => {
-    await rateChangeMut.mutateAsync({ loanId: Number(id), payload: { periodPaymentRate: Number(newRate), note: rateNote || undefined, locale: "en" } });
+    await rateChangeMut.mutateAsync({
+      loanId: Number(id),
+      payload: { periodPaymentRate: Number(newRate), note: rateNote || undefined, locale: "en" },
+    });
     toastSuccess(t("Payment rate updated"));
     setRateChangeOpen(false);
     handleSuccess();
@@ -169,7 +223,17 @@ const WCLoanViewPage: FC = () => {
         description={`${loan.loanProductName} — ${loan.clientName ?? `Client #${loan.clientId}`}`}
         actions={
           <div className="flex items-center gap-2">
-            <Badge variant={statusCfg?.variant === "success" ? "success" : statusCfg?.variant === "error" ? "error" : statusCfg?.variant === "warning" ? "warning" : "default"}>
+            <Badge
+              variant={
+                statusCfg?.variant === "success"
+                  ? "success"
+                  : statusCfg?.variant === "error"
+                    ? "error"
+                    : statusCfg?.variant === "warning"
+                      ? "warning"
+                      : "default"
+              }
+            >
               {statusCfg?.label ?? statusCode}
             </Badge>
             <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isRefetching}>
@@ -184,18 +248,39 @@ const WCLoanViewPage: FC = () => {
 
       <div className="flex flex-wrap items-center gap-2">
         {isPending && (
-          <Button variant="outline" size="sm" onClick={() => { setApproveAmount(String(loan.principal)); setApproveOpen(true); }} className="text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setApproveAmount(String(loan.principal));
+              setApproveOpen(true);
+            }}
+            className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+          >
             <CheckCircle2 className="mr-1 h-4 w-4" /> {t("Approve")}
           </Button>
         )}
         {isApproved && (
-          <Button variant="outline" size="sm" onClick={() => { setDisburseAmount(String(loan.approvedPrincipal ?? loan.principal)); setDisburseOpen(true); }} className="text-blue-600 border-blue-200 hover:bg-blue-50">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setDisburseAmount(String(loan.approvedPrincipal ?? loan.principal));
+              setDisburseOpen(true);
+            }}
+            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+          >
             <DollarSign className="mr-1 h-4 w-4" /> {t("Disburse")}
           </Button>
         )}
         {isActive && (
           <>
-            <Button variant="outline" size="sm" onClick={() => setRepayOpen(true)} className="text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRepayOpen(true)}
+              className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+            >
               <DollarSign className="mr-1 h-4 w-4" /> {t("Repayment")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setPauseOpen(true)}>
@@ -221,13 +306,17 @@ const WCLoanViewPage: FC = () => {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-gray-500">{t("Outstanding")}</p>
-            <p className="text-2xl font-bold font-mono">{formatMoney(loan.summary?.totalOutstanding ?? loan.balance?.totalOutstanding ?? 0, currencyCode)}</p>
+            <p className="text-2xl font-bold font-mono">
+              {formatMoney(loan.summary?.totalOutstanding ?? loan.balance?.totalOutstanding ?? 0, currencyCode)}
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-gray-500">{t("Total Paid")}</p>
-            <p className="text-2xl font-bold font-mono">{formatMoney(loan.summary?.principalPaid ?? loan.balance?.totalRepayment ?? 0, currencyCode)}</p>
+            <p className="text-2xl font-bold font-mono">
+              {formatMoney(loan.summary?.principalPaid ?? loan.balance?.totalRepayment ?? 0, currencyCode)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -241,28 +330,72 @@ const WCLoanViewPage: FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="details">{t("General")}</TabsTrigger>
-          <TabsTrigger value="amortization">{t("Amortization")} ({amortSchedule.length})</TabsTrigger>
-          <TabsTrigger value="delinquency">{t("Delinquency Schedule")} ({delinqSchedule.length})</TabsTrigger>
-          <TabsTrigger value="transactions">{t("Transactions")} ({transactions.length})</TabsTrigger>
-          <TabsTrigger value="tags">{t("Delinquency Tags")} ({delinqTags.length})</TabsTrigger>
-          <TabsTrigger value="rates">{t("Rate Changes")} ({rateChanges.length})</TabsTrigger>
+          <TabsTrigger value="amortization">
+            {t("Amortization")} ({amortSchedule.length})
+          </TabsTrigger>
+          <TabsTrigger value="delinquency">
+            {t("Delinquency Schedule")} ({delinqSchedule.length})
+          </TabsTrigger>
+          <TabsTrigger value="transactions">
+            {t("Transactions")} ({transactions.length})
+          </TabsTrigger>
+          <TabsTrigger value="tags">
+            {t("Delinquency Tags")} ({delinqTags.length})
+          </TabsTrigger>
+          <TabsTrigger value="rates">
+            {t("Rate Changes")} ({rateChanges.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("Loan Information")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("Loan Information")}</CardTitle>
+            </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Account No")}</span><span className="font-mono">{loan.accountNo ?? "—"}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("External ID")}</span><span>{loan.externalId ?? "—"}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Product")}</span><span>{loan.loanProductName}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Client")}</span><span>{loan.clientName ?? `#${loan.clientId}`}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Submitted")}</span><span>{formatDate(loan.timeline?.submittedOnDate)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Disbursed")}</span><span>{formatDate(loan.timeline?.actualDisbursementDate)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Approved")}</span><span>{formatMoney(loan.approvedPrincipal, currencyCode)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Grace Days")}</span><span>{loan.delinquencyGraceDays ?? "—"}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Delinquency Start")}</span><span>{loan.delinquencyStartType ?? "—"}</span></div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Account No")}</span>
+                <span className="font-mono">{loan.accountNo ?? "—"}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("External ID")}</span>
+                <span>{loan.externalId ?? "—"}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Product")}</span>
+                <span>{loan.loanProductName}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Client")}</span>
+                <span>{loan.clientName ?? `#${loan.clientId}`}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Submitted")}</span>
+                <span>{formatDate(loan.timeline?.submittedOnDate)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Disbursed")}</span>
+                <span>{formatDate(loan.timeline?.actualDisbursementDate)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Approved")}</span>
+                <span>{formatMoney(loan.approvedPrincipal, currencyCode)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Grace Days")}</span>
+                <span>{loan.delinquencyGraceDays ?? "—"}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("Delinquency Start")}</span>
+                <span>{loan.delinquencyStartType?.code ?? "—"}</span>
+              </div>
               {delinquencyClassification && (
-                <div className="flex justify-between text-sm"><span className="text-gray-500">{t("Delinquency Range")}</span><Badge variant="warning" size="sm">{delinquencyClassification}</Badge></div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">{t("Delinquency Range")}</span>
+                  <Badge variant="warning" size="sm">
+                    {delinquencyClassification}
+                  </Badge>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -270,7 +403,9 @@ const WCLoanViewPage: FC = () => {
 
         <TabsContent value="amortization" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("EIR Amortization Schedule")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("EIR Amortization Schedule")}</CardTitle>
+            </CardHeader>
             <CardContent className="p-0">
               {amortSchedule.length === 0 ? (
                 <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No schedule data available.")}</p>
@@ -296,8 +431,12 @@ const WCLoanViewPage: FC = () => {
                           <TableCell>{formatDate(entry.dueDate)}</TableCell>
                           <TableCell className="font-mono">{formatMoney(entry.expectedAmount, currencyCode)}</TableCell>
                           <TableCell className="font-mono">{formatMoney(entry.paidAmount, currencyCode)}</TableCell>
-                          <TableCell className="font-mono">{formatMoney(entry.outstandingAmount, currencyCode)}</TableCell>
-                          <TableCell className="font-mono">{entry.eir != null ? `${entry.eir.toFixed(4)}%` : "—"}</TableCell>
+                          <TableCell className="font-mono">
+                            {formatMoney(entry.outstandingAmount, currencyCode)}
+                          </TableCell>
+                          <TableCell className="font-mono">
+                            {entry.eir != null ? `${entry.eir.toFixed(4)}%` : "—"}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -310,7 +449,9 @@ const WCLoanViewPage: FC = () => {
 
         <TabsContent value="delinquency" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("Delinquency Range Schedule")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("Delinquency Range Schedule")}</CardTitle>
+            </CardHeader>
             <CardContent className="p-0">
               {delinqSchedule.length === 0 ? (
                 <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No delinquency schedule data.")}</p>
@@ -336,10 +477,17 @@ const WCLoanViewPage: FC = () => {
                           <TableCell>{formatDate(entry.toDate)}</TableCell>
                           <TableCell className="font-mono">{formatMoney(entry.expectedAmount, currencyCode)}</TableCell>
                           <TableCell className="font-mono">{formatMoney(entry.paidAmount, currencyCode)}</TableCell>
-                          <TableCell className="font-mono">{formatMoney(entry.outstandingAmount, currencyCode)}</TableCell>
+                          <TableCell className="font-mono">
+                            {formatMoney(entry.outstandingAmount, currencyCode)}
+                          </TableCell>
                           <TableCell>
-                            <Badge variant={entry.minPaymentCriteriaMet ? "success" : entry.delinquencyStatus ? "error" : "warning"} size="sm">
-                              {entry.minPaymentCriteriaMet ? t("Met") : entry.delinquencyStatus ?? t("Pending")}
+                            <Badge
+                              variant={
+                                entry.minPaymentCriteriaMet ? "success" : entry.delinquencyStatus ? "error" : "warning"
+                              }
+                              size="sm"
+                            >
+                              {entry.minPaymentCriteriaMet ? t("Met") : (entry.delinquencyStatus ?? t("Pending"))}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -354,7 +502,9 @@ const WCLoanViewPage: FC = () => {
 
         <TabsContent value="transactions" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("Transaction History")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("Transaction History")}</CardTitle>
+            </CardHeader>
             <CardContent className="p-0">
               {transactions.length === 0 ? (
                 <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No transactions yet.")}</p>
@@ -376,7 +526,9 @@ const WCLoanViewPage: FC = () => {
                           <TableCell className="font-mono text-xs">{tx.id}</TableCell>
                           <TableCell>{tx.type?.value ?? tx.type?.code}</TableCell>
                           <TableCell>{formatDate(tx.date)}</TableCell>
-                          <TableCell className="font-mono font-semibold">{formatMoney(tx.amount, currencyCode)}</TableCell>
+                          <TableCell className="font-mono font-semibold">
+                            {formatMoney(tx.amount, currencyCode)}
+                          </TableCell>
                           <TableCell className="font-mono">{formatMoney(tx.principalPortion, currencyCode)}</TableCell>
                         </TableRow>
                       ))}
@@ -390,7 +542,9 @@ const WCLoanViewPage: FC = () => {
 
         <TabsContent value="tags" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("Delinquency Tag History")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("Delinquency Tag History")}</CardTitle>
+            </CardHeader>
             <CardContent className="p-0">
               {delinqTags.length === 0 ? (
                 <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No delinquency tags recorded.")}</p>
@@ -407,7 +561,11 @@ const WCLoanViewPage: FC = () => {
                     <TableBody>
                       {delinqTags.map((tag) => (
                         <TableRow key={tag.id}>
-                          <TableCell><Badge variant="warning" size="sm">{tag.classification ?? `#${tag.tagId ?? tag.id}`}</Badge></TableCell>
+                          <TableCell>
+                            <Badge variant="warning" size="sm">
+                              {tag.classification ?? `#${tag.tagId ?? tag.id}`}
+                            </Badge>
+                          </TableCell>
                           <TableCell>{formatDate(tag.addedOnDate)}</TableCell>
                           <TableCell>{tag.liftedOnDate ? formatDate(tag.liftedOnDate) : "—"}</TableCell>
                         </TableRow>
@@ -422,7 +580,9 @@ const WCLoanViewPage: FC = () => {
 
         <TabsContent value="rates" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-base">{t("Rate Change History")}</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">{t("Rate Change History")}</CardTitle>
+            </CardHeader>
             <CardContent className="p-0">
               {rateChanges.length === 0 ? (
                 <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No rate changes recorded.")}</p>
@@ -468,11 +628,21 @@ const WCLoanViewPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Approved Amount")}</label>
-              <Input type="number" step="0.01" value={approveAmount} onChange={(e) => setApproveAmount(e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                value={approveAmount}
+                onChange={(e) => setApproveAmount(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setApproveOpen(false)} disabled={isMutating}>{t("Cancel")}</Button>
-              <Button onClick={handleApprove} disabled={isMutating}>{approveMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Approve")}</Button>
+              <Button variant="outline" onClick={() => setApproveOpen(false)} disabled={isMutating}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleApprove} disabled={isMutating}>
+                {approveMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Approve")}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -491,11 +661,21 @@ const WCLoanViewPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Amount")}</label>
-              <Input type="number" step="0.01" value={disburseAmount} onChange={(e) => setDisburseAmount(e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                value={disburseAmount}
+                onChange={(e) => setDisburseAmount(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDisburseOpen(false)} disabled={isMutating}>{t("Cancel")}</Button>
-              <Button onClick={handleDisburse} disabled={isMutating}>{disburseMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Disburse")}</Button>
+              <Button variant="outline" onClick={() => setDisburseOpen(false)} disabled={isMutating}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleDisburse} disabled={isMutating}>
+                {disburseMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Disburse")}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -517,8 +697,13 @@ const WCLoanViewPage: FC = () => {
               <Input type="number" step="0.01" value={repayAmount} onChange={(e) => setRepayAmount(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setRepayOpen(false)} disabled={isMutating}>{t("Cancel")}</Button>
-              <Button onClick={handleRepay} disabled={isMutating}>{repaymentMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Repay")}</Button>
+              <Button variant="outline" onClick={() => setRepayOpen(false)} disabled={isMutating}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleRepay} disabled={isMutating}>
+                {repaymentMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Repay")}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -540,10 +725,17 @@ const WCLoanViewPage: FC = () => {
               <Input type="date" value={pauseEnd} onChange={(e) => setPauseEnd(e.target.value)} />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setPauseOpen(false)} disabled={isMutating}>{t("Cancel")}</Button>
-              <Button onClick={handlePause} disabled={isMutating || !pauseEnd || pauseEnd <= pauseStart}>{pauseMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Pause")}</Button>
+              <Button variant="outline" onClick={() => setPauseOpen(false)} disabled={isMutating}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handlePause} disabled={isMutating || !pauseEnd || pauseEnd <= pauseStart}>
+                {pauseMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Pause")}
+              </Button>
             </div>
-            {pauseEnd && pauseEnd <= pauseStart && <p className="text-sm text-red-500">{t("End date must be after start date")}</p>}
+            {pauseEnd && pauseEnd <= pauseStart && (
+              <p className="text-sm text-red-500">{t("End date must be after start date")}</p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -557,15 +749,32 @@ const WCLoanViewPage: FC = () => {
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Minimum Payment")}</label>
-              <Input type="number" step="0.01" value={rescheduleMinPayment} onChange={(e) => setRescheduleMinPayment(e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                value={rescheduleMinPayment}
+                onChange={(e) => setRescheduleMinPayment(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Frequency (days)")}</label>
-              <Input type="number" value={rescheduleFrequency} onChange={(e) => setRescheduleFrequency(e.target.value)} />
+              <Input
+                type="number"
+                value={rescheduleFrequency}
+                onChange={(e) => setRescheduleFrequency(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setRescheduleOpen(false)} disabled={isMutating}>{t("Cancel")}</Button>
-              <Button onClick={handleReschedule} disabled={isMutating || (!rescheduleMinPayment && !rescheduleFrequency)}>{rescheduleMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Reschedule")}</Button>
+              <Button variant="outline" onClick={() => setRescheduleOpen(false)} disabled={isMutating}>
+                {t("Cancel")}
+              </Button>
+              <Button
+                onClick={handleReschedule}
+                disabled={isMutating || (!rescheduleMinPayment && !rescheduleFrequency)}
+              >
+                {rescheduleMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Reschedule")}
+              </Button>
             </div>
             {!rescheduleMinPayment && !rescheduleFrequency && (
               <p className="text-sm text-red-500">{t("Provide a minimum payment or frequency to reschedule.")}</p>
@@ -587,11 +796,21 @@ const WCLoanViewPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Note")}</label>
-              <Textarea value={rateNote} onChange={(e) => setRateNote(e.target.value)} rows={2} placeholder={t("Optional reason...")} />
+              <Textarea
+                value={rateNote}
+                onChange={(e) => setRateNote(e.target.value)}
+                rows={2}
+                placeholder={t("Optional reason...")}
+              />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setRateChangeOpen(false)} disabled={isMutating}>{t("Cancel")}</Button>
-              <Button onClick={handleRateChange} disabled={isMutating || !newRate}>{rateChangeMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("Update Rate")}</Button>
+              <Button variant="outline" onClick={() => setRateChangeOpen(false)} disabled={isMutating}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleRateChange} disabled={isMutating || !newRate}>
+                {rateChangeMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Update Rate")}
+              </Button>
             </div>
           </div>
         </DialogContent>
