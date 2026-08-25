@@ -40,6 +40,7 @@ const WCLoanProductFormPage: FC = () => {
     handleSubmit,
     setValue,
     watch,
+    trigger,
     formState: { errors },
   } = useForm<CreateWCLoanProductFormValues>({
     resolver: zodResolver(createWCLoanProductSchema) as never,
@@ -54,8 +55,6 @@ const WCLoanProductFormPage: FC = () => {
       amortizationType: "EIR",
       npvDayCount: 360,
       principal: undefined,
-      minPrincipal: undefined,
-      maxPrincipal: undefined,
       periodPaymentRate: undefined,
       minPeriodPaymentRate: undefined,
       maxPeriodPaymentRate: undefined,
@@ -88,7 +87,10 @@ const WCLoanProductFormPage: FC = () => {
       };
       const minMaxFields = ["minPrincipal", "maxPrincipal", "minPeriodPaymentRate", "maxPeriodPaymentRate"];
       for (const field of minMaxFields) {
-        if (!(payload[field as keyof typeof payload] as number | undefined) || (payload[field as keyof typeof payload] as number) <= 0) {
+        if (
+          !(payload[field as keyof typeof payload] as number | undefined) ||
+          (payload[field as keyof typeof payload] as number) <= 0
+        ) {
           delete payload[field as keyof typeof payload];
         }
       }
@@ -205,7 +207,12 @@ const WCLoanProductFormPage: FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                {...register("periodPaymentRate", { valueAsNumber: true })}
+                {...register("periodPaymentRate", {
+                  onChange: () => {
+                    trigger("minPeriodPaymentRate");
+                    trigger("maxPeriodPaymentRate");
+                  },
+                })}
                 error={errors.periodPaymentRate?.message}
               />
             </div>
@@ -214,7 +221,12 @@ const WCLoanProductFormPage: FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                {...register("minPeriodPaymentRate", { valueAsNumber: true })}
+                {...register("minPeriodPaymentRate", {
+                  onChange: () => {
+                    trigger("periodPaymentRate");
+                    trigger("maxPeriodPaymentRate");
+                  },
+                })}
                 error={errors.minPeriodPaymentRate?.message}
               />
             </div>
@@ -223,7 +235,12 @@ const WCLoanProductFormPage: FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                {...register("maxPeriodPaymentRate", { valueAsNumber: true })}
+                {...register("maxPeriodPaymentRate", {
+                  onChange: () => {
+                    trigger("periodPaymentRate");
+                    trigger("minPeriodPaymentRate");
+                  },
+                })}
                 error={errors.maxPeriodPaymentRate?.message}
               />
             </div>
@@ -240,7 +257,12 @@ const WCLoanProductFormPage: FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                {...register("principal", { valueAsNumber: true })}
+                {...register("principal", {
+                  onChange: () => {
+                    trigger("minPrincipal");
+                    trigger("maxPrincipal");
+                  },
+                })}
                 error={errors.principal?.message}
               />
             </div>
@@ -249,7 +271,12 @@ const WCLoanProductFormPage: FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                {...register("minPrincipal", { valueAsNumber: true })}
+                {...register("minPrincipal", {
+                  onChange: () => {
+                    trigger("principal");
+                    trigger("maxPrincipal");
+                  },
+                })}
                 error={errors.minPrincipal?.message}
               />
             </div>
@@ -258,7 +285,12 @@ const WCLoanProductFormPage: FC = () => {
               <Input
                 type="number"
                 step="0.01"
-                {...register("maxPrincipal", { valueAsNumber: true })}
+                {...register("maxPrincipal", {
+                  onChange: () => {
+                    trigger("principal");
+                    trigger("minPrincipal");
+                  },
+                })}
                 error={errors.maxPrincipal?.message}
               />
             </div>

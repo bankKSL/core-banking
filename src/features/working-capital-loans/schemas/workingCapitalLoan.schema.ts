@@ -25,12 +25,12 @@ export const createWCLoanProductSchema = z
     inMultiplesOf: z.number().int().min(0).default(1),
     amortizationType: z.string().default("EIR"),
     npvDayCount: z.number().int().positive("NPV day count must be positive"),
-    principal: z.number().positive("Principal is required"),
-    minPrincipal: z.number().min(0).optional(),
-    maxPrincipal: z.number().positive().optional(),
-    periodPaymentRate: z.number().positive("Period payment rate must be > 0"),
-    minPeriodPaymentRate: z.number().min(0).optional(),
-    maxPeriodPaymentRate: z.number().positive().optional(),
+    principal: z.coerce.number().positive("Principal must be > 0"),
+    minPrincipal: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
+    maxPrincipal: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
+    periodPaymentRate: z.coerce.number().positive("Period payment rate must be > 0"),
+    minPeriodPaymentRate: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
+    maxPeriodPaymentRate: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
     repaymentEvery: z.number().int().positive("Repayment frequency is required"),
     repaymentFrequencyType: z.string().min(1, "Repayment frequency type is required"),
     delinquencyBucketId: z.number().int().positive("Delinquency bucket is required"),
@@ -48,11 +48,61 @@ export const createWCLoanProductSchema = z
         message: "Amortization type must be EIR for Working Capital Loans",
       });
     }
-    if (data.minPrincipal != null && data.principal < data.minPrincipal) {
-      ctx.addIssue({ code: "custom", path: ["principal"], message: "Principal must be >= minimum principal" });
+
+    const { principal, minPrincipal, maxPrincipal } = data;
+    const hasMin = minPrincipal != null && !Number.isNaN(minPrincipal);
+    const hasMax = maxPrincipal != null && !Number.isNaN(maxPrincipal);
+    const hasPrincipal = principal != null && !Number.isNaN(principal);
+
+    if (hasMin && hasMax && minPrincipal > maxPrincipal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxPrincipal"],
+        message: "Max Principal must be greater than or equal to Min Principal",
+      });
     }
-    if (data.maxPrincipal != null && data.principal > data.maxPrincipal) {
-      ctx.addIssue({ code: "custom", path: ["principal"], message: "Principal must be <= maximum principal" });
+    if (hasPrincipal && hasMin && principal < minPrincipal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["principal"],
+        message: "Principal must not be less than Min Principal",
+      });
+    }
+    if (hasPrincipal && hasMax && principal > maxPrincipal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["principal"],
+        message: "Principal must not be greater than Max Principal",
+      });
+    }
+
+    const { periodPaymentRate, minPeriodPaymentRate, maxPeriodPaymentRate } = data;
+    const hasPeriodMin = minPeriodPaymentRate != null && !Number.isNaN(minPeriodPaymentRate);
+    const hasPeriodMax = maxPeriodPaymentRate != null && !Number.isNaN(maxPeriodPaymentRate);
+    const hasPeriodPaymentRate = periodPaymentRate != null && !Number.isNaN(periodPaymentRate);
+
+    if (hasPeriodMin && hasPeriodMax && minPeriodPaymentRate > maxPeriodPaymentRate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxPeriodPaymentRate"],
+        message: "Max Period Payment Rate must be greater than or equal to Min Period Payment Rate",
+      });
+    }
+
+    if (hasPeriodPaymentRate && hasPeriodMin && periodPaymentRate < minPeriodPaymentRate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["periodPaymentRate"],
+        message: "Period Payment Rate must not be less than Min Period Payment Rate",
+      });
+    }
+
+    if (hasPeriodPaymentRate && hasPeriodMax && periodPaymentRate > maxPeriodPaymentRate) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["periodPaymentRate"],
+        message: "Period Payment Rate must not be greater than Max Period Payment Rate",
+      });
     }
   });
 export type CreateWCLoanProductFormValues = z.infer<typeof createWCLoanProductSchema>;
