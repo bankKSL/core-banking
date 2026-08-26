@@ -1,12 +1,13 @@
-import { type FC, useState } from "react";
+import { type FC, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Card, CardContent } from "@/components/ui/card";
+import { DataTable, type ColumnDef } from "@/components/shared/DataTable";
+import { Pagination } from "@/components/shared/Pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,8 @@ import {
   useUpdateBreachConfig,
   useDeleteBreachConfig,
 } from "../hooks/useWCLoanQueries";
+import { WC_LOANS_PAGE_SIZE, WC_LOAN_PAGE_SIZE_OPTIONS } from "../constants/status";
+import { toDisplayText } from "../utils/format";
 import type { WCBreachConfig } from "../types/workingCapitalLoan";
 
 const FREQUENCIES = ["DAYS", "WEEKS", "MONTHS", "YEARS"] as const;
@@ -56,6 +59,75 @@ const WCBreachConfigPage: FC = () => {
   const [editing, setEditing] = useState<WCBreachConfig | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WCBreachConfig | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(WC_LOANS_PAGE_SIZE);
+
+  const totalRecords = configs.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pagedConfigs = useMemo(
+    () => configs.slice((safePage - 1) * pageSize, safePage * pageSize),
+    [configs, safePage, pageSize],
+  );
+
+  const columns: ColumnDef<WCBreachConfig>[] = [
+    {
+      key: "name",
+      header: t("Name"),
+      cell: (r) => <span className="font-medium">{r.name ?? `#${r.id}`}</span>,
+    },
+    {
+      key: "breachFrequency",
+      header: t("Frequency"),
+      accessorFn: (r) => `${r.breachFrequency ?? "—"} ${toDisplayText(r.breachFrequencyType)}`.trim(),
+      cell: (r) => (
+        <span className="text-sm">
+          {r.breachFrequency ?? "—"} {toDisplayText(r.breachFrequencyType)}
+        </span>
+      ),
+    },
+    {
+      key: "breachAmountCalculationType",
+      header: t("Amount Type"),
+      accessorFn: (r) => toDisplayText(r.breachAmountCalculationType),
+      cell: (r) => <span className="text-sm">{toDisplayText(r.breachAmountCalculationType)}</span>,
+    },
+    {
+      key: "breachAmount",
+      header: t("Amount"),
+      cell: (r) => <span className="font-mono text-sm font-semibold">{r.breachAmount ?? "—"}</span>,
+    },
+    {
+      key: "actions",
+      header: "",
+      sortable: false,
+      cell: (r) => (
+        <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEdit(r);
+            }}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteTarget(r);
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   const openCreate = () => {
     setEditing(null);
@@ -68,12 +140,12 @@ const WCBreachConfigPage: FC = () => {
     setForm({
       name: cfg.name ?? "",
       breachFrequency: String(cfg.breachFrequency ?? ""),
-      breachFrequencyType: ((typeof cfg.breachFrequencyType === "string"
+      breachFrequencyType: (typeof cfg.breachFrequencyType === "string"
         ? cfg.breachFrequencyType
-        : "DAYS") as FormState["breachFrequencyType"]),
-      breachAmountCalculationType: ((typeof cfg.breachAmountCalculationType === "string"
+        : "DAYS") as FormState["breachFrequencyType"],
+      breachAmountCalculationType: (typeof cfg.breachAmountCalculationType === "string"
         ? cfg.breachAmountCalculationType
-        : "PERCENTAGE") as FormState["breachAmountCalculationType"]),
+        : "PERCENTAGE") as FormState["breachAmountCalculationType"],
       breachAmount: String(cfg.breachAmount ?? ""),
     });
     setFormOpen(true);
@@ -132,57 +204,47 @@ const WCBreachConfigPage: FC = () => {
         }
       />
       <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="space-y-4 p-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : configs.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-400">{t("No breach configurations found.")}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left text-gray-500">
-                    <th className="px-6 py-3 font-medium">{t("Name")}</th>
-                    <th className="px-6 py-3 font-medium">{t("Frequency")}</th>
-                    <th className="px-6 py-3 font-medium">{t("Amount Type")}</th>
-                    <th className="px-6 py-3 font-medium">{t("Amount")}</th>
-                    <th className="px-6 py-3" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {configs.map((cfg) => (
-                    <tr key={cfg.id} className="border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-900/40">
-                      <td className="px-6 py-3 font-medium">{cfg.name}</td>
-                      <td className="px-6 py-3">
-                        {cfg.breachFrequency} {typeof cfg.breachFrequencyType === "string" ? cfg.breachFrequencyType : ""}
-                      </td>
-                      <td className="px-6 py-3">
-                        {typeof cfg.breachAmountCalculationType === "string" ? cfg.breachAmountCalculationType : ""}
-                      </td>
-                      <td className="px-6 py-3 font-mono">{cfg.breachAmount}</td>
-                      <td className="px-6 py-3">
-                        <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => openEdit(cfg)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600"
-                            onClick={() => setDeleteTarget(cfg)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <CardHeader>
+          <CardTitle>{t("All WC Breaches")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={pagedConfigs}
+            loading={isLoading}
+            emptyState={{ message: t("No breach configurations found.") }}
+            onRowClick={openEdit}
+          />
+          {totalRecords > 0 && (
+            <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">{t("Rows per page")}</span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(v) => {
+                    setPageSize(Number(v));
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WC_LOAN_PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                totalItems={totalRecords}
+                pageSize={pageSize}
+              />
             </div>
           )}
         </CardContent>
@@ -268,7 +330,11 @@ const WCBreachConfigPage: FC = () => {
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-2">
-              <Button variant="outline" onClick={() => setFormOpen(false)} disabled={createMut.isPending || updateMut.isPending}>
+              <Button
+                variant="outline"
+                onClick={() => setFormOpen(false)}
+                disabled={createMut.isPending || updateMut.isPending}
+              >
                 {t("Cancel")}
               </Button>
               <Button onClick={handleSubmit} disabled={!valid || createMut.isPending || updateMut.isPending}>
