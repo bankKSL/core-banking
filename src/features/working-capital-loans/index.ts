@@ -22,6 +22,42 @@ export type {
   RateChangeRequest,
   RateChangeHistoryEntry,
   RepaymentRequest,
+  WCBreachDelinquencyAction,
+  BreachActionRequest,
+  NearBreachActionRequest,
+  WCBreachActionData,
+  WCNearBreachActionData,
+  WCBreachSchedulePeriod,
+  RejectWCLoanRequest,
+  UndoApprovalRequest,
+  UndoDisbursalRequest,
+  DisbursementPaymentDetails,
+  MarkAsFraudRequest,
+  UpdateDiscountRequest,
+  WCLoanStateTransitionCommand,
+  RepaymentLikeRequest,
+  CreditBalanceRefundRequest,
+  DiscountFeeTransactionRequest,
+  DiscountFeeAdjustmentRequest,
+  ChargeOffRequest,
+  UndoChargeOffRequest,
+  UndoTransactionRequest,
+  WCCommandTemplateData,
+  WCTemplateType,
+  WCTransactionCommand,
+  WCChargeData,
+  WCBreachConfig,
+  WCBreachConfigRequest,
+  WCNearBreachConfig,
+  WCNearBreachConfigRequest,
+  CreateLoanChargeRequest,
+  ChargeAdjustmentRequest,
+} from "./types/workingCapitalLoan";
+
+export {
+  WC_LOAN_STATUS_ID,
+  WC_TRANSACTION_COMMANDS,
+  WC_TEMPLATE_TYPES,
 } from "./types/workingCapitalLoan";
 
 export {
@@ -31,13 +67,24 @@ export {
   fetchWCLoanProduct,
   fetchWCLoanProductTemplate,
   createWCLoanProduct,
+  updateWCLoanProduct,
+  deleteWCLoanProduct,
   fetchWCLoans,
   fetchWCLoan,
+  fetchWCLoanByExternalId,
   fetchWCLoanTemplate,
   createWCLoan,
+  updateWCLoan,
+  deleteWCLoan,
   approveWCLoan,
   disburseWCLoan,
+  executeStateTransition,
+  markWCLoanAsFraud,
+  updateWCDiscount,
   makeWCRepayment,
+  executeWCTransactionCommand,
+  undoWCTransaction,
+  fetchWCLoanCommandTemplate,
   fetchAmortizationSchedule,
   fetchDelinquencyRangeSchedule,
   fetchDelinquencyTags,
@@ -45,6 +92,22 @@ export {
   createDelinquencyAction,
   updatePaymentRate,
   fetchRateChangeHistory,
+  fetchWCLoanCharges,
+  createWCLoanCharge,
+  adjustWCLoanCharge,
+  createBreachAction,
+  createNearBreachAction,
+  fetchBreachActions,
+  fetchNearBreachActions,
+  fetchBreachSchedule,
+  fetchBreachConfigs,
+  createBreachConfig,
+  updateBreachConfig,
+  deleteBreachConfig,
+  fetchNearBreachConfigs,
+  createNearBreachConfig,
+  updateNearBreachConfig,
+  deleteNearBreachConfig,
 } from "./api/workingCapitalLoan";
 
 export {
@@ -54,6 +117,8 @@ export {
   useWCLoanProduct,
   useWCLoanProductTemplate,
   useCreateWCLoanProduct,
+  useUpdateWCLoanProduct,
+  useDeleteWCLoanProduct,
   useWCLoans,
   useWCLoan,
   useWCLoanTemplate,
@@ -63,11 +128,38 @@ export {
   useWCRepayment,
   useAmortizationSchedule,
   useDelinquencyRangeSchedule,
+  useBreachScheduleQuery,
+  useBreachActionsQuery,
+  useNearBreachActionsQuery,
   useWCDelinquencyTags,
   useWCLoanTransactions,
   useCreateDelinquencyAction,
   useUpdatePaymentRate,
   useRateChangeHistory,
+  useStateTransitionMutation,
+  useRejectWCLoan,
+  useUndoApprovalWCLoan,
+  useUndoDisbursalWCLoan,
+  useUpdateWCLoan,
+  useDeleteWCLoan,
+  useMarkAsFraudMutation,
+  useUpdateDiscountMutation,
+  useWCTransactionCommandMutation,
+  useUndoWCTransactionMutation,
+  useWCCommandTemplateQuery,
+  useWCLoanChargesQuery,
+  useCreateLoanChargeMutation,
+  useAdjustLoanChargeMutation,
+  useBreachActionMutation,
+  useNearBreachActionMutation,
+  useBreachConfigs,
+  useCreateBreachConfig,
+  useUpdateBreachConfig,
+  useDeleteBreachConfig,
+  useNearBreachConfigs,
+  useCreateNearBreachConfig,
+  useUpdateNearBreachConfig,
+  useDeleteNearBreachConfig,
 } from "./hooks/useWCLoanQueries";
 
 export {
@@ -78,6 +170,21 @@ export {
   wcRescheduleActionSchema,
   wcRateChangeSchema,
   wcRepaymentSchema,
+  rejectWCLoanSchema,
+  undoCommandSchema,
+  markAsFraudSchema,
+  updateDiscountSchema,
+  disburseWCLoanSchema,
+  repaymentLikeSchema,
+  creditBalanceRefundSchema,
+  discountFeeSchema,
+  discountFeeAdjustmentSchema,
+  chargeOffSchema,
+  undoChargeOffSchema,
+  undoTransactionSchema,
+  createLoanChargeSchema,
+  chargeAdjustmentSchema,
+  breachActionSchema,
 } from "./schemas/workingCapitalLoan.schema";
 
 export type {
@@ -88,6 +195,21 @@ export type {
   WCRescheduleActionFormValues,
   WCRateChangeFormValues,
   WCRepaymentFormValues,
+  RejectWCLoanFormValues,
+  UndoCommandFormValues,
+  MarkAsFraudFormValues,
+  UpdateDiscountFormValues,
+  DisburseWCLoanFormValues,
+  RepaymentLikeFormValues,
+  CreditBalanceRefundFormValues,
+  DiscountFeeFormValues,
+  DiscountFeeAdjustmentFormValues,
+  ChargeOffFormValues,
+  UndoChargeOffFormValues,
+  UndoTransactionFormValues,
+  CreateLoanChargeFormValues,
+  ChargeAdjustmentFormValues,
+  BreachActionFormValues,
 } from "./schemas/workingCapitalLoan.schema";
 
 export {
@@ -104,10 +226,13 @@ export {
   resolveWCStatusCode,
 } from "./constants/status";
 
-export { toIsoDate, formatDate, formatMoney } from "./utils/format";
+export { toIsoDate, formatDate, formatMoney, toDisplayText } from "./utils/format";
 
 export { default as WCLoansListPage } from "./pages/WCLoansListPage";
 export { default as WCLoanFormPage } from "./pages/WCLoanFormPage";
 export { default as WCLoanViewPage } from "./pages/WCLoanViewPage";
 export { default as WCLoanProductsPage } from "./pages/WCLoanProductsPage";
 export { default as WCLoanProductFormPage } from "./pages/WCLoanProductFormPage";
+export { default as WCLoanProductViewPage } from "./pages/WCLoanProductViewPage";
+export { default as WCBreachConfigPage } from "./pages/WCBreachConfigPage";
+export { default as WCNearBreachConfigPage } from "./pages/WCNearBreachConfigPage";

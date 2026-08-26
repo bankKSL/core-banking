@@ -44,6 +44,7 @@ import {
   Layers,
   CalendarRange,
   TrendingUp,
+  ShieldAlert,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -348,6 +349,18 @@ const getSections = (t: (key: string) => string): NavSectionConfig[] => [
         path: "/configuration/business-date",
         icon: Calendar,
         translationKey: "Business Date",
+      },
+      {
+        label: t("WC Breaches"),
+        path: "/configuration/working-capital/breaches",
+        icon: ShieldAlert,
+        translationKey: "WC Breaches",
+      },
+      {
+        label: t("WC Near-Breaches"),
+        path: "/configuration/working-capital/near-breaches",
+        icon: ShieldAlert,
+        translationKey: "WC Near-Breaches",
       },
     ],
   },

@@ -26,3 +26,22 @@ export function formatMoney(amount: number | null | undefined, code = "USD", max
     maximumFractionDigits,
   }).format(amount ?? 0);
 }
+
+/**
+ * Render-safe text for fields that may be a plain string OR an
+ * EnumOptionData object ({ id, code, value }) returned by Fineract.
+ */
+export function toDisplayText(raw: unknown): string {
+  if (raw == null || raw === "") return "—";
+  if (typeof raw === "string") return raw;
+  if (typeof raw === "number" || typeof raw === "boolean") return String(raw);
+  if (Array.isArray(raw)) return raw.map(toDisplayText).filter((s) => s !== "—").join(", ") || "—";
+  if (typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ["value", "name", "label", "code"] as const) {
+      const v = obj[key];
+      if (typeof v === "string" && v.length > 0) return v;
+    }
+  }
+  return String(raw);
+}

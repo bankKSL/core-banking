@@ -167,6 +167,9 @@ import {
   WCLoanViewPage,
   WCLoanProductsPage,
   WCLoanProductFormPage,
+  WCLoanProductViewPage,
+  WCBreachConfigPage,
+  WCNearBreachConfigPage,
 } from "@/features/working-capital-loans";
 
 /** Redirect authenticated users away from /login to dashboard */
@@ -281,10 +284,14 @@ function App() {
                   {/* Working Capital Loans */}
                   <Route path="/working-capital-loans/products" element={<WCLoanProductsPage />} />
                   <Route path="/working-capital-loans/products/new" element={<WCLoanProductFormPage />} />
-                  <Route path="/working-capital-loans/products/view/:id" element={<WCLoanViewPage />} />
+                  <Route path="/working-capital-loans/products/edit/:id" element={<WCLoanProductFormPage />} />
+                  <Route path="/working-capital-loans/products/view/:id" element={<WCLoanProductViewPage />} />
                   <Route path="/working-capital-loans" element={<WCLoansListPage />} />
                   <Route path="/working-capital-loans/new" element={<WCLoanFormPage />} />
+                  <Route path="/working-capital-loans/edit/:id" element={<WCLoanFormPage />} />
                   <Route path="/working-capital-loans/view/:id" element={<WCLoanViewPage />} />
+                  <Route path="/configuration/working-capital/breaches" element={<WCBreachConfigPage />} />
+                  <Route path="/configuration/working-capital/near-breaches" element={<WCNearBreachConfigPage />} />
                   {/* Deposits */}
                   <Route path="/deposits/products" element={<SavingsProductsPage />} />
                   <Route path="/deposits/products/new" element={<SavingsProductFormPage />} />

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWCLoanProducts } from "../hooks/useWCLoanQueries";
-import { formatMoney } from "../utils/format";
+import { formatMoney, toDisplayText } from "../utils/format";
 import type { WCLoanProduct } from "../types/workingCapitalLoan";
 
 const WCLoanProductsPage: FC = () => {
@@ -29,7 +29,7 @@ const WCLoanProductsPage: FC = () => {
     { key: "currency", header: t("Currency"), cell: (r) => <span>{r.currency?.code ?? "—"}</span> },
     { key: "principal", header: t("Principal"), cell: (r) => <span className="font-mono">{formatMoney(r.principal, r.currency?.code)}</span> },
     { key: "periodPaymentRate", header: t("Period Rate (%)"), cell: (r) => <span className="font-mono">{r.periodPaymentRate}%</span> },
-    { key: "repaymentEvery", header: t("Repayment"), cell: (r) => <span>{t("Every")} {r.repaymentEvery} {r.repaymentFrequencyType?.value ?? ""}</span> },
+    { key: "repaymentEvery", header: t("Repayment"), cell: (r) => <span>{t("Every")} {r.repaymentEvery} {toDisplayText(r.repaymentFrequencyType)}</span> },
     { key: "delinquencyBucket", header: t("Delinquency Bucket"), cell: (r) => <span>{r.delinquencyBucket?.name ?? (r.delinquencyBucketId != null ? `#${r.delinquencyBucketId}` : "—")}</span> },
     {
       key: "actions",

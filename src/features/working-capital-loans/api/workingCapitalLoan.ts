@@ -18,6 +18,29 @@ import type {
   RateChangeHistoryEntry,
   RepaymentRequest,
   DelinquencyBucket,
+  MarkAsFraudRequest,
+  UpdateDiscountRequest,
+  WCTransactionCommand,
+  RepaymentLikeRequest,
+  DiscountFeeTransactionRequest,
+  DiscountFeeAdjustmentRequest,
+  ChargeOffRequest,
+  UndoChargeOffRequest,
+  UndoTransactionRequest,
+  WCCommandTemplateData,
+  WCTemplateType,
+  WCChargeData,
+  CreateLoanChargeRequest,
+  ChargeAdjustmentRequest,
+  BreachActionRequest,
+  NearBreachActionRequest,
+  WCBreachActionData,
+  WCNearBreachActionData,
+  WCBreachSchedulePeriod,
+  WCBreachConfig,
+  WCBreachConfigRequest,
+  WCNearBreachConfig,
+  WCNearBreachConfigRequest,
 } from "../types/workingCapitalLoan";
 
 export async function fetchDelinquencyBuckets(): Promise<DelinquencyBucket[]> {
@@ -66,6 +89,23 @@ export async function createWCLoanProduct(payload: WCLoanProductCreateRequest): 
   return data;
 }
 
+export async function updateWCLoanProduct(
+  productId: number,
+  payload: Partial<WCLoanProductCreateRequest>,
+): Promise<{ resourceId: number }> {
+  const { data } = await client.put<{ resourceId: number }>(`/working-capital-loan-products/${productId}`, {
+    ...payload,
+    locale: "en",
+    dateFormat: "yyyy-MM-dd",
+  });
+  return data;
+}
+
+export async function deleteWCLoanProduct(productId: number): Promise<{ resourceId: number }> {
+  const { data } = await client.delete<{ resourceId: number }>(`/working-capital-loan-products/${productId}`);
+  return data;
+}
+
 export async function fetchWCLoans(params: WCLoanListParams = {}): Promise<WCLoanListResponse> {
   const { data } = await client.get<WCLoanListResponse | WCLoan[]>("/working-capital-loans", { params });
   if (Array.isArray(data)) return { pageItems: data, totalElements: data.length };
@@ -95,22 +135,106 @@ export async function createWCLoan(payload: WCLoanCreateRequest): Promise<WCLoan
 }
 
 export async function approveWCLoan(loanId: number, payload: WCLoanCommandRequest): Promise<WCLoanCommandResponse> {
+  return executeStateTransition(loanId, "approve", payload);
+}
+
+export async function disburseWCLoan(loanId: number, payload: WCLoanCommandRequest): Promise<WCLoanCommandResponse> {
+  return executeStateTransition(loanId, "disburse", payload);
+}
+
+type StateTransitionCommand = "approve" | "reject" | "undoapproval" | "disburse" | "undodisbursal";
+
+export async function executeStateTransition(
+  loanId: number,
+  command: StateTransitionCommand,
+  payload: object = {},
+): Promise<WCLoanCommandResponse> {
   const { data } = await client.post<WCLoanCommandResponse>(`/working-capital-loans/${loanId}`, payload, {
-    params: { command: "approve" },
+    params: { command },
   });
   return data;
 }
 
-export async function disburseWCLoan(loanId: number, payload: WCLoanCommandRequest): Promise<WCLoanCommandResponse> {
-  const { data } = await client.post<WCLoanCommandResponse>(`/working-capital-loans/${loanId}`, payload, {
-    params: { command: "disburse" },
+export async function updateWCLoan(
+  loanId: number,
+  payload: Partial<WCLoanCreateRequest>,
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.put<WCLoanCommandResponse>(`/working-capital-loans/${loanId}`, {
+    ...payload,
+    locale: "en",
+    dateFormat: "yyyy-MM-dd",
   });
+  return data;
+}
+
+export async function deleteWCLoan(loanId: number): Promise<{ resourceId: number }> {
+  const { data } = await client.delete<{ resourceId: number }>(`/working-capital-loans/${loanId}`);
+  return data;
+}
+
+export async function fetchWCLoanByExternalId(externalId: string): Promise<WCLoan> {
+  const { data } = await client.get<WCLoan>(`/working-capital-loans/external-id/${encodeURIComponent(externalId)}`);
+  return data;
+}
+
+export async function markWCLoanAsFraud(loanId: number, payload: MarkAsFraudRequest): Promise<WCLoanCommandResponse> {
+  const { data } = await client.put<WCLoanCommandResponse>(`/working-capital-loans/${loanId}/mark-as-fraud`, payload);
+  return data;
+}
+
+export async function updateWCDiscount(
+  loanId: number,
+  payload: UpdateDiscountRequest,
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.put<WCLoanCommandResponse>(`/working-capital-loans/${loanId}/discount`, {
+    ...payload,
+    dateFormat: "yyyy-MM-dd",
+  });
+  return data;
+}
+
+export async function executeWCTransactionCommand(
+  loanId: number,
+  command: WCTransactionCommand,
+  payload:
+    | RepaymentLikeRequest
+    | DiscountFeeTransactionRequest
+    | DiscountFeeAdjustmentRequest
+    | ChargeOffRequest
+    | UndoChargeOffRequest
+    | object = {},
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.post<WCLoanCommandResponse>(
+    `/working-capital-loans/${loanId}/transactions`,
+    payload,
+    { params: { command } },
+  );
   return data;
 }
 
 export async function makeWCRepayment(loanId: number, payload: RepaymentRequest): Promise<WCLoanCommandResponse> {
-  const { data } = await client.post<WCLoanCommandResponse>(`/working-capital-loans/${loanId}/transactions`, payload, {
-    params: { command: "repayment" },
+  return executeWCTransactionCommand(loanId, "repayment", payload);
+}
+
+export async function undoWCTransaction(
+  loanId: number,
+  transactionId: number,
+  payload: UndoTransactionRequest = {},
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.post<WCLoanCommandResponse>(
+    `/working-capital-loans/${loanId}/transactions/${transactionId}`,
+    payload,
+    { params: { command: "undo" } },
+  );
+  return data;
+}
+
+export async function fetchWCLoanCommandTemplate(
+  loanId: number,
+  templateType: WCTemplateType,
+): Promise<WCCommandTemplateData> {
+  const { data } = await client.get<WCCommandTemplateData>(`/working-capital-loans/${loanId}/template`, {
+    params: { templateType },
   });
   return data;
 }
@@ -245,4 +369,118 @@ export async function fetchRateChangeHistory(loanId: number): Promise<RateChange
     fromDate: rc.effectiveDate ?? rc.fromDate,
     createdOnDate: rc.createdDate ?? rc.createdOnDate,
   }));
+}
+
+// ─── Charges (§3.3) ───
+
+export async function fetchWCLoanCharges(loanId: number): Promise<WCChargeData[]> {
+  const { data } = await client.get<WCChargeData[]>(`/working-capital-loans/${loanId}/charges`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createWCLoanCharge(
+  loanId: number,
+  payload: CreateLoanChargeRequest,
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.post<WCLoanCommandResponse>(`/working-capital-loans/${loanId}/charges`, {
+    ...payload,
+    locale: "en",
+    dateFormat: "yyyy-MM-dd",
+  });
+  return data;
+}
+
+export async function adjustWCLoanCharge(
+  loanId: number,
+  loanChargeId: number,
+  payload: ChargeAdjustmentRequest,
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.post<WCLoanCommandResponse>(
+    `/working-capital-loans/${loanId}/charges/${loanChargeId}`,
+    { ...payload, dateFormat: "yyyy-MM-dd" },
+    { params: { command: "adjustment" } },
+  );
+  return data;
+}
+
+// ─── Breach / near-breach actions & schedules (§3.4) ───
+
+export async function fetchBreachActions(loanId: number): Promise<WCBreachActionData[]> {
+  const { data } = await client.get<WCBreachActionData[]>(`/working-capital-loans/${loanId}/breach-actions`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createBreachAction(
+  loanId: number,
+  payload: BreachActionRequest,
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.post<WCLoanCommandResponse>(`/working-capital-loans/${loanId}/breach-actions`, payload);
+  return data;
+}
+
+export async function fetchNearBreachActions(loanId: number): Promise<WCNearBreachActionData[]> {
+  const { data } = await client.get<WCNearBreachActionData[]>(`/working-capital-loans/${loanId}/near-breach-actions`);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createNearBreachAction(
+  loanId: number,
+  payload: NearBreachActionRequest,
+): Promise<WCLoanCommandResponse> {
+  const { data } = await client.post<WCLoanCommandResponse>(
+    `/working-capital-loans/${loanId}/near-breach-actions`,
+    payload,
+  );
+  return data;
+}
+
+export async function fetchBreachSchedule(loanId: number): Promise<WCBreachSchedulePeriod[]> {
+  const { data } = await client.get<WCBreachSchedulePeriod[]>(`/working-capital-loans/${loanId}/breach-schedule`);
+  return Array.isArray(data) ? data : [];
+}
+
+// ─── Configuration modules (§3.5) ───
+
+export async function fetchBreachConfigs(): Promise<WCBreachConfig[]> {
+  const { data } = await client.get<WCBreachConfig[]>("/working-capital/breach/breaches");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createBreachConfig(payload: WCBreachConfigRequest): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>("/working-capital/breach/breaches", payload);
+  return data;
+}
+
+export async function updateBreachConfig(
+  breachId: number,
+  payload: Partial<WCBreachConfigRequest>,
+): Promise<object> {
+  const { data } = await client.put(`/working-capital/breach/breaches/${breachId}`, payload);
+  return data as object;
+}
+
+export async function deleteBreachConfig(breachId: number): Promise<void> {
+  await client.delete(`/working-capital/breach/breaches/${breachId}`);
+}
+
+export async function fetchNearBreachConfigs(): Promise<WCNearBreachConfig[]> {
+  const { data } = await client.get<WCNearBreachConfig[]>("/working-capital/near-breach");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createNearBreachConfig(payload: WCNearBreachConfigRequest): Promise<{ resourceId: number }> {
+  const { data } = await client.post<{ resourceId: number }>("/working-capital/near-breach", payload);
+  return data;
+}
+
+export async function updateNearBreachConfig(
+  nearBreachId: number,
+  payload: Partial<WCNearBreachConfigRequest>,
+): Promise<object> {
+  const { data } = await client.put(`/working-capital/near-breach/${nearBreachId}`, payload);
+  return data as object;
+}
+
+export async function deleteNearBreachConfig(nearBreachId: number): Promise<void> {
+  await client.delete(`/working-capital/near-breach/${nearBreachId}`);
 }

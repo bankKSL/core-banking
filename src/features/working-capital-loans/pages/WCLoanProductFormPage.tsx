@@ -1,9 +1,9 @@
-import { type FC, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { type FC, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,26 +14,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { useToast } from "@/components/ui/toast";
 import { createWCLoanProductSchema, type CreateWCLoanProductFormValues } from "../schemas/workingCapitalLoan.schema";
-import { useCreateWCLoanProduct, useWCLoanProductTemplate, useDelinquencyBuckets } from "../hooks/useWCLoanQueries";
+import {
+  useCreateWCLoanProduct,
+  useUpdateWCLoanProduct,
+  useWCLoanProduct,
+  useWCLoanProductTemplate,
+  useDelinquencyBuckets,
+} from "../hooks/useWCLoanQueries";
 import { FREQUENCY_TYPE_OPTIONS, DELINQUENCY_START_TYPE_OPTIONS } from "../constants/status";
-
-interface PaymentAllocationOrderItem {
-  paymentAllocationRule: string;
-  order: number;
-}
-
-interface PaymentAllocationItem {
-  transactionType: string;
-  paymentAllocationOrder: PaymentAllocationOrderItem[];
-}
 
 const WCLoanProductFormPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { success: toastSuccess } = useToast();
+  const { id: routeId } = useParams<{ id?: string }>();
+  const editProductId = routeId ? Number(routeId) : undefined;
+  const isEditMode = !!editProductId;
+  const { success: toastSuccess, error: toastError } = useToast();
   const { data: template, isLoading: templateLoading } = useWCLoanProductTemplate();
   const { data: buckets = [] } = useDelinquencyBuckets();
   const createMutation = useCreateWCLoanProduct();
+  const updateMutation = useUpdateWCLoanProduct();
+  const mutation = isEditMode ? updateMutation : createMutation;
+  const { data: editProduct, isLoading: productLoading } = useWCLoanProduct(editProductId);
 
   const {
     register,
@@ -41,6 +43,7 @@ const WCLoanProductFormPage: FC = () => {
     setValue,
     watch,
     trigger,
+    reset,
     formState: { errors },
   } = useForm<CreateWCLoanProductFormValues>({
     resolver: zodResolver(createWCLoanProductSchema) as never,
@@ -94,15 +97,57 @@ const WCLoanProductFormPage: FC = () => {
           delete payload[field as keyof typeof payload];
         }
       }
+      if (isEditMode && editProductId) {
+        await updateMutation.mutateAsync({ productId: editProductId, payload });
+        toastSuccess(t("Product updated successfully"));
+        navigate(`/working-capital-loans/products/view/${editProductId}`);
+        return;
+      }
       await createMutation.mutateAsync(payload);
       toastSuccess(t("Product created successfully"));
       navigate("/working-capital-loans/products");
-    } catch {
-      // error handled by mutation state
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : t("An unexpected error occurred."));
     }
   };
 
-  if (templateLoading) {
+  // Edit mode: prefill from the product (docs/WCLoan.md §3.5 products CRUD)
+  const [prefillDone, setPrefillDone] = useState(false);
+  useEffect(() => {
+    if (!isEditMode || !editProduct || prefillDone) return;
+    setPrefillDone(true);
+    reset({
+      name: editProduct.name ?? "",
+      shortName: editProduct.shortName ?? "",
+      description: editProduct.description ?? "",
+      currencyCode: editProduct.currency?.code ?? "USD",
+      digitsAfterDecimal: editProduct.currency?.decimalPlaces ?? 2,
+      inMultiplesOf: editProduct.currency?.inMultiplesOf ?? 1,
+      amortizationType: "EIR",
+      npvDayCount: editProduct.npvDayCount ?? 360,
+      principal: editProduct.principal,
+      periodPaymentRate: editProduct.periodPaymentRate,
+      minPeriodPaymentRate: editProduct.minPeriodPaymentRate,
+      maxPeriodPaymentRate: editProduct.maxPeriodPaymentRate,
+      minPrincipal: editProduct.minPrincipal,
+      maxPrincipal: editProduct.maxPrincipal,
+      repaymentEvery: editProduct.repaymentEvery ?? 30,
+      repaymentFrequencyType:
+        typeof editProduct.repaymentFrequencyType === "string"
+          ? editProduct.repaymentFrequencyType
+          : (editProduct.repaymentFrequencyType?.code ?? "DAYS"),
+      delinquencyBucketId: editProduct.delinquencyBucketId,
+      delinquencyGraceDays: editProduct.delinquencyGraceDays ?? 3,
+      delinquencyStartType:
+        typeof editProduct.delinquencyStartType === "string"
+          ? editProduct.delinquencyStartType
+          : (editProduct.delinquencyStartType?.code ?? "DISBURSEMENT"),
+      accountingRule:
+        typeof editProduct.accountingRule === "string" ? editProduct.accountingRule : "NONE",
+    } as CreateWCLoanProductFormValues);
+  }, [isEditMode, editProduct, prefillDone, reset]);
+
+  if ((templateLoading || (isEditMode && productLoading))) {
     return (
       <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
@@ -120,20 +165,29 @@ const WCLoanProductFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={t("Create Working Capital Loan Product")}
+        title={
+          isEditMode ? t("Edit Working Capital Loan Product") : t("Create Working Capital Loan Product")
+        }
         description={t("Configure revolving credit product terms")}
         actions={
-          <Button variant="outline" onClick={() => navigate("/working-capital-loans/products")}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate(
+                isEditMode ? `/working-capital-loans/products/view/${editProductId}` : "/working-capital-loans/products",
+              )
+            }
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> {t("Back")}
           </Button>
         }
       />
 
-      {createMutation.isError && (
+      {mutation.isError && (
         <ErrorState
-          title={t("Failed to create product")}
-          message={createMutation.error?.message ?? t("An unexpected error occurred.")}
-          onRetry={() => createMutation.reset()}
+          title={isEditMode ? t("Failed to update product") : t("Failed to create product")}
+          message={mutation.error?.message ?? t("An unexpected error occurred.")}
+          onRetry={() => mutation.reset()}
         />
       )}
 
@@ -394,13 +448,21 @@ const WCLoanProductFormPage: FC = () => {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => navigate("/working-capital-loans/products")}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              navigate(
+                isEditMode ? `/working-capital-loans/products/view/${editProductId}` : "/working-capital-loans/products",
+              )
+            }
+          >
             {t("Cancel")}
           </Button>
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {t("Create Product")}
+            {isEditMode ? t("Save Changes") : t("Create Product")}
           </Button>
         </div>
       </form>
