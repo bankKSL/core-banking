@@ -219,6 +219,13 @@ export interface Loan {
   enableInstallmentLevelDelinquency?: boolean;
   loanDocuments?: unknown[];
   notes?: unknown[];
+  currency: {
+    code: string;
+    name: string;
+    decimalPlaces: number;
+    nameCode: string;
+    displayLabel: string;
+  };
 }
 
 /** Repayment schedule block as returned with associations=repaymentSchedule|all */

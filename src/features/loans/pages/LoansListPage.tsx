@@ -109,7 +109,9 @@ const LoansListPage: FC = () => {
     {
       key: "principal",
       header: t("Principal"),
-      cell: (r) => <span className="font-mono text-sm font-semibold">{formatCurrency(r.principal ?? 0)}</span>,
+      cell: (r) => (
+        <span className="font-mono text-sm font-semibold">{formatCurrency(r.principal ?? 0, r.currency.code)}</span>
+      ),
     },
     {
       key: "status",
@@ -161,7 +163,9 @@ const LoansListPage: FC = () => {
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span className="text-sm">{t("Failed to load loans.")} {error?.message ?? t("Please try again.")}</span>
+          <span className="text-sm">
+            {t("Failed to load loans.")} {error?.message ?? t("Please try again.")}
+          </span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             {t("Retry")}
           </Button>
