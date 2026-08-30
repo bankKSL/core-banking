@@ -101,6 +101,8 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
   const [selectedLoanOfficerId, setSelectedLoanOfficerId] = useState<string>("");
   const [assignmentDate, setAssignmentDate] = useState(today());
   const [unassignDate, setUnassignDate] = useState(today());
+  const [rejectedOnDate, setRejectedOnDate] = useState(today());
+  const [withdrawnOnDate, setWithdrawnOnDate] = useState(today());
 
   const { data: loanOfficers = [] } = useQuery({
     queryKey: ["staff", "loanOfficers", loan.officeId],
@@ -191,10 +193,16 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
     if (!confirmCommand) return;
     switch (confirmCommand) {
       case "reject":
-        await rejectMut.mutateAsync({ loanId: loan.id });
+        await rejectMut.mutateAsync({
+          loanId: loan.id,
+          payload: { rejectedOnDate, dateFormat: "yyyy-MM-dd", locale: "en" },
+        });
         break;
       case "withdraw":
-        await withdrawMut.mutateAsync({ loanId: loan.id });
+        await withdrawMut.mutateAsync({
+          loanId: loan.id,
+          payload: { withdrawnOnDate, dateFormat: "yyyy-MM-dd", locale: "en" },
+        });
         break;
       case "undoApproval":
         await undoApprovalMut.mutateAsync(loan.id);
@@ -220,6 +228,8 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
     confirmCommand,
     loan.id,
     noteInput,
+    rejectedOnDate,
+    withdrawnOnDate,
     rejectMut,
     withdrawMut,
     undoApprovalMut,
@@ -288,7 +298,10 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setConfirmCommand("reject")}
+              onClick={() => {
+                setRejectedOnDate(today());
+                setConfirmCommand("reject");
+              }}
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
               <XCircle className="mr-1 h-4 w-4" />
@@ -297,7 +310,10 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setConfirmCommand("withdraw")}
+              onClick={() => {
+                setWithdrawnOnDate(today());
+                setConfirmCommand("withdraw");
+              }}
               className="text-amber-600 border-amber-200 hover:bg-amber-50"
             >
               <Ban className="mr-1 h-4 w-4" />
@@ -607,26 +623,78 @@ const LoanCommands: FC<LoanCommandsProps> = ({ loan, onSuccess }) => {
       </Dialog>
 
       {/* Confirm dialogs */}
-      <ConfirmDialog
-        open={confirmCommand === "reject"}
-        onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title={t("Reject Loan")}
-        description={`${t("Reject loan")} ${loan.accountNo ?? `#${loan.id}`}?`}
-        confirmLabel={t("Reject")}
-        variant="destructive"
-        loading={rejectMut.isPending}
-        onConfirm={handleConfirmCommand}
-      />
-      <ConfirmDialog
-        open={confirmCommand === "withdraw"}
-        onOpenChange={(open) => !open && setConfirmCommand(null)}
-        title={t("Withdraw Loan")}
-        description={`${t("Withdraw loan application")} ${loan.accountNo ?? `#${loan.id}`}?`}
-        confirmLabel={t("Withdraw")}
-        variant="destructive"
-        loading={withdrawMut.isPending}
-        onConfirm={handleConfirmCommand}
-      />
+      <Dialog open={confirmCommand === "reject"} onOpenChange={(open) => !open && setConfirmCommand(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Reject Loan")}</DialogTitle>
+            <DialogDescription>{`${t("Reject loan")} ${loan.accountNo ?? `#${loan.id}`}?`}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="rejectedOnDate">
+                {t("Rejected On Date")}
+              </label>
+              <Input
+                id="rejectedOnDate"
+                type="date"
+                value={rejectedOnDate}
+                onChange={(e) => setRejectedOnDate(e.target.value)}
+                disabled={rejectMut.isPending}
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setConfirmCommand(null)} disabled={rejectMut.isPending}>
+                {t("Cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmCommand}
+                disabled={rejectMut.isPending || !rejectedOnDate}
+              >
+                {rejectMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Reject")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={confirmCommand === "withdraw"} onOpenChange={(open) => !open && setConfirmCommand(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Withdraw Loan")}</DialogTitle>
+            <DialogDescription>{`${t("Withdraw loan application")} ${loan.accountNo ?? `#${loan.id}`}?`}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="block text-sm font-medium" htmlFor="withdrawnOnDate">
+                {t("Withdrawn On Date")}
+              </label>
+              <Input
+                id="withdrawnOnDate"
+                type="date"
+                value={withdrawnOnDate}
+                onChange={(e) => setWithdrawnOnDate(e.target.value)}
+                disabled={withdrawMut.isPending}
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setConfirmCommand(null)} disabled={withdrawMut.isPending}>
+                {t("Cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmCommand}
+                disabled={withdrawMut.isPending || !withdrawnOnDate}
+              >
+                {withdrawMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("Withdraw")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog
         open={confirmCommand === "undoApproval"}
         onOpenChange={(open) => !open && setConfirmCommand(null)}

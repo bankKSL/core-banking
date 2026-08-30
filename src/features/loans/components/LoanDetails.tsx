@@ -91,8 +91,13 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           />
           <InfoRow
             icon={<Percent className="h-4 w-4 text-blue-500" />}
-            label={t("Interest Rate")}
-            value={`${loan.annualInterestRate ?? loan.interestRatePerPeriod ?? 0}%`}
+            label={t("Interest Rate Per Period")}
+            value={`${loan.interestRatePerPeriod ?? loan.interestRatePerPeriod ?? 0}%`}
+          />
+          <InfoRow
+            icon={<Percent className="h-4 w-4 text-blue-500" />}
+            label={t("Annual Interest Rate")}
+            value={`${loan.annualInterestRate ?? loan.annualInterestRate ?? 0}%`}
           />
           <InfoRow
             icon={<Clock className="h-4 w-4" />}
