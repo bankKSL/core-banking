@@ -41,8 +41,12 @@ export const BUYDOWN_INCOME_TYPE_FEE = "FEE";
 export const BUYDOWN_INCOME_TYPE_INTEREST = "INTEREST";
 
 /** Canonical option lists (only these values are currently supported) */
-const BUYDOWN_CALCULATION_TYPE_OPTIONS = [{ id: BUYDOWN_CALCULATION_TYPE_FLAT, code: BUYDOWN_CALCULATION_TYPE_FLAT, value: "Flat" }];
-const BUYDOWN_STRATEGY_OPTIONS = [{ id: BUYDOWN_STRATEGY_EQUAL_AMORTIZATION, code: BUYDOWN_STRATEGY_EQUAL_AMORTIZATION, value: "Equal Amortization" }];
+const BUYDOWN_CALCULATION_TYPE_OPTIONS = [
+  { id: BUYDOWN_CALCULATION_TYPE_FLAT, code: BUYDOWN_CALCULATION_TYPE_FLAT, value: "Flat" },
+];
+const BUYDOWN_STRATEGY_OPTIONS = [
+  { id: BUYDOWN_STRATEGY_EQUAL_AMORTIZATION, code: BUYDOWN_STRATEGY_EQUAL_AMORTIZATION, value: "Equal Amortization" },
+];
 const BUYDOWN_INCOME_TYPE_OPTIONS = [
   { id: BUYDOWN_INCOME_TYPE_FEE, code: BUYDOWN_INCOME_TYPE_FEE, value: "Fee" },
   { id: BUYDOWN_INCOME_TYPE_INTEREST, code: BUYDOWN_INCOME_TYPE_INTEREST, value: "Interest" },
@@ -811,7 +815,7 @@ const LoanProductFormPage: React.FC = () => {
             <CardTitle className="text-base">{t("Loan Terms")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">{t("Principal")} *</label>
               <Input
                 type="number"
@@ -823,29 +827,6 @@ const LoanProductFormPage: React.FC = () => {
                   },
                 })}
                 error={errors.principal?.message}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Interest Rate (%)")} *</label>
-              <Input
-                type="number"
-                step="0.01"
-                {...register("interestRatePerPeriod")}
-                error={errors.interestRatePerPeriod?.message}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Min Principal")}</label>
-              <Input
-                type="number"
-                step="0.01"
-                {...register("minPrincipal", {
-                  onChange: () => {
-                    trigger("principal");
-                    trigger("maxPrincipal");
-                  },
-                })}
-                error={errors.minPrincipal?.message}
               />
             </div>
             <div className="space-y-1.5">
@@ -863,6 +844,20 @@ const LoanProductFormPage: React.FC = () => {
               />
             </div>
             <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Min Principal")}</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("minPrincipal", {
+                  onChange: () => {
+                    trigger("principal");
+                    trigger("maxPrincipal");
+                  },
+                })}
+                error={errors.minPrincipal?.message}
+              />
+            </div>
+            <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">{t("Number of Repayments")} *</label>
               <Input
                 type="number"
@@ -874,10 +869,6 @@ const LoanProductFormPage: React.FC = () => {
                 })}
                 error={errors.numberOfRepayments?.message}
               />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Repayment Every")} *</label>
-              <Input type="number" {...register("repaymentEvery")} error={errors.repaymentEvery?.message} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Min Number of Repayments")}</label>
@@ -905,15 +896,10 @@ const LoanProductFormPage: React.FC = () => {
                 error={errors.maxNumberOfRepayments?.message}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* ── Repayment & Interest Settings ── */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t("Repayment & Interest Settings")}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Repayment Every")} *</label>
+              <Input type="number" {...register("repaymentEvery")} error={errors.repaymentEvery?.message} />
+            </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Repayment Frequency")} *</label>
               <Select
@@ -931,6 +917,15 @@ const LoanProductFormPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Interest Rate (%)")} *</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("interestRatePerPeriod")}
+                error={errors.interestRatePerPeriod?.message}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Interest Rate Frequency")}</label>
