@@ -288,6 +288,14 @@ const WCLoanViewPage: FC = () => {
   };
 
   // Unified breach/delinquency action dispatch (docs/WCLoan.md §4.18–4.19)
+  const openMonitor = (kind: "breach" | "delinquency", action: WCBreachDelinquencyAction) => {
+    setMonitorStartDate(today());
+    setMonitorEndDate("");
+    setRescheduleMinPayment("");
+    setRescheduleFrequency("");
+    setMonitorAction({ kind, action });
+  };
+
   const handleMonitorAction = () => {
     if (!monitorAction) return;
     const { kind, action } = monitorAction;
@@ -310,10 +318,8 @@ const WCLoanViewPage: FC = () => {
       kind === "breach"
         ? () => breachActionMut.mutateAsync({ loanId: Number(id), payload })
         : () => delinqActionMut.mutateAsync({ loanId: Number(id), payload });
-    return runMutation(
-      mutate,
-      `${ACTION_LABELS[action]} — ${kind === "breach" ? t("breach") : t("delinquency")}`,
-      () => setMonitorAction(null),
+    return runMutation(mutate, `${ACTION_LABELS[action]} — ${kind === "breach" ? t("breach") : t("delinquency")}`, () =>
+      setMonitorAction(null),
     );
   };
 
@@ -403,7 +409,12 @@ const WCLoanViewPage: FC = () => {
         transitionMut.mutateAsync({
           loanId: Number(id),
           command: "reject",
-          payload: { rejectedOnDate: rejectDate, note: rejectNote || undefined, dateFormat: "yyyy-MM-dd", locale: "en" },
+          payload: {
+            rejectedOnDate: rejectDate,
+            note: rejectNote || undefined,
+            dateFormat: "yyyy-MM-dd",
+            locale: "en",
+          },
         }),
       t("Loan rejected"),
       () => setRejectOpen(false),
@@ -559,6 +570,7 @@ const WCLoanViewPage: FC = () => {
               variant="outline"
               size="sm"
               onClick={() => {
+                setApproveDate(today());
                 setApproveAmount(String(loan.principal));
                 setApproveOpen(true);
               }}
@@ -566,14 +578,19 @@ const WCLoanViewPage: FC = () => {
             >
               <CheckCircle2 className="mr-1 h-4 w-4" /> {t("Approve")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setRejectOpen(true)} className="text-red-600 border-red-200 hover:bg-red-50">
-              <XCircle className="mr-1 h-4 w-4" /> {t("Reject")}
-            </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/working-capital-loans/edit/${loan.id}`)}
+              onClick={() => {
+                setRejectDate(today());
+                setRejectNote("");
+                setRejectOpen(true);
+              }}
+              className="text-red-600 border-red-200 hover:bg-red-50"
             >
+              <XCircle className="mr-1 h-4 w-4" /> {t("Reject")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate(`/working-capital-loans/edit/${loan.id}`)}>
               <Pencil className="mr-1 h-4 w-4" /> {t("Edit")}
             </Button>
             <Button
@@ -592,6 +609,7 @@ const WCLoanViewPage: FC = () => {
               variant="outline"
               size="sm"
               onClick={() => {
+                setDisburseDate(today());
                 setDisburseAmount(String(loan.approvedPrincipal ?? loan.principal));
                 setDisburseOpen(true);
               }}
@@ -599,7 +617,14 @@ const WCLoanViewPage: FC = () => {
             >
               <DollarSign className="mr-1 h-4 w-4" /> {t("Disburse")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setUndoApprovalOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setUndoNote("");
+                setUndoApprovalOpen(true);
+              }}
+            >
               <Undo2 className="mr-1 h-4 w-4" /> {t("Undo Approval")}
             </Button>
           </>
@@ -609,62 +634,125 @@ const WCLoanViewPage: FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setRepayOpen(true)}
+              onClick={() => {
+                setRepayDate(today());
+                setRepayAmount("");
+                setRepayOpen(true);
+              }}
               className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
             >
               <DollarSign className="mr-1 h-4 w-4" /> {t("Repayment")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setGoodwillOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTxnDate(today());
+                setTxnAmount("");
+                setGoodwillOpen(true);
+              }}
+            >
               <HandCoins className="mr-1 h-4 w-4" /> {t("Goodwill Credit")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setPayoutRefundOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTxnDate(today());
+                setTxnAmount("");
+                setPayoutRefundOpen(true);
+              }}
+            >
               <Landmark className="mr-1 h-4 w-4" /> {t("Payout Refund")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setCreditRefundOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTxnDate(today());
+                setTxnAmount("");
+                setCreditRefundOpen(true);
+              }}
+            >
               <RotateCcw className="mr-1 h-4 w-4" /> {t("Credit Balance Refund")}
             </Button>
             {!loan.chargedOff && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setChargeOffOpen(true)}
+                onClick={() => {
+                  setTxnDate(today());
+                  setTxnAmount("");
+                  setChargeOffReasonId("");
+                  setChargeOffOpen(true);
+                }}
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >
                 <ReceiptText className="mr-1 h-4 w-4" /> {t("Charge-Off")}
               </Button>
             )}
             {loan.chargedOff && (
-              <Button variant="outline" size="sm" onClick={() => setUndoChargeOffOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setUndoReversalExternalId("");
+                  setUndoNote("");
+                  setUndoChargeOffOpen(true);
+                }}
+              >
                 <RotateCcw className="mr-1 h-4 w-4" /> {t("Undo Charge-Off")}
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => setDiscountFeeOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTxnDate(today());
+                setTxnAmount("");
+                setDiscountFeeOpen(true);
+              }}
+            >
               <Percent className="mr-1 h-4 w-4" /> {t("Discount Fee")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setDiscountFeeAdjustOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setTxnDate(today());
+                setTxnAmount("");
+                setDiscountFeeAdjustOpen(true);
+              }}
+            >
               <Percent className="mr-1 h-4 w-4" /> {t("Adjust Discount Fee")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setUpdateDiscountOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setDiscountAmountInput("");
+                setUpdateDiscountOpen(true);
+              }}
+            >
               <Percent className="mr-1 h-4 w-4" /> {t("Update Discount")}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMonitorAction({ kind: "delinquency", action: "pause" })}
-            >
+            <Button variant="outline" size="sm" onClick={() => openMonitor("delinquency", "pause")}>
               <Pause className="mr-1 h-4 w-4" /> {t("Pause Delinquency")}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMonitorAction({ kind: "delinquency", action: "reschedule" })}
-            >
+            <Button variant="outline" size="sm" onClick={() => openMonitor("delinquency", "reschedule")}>
               <CalendarClock className="mr-1 h-4 w-4" /> {t("Reschedule")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setRateChangeOpen(true)}>
               <TrendingUp className="mr-1 h-4 w-4" /> {t("Change Rate")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setUndoDisbursalOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setUndoNote("");
+                setUndoDisbursalOpen(true);
+              }}
+            >
               <Undo2 className="mr-1 h-4 w-4" /> {t("Undo Disbursal")}
             </Button>
           </>
@@ -716,9 +804,9 @@ const WCLoanViewPage: FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="details">{t("General")}</TabsTrigger>
-          <TabsTrigger value="amortization">
+          {/* <TabsTrigger value="amortization">
             {t("Amortization")} ({amortSchedule.length})
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger value="delinquency">
             {t("Delinquency Schedule")} ({delinqSchedule.length})
           </TabsTrigger>
@@ -793,7 +881,7 @@ const WCLoanViewPage: FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="amortization" className="mt-4">
+        {/* <TabsContent value="amortization" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t("EIR Amortization Schedule")}</CardTitle>
@@ -837,17 +925,12 @@ const WCLoanViewPage: FC = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="delinquency" className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             {(["pause", "resume", "reschedule", "reset", "undo_reset", "disable", "enable"] as const).map((a) => (
-              <Button
-                key={a}
-                variant="outline"
-                size="sm"
-                onClick={() => setMonitorAction({ kind: "delinquency", action: a })}
-              >
+              <Button key={a} variant="outline" size="sm" onClick={() => openMonitor("delinquency", a)}>
                 {ACTION_LABELS[a]}
               </Button>
             ))}
@@ -968,7 +1051,15 @@ const WCLoanViewPage: FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">{t("Loan Charges")}</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => setAddChargeOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setAddChargeId("");
+                  setAddChargeAmount("");
+                  setAddChargeOpen(true);
+                }}
+              >
                 <Plus className="mr-1 h-4 w-4" /> {t("Add Charge")}
               </Button>
             </CardHeader>
@@ -994,7 +1085,9 @@ const WCLoanViewPage: FC = () => {
                           <TableCell>{charge.name}</TableCell>
                           <TableCell>{formatDate(charge.dueDate)}</TableCell>
                           <TableCell className="font-mono">{formatMoney(charge.amount, currencyCode)}</TableCell>
-                          <TableCell className="font-mono">{formatMoney(charge.amountPaid ?? 0, currencyCode)}</TableCell>
+                          <TableCell className="font-mono">
+                            {formatMoney(charge.amountPaid ?? 0, currencyCode)}
+                          </TableCell>
                           <TableCell className="font-mono">
                             {formatMoney(charge.amountOutstanding, currencyCode)}
                           </TableCell>
@@ -1025,16 +1118,20 @@ const WCLoanViewPage: FC = () => {
         <TabsContent value="breach" className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             {(["pause", "resume", "reschedule", "reset", "undo_reset", "disable", "enable"] as const).map((a) => (
-              <Button
-                key={a}
-                variant="outline"
-                size="sm"
-                onClick={() => setMonitorAction({ kind: "breach", action: a })}
-              >
+              <Button key={a} variant="outline" size="sm" onClick={() => openMonitor("breach", a)}>
                 {ACTION_LABELS[a]}
               </Button>
             ))}
-            <Button variant="outline" size="sm" onClick={() => setNearBreachOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setNearBreachThreshold("");
+                setNearBreachFrequency("");
+                setNearBreachFrequencyType("DAYS");
+                setNearBreachOpen(true);
+              }}
+            >
               {t("Near-Breach Reschedule")}
             </Button>
           </div>
@@ -1064,7 +1161,9 @@ const WCLoanViewPage: FC = () => {
                           <TableCell>{period.periodNumber}</TableCell>
                           <TableCell>{formatDate(period.fromDate)}</TableCell>
                           <TableCell>{formatDate(period.toDate)}</TableCell>
-                          <TableCell className="font-mono">{formatMoney(period.minPaymentAmount, currencyCode)}</TableCell>
+                          <TableCell className="font-mono">
+                            {formatMoney(period.minPaymentAmount, currencyCode)}
+                          </TableCell>
                           <TableCell className="font-mono">
                             {formatMoney(period.outstandingAmount, currencyCode)}
                           </TableCell>
@@ -1338,7 +1437,12 @@ const WCLoanViewPage: FC = () => {
               <Button variant="outline" onClick={() => setUndoApprovalOpen(false)} disabled={isMutating}>
                 {t("Cancel")}
               </Button>
-              <Button onClick={() => { handleUndoApproval(); }} disabled={isMutating}>
+              <Button
+                onClick={() => {
+                  handleUndoApproval();
+                }}
+                disabled={isMutating}
+              >
                 {transitionMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t("Undo Approval")}
               </Button>
@@ -1351,9 +1455,7 @@ const WCLoanViewPage: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Undo Disbursal")}</DialogTitle>
-            <DialogDescription>
-              {t("Blocked once repayment-like transactions exist on the loan.")}
-            </DialogDescription>
+            <DialogDescription>{t("Blocked once repayment-like transactions exist on the loan.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -1364,7 +1466,12 @@ const WCLoanViewPage: FC = () => {
               <Button variant="outline" onClick={() => setUndoDisbursalOpen(false)} disabled={isMutating}>
                 {t("Cancel")}
               </Button>
-              <Button onClick={() => { handleUndoDisbursal(); }} disabled={isMutating}>
+              <Button
+                onClick={() => {
+                  handleUndoDisbursal();
+                }}
+                disabled={isMutating}
+              >
                 {transitionMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t("Undo Disbursal")}
               </Button>
@@ -1401,7 +1508,9 @@ const WCLoanViewPage: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Update Discount")}</DialogTitle>
-            <DialogDescription>{t("Allowed once after disbursement, on the disbursement date only.")}</DialogDescription>
+            <DialogDescription>
+              {t("Allowed once after disbursement, on the disbursement date only.")}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -1440,11 +1549,7 @@ const WCLoanViewPage: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {goodwillOpen
-                ? t("Goodwill Credit")
-                : payoutRefundOpen
-                  ? t("Payout Refund")
-                  : t("Credit Balance Refund")}
+              {goodwillOpen ? t("Goodwill Credit") : payoutRefundOpen ? t("Payout Refund") : t("Credit Balance Refund")}
             </DialogTitle>
             <DialogDescription>
               {creditRefundOpen
@@ -1653,9 +1758,7 @@ const WCLoanViewPage: FC = () => {
                   />
                 </div>
                 {!rescheduleMinPayment && !rescheduleFrequency && (
-                  <p className="text-sm text-red-500">
-                    {t("Provide a minimum payment or frequency to reschedule.")}
-                  </p>
+                  <p className="text-sm text-red-500">{t("Provide a minimum payment or frequency to reschedule.")}</p>
                 )}
               </>
             )}
@@ -1667,8 +1770,7 @@ const WCLoanViewPage: FC = () => {
                 onClick={handleMonitorAction}
                 disabled={
                   isMutating ||
-                  (monitorAction?.action === "pause" &&
-                    (!monitorEndDate || monitorEndDate <= monitorStartDate)) ||
+                  (monitorAction?.action === "pause" && (!monitorEndDate || monitorEndDate <= monitorStartDate)) ||
                   (monitorAction?.action === "reschedule" && !rescheduleMinPayment && !rescheduleFrequency)
                 }
               >
@@ -1757,21 +1859,26 @@ const WCLoanViewPage: FC = () => {
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Transaction Date")}</label>
-              <Input
-                type="date"
-                value={txnDate}
-                onChange={(e) => setTxnDate(e.target.value)}
-              />
+              <Input type="date" value={txnDate} onChange={(e) => setTxnDate(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Amount")}</label>
-              <Input type="number" step="0.01" min="0" value={txnAmount} onChange={(e) => setTxnAmount(e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={txnAmount}
+                onChange={(e) => setTxnAmount(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDiscountFeeOpen(false)} disabled={isMutating}>
                 {t("Cancel")}
               </Button>
-              <Button onClick={() => handleDiscountFee("discountFee", () => setDiscountFeeOpen(false))} disabled={isMutating}>
+              <Button
+                onClick={() => handleDiscountFee("discountFee", () => setDiscountFeeOpen(false))}
+                disabled={isMutating}
+              >
                 {txnCommandMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t("Save")}
               </Button>
@@ -1795,7 +1902,13 @@ const WCLoanViewPage: FC = () => {
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Amount")} *</label>
-              <Input type="number" step="0.01" min="0.01" value={txnAmount} onChange={(e) => setTxnAmount(e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={txnAmount}
+                onChange={(e) => setTxnAmount(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDiscountFeeAdjustOpen(false)} disabled={isMutating}>
@@ -1817,9 +1930,7 @@ const WCLoanViewPage: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Undo Charge-Off")}</DialogTitle>
-            <DialogDescription>
-              {t("Only possible while charge-off is the last user transaction.")}
-            </DialogDescription>
+            <DialogDescription>{t("Only possible while charge-off is the last user transaction.")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">

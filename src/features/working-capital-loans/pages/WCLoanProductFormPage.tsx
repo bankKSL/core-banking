@@ -61,8 +61,8 @@ const WCLoanProductFormPage: FC = () => {
       periodPaymentRate: undefined,
       minPeriodPaymentRate: undefined,
       maxPeriodPaymentRate: undefined,
-      repaymentEvery: 30,
-      repaymentFrequencyType: "DAYS",
+      repaymentEvery: 1,
+      repaymentFrequencyType: "MONTHS",
       delinquencyBucketId: undefined,
       delinquencyGraceDays: 3,
       delinquencyStartType: "DISBURSEMENT",
@@ -142,12 +142,11 @@ const WCLoanProductFormPage: FC = () => {
         typeof editProduct.delinquencyStartType === "string"
           ? editProduct.delinquencyStartType
           : (editProduct.delinquencyStartType?.code ?? "DISBURSEMENT"),
-      accountingRule:
-        typeof editProduct.accountingRule === "string" ? editProduct.accountingRule : "NONE",
+      accountingRule: typeof editProduct.accountingRule === "string" ? editProduct.accountingRule : "NONE",
     } as CreateWCLoanProductFormValues);
   }, [isEditMode, editProduct, prefillDone, reset]);
 
-  if ((templateLoading || (isEditMode && productLoading))) {
+  if (templateLoading || (isEditMode && productLoading)) {
     return (
       <div className="max-w-6xl m-auto space-y-6">
         <Skeleton className="h-10 w-64" />
@@ -165,16 +164,16 @@ const WCLoanProductFormPage: FC = () => {
   return (
     <div className="max-w-6xl m-auto space-y-6">
       <PageHeader
-        title={
-          isEditMode ? t("Edit Working Capital Loan Product") : t("Create Working Capital Loan Product")
-        }
+        title={isEditMode ? t("Edit Working Capital Loan Product") : t("Create Working Capital Loan Product")}
         description={t("Configure revolving credit product terms")}
         actions={
           <Button
             variant="outline"
             onClick={() =>
               navigate(
-                isEditMode ? `/working-capital-loans/products/view/${editProductId}` : "/working-capital-loans/products",
+                isEditMode
+                  ? `/working-capital-loans/products/view/${editProductId}`
+                  : "/working-capital-loans/products",
               )
             }
           >
@@ -256,7 +255,7 @@ const WCLoanProductFormPage: FC = () => {
                 error={errors.npvDayCount?.message}
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">{t("Period Payment Rate (%)")} *</label>
               <Input
                 type="number"
@@ -306,7 +305,7 @@ const WCLoanProductFormPage: FC = () => {
             <CardTitle className="text-base">{t("Principal & Repayment")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 col-span-2">
               <label className="block text-sm font-medium">{t("Principal")} *</label>
               <Input
                 type="number"
@@ -453,7 +452,9 @@ const WCLoanProductFormPage: FC = () => {
             variant="outline"
             onClick={() =>
               navigate(
-                isEditMode ? `/working-capital-loans/products/view/${editProductId}` : "/working-capital-loans/products",
+                isEditMode
+                  ? `/working-capital-loans/products/view/${editProductId}`
+                  : "/working-capital-loans/products",
               )
             }
           >
