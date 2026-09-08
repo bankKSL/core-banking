@@ -191,6 +191,7 @@ export type CreateLoanCollateralFormValues = z.infer<typeof createLoanCollateral
 export const createLoanGuarantorSchema = z.object({
   clientId: z.number({ message: "Guarantor client is required" }).int().positive(),
   amount: z.number({ message: "Amount is required" }).positive("Amount must be greater than 0"),
+  guarantorTypeId: z.number({ message: "Guarantor type is required" }).int().positive(),
 });
 export type CreateLoanGuarantorFormValues = z.infer<typeof createLoanGuarantorSchema>;
 

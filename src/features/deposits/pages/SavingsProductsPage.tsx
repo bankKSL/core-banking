@@ -12,8 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSavingsProducts } from "@/features/deposits";
 import type { SavingsProduct } from "@/features/deposits";
 
-const formatCurrency = (n: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+const formatCurrency = (n: number, code = "USD") =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: 0 }).format(n);
 
 const SavingsProductsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -88,7 +88,9 @@ const SavingsProductsPage: React.FC = () => {
         />
         <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           <AlertTriangle className="h-5 w-5 shrink-0" />
-          <span className="text-sm">{t("Failed to load savings products.")} {error?.message ?? t("Please try again.")}</span>
+          <span className="text-sm">
+            {t("Failed to load savings products.")} {error?.message ?? t("Please try again.")}
+          </span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             {t("Retry")}
           </Button>
@@ -99,15 +101,15 @@ const SavingsProductsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-        <PageHeader
-          title={t("Savings Products")}
-          description={t("Manage savings product definitions")}
-          actions={
-            <Button onClick={() => navigate("/deposits/products/new")} className="bg-[#D32F2F] hover:bg-red-700">
-              <Plus className="mr-2 h-4 w-4" /> {t("New Product")}
-            </Button>
-          }
-        />
+      <PageHeader
+        title={t("Savings Products")}
+        description={t("Manage savings product definitions")}
+        actions={
+          <Button onClick={() => navigate("/deposits/products/new")} className="bg-[#D32F2F] hover:bg-red-700">
+            <Plus className="mr-2 h-4 w-4" /> {t("New Product")}
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -119,7 +121,7 @@ const SavingsProductsPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard title={t("Total Products")} value={stats.total} icon={Building2} />
           <StatCard title={t("Avg Interest Rate")} value={`${stats.avgRate.toFixed(2)}%`} variant="success" />
-          <StatCard title={t("Currencies")} value={stats.uniqueCurrencies} icon={DollarSign} />
+          <StatCard title={t("Currencies")} value={stats.uniqueCurrencies} />
           <StatCard title={t("Min Opening Balance")} value={formatCurrency(stats.totalMinBalance)} variant="warning" />
         </div>
       )}

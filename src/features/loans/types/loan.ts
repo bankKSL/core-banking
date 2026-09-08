@@ -508,7 +508,7 @@ export interface LoanCreateRequest {
   maxOutstandingLoanBalance?: number;
   charges?: Array<{ chargeId: number; amount: number; dueDate?: string }>;
   collateral?: Array<{ collateralTypeId: number; value: number; description?: string }>;
-  guarantors?: Array<{ clientId: number; amount: number; guarantorTypeId?: number }>;
+  guarantors?: Array<{ clientId: number; amount: number; guarantorTypeId: number }>;
   originators?: LoanApplicationOriginator[];
   disbursementData?: Array<{
     expectedDisbursementDate: string;
@@ -839,7 +839,7 @@ export interface LoanGuarantor {
 export interface LoanGuarantorCreateRequest {
   clientId: number;
   amount: number;
-  guarantorTypeId?: number;
+  guarantorTypeId: number;
   dateFormat?: string;
   locale?: string;
 }

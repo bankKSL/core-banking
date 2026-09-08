@@ -51,7 +51,9 @@ const LoanTable: FC<LoanTableProps> = ({ data, loading, onRowClick }) => {
     {
       key: "principal",
       header: t("Principal"),
-      accessorFn: (row) => <span className="font-mono text-sm">{formatCurrency(row.principal ?? 0)}</span>,
+      accessorFn: (row) => (
+        <span className="font-mono text-sm">{formatCurrency(row.principal ?? 0, row.currency.code)}</span>
+      ),
       sortable: true,
     },
     {

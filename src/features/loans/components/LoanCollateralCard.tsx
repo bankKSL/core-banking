@@ -116,7 +116,9 @@ const LoanCollateralCard: FC<LoanCollateralCardProps> = ({ loanId, currencyCode 
                   <TableRow key={item.id}>
                     <TableCell className="text-sm font-medium">{typeName(item)}</TableCell>
                     <TableCell className="text-sm text-gray-500">{item.description || "—"}</TableCell>
-                    <TableCell className="text-right font-mono text-sm">{formatMoney(item.value, currencyCode)}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">
+                      {formatMoney(item.value, currencyCode)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>

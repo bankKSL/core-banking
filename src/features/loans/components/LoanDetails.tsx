@@ -87,7 +87,7 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
           <InfoRow
             icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
             label={t("Principal")}
-            value={formatCurrency(loan.principal ?? 0)}
+            value={formatCurrency(loan.principal ?? 0, loan.currency?.code)}
           />
           <InfoRow
             icon={<Percent className="h-4 w-4 text-blue-500" />}
@@ -133,27 +133,27 @@ const LoanDetails: FC<LoanDetailsProps> = ({ loan }) => {
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
               label={t("Disbursed")}
-              value={formatCurrency(summary.principalDisbursed ?? 0)}
+              value={formatCurrency(summary.principalDisbursed ?? 0, loan.currency?.code)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-blue-500" />}
               label={t("Principal Paid")}
-              value={formatCurrency(summary.principalPaid ?? 0)}
+              value={formatCurrency(summary.principalPaid ?? 0, loan.currency?.code)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-blue-500" />}
               label={t("Interest Paid")}
-              value={formatCurrency(summary.interestPaid ?? 0)}
+              value={formatCurrency(summary.interestPaid ?? 0, loan.currency?.code)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-red-500" />}
               label={t("Outstanding")}
-              value={formatCurrency(summary.totalOutstanding ?? 0)}
+              value={formatCurrency(summary.totalOutstanding ?? 0, loan.currency?.code)}
             />
             <InfoRow
               icon={<DollarSign className="h-4 w-4 text-amber-500" />}
               label={t("Overdue")}
-              value={formatCurrency(summary.totalOverdue ?? 0)}
+              value={formatCurrency(summary.totalOverdue ?? 0, loan.currency?.code)}
             />
           </CardContent>
         </Card>

@@ -7,12 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { ClientSearch } from "@/components/shared/ClientSearch";
 import type { LoanGuarantor } from "../types/loan";
 import { createLoanGuarantorSchema, type CreateLoanGuarantorFormValues } from "../schemas/loan.schema";
 import { useLoanGuarantors, useAddLoanGuarantor, useUpdateLoanGuarantor, useDeleteLoanGuarantor } from "../hooks/useLoanGuarantors";
+import { useGuarantorTemplate } from "../hooks/useLoanExtras";
 import { formatMoney } from "../utils/format";
 
 interface LoanGuarantorsCardProps {
@@ -29,6 +31,7 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
   const addMutation = useAddLoanGuarantor();
   const updateMutation = useUpdateLoanGuarantor();
   const deleteMutation = useDeleteLoanGuarantor();
+  const guarantorTemplateQuery = useGuarantorTemplate(loanId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<LoanGuarantor | null>(null);
@@ -44,13 +47,14 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
     formState: { errors },
   } = useForm<CreateLoanGuarantorFormValues>({
     resolver: zodResolver(createLoanGuarantorSchema),
-    defaultValues: { clientId: 0, amount: 0 },
+    defaultValues: { clientId: 0, amount: 0, guarantorTypeId: 0 },
   });
 
   const clientIdValue = watch("clientId");
+  const guarantorTypeOptions = guarantorTemplateQuery.data?.guarantorTypeOptions ?? [];
 
   const openCreate = () => {
-    reset({ clientId: 0, amount: 0 });
+    reset({ clientId: 0, amount: 0, guarantorTypeId: 0 });
     setDialogOpen(true);
   };
 
@@ -130,6 +134,28 @@ const LoanGuarantorsCard: FC<LoanGuarantorsCardProps> = ({ loanId, currencyCode 
               disabled={isMutating}
               error={errors.clientId?.message}
             />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Guarantor Type")} *</label>
+              <Select
+                disabled={isMutating}
+                value={watch("guarantorTypeId") ? String(watch("guarantorTypeId")) : undefined}
+                onValueChange={(v) => setValue("guarantorTypeId", Number(v), { shouldValidate: true })}
+              >
+                <SelectTrigger className={errors.guarantorTypeId ? "border-red-500" : ""}>
+                  <SelectValue placeholder={t("Select Guarantor Type")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {guarantorTypeOptions.map((opt) => (
+                    <SelectItem key={opt.id} value={String(opt.id)}>
+                      {opt.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.guarantorTypeId?.message && (
+                <p className="text-sm text-red-500">{errors.guarantorTypeId.message}</p>
+              )}
+            </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Guaranteed Amount")} *</label>
               <Input

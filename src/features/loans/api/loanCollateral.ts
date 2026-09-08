@@ -1,5 +1,10 @@
 import client from "@/api/client";
-import type { LoanCollateral, LoanCollateralTemplate, LoanCollateralCreateRequest, LoanCommandResponse } from "../types/loan";
+import type {
+  LoanCollateral,
+  LoanCollateralTemplate,
+  LoanCollateralCreateRequest,
+  LoanCommandResponse,
+} from "../types/loan";
 
 // ─── Loan Collateral — /loans/{loanId}/collaterals (doc §7.28) ──
 
