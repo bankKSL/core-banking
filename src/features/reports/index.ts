@@ -2,8 +2,10 @@ export type {
   Report,
   ReportParameter,
   ReportTemplate,
-  RunReportResult,
+  RunReportData,
   AdhocQuery,
+  SelectOption,
+  ColumnHeader,
 } from "./api/reports";
 
 export {
@@ -13,7 +15,13 @@ export {
   createReport,
   updateReport,
   deleteReport,
-  runReport,
+  fetchReportParams,
+  fetchSelectOptions,
+  runTableReport,
+  runChartReport,
+  runPentahoReport,
+  runBirtReport,
+  formatUserResponse,
   fetchAdhocQueries,
   fetchAdhocQuery,
   createAdhocQuery,
@@ -27,10 +35,15 @@ export {
   useReports,
   useReport,
   useReportTemplate,
+  useReportParams,
+  useSelectOptions,
   useCreateReport,
   useUpdateReport,
   useDeleteReport,
-  useRunReport,
+  useRunTableReport,
+  useRunChartReport,
+  useRunPentahoReport,
+  useRunBirtReport,
   useAdhocQueries,
   useAdhocQuery,
   useCreateAdhocQuery,
@@ -38,4 +51,8 @@ export {
   useDeleteAdhocQuery,
 } from "./hooks/useReports";
 
-export { ReportRunDialog } from "./pages/ReportRunDialog";
+export { TableAndSms } from "./components/TableAndSms";
+export { ChartOutput } from "./components/ChartOutput";
+export { PentahoOutput } from "./components/PentahoOutput";
+export { BirtOutput } from "./components/BirtOutput";
+export { exportToCsv, exportToXls, sanitizeCsvValue } from "./utils/export.utils";

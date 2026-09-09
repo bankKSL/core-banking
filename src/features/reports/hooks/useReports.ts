@@ -6,7 +6,12 @@ import {
   createReport,
   updateReport,
   deleteReport,
-  runReport,
+  fetchReportParams,
+  fetchSelectOptions,
+  runTableReport,
+  runChartReport,
+  runPentahoReport,
+  runBirtReport,
   fetchAdhocQueries,
   fetchAdhocQuery,
   createAdhocQuery,
@@ -19,6 +24,7 @@ export const reportKeys = {
   list: () => [...reportKeys.all, "list"] as const,
   detail: (id: number) => [...reportKeys.all, "detail", id] as const,
   template: () => [...reportKeys.all, "template"] as const,
+  params: (name: string) => [...reportKeys.all, "params", name] as const,
 };
 
 export const adhocQueryKeys = {
@@ -47,6 +53,22 @@ export function useReportTemplate() {
   return useQuery({
     queryKey: reportKeys.template(),
     queryFn: fetchReportTemplate,
+  });
+}
+
+export function useReportParams(reportName: string | undefined) {
+  return useQuery({
+    queryKey: reportKeys.params(reportName!),
+    queryFn: () => fetchReportParams(reportName!),
+    enabled: !!reportName,
+  });
+}
+
+export function useSelectOptions(inputString: string | undefined) {
+  return useQuery({
+    queryKey: ["selectOptions", inputString],
+    queryFn: () => fetchSelectOptions(inputString!),
+    enabled: !!inputString,
   });
 }
 
@@ -82,14 +104,49 @@ export function useDeleteReport() {
   });
 }
 
-export interface RunReportParams {
-  reportName: string;
-  params: Record<string, string>;
+export function useRunTableReport() {
+  return useMutation({
+    mutationFn: ({ reportName, params }: { reportName: string; params: Record<string, string> }) =>
+      runTableReport(reportName, params),
+  });
 }
 
-export function useRunReport() {
+export function useRunChartReport() {
   return useMutation({
-    mutationFn: ({ reportName, params }: RunReportParams) => runReport(reportName, params),
+    mutationFn: ({ reportName, params }: { reportName: string; params: Record<string, string> }) =>
+      runChartReport(reportName, params),
+  });
+}
+
+export function useRunPentahoReport() {
+  return useMutation({
+    mutationFn: ({
+      reportName,
+      params,
+      locale,
+      dateFormat,
+    }: {
+      reportName: string;
+      params: Record<string, string>;
+      locale: string;
+      dateFormat: string;
+    }) => runPentahoReport(reportName, params, locale, dateFormat),
+  });
+}
+
+export function useRunBirtReport() {
+  return useMutation({
+    mutationFn: ({
+      reportName,
+      params,
+      locale,
+      dateFormat,
+    }: {
+      reportName: string;
+      params: Record<string, string>;
+      locale: string;
+      dateFormat: string;
+    }) => runBirtReport(reportName, params, locale, dateFormat),
   });
 }
 

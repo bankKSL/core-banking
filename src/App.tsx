@@ -61,6 +61,7 @@ import TaxGroupListPage from "@/features/taxes/pages/TaxGroupListPage";
 import TaxGroupFormPage from "@/features/taxes/pages/TaxGroupFormPage";
 import ReportListPage from "@/features/reports/pages/ReportListPage";
 import ReportFormPage from "@/features/reports/pages/ReportFormPage";
+import RunReportPage from "@/features/reports/pages/RunReportPage";
 import AdhocQueryListPage from "@/features/reports/pages/AdhocQueryListPage";
 import AdhocQueryFormPage from "@/features/reports/pages/AdhocQueryFormPage";
 import DatatableListPage from "@/features/datatables/pages/DatatableListPage";
@@ -355,6 +356,7 @@ function App() {
                   <Route path="/provisioning-criteria/new" element={<ProvisioningCriteriaFormPage />} />
                   <Route path="/provisioning-criteria/edit/:id" element={<ProvisioningCriteriaFormPage />} />
                   <Route path="/reports" element={<ReportListPage />} />
+                  <Route path="/reports/run/:name" element={<RunReportPage />} />
                   <Route path="/reports/new" element={<ReportFormPage />} />
                   <Route path="/reports/edit/:id" element={<ReportFormPage />} />
                   <Route path="/adhoc-queries" element={<AdhocQueryListPage />} />
