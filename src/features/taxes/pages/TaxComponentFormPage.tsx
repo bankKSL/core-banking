@@ -111,7 +111,7 @@ const TaxComponentFormPage: FC = () => {
       const payload: Record<string, unknown> = {
         name: values.name,
         percentage: Number(values.percentage),
-        dateFormat: "dd MMMM yyyy",
+        dateFormat: "yyyy-MM-dd",
         locale: "en",
       };
 
