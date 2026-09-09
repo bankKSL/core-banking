@@ -96,11 +96,32 @@ export async function deleteReport(id: number): Promise<void> {
 }
 
 export async function fetchReportParams(reportName: string): Promise<ReportParameter[]> {
-  const { data } = await client.get<{ data: Array<{ row: ReportParameter }> }>(
+  const { data } = await client.get<{ data: Array<{ row: Array<string | boolean | null> }> }>(
     `/runreports/FullParameterList`,
     { params: { R_reportListing: reportName, parameterType: "true" } },
   );
-  return data.data.map((entry) => entry.row);
+  return data.data.map((entry) => {
+    const row = entry.row;
+    return {
+      id: 0,
+      parameterName: String(row[0] || ""),
+      parameterType: String(row[3] || ""),
+      selectOne: Boolean(row[6]),
+      reportParameterName: String(row[9] || ""),
+      name: String(row[0] || ""),
+      variable: String(row[1] || ""),
+      label: String(row[2] || ""),
+      displayType: String(row[3] || ""),
+      formatType: String(row[4] || ""),
+      defaultVal: String(row[5] || ""),
+      selectAll: String(row[7] || ""),
+      parentParameterName: String(row[8] || ""),
+      inputName: `R_${String(row[1] || "")}`,
+      selectOptions: [],
+      childParameters: [],
+      pentahoName: "",
+    };
+  });
 }
 
 export async function fetchSelectOptions(inputString: string): Promise<SelectOption[]> {

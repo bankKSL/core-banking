@@ -173,8 +173,6 @@ export default function RunReportPage() {
                   <ParameterField
                     key={param.name}
                     param={param}
-                    paramData={paramData}
-                    allParamValues={paramValues}
                     value={paramValues[param.name] ?? ""}
                     onChange={(value) => handleParamChange(param.name, value)}
                   />
