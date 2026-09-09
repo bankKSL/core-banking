@@ -65,7 +65,7 @@ export async function fetchPasswordPolicies(): Promise<PasswordPolicy[]> {
 }
 
 export async function updatePasswordPreference(policyId: number): Promise<void> {
-  await api.put("/passwordpreferences", { id: policyId });
+  await api.put("/passwordpreferences", { validationPolicyId: policyId });
 }
 
 export async function fetchBusinessDates(): Promise<BusinessDate[]> {
