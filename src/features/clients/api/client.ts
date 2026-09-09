@@ -174,14 +174,14 @@ export async function reactivateClient(clientId: number | string): Promise<{ cli
 
 export async function undoRejectClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
   const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
-    params: { command: "undoreject" },
+    params: { command: "undoRejection" },
   });
   return data;
 }
 
 export async function undoWithdrawClient(clientId: number | string): Promise<{ clientId: number; resourceId: number }> {
   const { data } = await client.post<{ clientId: number; resourceId: number }>(`/clients/${clientId}`, null, {
-    params: { command: "undowithdraw" },
+    params: { command: "undoWithdrawal" },
   });
   return data;
 }

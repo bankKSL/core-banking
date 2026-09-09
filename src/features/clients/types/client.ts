@@ -1,13 +1,14 @@
 // ─── Client Types ─────────────────────────────
 
-/** client status codes */
+/** client status codes (numeric IDs per Fineract ClientStatus enum) */
 export type ClientStatus =
   | "pending" // 100
   | "active" // 300
+  | "transfer in progress" // 303
+  | "transfer on hold" // 304
   | "closed" // 600
   | "rejected" // 700
-  | "transfer in progress" // 800
-  | "transfer on hold"; // 900
+  | "withdrawn"; // 800
 
 /** client legal form */
 export type LegalForm = "person" | "entity";

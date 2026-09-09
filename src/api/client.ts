@@ -25,6 +25,16 @@ client.interceptors.request.use(
       delete config.headers.Authorization;
     }
 
+    // Attach the multi-tenant identifier to every request (query param
+    // fallback). Fineract resolves the tenant from the `tenantIdentifier`
+    // query param or the `Fineract-Platform-TenantId` header (VERIFIED:
+    // TenantAwareBasicAuthenticationFilter). Centralizing here means the
+    // login call no longer needs to hardcode it per-endpoint.
+    const tenantIdentifier = import.meta.env.VITE_TENANT_IDENTIFIER ?? "default";
+    if (tenantIdentifier) {
+      config.params = { ...(config.params as Record<string, unknown> | undefined), tenantIdentifier };
+    }
+
     return config;
   },
   (error: AxiosError) => Promise.reject(error),

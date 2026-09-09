@@ -27,7 +27,6 @@ export interface LoginResponse {
   isTwoFactorAuthenticationRequired?: boolean;
   staffDisplayName?: string;
   organisationalRole?: string;
-  lastLoginDateTime?: string | null;
 }
 
 /** Normalized authenticated user stored in the auth store. */
