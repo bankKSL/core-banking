@@ -258,16 +258,16 @@ const LoanForm: FC<LoanFormProps> = ({
             <Input
               type="number"
               step="0.01"
-              {...register("principal")}
+              {...register("principal", { valueAsNumber: true })}
               disabled={isSubmitting || afterApproval}
               error={t(errors.principal?.message ?? "")}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium">{t("Loan Term Frequency")}</label>
+            <label className="block text-sm font-medium">{t("Loan Term Frequency")} *</label>
             <Input
               type="number"
-              {...register("loanTermFrequency")}
+              {...register("loanTermFrequency", { valueAsNumber: true })}
               disabled={isSubmitting}
               error={t(errors.loanTermFrequency?.message ?? "")}
             />
@@ -298,7 +298,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">{t("Number of Repayments")} *</label>
             <Input
               type="number"
-              {...register("numberOfRepayments")}
+              {...register("numberOfRepayments", { valueAsNumber: true })}
               disabled={isSubmitting || afterApproval}
               error={t(errors.numberOfRepayments?.message ?? "")}
             />
@@ -316,7 +316,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">{t("Repayment Every")} *</label>
             <Input
               type="number"
-              {...register("repaymentEvery")}
+              {...register("repaymentEvery", { valueAsNumber: true })}
               disabled={isSubmitting}
               error={t(errors.repaymentEvery?.message ?? "")}
             />
@@ -429,7 +429,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">{t("Grace on Principal Payment")}</label>
             <Input
               type="number"
-              {...register("graceOnPrincipalPayment")}
+              {...register("graceOnPrincipalPayment", { valueAsNumber: true })}
               disabled={isSubmitting}
               error={t(errors.graceOnPrincipalPayment?.message ?? "")}
             />
@@ -438,7 +438,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">{t("Grace on Interest Payment")}</label>
             <Input
               type="number"
-              {...register("graceOnInterestPayment")}
+              {...register("graceOnInterestPayment", { valueAsNumber: true })}
               disabled={isSubmitting}
               error={t(errors.graceOnInterestPayment?.message ?? "")}
             />
@@ -447,7 +447,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">{t("Grace on Interest Charged")}</label>
             <Input
               type="number"
-              {...register("graceOnInterestCharged")}
+              {...register("graceOnInterestCharged", { valueAsNumber: true })}
               disabled={isSubmitting}
               error={t(errors.graceOnInterestCharged?.message ?? "")}
             />
@@ -456,7 +456,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <label className="block text-sm font-medium">{t("Grace on Arrears Ageing")}</label>
             <Input
               type="number"
-              {...register("graceOnArrearsAgeing")}
+              {...register("graceOnArrearsAgeing", { valueAsNumber: true })}
               disabled={isSubmitting}
               error={t(errors.graceOnArrearsAgeing?.message ?? "")}
             />
@@ -475,7 +475,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <Input
               type="number"
               step="0.01"
-              {...register("inArrearsTolerance")}
+              {...register("inArrearsTolerance", { valueAsNumber: true })}
               disabled={isSubmitting}
             />
           </div>
@@ -484,7 +484,7 @@ const LoanForm: FC<LoanFormProps> = ({
             <Input
               type="number"
               step="0.01"
-              {...register("maxOutstandingLoanBalance")}
+              {...register("maxOutstandingLoanBalance", { valueAsNumber: true })}
               disabled={isSubmitting}
             />
           </div>
@@ -706,7 +706,7 @@ const LoanForm: FC<LoanFormProps> = ({
                 <label className="block text-sm font-medium">{t("Loan to Close")} *</label>
                 <Input
                   type="number"
-                  {...register("loanIdToClose")}
+                  {...register("loanIdToClose", { valueAsNumber: true })}
                   disabled={isSubmitting}
                   error={t(errors.loanIdToClose?.message ?? "")}
                   placeholder={t("Enter loan ID to close")}

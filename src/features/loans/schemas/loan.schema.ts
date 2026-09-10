@@ -24,28 +24,28 @@ export const createLoanSchema = z
     linkAccountId: z.number().int().optional().nullable(),
     externalId: z.string().max(100).optional(),
     graceOnPrincipalPayment: z.preprocess(
-      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : Number(v)),
       z.number().int().min(0).optional(),
     ),
     graceOnInterestPayment: z.preprocess(
-      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : Number(v)),
       z.number().int().min(0).optional(),
     ),
     graceOnInterestCharged: z.preprocess(
-      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : Number(v)),
       z.number().int().min(0).optional(),
     ),
     graceOnArrearsAgeing: z.preprocess(
-      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : Number(v)),
       z.number().int().min(0).optional(),
     ),
     inArrearsTolerance: z.preprocess(
-      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : Number(v)),
       z.number().min(0).optional(),
     ),
     allowPartialPeriodInterestCalculation: z.boolean().optional(),
     maxOutstandingLoanBalance: z.preprocess(
-      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : Number(v)),
       z.number().optional(),
     ),
     dateFormat: z.string().default("yyyy-MM-dd"),
