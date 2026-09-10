@@ -237,7 +237,11 @@ const UserFormPage: FC = () => {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex items-center gap-3">
-                <Switch id="sendPasswordToEmail" onCheckedChange={(v) => setValue("sendPasswordToEmail", v)} />
+                <Switch
+                  id="sendPasswordToEmail"
+                  checked={sendPasswordToEmail ?? false}
+                  onCheckedChange={(v) => setValue("sendPasswordToEmail", v)}
+                />
                 <label className="block text-sm font-medium" htmlFor="sendPasswordToEmail">
                   {t("Send password via email")}
                 </label>

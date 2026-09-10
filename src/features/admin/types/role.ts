@@ -22,7 +22,7 @@ export interface PermissionUsageData {
 }
 
 export interface RolePermissionsUpdateRequest {
-  permissionUsageData: PermissionUsageData[];
+  permissions: Record<string, boolean>;
 }
 
 export interface Permission {

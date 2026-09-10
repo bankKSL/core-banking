@@ -60,14 +60,11 @@ const RoleDetailPage: FC = () => {
 
   const handleSavePermissions = async () => {
     if (!id || !permissions) return;
-    const permissionUsageData = permissions.map((p) => ({
-      grouping: p.grouping,
-      code: p.code,
-      entityName: p.entityName,
-      actionName: p.actionName,
-      selected: selected[p.code] ?? false,
-    }));
-    await updatePermsMutation.mutateAsync({ roleId: id, payload: { permissionUsageData } });
+    const permissionsMap: Record<string, boolean> = {};
+    for (const p of permissions) {
+      permissionsMap[p.code] = selected[p.code] ?? false;
+    }
+    await updatePermsMutation.mutateAsync({ roleId: id, payload: { permissions: permissionsMap } });
   };
 
   if (isLoading || permsLoading) {
