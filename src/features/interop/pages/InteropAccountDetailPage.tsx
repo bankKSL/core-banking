@@ -189,7 +189,7 @@ const InteropAccountDetailPage: FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-3">
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1">
               <label cursor-pointer htmlFor="searchAccountId">
                 {t("Account External ID")}
               </label>
@@ -198,6 +198,7 @@ const InteropAccountDetailPage: FC = () => {
                 value={accountId}
                 onChange={(e) => setAccountId(e.target.value)}
                 placeholder="e.g. ext-uuid-account-id"
+                className="mt-1.5"
               />
             </div>
             <Button onClick={() => setAccountId(accountId)} className="bg-[#D32F2F] hover:bg-red-700">

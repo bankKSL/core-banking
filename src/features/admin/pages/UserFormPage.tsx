@@ -115,9 +115,8 @@ const UserFormPage: FC = () => {
     };
 
     if (!isEdit) {
-      if (values.sendPasswordToEmail) {
-        payload.sendPasswordToEmail = true;
-      } else {
+      payload.sendPasswordToEmail = !!values.sendPasswordToEmail;
+      if (!values.sendPasswordToEmail) {
         payload.password = values.password;
         payload.repeatPassword = values.repeatPassword;
       }

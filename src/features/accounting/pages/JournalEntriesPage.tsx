@@ -170,7 +170,6 @@ const JournalEntriesPage: React.FC = () => {
           <CardTitle>{t("Entries")}</CardTitle>
           <div className="flex items-end gap-3">
             <div className="space-y-1">
-              <label className="block text-sm font-medium">{t("Office")}</label>
               <OfficeSelect
                 value={officeFilter}
                 onChange={(v) => {
@@ -233,7 +232,9 @@ const JournalEntriesPage: React.FC = () => {
             </div>
           ) : isError ? (
             <div className="flex items-center gap-3 text-red-600">
-              <span className="text-sm">{t("Failed to load:")} {error?.message ?? t("Unknown error")}</span>
+              <span className="text-sm">
+                {t("Failed to load:")} {error?.message ?? t("Unknown error")}
+              </span>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 {t("Retry")}
               </Button>

@@ -66,7 +66,7 @@ const PartyRegisterPage: FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium">{t("Identifier Type")} *</label>
                 <Select onValueChange={(v) => setValue("idType", v, { shouldValidate: true })} defaultValue="MSISDN">
                   <SelectTrigger>

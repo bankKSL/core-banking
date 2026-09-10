@@ -63,7 +63,7 @@ const PartySearchPage: FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              <div className="space-y-1.5">
                 <label className="block text-sm font-medium">{t("Identifier Type")} *</label>
                 <Select onValueChange={(v) => setValue("idType", v)} defaultValue="MSISDN">
                   <SelectTrigger>
