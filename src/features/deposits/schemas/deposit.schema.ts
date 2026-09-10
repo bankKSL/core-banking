@@ -46,20 +46,38 @@ export const createSavingsProductSchema = z
     description: z.string().max(500).optional(),
     currencyCode: z.string().min(1, i18n.t("Currency is required")),
     digitsAfterDecimal: z.number().int().min(0).max(6).default(2),
-    inMultiplesOf: z.number().int().min(0).optional(),
+    inMultiplesOf: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(0).optional(),
+    ),
     nominalAnnualInterestRate: z.number({ message: i18n.t("Interest rate is required") }).min(0),
     interestCompoundingPeriodType: z.number({ message: i18n.t("Required") }).int(),
     interestPostingPeriodType: z.number({ message: i18n.t("Required") }).int(),
     interestCalculationType: z.number({ message: i18n.t("Required") }).int(),
     interestCalculationDaysInYearType: z.number({ message: i18n.t("Required") }).int(),
-    minRequiredOpeningBalance: z.number().min(0).optional(),
-    minBalanceForInterestCalculation: z.number().min(0).optional(),
-    lockinPeriodFrequency: z.number().int().min(0).optional(),
+    minRequiredOpeningBalance: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
+    minBalanceForInterestCalculation: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
+    lockinPeriodFrequency: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(0).optional(),
+    ),
     lockinPeriodFrequencyType: z.number().int().min(0).max(3).optional(),
-    withdrawalFeeAmount: z.number().min(0).optional(),
+    withdrawalFeeAmount: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
     withdrawalFeeType: z.number().int().optional(),
     withdrawalFeeForTransfers: z.boolean().optional(),
-    feeAmount: z.number().min(0).optional(),
+    feeAmount: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
     feeOnMonthDay: z
       .string()
       .regex(
@@ -68,18 +86,42 @@ export const createSavingsProductSchema = z
       )
       .optional(),
     allowOverdraft: z.boolean().optional(),
-    overdraftLimit: z.number().min(0).optional(),
-    nominalAnnualInterestRateOverdraft: z.number().min(0).optional(),
-    minOverdraftForInterestCalculation: z.number().min(0).optional(),
-    minRequiredBalance: z.number().min(0).optional(),
+    overdraftLimit: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
+    nominalAnnualInterestRateOverdraft: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
+    minOverdraftForInterestCalculation: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
+    minRequiredBalance: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
     enforceMinRequiredBalance: z.boolean().optional(),
     lienAllowed: z.boolean().optional(),
-    maxAllowedLienLimit: z.number().min(0).optional(),
+    maxAllowedLienLimit: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().min(0).optional(),
+    ),
     accountingRule: z.number().int().min(1).max(3).default(1),
     isDormancyTrackingActive: z.boolean().optional(),
-    daysToInactive: z.number().int().min(1).optional(),
-    daysToDormancy: z.number().int().min(1).optional(),
-    daysToEscheat: z.number().int().min(1).optional(),
+    daysToInactive: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1).optional(),
+    ),
+    daysToDormancy: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1).optional(),
+    ),
+    daysToEscheat: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1).optional(),
+    ),
     withHoldTax: z.boolean().optional(),
     taxGroupId: z.number().int().positive().optional(),
     locale: z.string().default("en"),
