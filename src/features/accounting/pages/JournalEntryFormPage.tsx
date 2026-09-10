@@ -17,10 +17,13 @@ import { currentDate } from "@/lib/utils";
 interface EntryRow {
   glAccountId: number;
   amount: string;
+  comments: string;
 }
 
-const formatCurrency = (n: number, code = "USD") =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(n);
+const formatCurrency = (n: number, code?: string) => {
+  const currency = code && code.length === 3 ? code : "USD";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
+};
 
 const JournalEntryFormPage: React.FC = () => {
   const { t } = useTranslation();
@@ -39,8 +42,14 @@ const JournalEntryFormPage: React.FC = () => {
     comments: "",
     accountingRuleId: 0,
   });
-  const [debits, setDebits] = useState<EntryRow[]>([{ glAccountId: 0, amount: "" }]);
-  const [credits, setCredits] = useState<EntryRow[]>([{ glAccountId: 0, amount: "" }]);
+  const [debits, setDebits] = useState<EntryRow[]>([{ glAccountId: 0, amount: "", comments: "" }]);
+  const [credits, setCredits] = useState<EntryRow[]>([{ glAccountId: 0, amount: "", comments: "" }]);
+  const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
+  const [accountNumber, setAccountNumber] = useState("");
+  const [checkNumber, setCheckNumber] = useState("");
+  const [routingCode, setRoutingCode] = useState("");
+  const [receiptNumber, setReceiptNumber] = useState("");
+  const [bankNumber, setBankNumber] = useState("");
 
   const totalDebits = useMemo(() => debits.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0), [debits]);
   const totalCredits = useMemo(() => credits.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0), [credits]);
@@ -65,7 +74,7 @@ const JournalEntryFormPage: React.FC = () => {
 
   const addRow = (side: "debit" | "credit") => {
     const setter = side === "debit" ? setDebits : setCredits;
-    setter((rows) => [...rows, { glAccountId: 0, amount: "" }]);
+    setter((rows) => [...rows, { glAccountId: 0, amount: "", comments: "" }]);
   };
 
   const removeRow = (side: "debit" | "credit", index: number) => {
@@ -104,8 +113,22 @@ const JournalEntryFormPage: React.FC = () => {
         referenceNumber: header.referenceNumber || undefined,
         comments: header.comments || undefined,
         accountingRuleId: header.accountingRuleId || undefined,
-        debits: debits.map((r) => ({ glAccountId: r.glAccountId, amount: parseFloat(r.amount) })),
-        credits: credits.map((r) => ({ glAccountId: r.glAccountId, amount: parseFloat(r.amount) })),
+        paymentTypeId: paymentTypeId || undefined,
+        accountNumber: accountNumber || undefined,
+        checkNumber: checkNumber || undefined,
+        routingCode: routingCode || undefined,
+        receiptNumber: receiptNumber || undefined,
+        bankNumber: bankNumber || undefined,
+        debits: debits.map((r) => ({
+          glAccountId: r.glAccountId,
+          amount: parseFloat(r.amount),
+          comments: r.comments || undefined,
+        })),
+        credits: credits.map((r) => ({
+          glAccountId: r.glAccountId,
+          amount: parseFloat(r.amount),
+          comments: r.comments || undefined,
+        })),
       });
       navigate("/accounting/journal-entries");
     } catch (err) {
@@ -118,48 +141,61 @@ const JournalEntryFormPage: React.FC = () => {
   const renderRows = (side: "debit" | "credit", rows: EntryRow[]) => (
     <div className="space-y-3">
       {rows.map((row, i) => (
-        <div key={i} className="grid grid-cols-[1fr_160px_40px] items-end gap-3">
-          <div className="space-y-1">
-            <label className="block text-sm font-medium">{t("GL Account")}</label>
-            <Select
-              value={row.glAccountId ? String(row.glAccountId) : ""}
-              onValueChange={(v) => updateRow(side, i, "glAccountId", Number(v))}
+        <div key={i} className="space-y-2 p-3 rounded-lg bg-gray-50/50">
+          <div className="grid grid-cols-[1fr_160px_40px] items-end gap-3">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">{t("GL Account")}</label>
+              <Select
+                value={row.glAccountId ? String(row.glAccountId) : ""}
+                onValueChange={(v) => updateRow(side, i, "glAccountId", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select account")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {glAccounts.map((a) => (
+                    <SelectItem key={a.id} value={String(a.id)}>
+                      {a.name} ({a.glCode})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors[`${side}_${i}_account`] && (
+                <p className="text-xs text-red-500">{errors[`${side}_${i}_account`]}</p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">{t("Amount")}</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={row.amount}
+                onChange={(e) => updateRow(side, i, "amount", e.target.value)}
+                placeholder="0.00"
+              />
+              {errors[`${side}_${i}_amount`] && <p className="text-xs text-red-500">{errors[`${side}_${i}_amount`]}</p>}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => removeRow(side, i)}
+              disabled={rows.length <= 1}
             >
-              <SelectTrigger>
-                <SelectValue placeholder={t("Select account")} />
-              </SelectTrigger>
-              <SelectContent>
-                {glAccounts.map((a) => (
-                  <SelectItem key={a.id} value={String(a.id)}>
-                    {a.name} ({a.glCode})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors[`${side}_${i}_account`] && <p className="text-xs text-red-500">{errors[`${side}_${i}_account`]}</p>}
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-medium">{t("Amount")}</label>
+            <label className="block text-xs text-gray-500">{t("Entry Comment")}</label>
             <Input
-              type="number"
-              step="0.01"
-              min="0"
-              value={row.amount}
-              onChange={(e) => updateRow(side, i, "amount", e.target.value)}
-              placeholder="0.00"
+              value={row.comments}
+              onChange={(e) => updateRow(side, i, "comments", e.target.value)}
+              placeholder={t("Optional comment for this line")}
+              className="h-8 text-sm"
             />
-            {errors[`${side}_${i}_amount`] && <p className="text-xs text-red-500">{errors[`${side}_${i}_amount`]}</p>}
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => removeRow(side, i)}
-            disabled={rows.length <= 1}
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => addRow(side)}>
@@ -189,6 +225,7 @@ const JournalEntryFormPage: React.FC = () => {
             value={header.officeId ? String(header.officeId) : ""}
             onChange={(v) => setHeader((h) => ({ ...h, officeId: Number(v) }))}
             error={errors.officeId}
+            isLabelHidden={false}
           />
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">{t("Transaction Date")} *</label>
@@ -252,6 +289,56 @@ const JournalEntryFormPage: React.FC = () => {
           <CardContent>{renderRows("credit", credits)}</CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("Payment Details")}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-3 gap-4">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">{t("Payment Type")}</label>
+            <Select
+              value={paymentTypeId ? String(paymentTypeId) : ""}
+              onValueChange={(v) => setPaymentTypeId(Number(v))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("None")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">{t("None")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">{t("Account Number")}</label>
+            <Input
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              placeholder={t("Optional")}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">{t("Check Number")}</label>
+            <Input value={checkNumber} onChange={(e) => setCheckNumber(e.target.value)} placeholder={t("Optional")} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">{t("Routing Code")}</label>
+            <Input value={routingCode} onChange={(e) => setRoutingCode(e.target.value)} placeholder={t("Optional")} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">{t("Receipt Number")}</label>
+            <Input
+              value={receiptNumber}
+              onChange={(e) => setReceiptNumber(e.target.value)}
+              placeholder={t("Optional")}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium">{t("Bank Number")}</label>
+            <Input value={bankNumber} onChange={(e) => setBankNumber(e.target.value)} placeholder={t("Optional")} />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="flex items-center justify-between py-4">

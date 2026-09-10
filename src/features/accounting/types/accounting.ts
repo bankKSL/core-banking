@@ -36,14 +36,34 @@ export interface CurrencyData {
   displayLabel: string;
 }
 
-export interface TransactionDetailData {
-  paymentTypeId: number;
-  paymentTypeName: string;
+export interface PaymentDetailData {
+  id: number;
+  paymentType: { id: number; name: string; description?: string; isCashPayment?: boolean };
   accountNumber: string;
   checkNumber: string;
   routingCode: string;
   receiptNumber: string;
   bankNumber: string;
+}
+
+export interface NoteData {
+  id: number;
+  note: string;
+  createdOn: string;
+  createdByUsername: string;
+}
+
+export interface TransactionTypeEnumData {
+  id: number;
+  code: string;
+  value: string;
+}
+
+export interface TransactionDetailData {
+  transactionId: number;
+  paymentDetails: PaymentDetailData | null;
+  noteData: NoteData | null;
+  transactionType: TransactionTypeEnumData | null;
 }
 
 export interface CommandProcessingResult {
@@ -153,11 +173,22 @@ export interface JournalEntryData {
   runningBalanceComputed: boolean;
   transactionDetails: TransactionDetailData | null;
   submittedOnDate: string;
+  externalAssetOwner?: string;
+  credits?: CreditDebit[];
+  debits?: CreditDebit[];
+  paymentTypeId?: number;
+  currencyCode?: string;
+  accountNumber?: string;
+  checkNumber?: string;
+  routingCode?: string;
+  receiptNumber?: string;
+  bankNumber?: string;
 }
 
 export interface CreditDebit {
   glAccountId: number;
   amount: number;
+  comments?: string;
 }
 
 export interface CreateJournalEntryRequest {
@@ -178,6 +209,7 @@ export interface CreateJournalEntryRequest {
   receiptNumber?: string;
   bankNumber?: string;
   externalAssetOwner?: string;
+  amount?: number;
 }
 
 export interface JournalEntryListParams {
@@ -186,7 +218,10 @@ export interface JournalEntryListParams {
   manualEntriesOnly?: boolean;
   fromDate?: string;
   toDate?: string;
+  submittedOnDateFrom?: string;
+  submittedOnDateTo?: string;
   transactionId?: string;
+  entityType?: number;
   loanId?: number;
   savingsId?: number;
   runningBalance?: boolean;
@@ -197,6 +232,44 @@ export interface JournalEntryListParams {
   sortOrder?: "ASC" | "DESC";
   dateFormat?: string;
   locale?: string;
+}
+
+export interface JournalEntryAssociationParametersData {
+  transactionDetailsRequired: boolean;
+  runningBalanceRequired: boolean;
+}
+
+export interface OfficeOpeningBalancesData {
+  officeId: number;
+  officeName: string;
+  transactionDate: string;
+  contraAccount: GLAccountData;
+  assetAccountOpeningBalances: JournalEntryData[];
+  liabityAccountOpeningBalances: JournalEntryData[];
+  incomeAccountOpeningBalances: JournalEntryData[];
+  equityAccountOpeningBalances: JournalEntryData[];
+  expenseAccountOpeningBalances: JournalEntryData[];
+}
+
+export interface DefineOpeningBalanceRequest {
+  officeId: number;
+  transactionDate: string;
+  currencyCode: string;
+  dateFormat: string;
+  locale: string;
+  comments?: string;
+  credits: CreditDebit[];
+  debits: CreditDebit[];
+}
+
+export interface UpdateRunningBalanceRequest {
+  officeId: number;
+  currencyCode?: string;
+}
+
+export interface JournalEntryIdentifier {
+  entityId: string;
+  makerCheckerId?: number;
 }
 
 // ============================================================

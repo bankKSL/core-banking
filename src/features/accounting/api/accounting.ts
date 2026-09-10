@@ -7,6 +7,9 @@ import type {
   JournalEntryData,
   JournalEntryListParams,
   CreateJournalEntryRequest,
+  DefineOpeningBalanceRequest,
+  UpdateRunningBalanceRequest,
+  OfficeOpeningBalancesData,
   AccountingRuleData,
   CreateAccountingRuleRequest,
   FinancialActivityAccountData,
@@ -68,8 +71,14 @@ export async function fetchJournalEntries(params: JournalEntryListParams = {}): 
   return data;
 }
 
-export async function fetchJournalEntry(id: number | string): Promise<JournalEntryData> {
-  const { data } = await client.get<JournalEntryData>(`/journalentries/${id}`);
+export async function fetchJournalEntry(
+  id: number | string,
+  runningBalance = false,
+  transactionDetails = false,
+): Promise<JournalEntryData> {
+  const { data } = await client.get<JournalEntryData>(`/journalentries/${id}`, {
+    params: { runningBalance, transactionDetails },
+  });
   return data;
 }
 
@@ -92,6 +101,63 @@ export async function reverseJournalEntry(
     { params: { command: "reverse" } },
   );
   return data;
+}
+
+export async function updateRunningBalance(
+  payload: UpdateRunningBalanceRequest,
+): Promise<CommandProcessingResult> {
+  const { data } = await client.post<CommandProcessingResult>(
+    "/journalentries",
+    { ...payload, dateFormat: "yyyy-MM-dd", locale: "en" },
+    { params: { command: "updateRunningBalance" } },
+  );
+  return data;
+}
+
+export async function defineOpeningBalance(
+  payload: DefineOpeningBalanceRequest,
+): Promise<CommandProcessingResult> {
+  const { data } = await client.post<CommandProcessingResult>(
+    "/journalentries",
+    { ...payload, dateFormat: "yyyy-MM-dd", locale: "en" },
+    { params: { command: "defineOpeningBalance" } },
+  );
+  return data;
+}
+
+export async function fetchOfficeOpeningBalances(
+  officeId?: number,
+  currencyCode?: string,
+): Promise<OfficeOpeningBalancesData> {
+  const { data } = await client.get<OfficeOpeningBalancesData>("/journalentries/openingbalance", {
+    params: { ...(officeId ? { officeId } : {}), ...(currencyCode ? { currencyCode } : {}) },
+  });
+  return data;
+}
+
+export async function fetchProvisioningJournalEntries(params: {
+  offset?: number;
+  limit?: number;
+  entryId?: number;
+}): Promise<Page<JournalEntryData>> {
+  const { data } = await client.get<Page<JournalEntryData>>("/journalentries/provisioning", { params });
+  return data;
+}
+
+export async function fetchJournalEntriesByEntityId(
+  transactionId: string,
+  entityId: number,
+  entityType: number,
+): Promise<Page<JournalEntryData>> {
+  const params: JournalEntryListParams = {
+    transactionId,
+    entityType,
+    offset: 0,
+    limit: 100,
+  };
+  if (entityType === 1) params.loanId = entityId;
+  else if (entityType === 2) params.savingsId = entityId;
+  return fetchJournalEntries(params);
 }
 
 // ─── Accounting Rules ────────────────────────────────────────────

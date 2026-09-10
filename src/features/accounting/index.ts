@@ -5,6 +5,9 @@ export type {
   CodeValueData,
   OfficeData,
   CurrencyData,
+  PaymentDetailData,
+  NoteData,
+  TransactionTypeEnumData,
   TransactionDetailData,
   CommandProcessingResult,
   Page,
@@ -16,6 +19,11 @@ export type {
   CreditDebit,
   CreateJournalEntryRequest,
   JournalEntryListParams,
+  JournalEntryAssociationParametersData,
+  OfficeOpeningBalancesData,
+  DefineOpeningBalanceRequest,
+  UpdateRunningBalanceRequest,
+  JournalEntryIdentifier,
   AccountingTagRuleData,
   GLAccountDataForLookup,
   AccountingRuleData,
@@ -37,6 +45,10 @@ export {
   GL_ACCOUNT_USAGE_LABELS,
   ACCOUNTING_RULE_TYPE,
   ACCOUNTING_RULE_TYPE_LABELS,
+  JOURNAL_ENTRY_TYPE,
+  JOURNAL_ENTRY_TYPE_LABELS,
+  JOURNAL_ENTRY_ENTITY_TYPE,
+  JOURNAL_ENTRY_ENTITY_TYPE_LABELS,
   ACCOUNTING_PAGE_SIZE,
 } from "./constants/accounting";
 
@@ -71,7 +83,17 @@ export {
 } from "./api/accounting";
 
 // API — Journal Entries
-export { fetchJournalEntries, fetchJournalEntry, createJournalEntry, reverseJournalEntry } from "./api/accounting";
+export {
+  fetchJournalEntries,
+  fetchJournalEntry,
+  createJournalEntry,
+  reverseJournalEntry,
+  updateRunningBalance,
+  defineOpeningBalance,
+  fetchOfficeOpeningBalances,
+  fetchProvisioningJournalEntries,
+  fetchJournalEntriesByEntityId,
+} from "./api/accounting";
 
 // API — Accounting Rules
 export {
@@ -125,6 +147,10 @@ export {
   useJournalEntry,
   useCreateJournalEntry,
   useReverseJournalEntry,
+  useUpdateRunningBalance,
+  useDefineOpeningBalance,
+  useOfficeOpeningBalances,
+  useProvisioningJournalEntries,
 } from "./hooks/useJournalEntries";
 
 // Hooks — Accounting Rules

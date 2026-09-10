@@ -42,4 +42,32 @@ export const ACCOUNTING_RULE_TYPE_LABELS: Record<number, string> = {
   4: i18n.t("Upfront Accrual"),
 };
 
+// ─── Journal Entry ────────────────────────────────────────────────
+
+export const JOURNAL_ENTRY_TYPE = {
+  CREDIT: 1,
+  DEBIT: 2,
+} as const;
+
+export const JOURNAL_ENTRY_TYPE_LABELS: Record<number, string> = {
+  1: i18n.t("Credit"),
+  2: i18n.t("Debit"),
+};
+
+export const JOURNAL_ENTRY_ENTITY_TYPE = {
+  LOAN: 1,
+  SAVINGS: 2,
+  CLIENT: 3,
+  SHARE: 4,
+  PROVISIONING: 5,
+} as const;
+
+export const JOURNAL_ENTRY_ENTITY_TYPE_LABELS: Record<number, string> = {
+  1: i18n.t("Loan"),
+  2: i18n.t("Savings"),
+  3: i18n.t("Client"),
+  4: i18n.t("Share"),
+  5: i18n.t("Provisioning"),
+};
+
 export const ACCOUNTING_PAGE_SIZE = 20;
