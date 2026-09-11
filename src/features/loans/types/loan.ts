@@ -695,6 +695,9 @@ export interface LoanProductCreateRequest {
   disallowExpectedDisbursements?: boolean;
   allowApprovedDisbursedAmountsOverApplied?: boolean;
   holdGuaranteeFunds?: boolean;
+  mandatoryGuarantee?: number;
+  minimumGuaranteeFromGuarantor?: number;
+  minimumGuaranteeFromOwnFunds?: number;
   isLinkedToFloatingInterestRates?: boolean;
   allowVariableInstallments?: boolean;
   enableInstallmentLevelDelinquency?: boolean;

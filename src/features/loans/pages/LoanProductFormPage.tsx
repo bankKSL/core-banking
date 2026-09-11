@@ -68,11 +68,20 @@ const loanProductSchema = z
     shortName: z.string().min(1, "Short name is required").max(4, "Max 4 chars"),
     description: z.string().optional(),
     externalId: z.string().optional(),
+    startDate: z.string().optional(),
+    closeDate: z.string().optional(),
     currencyCode: z.string().min(1, "Currency is required"),
     digitsAfterDecimal: z.coerce.number().int().min(0).max(6),
+    inMultiplesOf: z.coerce.number().min(0).optional(),
     principal: z.coerce.number().positive("Principal must be > 0"),
-    minPrincipal: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
-    maxPrincipal: z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number().optional()),
+    minPrincipal: z.preprocess(
+      (v) => (v === "" || v === null ? undefined : v),
+      z.coerce.number().positive().optional(),
+    ),
+    maxPrincipal: z.preprocess(
+      (v) => (v === "" || v === null ? undefined : v),
+      z.coerce.number().positive().optional(),
+    ),
     numberOfRepayments: z.coerce.number().int().positive("Number of repayments is required"),
     minNumberOfRepayments: z.preprocess(
       (v) => (v === "" || v === null ? undefined : v),
@@ -84,29 +93,36 @@ const loanProductSchema = z
     ),
     repaymentEvery: z.coerce.number().int().positive("Repayment every is required"),
     repaymentFrequencyType: z.coerce.number(),
-    amortizationType: z.coerce.number(),
-    interestCalculationPeriodType: z.coerce.number(),
-    allowPartialPeriodInterestCalculation: z.boolean().optional(),
-    transactionProcessingStrategyCode: z.string().min(1, "Transaction processing strategy is required"),
-    loanScheduleType: z.string().optional(),
-    daysInYearType: z.coerce.number(),
-    daysInMonthType: z.coerce.number(),
-    isInterestRecalculationEnabled: z.boolean(),
     interestRatePerPeriod: z.preprocess(
       (v) => (v === "" || v === null ? undefined : v),
       z.coerce.number("Interest rate per period is required").int().positive(),
     ),
-    minInterestRatePerPeriod: z.coerce.number().optional(),
-    maxInterestRatePerPeriod: z.coerce.number().optional(),
-    interestType: z.coerce.number(),
+    minInterestRatePerPeriod: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || v === 0 ? undefined : v),
+      z.coerce.number().int().positive().optional(),
+    ),
+    maxInterestRatePerPeriod: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined || v === 0 ? undefined : v),
+      z.coerce.number().int().positive().optional(),
+    ),
     interestRateFrequencyType: z.coerce.number().optional(),
-    graceOnPrincipalPayment: z.coerce.number().optional(),
-    graceOnInterestPayment: z.coerce.number().optional(),
-    graceOnInterestCharged: z.coerce.number().optional(),
-    graceOnArrearsAgeing: z.coerce.number().optional(),
+    amortizationType: z.coerce.number(),
+    interestType: z.coerce.number(),
+    interestCalculationPeriodType: z.coerce.number(),
+    allowPartialPeriodInterestCalculation: z.boolean().optional(),
+    transactionProcessingStrategyCode: z.string().min(1, "Transaction processing strategy is required"),
+    loanScheduleType: z.string().optional(),
+    loanScheduleProcessingType: z.string().optional(),
+    daysInYearType: z.coerce.number("Days in year type is required").int(),
+    daysInMonthType: z.coerce.number("Days in month type is required").int(),
+    isInterestRecalculationEnabled: z.boolean(),
+    graceOnPrincipalPayment: z.coerce.number().min(0).optional(),
+    graceOnInterestPayment: z.coerce.number().min(0).optional(),
+    graceOnInterestCharged: z.coerce.number().min(0).optional(),
+    graceOnArrearsAgeing: z.coerce.number().min(0).optional(),
     multiDisburseLoan: z.boolean().optional(),
-    maxTrancheCount: z.coerce.number().optional(),
-    outstandingLoanBalance: z.coerce.number().optional(),
+    maxTrancheCount: z.coerce.number().int().positive().optional(),
+    outstandingLoanBalance: z.coerce.number().min(0).optional(),
     canDefineInstallmentAmount: z.boolean().optional(),
     installmentAmountInMultiplesOf: z.coerce.number().optional(),
     interestRecalculationCompoundingMethod: z.coerce.number().optional(),
@@ -135,26 +151,70 @@ const loanProductSchema = z
     disallowExpectedDisbursements: z.boolean().optional(),
     allowApprovedDisbursedAmountsOverApplied: z.boolean().optional(),
     holdGuaranteeFunds: z.boolean().optional(),
+    mandatoryGuarantee: z.coerce.number().optional(),
+    minimumGuaranteeFromGuarantor: z.coerce.number().optional(),
+    minimumGuaranteeFromOwnFunds: z.coerce.number().optional(),
     enableInstallmentLevelDelinquency: z.boolean().optional(),
     includeInBorrowerCycle: z.boolean().optional(),
     useBorrowerCycle: z.boolean().optional(),
-    overdueDaysForNpa: z.coerce.number().optional(),
-    minDaysBetweenDisbursalAndFirstRepayment: z.coerce.number().optional(),
-    principalThresholdForLastInstallment: z.coerce.number().optional(),
-    fixedPrincipalPercentagePerInstallment: z.coerce.number().optional(),
-    dueDaysForRepaymentEvent: z.coerce.number().optional(),
-    overdueDaysForRepaymentEvent: z.coerce.number().optional(),
+    accountMovesOutOfNpaOnlyOnArrearsCompletion: z.boolean().optional(),
+    overdueDaysForNpa: z.coerce.number().min(0).optional(),
+    minDaysBetweenDisbursalAndFirstRepayment: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().positive().optional(),
+    ),
+    principalThresholdForLastInstallment: z.coerce.number().min(0).max(100).optional(),
+    fixedPrincipalPercentagePerInstallment: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(1).max(100).optional(),
+    ),
+    fixedLength: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().int().positive().optional(),
+    ),
+    recurringMoratoriumOnPrincipalPeriods: z.coerce.number().min(0).optional(),
+    daysInYearCustomStrategy: z.string().optional(),
+    dueDaysForRepaymentEvent: z.coerce.number().min(0).optional(),
+    overdueDaysForRepaymentEvent: z.coerce.number().min(0).optional(),
     overAppliedCalculationType: z.string().optional(),
     overAppliedNumber: z.coerce.number().optional(),
-    minimumGap: z.coerce.number().optional(),
-    maximumGap: z.coerce.number().optional(),
+    allowFullTermForTranche: z.boolean().optional(),
+    isLinkedToFloatingInterestRates: z.boolean().optional(),
+    floatingRatesId: z.coerce.number().optional(),
+    interestRateDifferential: z.coerce.number().optional(),
+    minDifferentialLendingRate: z.coerce.number().optional(),
+    defaultDifferentialLendingRate: z.coerce.number().optional(),
+    maxDifferentialLendingRate: z.coerce.number().optional(),
+    isFloatingInterestRateCalculationAllowed: z.boolean().optional(),
+    recalculationRestFrequencyInterval: z.coerce.number().optional(),
+    recalculationRestFrequencyNthDayType: z.coerce.number().optional(),
+    recalculationRestFrequencyDayOfWeekType: z.coerce.number().optional(),
+    recalculationRestFrequencyOnDayType: z.coerce.number().optional(),
+    recalculationCompoundingFrequencyType: z.coerce.number().optional(),
+    recalculationCompoundingFrequencyInterval: z.coerce.number().optional(),
+    recalculationCompoundingFrequencyNthDayType: z.coerce.number().optional(),
+    recalculationCompoundingFrequencyDayOfWeekType: z.coerce.number().optional(),
+    recalculationCompoundingFrequencyOnDayType: z.coerce.number().optional(),
+    isCompoundingToBePostedAsTransaction: z.boolean().optional(),
+    allowCompoundingOnEod: z.boolean().optional(),
+    disallowInterestCalculationOnPastDue: z.boolean().optional(),
+    supportedInterestRefundTypes: z.array(z.string()).optional(),
+    paymentAllocation: z.array(z.any()).optional(),
+    creditAllocation: z.array(z.any()).optional(),
+    allowAttributeOverrides: z.record(z.string(), z.boolean()).optional(),
+    charges: z.array(z.any()).optional(),
+    rates: z.array(z.any()).optional(),
+    minimumGap: z.coerce.number().positive().optional(),
+    maximumGap: z.coerce.number().positive().optional(),
     allowVariableInstallments: z.boolean().optional(),
-    delinquencyBucketId: z.coerce.number().optional(),
+    delinquencyBucketId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().positive().optional(),
+    ),
     compoundingFrequencyType: z.coerce.number().optional(),
     isArrearsBasedOnOriginalSchedule: z.boolean().optional(),
-    inArrearsTolerance: z.coerce.number().optional(),
+    inArrearsTolerance: z.coerce.number().min(0).optional(),
     fundId: z.coerce.number().optional(),
-    inMultiplesOf: z.coerce.number().optional(),
     accountingRule: z.coerce.number(),
     fundSourceAccountId: z.coerce.number().optional(),
     loanPortfolioAccountId: z.coerce.number().optional(),
@@ -239,6 +299,34 @@ const loanProductSchema = z
       });
     }
 
+    // Interest rate cross-field validation: min <= max, rate within [min, max]
+    const { interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod } = data;
+    const hasMinRate = minInterestRatePerPeriod != null && !Number.isNaN(minInterestRatePerPeriod);
+    const hasMaxRate = maxInterestRatePerPeriod != null && !Number.isNaN(maxInterestRatePerPeriod);
+    const hasRate = interestRatePerPeriod != null && !Number.isNaN(interestRatePerPeriod);
+
+    if (hasMinRate && hasMaxRate && minInterestRatePerPeriod > maxInterestRatePerPeriod) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxInterestRatePerPeriod"],
+        message: "Max Interest Rate must be greater than or equal to Min Interest Rate",
+      });
+    }
+    if (hasRate && hasMinRate && interestRatePerPeriod < minInterestRatePerPeriod) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["interestRatePerPeriod"],
+        message: "Interest Rate per Period must not be less than Min Interest Rate",
+      });
+    }
+    if (hasRate && hasMaxRate && interestRatePerPeriod > maxInterestRatePerPeriod) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["interestRatePerPeriod"],
+        message: "Interest Rate per Period must not be greater than Max Interest Rate",
+      });
+    }
+
     // Validation rule 3: multiDisburseLoan=true requires maxTrancheCount
     if (data.multiDisburseLoan && (data.maxTrancheCount == null || data.maxTrancheCount <= 0)) {
       ctx.addIssue({
@@ -315,6 +403,18 @@ const loanProductSchema = z
       });
     }
 
+    // Loan Schedule Processing Type VERTICAL requires advanced-payment-allocation strategy
+    if (
+      data.loanScheduleProcessingType === "VERTICAL" &&
+      data.transactionProcessingStrategyCode !== ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["loanScheduleProcessingType"],
+        message: "Vertical processing requires advance-payment-allocation-strategy",
+      });
+    }
+
     // Buy Down Fee: only supported for Advanced Payment Allocation Strategy + Progressive schedule.
     // When enabled, only Flat calculation, Equal Amortization strategy and Fee/Interest income type are allowed.
     if (data.enableBuyDownFee) {
@@ -356,6 +456,23 @@ const loanProductSchema = z
           message: "Income Type must be Fee or Interest",
         });
       }
+      // Buy Down Fee requires buy down expense and income accounts for accrual accounting
+      if (data.accountingRule === 3 || data.accountingRule === 4) {
+        if (!data.buyDownExpenseAccountId) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["buyDownExpenseAccountId"],
+            message: "Buy Down Expense Account is required for Accrual accounting with Buy Down Fee",
+          });
+        }
+        if (!data.incomeFromBuyDownAccountId) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["incomeFromBuyDownAccountId"],
+            message: "Income from Buy Down Account is required for Accrual accounting with Buy Down Fee",
+          });
+        }
+      }
     }
 
     // Validation rule 7: Grace periods must be less than numberOfRepayments
@@ -378,6 +495,117 @@ const loanProductSchema = z
         code: "custom",
         path: ["graceOnInterestCharged"],
         message: "Grace on Interest Charged must be less than Number of Repayments",
+      });
+    }
+
+    // Interest recalculation enabled requires compounding method, reschedule strategy, and rest frequency
+    if (data.isInterestRecalculationEnabled) {
+      if (data.interestRecalculationCompoundingMethod == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["interestRecalculationCompoundingMethod"],
+          message: "Compounding Method is required when Interest Recalculation is enabled",
+        });
+      }
+      if (data.rescheduleStrategyMethod == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["rescheduleStrategyMethod"],
+          message: "Reschedule Strategy Method is required when Interest Recalculation is enabled",
+        });
+      }
+      if (data.recalculationRestFrequencyType == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["recalculationRestFrequencyType"],
+          message: "Rest Frequency Type is required when Interest Recalculation is enabled",
+        });
+      }
+    }
+
+    // Hold Guarantee Funds requires mandatory guarantee
+    if (data.holdGuaranteeFunds) {
+      if (data.mandatoryGuarantee == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["mandatoryGuarantee"],
+          message: "Mandatory Guarantee is required when Hold Guarantee Funds is enabled",
+        });
+      }
+      const minOwn = data.minimumGuaranteeFromOwnFunds ?? 0;
+      const minGuarantor = data.minimumGuaranteeFromGuarantor ?? 0;
+      if (data.mandatoryGuarantee != null && data.mandatoryGuarantee < minOwn + minGuarantor) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["mandatoryGuarantee"],
+          message: "Mandatory Guarantee must be >= Minimum Guarantee from Own Funds + Minimum Guarantee from Guarantor",
+        });
+      }
+    }
+
+    // Variable installments requires minimumGap and maximumGap > minimumGap
+    if (data.allowVariableInstallments) {
+      if (data.minimumGap == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["minimumGap"],
+          message: "Minimum Gap is required when Variable Installments is enabled",
+        });
+      }
+      if (data.minimumGap != null && data.maximumGap != null && data.maximumGap <= data.minimumGap) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["maximumGap"],
+          message: "Maximum Gap must be greater than Minimum Gap",
+        });
+      }
+    }
+
+    // Installment level delinquency requires delinquency bucket
+    if (data.enableInstallmentLevelDelinquency && data.delinquencyBucketId == null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["delinquencyBucketId"],
+        message: "Delinquency Bucket is required when Installment Level Delinquency is enabled",
+      });
+    }
+
+    // Partial period interest calculation not allowed with daily interest calculation
+    if (data.allowPartialPeriodInterestCalculation && data.interestCalculationPeriodType === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["allowPartialPeriodInterestCalculation"],
+        message: "Partial Period Interest Calculation is not allowed with Daily interest calculation",
+      });
+    }
+
+    // Income Capitalization only with advanced payment allocation strategy
+    if (
+      data.enableIncomeCapitalization &&
+      data.transactionProcessingStrategyCode !== ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["enableIncomeCapitalization"],
+        message: "Income Capitalization is only supported for Advanced Payment Allocation Strategy",
+      });
+    }
+
+    // Enable Accrual Activity Posting only with accrual accounting rules
+    if (data.enableAccrualActivityPosting && data.accountingRule !== 3 && data.accountingRule !== 4) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["enableAccrualActivityPosting"],
+        message: "Accrual Activity Posting is only allowed with Accrual accounting rules",
+      });
+    }
+
+    // fixedPrincipalPercentagePerInstallment only with Equal Principal amortization
+    if (data.fixedPrincipalPercentagePerInstallment != null && data.amortizationType !== 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["fixedPrincipalPercentagePerInstallment"],
+        message: "Fixed Principal Percentage is only allowed with Equal Principal amortization",
       });
     }
 
@@ -437,6 +665,13 @@ const loanProductSchema = z
           code: "custom",
           path: ["transfersInSuspenseAccountId"],
           message: "Transfers in Suspense Account is required for Cash/Accrual accounting",
+        });
+      }
+      if (!data.incomeFromRecoveryAccountId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["incomeFromRecoveryAccountId"],
+          message: "Income from Recovery Account is required for Cash/Accrual accounting",
         });
       }
 
@@ -501,6 +736,189 @@ const loanProductSchema = z
           code: "custom",
           path: ["incomeFromCapitalizationAccountId"],
           message: "Income from Capitalization Account is required when Income Capitalization is enabled",
+        });
+      }
+    }
+
+    // Close date must be after start date
+    if (data.startDate && data.closeDate && new Date(data.closeDate) <= new Date(data.startDate)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["closeDate"],
+        message: "Close Date must be after Start Date",
+      });
+    }
+
+    // Floating interest rates validation: when linked, floating rate fields required
+    if (data.isLinkedToFloatingInterestRates) {
+      if (data.floatingRatesId == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["floatingRatesId"],
+          message: "Floating Rates ID is required when linked to floating interest rates",
+        });
+      }
+      if (data.interestRateDifferential == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["interestRateDifferential"],
+          message: "Interest Rate Differential is required when linked to floating interest rates",
+        });
+      }
+      if (data.minDifferentialLendingRate == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["minDifferentialLendingRate"],
+          message: "Min Differential Lending Rate is required when linked to floating interest rates",
+        });
+      }
+      if (data.defaultDifferentialLendingRate == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["defaultDifferentialLendingRate"],
+          message: "Default Differential Lending Rate is required when linked to floating interest rates",
+        });
+      }
+      if (data.maxDifferentialLendingRate == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["maxDifferentialLendingRate"],
+          message: "Max Differential Lending Rate is required when linked to floating interest rates",
+        });
+      }
+      if (data.isFloatingInterestRateCalculationAllowed == null) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["isFloatingInterestRateCalculationAllowed"],
+          message: "Floating Interest Rate Calculation Allowed is required when linked to floating interest rates",
+        });
+      }
+      // When linked to floating rates, standard interest rate fields should NOT be set
+      if (data.interestRatePerPeriod != null && data.interestRatePerPeriod > 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["interestRatePerPeriod"],
+          message: "Interest Rate per Period should not be set when linked to floating rates",
+        });
+      }
+    }
+
+    // Floating rate differentials cross-validation
+    if (
+      data.minDifferentialLendingRate != null &&
+      data.maxDifferentialLendingRate != null &&
+      data.minDifferentialLendingRate > data.maxDifferentialLendingRate
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxDifferentialLendingRate"],
+        message: "Max Differential Lending Rate must be >= Min Differential Lending Rate",
+      });
+    }
+    if (
+      data.defaultDifferentialLendingRate != null &&
+      data.minDifferentialLendingRate != null &&
+      data.defaultDifferentialLendingRate < data.minDifferentialLendingRate
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["defaultDifferentialLendingRate"],
+        message: "Default Differential Lending Rate must be >= Min Differential Lending Rate",
+      });
+    }
+    if (
+      data.defaultDifferentialLendingRate != null &&
+      data.maxDifferentialLendingRate != null &&
+      data.defaultDifferentialLendingRate > data.maxDifferentialLendingRate
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["defaultDifferentialLendingRate"],
+        message: "Default Differential Lending Rate must be <= Max Differential Lending Rate",
+      });
+    }
+
+    // Floating rates require DECLINING_BALANCE interest type
+    if (data.isLinkedToFloatingInterestRates && data.interestType !== 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["interestType"],
+        message: "Floating interest rates require Declining Balance interest type",
+      });
+    }
+
+    // Floating rates require interest recalculation enabled
+    if (data.isLinkedToFloatingInterestRates && !data.isInterestRecalculationEnabled) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["isInterestRecalculationEnabled"],
+        message: "Floating interest rates require Interest Recalculation to be enabled",
+      });
+    }
+
+    // Interest recalculation requires unequal amortization
+    if (data.isInterestRecalculationEnabled && data.isEqualAmortization) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["isInterestRecalculationEnabled"],
+        message: "Interest Recalculation cannot be combined with Equal Amortization",
+      });
+    }
+
+    // Fixed length only for advanced-payment-allocation strategy with zero interest
+    if (data.fixedLength != null && data.transactionProcessingStrategyCode !== ADVANCED_PAYMENT_ALLOCATION_STRATEGY) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["fixedLength"],
+        message: "Fixed Length is only supported for Advanced Payment Allocation Strategy",
+      });
+    }
+
+    // allowFullTermForTranche requires multi-disburse + PROGRESSIVE
+    if (data.allowFullTermForTranche && !data.multiDisburseLoan) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["allowFullTermForTranche"],
+        message: "Allow Full Term for Tranche requires Multi-Disburse Loan",
+      });
+    }
+    if (data.allowFullTermForTranche && enumVal(data.loanScheduleType) !== "PROGRESSIVE") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["allowFullTermForTranche"],
+        message: "Allow Full Term for Tranche requires Progressive Loan Schedule",
+      });
+    }
+
+    // disallowExpectedDisbursements and allowApprovedDisbursedAmountsOverApplied require multi-disburse
+    if (data.disallowExpectedDisbursements && !data.multiDisburseLoan) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["disallowExpectedDisbursements"],
+        message: "Disallow Expected Disbursements requires Multi-Disburse Loan",
+      });
+    }
+    if (data.allowApprovedDisbursedAmountsOverApplied && !data.multiDisburseLoan) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["allowApprovedDisbursedAmountsOverApplied"],
+        message: "Allow Approved Disbursed Amounts Over Applied requires Multi-Disburse Loan",
+      });
+    }
+
+    // Grace periods recurring moratorium validation
+    if (
+      data.recurringMoratoriumOnPrincipalPeriods != null &&
+      data.recurringMoratoriumOnPrincipalPeriods > 0 &&
+      data.graceOnPrincipalPayment != null
+    ) {
+      const expected =
+        (data.numberOfRepayments - data.graceOnPrincipalPayment) % (data.recurringMoratoriumOnPrincipalPeriods + 1);
+      if (expected !== 1) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["recurringMoratoriumOnPrincipalPeriods"],
+          message: "Recurring Moratorium: (numberOfRepayments - graceOnPrincipal) % (moratorium + 1) must equal 1",
         });
       }
     }
@@ -589,6 +1007,42 @@ const LoanProductFormPage: React.FC = () => {
       incomeFromCapitalizationAccountId: undefined,
       buyDownExpenseAccountId: undefined,
       incomeFromBuyDownAccountId: undefined,
+      startDate: undefined,
+      closeDate: undefined,
+      isEqualAmortization: undefined,
+      inArrearsTolerance: undefined,
+      principalThresholdForLastInstallment: undefined,
+      fixedPrincipalPercentagePerInstallment: undefined,
+      fixedLength: undefined,
+      recurringMoratoriumOnPrincipalPeriods: undefined,
+      daysInYearCustomStrategy: undefined,
+      isLinkedToFloatingInterestRates: undefined,
+      floatingRatesId: undefined,
+      interestRateDifferential: undefined,
+      minDifferentialLendingRate: undefined,
+      defaultDifferentialLendingRate: undefined,
+      maxDifferentialLendingRate: undefined,
+      isFloatingInterestRateCalculationAllowed: undefined,
+      recalculationRestFrequencyInterval: undefined,
+      recalculationCompoundingFrequencyType: undefined,
+      recalculationCompoundingFrequencyInterval: undefined,
+      isArrearsBasedOnOriginalSchedule: undefined,
+      isCompoundingToBePostedAsTransaction: undefined,
+      allowCompoundingOnEod: undefined,
+      disallowInterestCalculationOnPastDue: undefined,
+      allowFullTermForTranche: undefined,
+      loanScheduleProcessingType: undefined,
+      chargeOffBehaviour: undefined,
+      repaymentStartDateType: undefined,
+      interestRecognitionOnDisbursementDate: undefined,
+      enableAccrualActivityPosting: undefined,
+      mandatoryGuarantee: undefined,
+      minimumGuaranteeFromGuarantor: undefined,
+      minimumGuaranteeFromOwnFunds: undefined,
+      accountMovesOutOfNpaOnlyOnArrearsCompletion: undefined,
+      dueDaysForRepaymentEvent: undefined,
+      overdueDaysForRepaymentEvent: undefined,
+      minDaysBetweenDisbursalAndFirstRepayment: undefined,
       locale: "en",
       dateFormat: "yyyy-MM-dd",
       minInterestRatePerPeriod: undefined,
@@ -610,6 +1064,9 @@ const LoanProductFormPage: React.FC = () => {
       shortName: p.shortName ?? "",
       description: p.description ?? "",
       externalId: p.externalId ?? "",
+      startDate: p.startDate ?? undefined,
+      closeDate: p.closeDate ?? undefined,
+      includeInBorrowerCycle: !!p.includeInBorrowerCycle,
       currencyCode: p.currency?.code ?? "USD",
       principal: p.principal ?? 0,
       minPrincipal: undefined,
@@ -624,6 +1081,7 @@ const LoanProductFormPage: React.FC = () => {
       allowPartialPeriodInterestCalculation: !!p.allowPartialPeriodInterestCalculation,
       transactionProcessingStrategyCode: p.transactionProcessingStrategyCode ?? "mifos-standard-strategy",
       loanScheduleType: enumVal(p.loanScheduleType, "CUMULATIVE"),
+      loanScheduleProcessingType: p.loanScheduleProcessingType?.code ?? undefined,
       daysInYearType: p.daysInYearType?.id ?? 1,
       daysInMonthType: p.daysInMonthType?.id ?? 1,
       isInterestRecalculationEnabled: !!p.isInterestRecalculationEnabled,
@@ -654,26 +1112,48 @@ const LoanProductFormPage: React.FC = () => {
       buyDownFeeCalculationType: p.buyDownFeeCalculationType?.code ?? undefined,
       buyDownFeeStrategy: p.buyDownFeeStrategy?.code ?? undefined,
       buyDownFeeIncomeType: p.buyDownFeeIncomeType?.code ?? undefined,
+      chargeOffBehaviour: p.chargeOffBehaviour?.code ?? undefined,
+      interestRecognitionOnDisbursementDate: !!p.interestRecognitionOnDisbursementDate,
+      enableAccrualActivityPosting: !!p.enableAccrualActivityPosting,
       enableIncomeCapitalization: !!p.enableIncomeCapitalization,
       capitalizedIncomeCalculationType: p.capitalizedIncomeCalculationType?.id ?? undefined,
       capitalizedIncomeStrategy: p.capitalizedIncomeStrategy?.id ?? undefined,
       capitalizedIncomeType: p.capitalizedIncomeType?.id ?? undefined,
-      chargeOffBehaviour: enumVal(p.chargeOffBehaviour.id, undefined) || undefined,
-      enableAccrualActivityPosting: !!p.enableAccrualActivityPosting,
-      interestRecognitionOnDisbursementDate: !!p.interestRecognitionOnDisbursementDate,
       isEqualAmortization: !!p.isEqualAmortization,
+      inArrearsTolerance: p.inArrearsTolerance ?? undefined,
+      principalThresholdForLastInstallment: p.principalThresholdForLastInstallment ?? undefined,
       canUseForTopup: !!p.canUseForTopup,
       syncExpectedWithDisbursementDate: !!p.syncExpectedWithDisbursementDate,
       disallowExpectedDisbursements: !!p.disallowExpectedDisbursements,
       allowApprovedDisbursedAmountsOverApplied: !!p.allowApprovedDisbursedAmountsOverApplied,
       holdGuaranteeFunds: !!p.holdGuaranteeFunds,
+      mandatoryGuarantee: p.mandatoryGuarantee ?? undefined,
+      minimumGuaranteeFromGuarantor: p.minimumGuaranteeFromGuarantor ?? undefined,
+      minimumGuaranteeFromOwnFunds: p.minimumGuaranteeFromOwnFunds ?? undefined,
       enableInstallmentLevelDelinquency: !!p.enableInstallmentLevelDelinquency,
-      includeInBorrowerCycle: !!p.includeInBorrowerCycle,
       useBorrowerCycle: !!p.useBorrowerCycle,
+      accountMovesOutOfNpaOnlyOnArrearsCompletion: !!p.accountMovesOutOfNpaOnlyOnArrearsCompletion,
       overdueDaysForNpa: p.overdueDaysForNpa ?? undefined,
       minDaysBetweenDisbursalAndFirstRepayment: p.minDaysBetweenDisbursalAndFirstRepayment ?? undefined,
-      principalThresholdForLastInstallment: p.principalThresholdForLastInstallment ?? undefined,
       fixedPrincipalPercentagePerInstallment: p.fixedPrincipalPercentagePerInstallment ?? undefined,
+      fixedLength: p.fixedLength ?? undefined,
+      recurringMoratoriumOnPrincipalPeriods: p.recurringMoratoriumOnPrincipalPeriods ?? undefined,
+      daysInYearCustomStrategy: p.daysInYearCustomStrategy?.code ?? undefined,
+      isLinkedToFloatingInterestRates: !!p.isLinkedToFloatingInterestRates,
+      floatingRatesId: p.floatingRatesId ?? undefined,
+      interestRateDifferential: p.interestRateDifferential ?? undefined,
+      minDifferentialLendingRate: p.minDifferentialLendingRate ?? undefined,
+      defaultDifferentialLendingRate: p.defaultDifferentialLendingRate ?? undefined,
+      maxDifferentialLendingRate: p.maxDifferentialLendingRate ?? undefined,
+      isFloatingInterestRateCalculationAllowed: !!p.isFloatingInterestRateCalculationAllowed,
+      recalculationRestFrequencyInterval: p.interestRecalculationData?.restFrequencyInterval ?? undefined,
+      recalculationCompoundingFrequencyType: p.interestRecalculationData?.compoundingFrequencyType?.id ?? undefined,
+      recalculationCompoundingFrequencyInterval: p.interestRecalculationData?.compoundingInterval ?? undefined,
+      isArrearsBasedOnOriginalSchedule: !!p.interestRecalculationData?.isArrearsBasedOnOriginalSchedule,
+      isCompoundingToBePostedAsTransaction: !!p.interestRecalculationData?.isCompoundingToBePostedAsTransaction,
+      allowCompoundingOnEod: !!p.interestRecalculationData?.allowCompoundingOnEod,
+      disallowInterestCalculationOnPastDue: !!p.disallowInterestCalculationOnPastDue,
+      allowFullTermForTranche: !!p.allowFullTermForTranche,
       dueDaysForRepaymentEvent: p.dueDaysForRepaymentEvent ?? undefined,
       overdueDaysForRepaymentEvent: p.overdueDaysForRepaymentEvent ?? undefined,
       overAppliedCalculationType: p.overAppliedCalculationType ?? undefined,
@@ -683,8 +1163,6 @@ const LoanProductFormPage: React.FC = () => {
       allowVariableInstallments: !!p.allowVariableInstallments,
       delinquencyBucketId: p.delinquencyBucketId ?? undefined,
       compoundingFrequencyType: p.interestRecalculationData?.compoundingFrequencyType?.id ?? undefined,
-      isArrearsBasedOnOriginalSchedule: !!p.interestRecalculationData?.isArrearsBasedOnOriginalSchedule,
-      inArrearsTolerance: p.inArrearsTolerance ?? undefined,
       fundId: p.fund?.id ?? p.fundId ?? undefined,
       digitsAfterDecimal: p.currency?.decimalPlaces ?? 2,
       inMultiplesOf: p.currency?.inMultiplesOf ?? 0,
@@ -806,6 +1284,27 @@ const LoanProductFormPage: React.FC = () => {
               onChange={(v) => setValue("currencyCode", v, { shouldValidate: true })}
               error={errors.currencyCode?.message}
             />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Start Date")}</label>
+              <Input type="date" {...register("startDate")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Close Date")}</label>
+              <Input type="date" {...register("closeDate")} error={errors.closeDate?.message} />
+            </div>
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("includeInBorrowerCycle", !watch("includeInBorrowerCycle"))}
+            >
+              <Checkbox
+                id="includeInBorrowerCycle"
+                checked={!!watch("includeInBorrowerCycle")}
+                onCheckedChange={(v) => setValue("includeInBorrowerCycle", v === true)}
+              />
+              <label htmlFor="includeInBorrowerCycle" className="block text-sm font-medium">
+                {t("Include in Borrower Cycle")}
+              </label>
+            </div>
           </CardContent>
         </Card>
 
@@ -994,6 +1493,120 @@ const LoanProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">{t("Grace on Arrears Ageing")}</label>
               <Input type="number" {...register("graceOnArrearsAgeing")} />
             </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Min Interest Rate (%)")}</label>
+              <Input type="number" step="0.01" {...register("minInterestRatePerPeriod")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Max Interest Rate (%)")}</label>
+              <Input type="number" step="0.01" {...register("maxInterestRatePerPeriod")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Interest Calculation Period Type")}</label>
+              <Select
+                value={String(watch("interestCalculationPeriodType") ?? 1)}
+                onValueChange={(v) => setValue("interestCalculationPeriodType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(template?.interestCalculationPeriodTypeOptions ?? []).map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("In Arrears Tolerance")}</label>
+              <Input type="number" step="0.01" {...register("inArrearsTolerance")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Principal Threshold for Last Installment (%)")}</label>
+              <Input type="number" step="0.01" {...register("principalThresholdForLastInstallment")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Fixed Principal Percentage per Installment (%)")}</label>
+              <Input type="number" step="0.01" {...register("fixedPrincipalPercentagePerInstallment")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Fixed Length")}</label>
+              <Input type="number" {...register("fixedLength")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Recurring Moratorium on Principal Periods")}</label>
+              <Input type="number" {...register("recurringMoratoriumOnPrincipalPeriods")} />
+            </div>
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("isLinkedToFloatingInterestRates", !watch("isLinkedToFloatingInterestRates"))}
+            >
+              <Checkbox
+                id="isLinkedToFloatingInterestRates"
+                checked={!!watch("isLinkedToFloatingInterestRates")}
+                onCheckedChange={(v) => setValue("isLinkedToFloatingInterestRates", v === true)}
+              />
+              <label htmlFor="isLinkedToFloatingInterestRates" className="block text-sm font-medium">
+                {t("Linked to Floating Interest Rates")}
+              </label>
+            </div>
+            {watch("isLinkedToFloatingInterestRates") && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Floating Rates ID")}</label>
+                  <Input type="number" {...register("floatingRatesId")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Interest Rate Differential")}</label>
+                  <Input type="number" step="0.01" {...register("interestRateDifferential")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Min Differential Lending Rate")}</label>
+                  <Input type="number" step="0.01" {...register("minDifferentialLendingRate")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Default Differential Lending Rate")}</label>
+                  <Input type="number" step="0.01" {...register("defaultDifferentialLendingRate")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Max Differential Lending Rate")}</label>
+                  <Input type="number" step="0.01" {...register("maxDifferentialLendingRate")} />
+                </div>
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() =>
+                    setValue(
+                      "isFloatingInterestRateCalculationAllowed",
+                      !watch("isFloatingInterestRateCalculationAllowed"),
+                    )
+                  }
+                >
+                  <Checkbox
+                    id="isFloatingInterestRateCalculationAllowed"
+                    checked={!!watch("isFloatingInterestRateCalculationAllowed")}
+                    onCheckedChange={(v) => setValue("isFloatingInterestRateCalculationAllowed", v === true)}
+                  />
+                  <label htmlFor="isFloatingInterestRateCalculationAllowed" className="block text-sm font-medium">
+                    {t("Floating Interest Rate Calculation Allowed")}
+                  </label>
+                </div>
+              </>
+            )}
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("isEqualAmortization", !watch("isEqualAmortization"))}
+            >
+              <Checkbox
+                id="isEqualAmortization"
+                checked={!!watch("isEqualAmortization")}
+                onCheckedChange={(v) => setValue("isEqualAmortization", v === true)}
+              />
+              <label htmlFor="isEqualAmortization" className="block text-sm font-medium">
+                {t("Equal Amortization")}
+              </label>
+            </div>
             <div
               className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
               onClick={() =>
@@ -1062,7 +1675,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Days In Month Type")}</label>
+              <label className="block text-sm font-medium">{t("Days In Month Type")} *</label>
               <Select
                 value={String(watch("daysInMonthType") ?? 1)}
                 onValueChange={(v) => setValue("daysInMonthType", Number(v))}
@@ -1080,7 +1693,7 @@ const LoanProductFormPage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium">{t("Days In Year Type")}</label>
+              <label className="block text-sm font-medium">{t("Days In Year Type")} *</label>
               <Select
                 value={String(watch("daysInYearType") ?? 1)}
                 onValueChange={(v) => setValue("daysInYearType", Number(v))}
@@ -1096,6 +1709,103 @@ const LoanProductFormPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Loan Schedule Processing Type")}</label>
+              <Select
+                value={watch("loanScheduleProcessingType") ?? ""}
+                onValueChange={(v) => setValue("loanScheduleProcessingType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(template?.loanScheduleProcessingTypeOptions ?? []).map((o) => (
+                    <SelectItem key={o.code} value={o.code}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Charge-Off Behaviour")}</label>
+              <Select
+                value={watch("chargeOffBehaviour") ?? ""}
+                onValueChange={(v) => setValue("chargeOffBehaviour", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(template?.chargeOffBehaviourOptions ?? []).map((o) => (
+                    <SelectItem key={o.code} value={o.code}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Repayment Start Date Type")}</label>
+              <Select
+                value={watch("repaymentStartDateType") ? String(watch("repaymentStartDateType")) : ""}
+                onValueChange={(v) => setValue("repaymentStartDateType", Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(template?.repaymentStartDateTypeOptions ?? []).map((o) => (
+                    <SelectItem key={o.id} value={String(o.id)}>
+                      {o.value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Days in Year Custom Strategy")}</label>
+              <Select
+                value={watch("daysInYearCustomStrategy") ?? ""}
+                onValueChange={(v) => setValue("daysInYearCustomStrategy", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FULL_LEAP_YEAR">{t("Full Leap Year")}</SelectItem>
+                  <SelectItem value="FEB_29_PERIOD_ONLY">{t("Feb 29 Period Only")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() =>
+                setValue("interestRecognitionOnDisbursementDate", !watch("interestRecognitionOnDisbursementDate"))
+              }
+            >
+              <Checkbox
+                id="interestRecognitionOnDisbursementDate"
+                checked={!!watch("interestRecognitionOnDisbursementDate")}
+                onCheckedChange={(v) => setValue("interestRecognitionOnDisbursementDate", v === true)}
+              />
+              <label htmlFor="interestRecognitionOnDisbursementDate" className="block text-sm font-medium">
+                {t("Interest Recognition on Disbursement Date")}
+              </label>
+            </div>
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("enableAccrualActivityPosting", !watch("enableAccrualActivityPosting"))}
+            >
+              <Checkbox
+                id="enableAccrualActivityPosting"
+                checked={!!watch("enableAccrualActivityPosting")}
+                onCheckedChange={(v) => setValue("enableAccrualActivityPosting", v === true)}
+              />
+              <label htmlFor="enableAccrualActivityPosting" className="block text-sm font-medium">
+                {t("Enable Accrual Activity Posting")}
+              </label>
             </div>
           </CardContent>
         </Card>
@@ -1397,6 +2107,94 @@ const LoanProductFormPage: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Rest Frequency Interval")}</label>
+                  <Input type="number" {...register("recalculationRestFrequencyInterval")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Compounding Frequency Type")}</label>
+                  <Select
+                    value={
+                      watch("recalculationCompoundingFrequencyType")
+                        ? String(watch("recalculationCompoundingFrequencyType"))
+                        : ""
+                    }
+                    onValueChange={(v) => setValue("recalculationCompoundingFrequencyType", Number(v))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("Select")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(template?.interestRecalculationFrequencyTypeOptions ?? []).map((o) => (
+                        <SelectItem key={o.id} value={String(o.id)}>
+                          {o.value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Compounding Frequency Interval")}</label>
+                  <Input type="number" {...register("recalculationCompoundingFrequencyInterval")} />
+                </div>
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() =>
+                    setValue("isArrearsBasedOnOriginalSchedule", !watch("isArrearsBasedOnOriginalSchedule"))
+                  }
+                >
+                  <Checkbox
+                    id="isArrearsBasedOnOriginalSchedule"
+                    checked={!!watch("isArrearsBasedOnOriginalSchedule")}
+                    onCheckedChange={(v) => setValue("isArrearsBasedOnOriginalSchedule", v === true)}
+                  />
+                  <label htmlFor="isArrearsBasedOnOriginalSchedule" className="block text-sm font-medium">
+                    {t("Arrears Based on Original Schedule")}
+                  </label>
+                </div>
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() =>
+                    setValue("isCompoundingToBePostedAsTransaction", !watch("isCompoundingToBePostedAsTransaction"))
+                  }
+                >
+                  <Checkbox
+                    id="isCompoundingToBePostedAsTransaction"
+                    checked={!!watch("isCompoundingToBePostedAsTransaction")}
+                    onCheckedChange={(v) => setValue("isCompoundingToBePostedAsTransaction", v === true)}
+                  />
+                  <label htmlFor="isCompoundingToBePostedAsTransaction" className="block text-sm font-medium">
+                    {t("Compounding to be Posted as Transaction")}
+                  </label>
+                </div>
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() => setValue("allowCompoundingOnEod", !watch("allowCompoundingOnEod"))}
+                >
+                  <Checkbox
+                    id="allowCompoundingOnEod"
+                    checked={!!watch("allowCompoundingOnEod")}
+                    onCheckedChange={(v) => setValue("allowCompoundingOnEod", v === true)}
+                  />
+                  <label htmlFor="allowCompoundingOnEod" className="block text-sm font-medium">
+                    {t("Allow Compounding on EOD")}
+                  </label>
+                </div>
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() =>
+                    setValue("disallowInterestCalculationOnPastDue", !watch("disallowInterestCalculationOnPastDue"))
+                  }
+                >
+                  <Checkbox
+                    id="disallowInterestCalculationOnPastDue"
+                    checked={!!watch("disallowInterestCalculationOnPastDue")}
+                    onCheckedChange={(v) => setValue("disallowInterestCalculationOnPastDue", v === true)}
+                  />
+                  <label htmlFor="disallowInterestCalculationOnPastDue" className="block text-sm font-medium">
+                    {t("Disallow Interest Calculation on Past Due")}
+                  </label>
+                </div>
               </>
             )}
           </CardContent>
@@ -1450,6 +2248,62 @@ const LoanProductFormPage: React.FC = () => {
                     <Input type="number" step="0.01" {...register("installmentAmountInMultiplesOf")} />
                   </div>
                 )}
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() => setValue("disallowExpectedDisbursements", !watch("disallowExpectedDisbursements"))}
+                >
+                  <Checkbox
+                    id="disallowExpectedDisbursements"
+                    checked={!!watch("disallowExpectedDisbursements")}
+                    onCheckedChange={(v) => setValue("disallowExpectedDisbursements", v === true)}
+                  />
+                  <label htmlFor="disallowExpectedDisbursements" className="block text-sm font-medium">
+                    {t("Disallow Expected Disbursements")}
+                  </label>
+                </div>
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() =>
+                    setValue(
+                      "allowApprovedDisbursedAmountsOverApplied",
+                      !watch("allowApprovedDisbursedAmountsOverApplied"),
+                    )
+                  }
+                >
+                  <Checkbox
+                    id="allowApprovedDisbursedAmountsOverApplied"
+                    checked={!!watch("allowApprovedDisbursedAmountsOverApplied")}
+                    onCheckedChange={(v) => setValue("allowApprovedDisbursedAmountsOverApplied", v === true)}
+                  />
+                  <label htmlFor="allowApprovedDisbursedAmountsOverApplied" className="block text-sm font-medium">
+                    {t("Allow Approved Disbursed Amounts Over Applied")}
+                  </label>
+                </div>
+                {watch("allowApprovedDisbursedAmountsOverApplied") && (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Over Applied Calculation Type")}</label>
+                      <Input {...register("overAppliedCalculationType")} placeholder={t("percentage or flat")} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium">{t("Over Applied Number")}</label>
+                      <Input type="number" {...register("overAppliedNumber")} />
+                    </div>
+                  </>
+                )}
+                <div
+                  className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+                  onClick={() => setValue("allowFullTermForTranche", !watch("allowFullTermForTranche"))}
+                >
+                  <Checkbox
+                    id="allowFullTermForTranche"
+                    checked={!!watch("allowFullTermForTranche")}
+                    onCheckedChange={(v) => setValue("allowFullTermForTranche", v === true)}
+                  />
+                  <label htmlFor="allowFullTermForTranche" className="block text-sm font-medium">
+                    {t("Allow Full Term for Tranche")}
+                  </label>
+                </div>
               </>
             )}
           </CardContent>
@@ -1486,6 +2340,111 @@ const LoanProductFormPage: React.FC = () => {
                 </div>
               </>
             )}
+          </CardContent>
+        </Card>
+
+        {/* ── Guarantee ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Guarantee")}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("holdGuaranteeFunds", !watch("holdGuaranteeFunds"))}
+            >
+              <Checkbox
+                id="holdGuaranteeFunds"
+                checked={!!watch("holdGuaranteeFunds")}
+                onCheckedChange={(v) => setValue("holdGuaranteeFunds", v === true)}
+              />
+              <label htmlFor="holdGuaranteeFunds" className="block text-sm font-medium">
+                {t("Hold Guarantee Funds")}
+              </label>
+            </div>
+            {watch("holdGuaranteeFunds") && (
+              <>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Mandatory Guarantee")}</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    {...register("mandatoryGuarantee")}
+                    error={errors.mandatoryGuarantee?.message}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Minimum Guarantee from Guarantor")}</label>
+                  <Input type="number" step="0.01" {...register("minimumGuaranteeFromGuarantor")} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium">{t("Minimum Guarantee from Own Funds")}</label>
+                  <Input type="number" step="0.01" {...register("minimumGuaranteeFromOwnFunds")} />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Arrears / NPA ── */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("Arrears / NPA")}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Overdue Days for NPA")}</label>
+              <Input type="number" {...register("overdueDaysForNpa")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Delinquency Bucket")}</label>
+              <Input type="number" {...register("delinquencyBucketId")} placeholder={t("Bucket ID")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Due Days for Repayment Event")}</label>
+              <Input type="number" {...register("dueDaysForRepaymentEvent")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">{t("Overdue Days for Repayment Event")}</label>
+              <Input type="number" {...register("overdueDaysForRepaymentEvent")} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium">
+                {t("Minimum Days Between Disbursal and First Repayment")}
+              </label>
+              <Input type="number" {...register("minDaysBetweenDisbursalAndFirstRepayment")} />
+            </div>
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() =>
+                setValue(
+                  "accountMovesOutOfNpaOnlyOnArrearsCompletion",
+                  !watch("accountMovesOutOfNpaOnlyOnArrearsCompletion"),
+                )
+              }
+            >
+              <Checkbox
+                id="accountMovesOutOfNpaOnlyOnArrearsCompletion"
+                checked={!!watch("accountMovesOutOfNpaOnlyOnArrearsCompletion")}
+                onCheckedChange={(v) => setValue("accountMovesOutOfNpaOnlyOnArrearsCompletion", v === true)}
+              />
+              <label htmlFor="accountMovesOutOfNpaOnlyOnArrearsCompletion" className="block text-sm font-medium">
+                {t("Account Moves Out of NPA Only on Arrears Completion")}
+              </label>
+            </div>
+            <div
+              className="col-span-2 flex items-center gap-2 pt-2 cursor-pointer"
+              onClick={() => setValue("enableInstallmentLevelDelinquency", !watch("enableInstallmentLevelDelinquency"))}
+            >
+              <Checkbox
+                id="enableInstallmentLevelDelinquency"
+                checked={!!watch("enableInstallmentLevelDelinquency")}
+                onCheckedChange={(v) => setValue("enableInstallmentLevelDelinquency", v === true)}
+              />
+              <label htmlFor="enableInstallmentLevelDelinquency" className="block text-sm font-medium">
+                {t("Enable Installment Level Delinquency")}
+              </label>
+            </div>
           </CardContent>
         </Card>
 
@@ -1537,10 +2496,6 @@ const LoanProductFormPage: React.FC = () => {
                   <label htmlFor="enableAutoRepaymentForDownPayment" className="block text-sm font-medium">
                     {t("Auto Repayment for Down Payment")}
                   </label>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium">{t("Repayment Start Date Type")}</label>
-                  <Input type="number" {...register("repaymentStartDateType")} />
                 </div>
               </>
             )}
