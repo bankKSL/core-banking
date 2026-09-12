@@ -75,20 +75,20 @@ const loanProductSchema = z
     inMultiplesOf: z.coerce.number().min(0).optional(),
     principal: z.coerce.number().positive("Principal must be > 0"),
     minPrincipal: z.preprocess(
-      (v) => (v === "" || v === null ? undefined : v),
+      (v) => (v === "" || v === null || v === undefined || v === 0 ? undefined : v),
       z.coerce.number().positive().optional(),
     ),
     maxPrincipal: z.preprocess(
-      (v) => (v === "" || v === null ? undefined : v),
+      (v) => (v === "" || v === null || v === undefined || v === 0 ? undefined : v),
       z.coerce.number().positive().optional(),
     ),
     numberOfRepayments: z.coerce.number().int().positive("Number of repayments is required"),
     minNumberOfRepayments: z.preprocess(
-      (v) => (v === "" || v === null ? undefined : v),
+      (v) => (v === "" || v === null || v === undefined || v === 0 ? undefined : v),
       z.coerce.number().int().positive().optional(),
     ),
     maxNumberOfRepayments: z.preprocess(
-      (v) => (v === "" || v === null ? undefined : v),
+      (v) => (v === "" || v === null || v === undefined || v === 0 ? undefined : v),
       z.coerce.number().int().positive().optional(),
     ),
     repaymentEvery: z.coerce.number().int().positive("Repayment every is required"),
@@ -113,26 +113,65 @@ const loanProductSchema = z
     transactionProcessingStrategyCode: z.string().min(1, "Transaction processing strategy is required"),
     loanScheduleType: z.string().optional(),
     loanScheduleProcessingType: z.string().optional(),
-    daysInYearType: z.coerce.number("Days in year type is required").int(),
-    daysInMonthType: z.coerce.number("Days in month type is required").int(),
+    daysInYearType: z.coerce.number("Days in year type is required").int().positive("Days in year type is required"),
+    daysInMonthType: z.coerce.number("Days in month type is required").int().positive("Days in month type is required"),
     isInterestRecalculationEnabled: z.boolean(),
-    graceOnPrincipalPayment: z.coerce.number().min(0).optional(),
-    graceOnInterestPayment: z.coerce.number().min(0).optional(),
-    graceOnInterestCharged: z.coerce.number().min(0).optional(),
-    graceOnArrearsAgeing: z.coerce.number().min(0).optional(),
+    graceOnPrincipalPayment: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
+    graceOnInterestPayment: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
+    graceOnInterestCharged: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
+    graceOnArrearsAgeing: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
     multiDisburseLoan: z.boolean().optional(),
-    maxTrancheCount: z.coerce.number().int().positive().optional(),
-    outstandingLoanBalance: z.coerce.number().min(0).optional(),
+    maxTrancheCount: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().int().positive().optional(),
+    ),
+    outstandingLoanBalance: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
     canDefineInstallmentAmount: z.boolean().optional(),
-    installmentAmountInMultiplesOf: z.coerce.number().optional(),
-    interestRecalculationCompoundingMethod: z.coerce.number().optional(),
-    rescheduleStrategyMethod: z.coerce.number().optional(),
-    recalculationRestFrequencyType: z.coerce.number().optional(),
-    preClosureInterestCalculationStrategy: z.coerce.number().optional(),
+    installmentAmountInMultiplesOf: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    interestRecalculationCompoundingMethod: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    rescheduleStrategyMethod: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationRestFrequencyType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    preClosureInterestCalculationStrategy: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     enableDownPayment: z.boolean().optional(),
-    disbursedAmountPercentageForDownPayment: z.coerce.number().min(1).max(100).optional(),
+    disbursedAmountPercentageForDownPayment: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(1).max(100).optional(),
+    ),
     enableAutoRepaymentForDownPayment: z.boolean().optional(),
-    repaymentStartDateType: z.coerce.number().optional(),
+    repaymentStartDateType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     enableBuyDownFee: z.boolean().optional(),
     merchantBuyDownFee: z.boolean().optional(),
     buyDownFeeCalculationType: z.string().optional(),
@@ -151,19 +190,34 @@ const loanProductSchema = z
     disallowExpectedDisbursements: z.boolean().optional(),
     allowApprovedDisbursedAmountsOverApplied: z.boolean().optional(),
     holdGuaranteeFunds: z.boolean().optional(),
-    mandatoryGuarantee: z.coerce.number().optional(),
-    minimumGuaranteeFromGuarantor: z.coerce.number().optional(),
-    minimumGuaranteeFromOwnFunds: z.coerce.number().optional(),
+    mandatoryGuarantee: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    minimumGuaranteeFromGuarantor: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    minimumGuaranteeFromOwnFunds: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     enableInstallmentLevelDelinquency: z.boolean().optional(),
     includeInBorrowerCycle: z.boolean().optional(),
     useBorrowerCycle: z.boolean().optional(),
     accountMovesOutOfNpaOnlyOnArrearsCompletion: z.boolean().optional(),
-    overdueDaysForNpa: z.coerce.number().min(0).optional(),
+    overdueDaysForNpa: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
     minDaysBetweenDisbursalAndFirstRepayment: z.preprocess(
       (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
       z.coerce.number().positive().optional(),
     ),
-    principalThresholdForLastInstallment: z.coerce.number().min(0).max(100).optional(),
+    principalThresholdForLastInstallment: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).max(100).optional(),
+    ),
     fixedPrincipalPercentagePerInstallment: z.preprocess(
       (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
       z.coerce.number().min(1).max(100).optional(),
@@ -172,29 +226,83 @@ const loanProductSchema = z
       (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
       z.coerce.number().int().positive().optional(),
     ),
-    recurringMoratoriumOnPrincipalPeriods: z.coerce.number().min(0).optional(),
+    recurringMoratoriumOnPrincipalPeriods: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
     daysInYearCustomStrategy: z.string().optional(),
-    dueDaysForRepaymentEvent: z.coerce.number().min(0).optional(),
-    overdueDaysForRepaymentEvent: z.coerce.number().min(0).optional(),
+    dueDaysForRepaymentEvent: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
+    overdueDaysForRepaymentEvent: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
     overAppliedCalculationType: z.string().optional(),
-    overAppliedNumber: z.coerce.number().optional(),
+    overAppliedNumber: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     allowFullTermForTranche: z.boolean().optional(),
     isLinkedToFloatingInterestRates: z.boolean().optional(),
-    floatingRatesId: z.coerce.number().optional(),
-    interestRateDifferential: z.coerce.number().optional(),
-    minDifferentialLendingRate: z.coerce.number().optional(),
-    defaultDifferentialLendingRate: z.coerce.number().optional(),
-    maxDifferentialLendingRate: z.coerce.number().optional(),
+    floatingRatesId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    interestRateDifferential: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    minDifferentialLendingRate: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    defaultDifferentialLendingRate: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    maxDifferentialLendingRate: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     isFloatingInterestRateCalculationAllowed: z.boolean().optional(),
-    recalculationRestFrequencyInterval: z.coerce.number().optional(),
-    recalculationRestFrequencyNthDayType: z.coerce.number().optional(),
-    recalculationRestFrequencyDayOfWeekType: z.coerce.number().optional(),
-    recalculationRestFrequencyOnDayType: z.coerce.number().optional(),
-    recalculationCompoundingFrequencyType: z.coerce.number().optional(),
-    recalculationCompoundingFrequencyInterval: z.coerce.number().optional(),
-    recalculationCompoundingFrequencyNthDayType: z.coerce.number().optional(),
-    recalculationCompoundingFrequencyDayOfWeekType: z.coerce.number().optional(),
-    recalculationCompoundingFrequencyOnDayType: z.coerce.number().optional(),
+    recalculationRestFrequencyInterval: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationRestFrequencyNthDayType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationRestFrequencyDayOfWeekType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationRestFrequencyOnDayType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationCompoundingFrequencyType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationCompoundingFrequencyInterval: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationCompoundingFrequencyNthDayType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationCompoundingFrequencyDayOfWeekType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    recalculationCompoundingFrequencyOnDayType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     isCompoundingToBePostedAsTransaction: z.boolean().optional(),
     allowCompoundingOnEod: z.boolean().optional(),
     disallowInterestCalculationOnPastDue: z.boolean().optional(),
@@ -204,43 +312,133 @@ const loanProductSchema = z
     allowAttributeOverrides: z.record(z.string(), z.boolean()).optional(),
     charges: z.array(z.any()).optional(),
     rates: z.array(z.any()).optional(),
-    minimumGap: z.coerce.number().positive().optional(),
-    maximumGap: z.coerce.number().positive().optional(),
+    minimumGap: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().positive().optional(),
+    ),
+    maximumGap: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().positive().optional(),
+    ),
     allowVariableInstallments: z.boolean().optional(),
     delinquencyBucketId: z.preprocess(
       (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
       z.coerce.number().positive().optional(),
     ),
-    compoundingFrequencyType: z.coerce.number().optional(),
+    compoundingFrequencyType: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     isArrearsBasedOnOriginalSchedule: z.boolean().optional(),
-    inArrearsTolerance: z.coerce.number().min(0).optional(),
-    fundId: z.coerce.number().optional(),
+    inArrearsTolerance: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().min(0).optional(),
+    ),
+    fundId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     accountingRule: z.coerce.number(),
-    fundSourceAccountId: z.coerce.number().optional(),
-    loanPortfolioAccountId: z.coerce.number().optional(),
-    receivableInterestAccountId: z.coerce.number().optional(),
-    receivableFeeAccountId: z.coerce.number().optional(),
-    receivablePenaltyAccountId: z.coerce.number().optional(),
-    interestOnLoanAccountId: z.coerce.number().optional(),
-    incomeFromFeeAccountId: z.coerce.number().optional(),
-    incomeFromPenaltyAccountId: z.coerce.number().optional(),
-    overpaymentLiabilityAccountId: z.coerce.number().optional(),
-    writeOffAccountId: z.coerce.number().optional(),
-    transfersInSuspenseAccountId: z.coerce.number().optional(),
-    incomeFromRecoveryAccountId: z.coerce.number().optional(),
-    goodwillCreditAccountId: z.coerce.number().optional(),
-    incomeFromChargeOffInterestAccountId: z.coerce.number().optional(),
-    incomeFromChargeOffFeesAccountId: z.coerce.number().optional(),
-    incomeFromChargeOffPenaltyAccountId: z.coerce.number().optional(),
-    chargeOffExpenseAccountId: z.coerce.number().optional(),
-    chargeOffFraudExpenseAccountId: z.coerce.number().optional(),
-    incomeFromGoodwillCreditInterestAccountId: z.coerce.number().optional(),
-    incomeFromGoodwillCreditFeesAccountId: z.coerce.number().optional(),
-    incomeFromGoodwillCreditPenaltyAccountId: z.coerce.number().optional(),
-    deferredIncomeLiabilityAccountId: z.coerce.number().optional(),
-    incomeFromCapitalizationAccountId: z.coerce.number().optional(),
-    buyDownExpenseAccountId: z.coerce.number().optional(),
-    incomeFromBuyDownAccountId: z.coerce.number().optional(),
+    fundSourceAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    loanPortfolioAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    receivableInterestAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    receivableFeeAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    receivablePenaltyAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    interestOnLoanAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromFeeAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromPenaltyAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    overpaymentLiabilityAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    writeOffAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    transfersInSuspenseAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromRecoveryAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    goodwillCreditAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromChargeOffInterestAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromChargeOffFeesAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromChargeOffPenaltyAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    chargeOffExpenseAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    chargeOffFraudExpenseAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromGoodwillCreditInterestAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromGoodwillCreditFeesAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromGoodwillCreditPenaltyAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    deferredIncomeLiabilityAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromCapitalizationAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    buyDownExpenseAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
+    incomeFromBuyDownAccountId: z.preprocess(
+      (val) => (val === "" || val === null || val === undefined || val === 0 ? undefined : val),
+      z.coerce.number().optional(),
+    ),
     locale: z.string(),
     dateFormat: z.string(),
   })
@@ -1678,9 +1876,12 @@ const LoanProductFormPage: React.FC = () => {
               <label className="block text-sm font-medium">{t("Days In Month Type")} *</label>
               <Select
                 value={String(watch("daysInMonthType") ?? 1)}
-                onValueChange={(v) => setValue("daysInMonthType", Number(v))}
+                onValueChange={(v) => setValue("daysInMonthType", Number(v), { shouldValidate: true })}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  {...register("daysInMonthType")}
+                  className={errors.daysInMonthType ? "border-red-500" : ""}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1691,14 +1892,18 @@ const LoanProductFormPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.daysInMonthType && <p className="text-sm text-red-500">{errors.daysInMonthType.message}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Days In Year Type")} *</label>
               <Select
                 value={String(watch("daysInYearType") ?? 1)}
-                onValueChange={(v) => setValue("daysInYearType", Number(v))}
+                onValueChange={(v) => setValue("daysInYearType", Number(v), { shouldValidate: true })}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  {...register("daysInYearType")}
+                  className={errors.daysInYearType ? "border-red-500" : ""}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1709,6 +1914,7 @@ const LoanProductFormPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.daysInYearType && <p className="text-sm text-red-500">{errors.daysInYearType.message}</p>}
             </div>
             <div className="space-y-1.5">
               <label className="block text-sm font-medium">{t("Loan Schedule Processing Type")}</label>
